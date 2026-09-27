@@ -4,7 +4,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-
 <title>Pixel World</title>
 
 <style>
@@ -78,6 +77,54 @@ canvas{
     font-weight:bold;
 }
 
+button{
+    cursor:pointer;
+}
+
+#save,
+#reset{
+    position:absolute;
+    left:15px;
+    padding:7px 12px;
+    border:2px solid #222;
+    border-radius:6px;
+    background:white;
+    pointer-events:auto;
+    font-weight:bold;
+}
+
+#save{
+    top:50px;
+}
+
+#reset{
+    top:90px;
+}
+
+#help{
+    position:absolute;
+    right:15px;
+    top:15px;
+    color:white;
+    text-align:right;
+    font-size:13px;
+    line-height:18px;
+    text-shadow:2px 2px #000;
+}
+
+#message{
+    position:absolute;
+    left:50%;
+    top:72%;
+    transform:translateX(-50%);
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    text-shadow:2px 2px #000;
+    opacity:0;
+    transition:opacity .2s;
+}
+
 #hotbar{
     position:absolute;
     left:50%;
@@ -145,54 +192,6 @@ canvas{
     pointer-events:auto;
 }
 
-#help{
-    position:absolute;
-    right:15px;
-    top:15px;
-    color:white;
-    text-align:right;
-    font-size:13px;
-    line-height:18px;
-    text-shadow:2px 2px #000;
-}
-
-#save{
-    position:absolute;
-    left:15px;
-    top:50px;
-    padding:7px 12px;
-    border:2px solid #222;
-    border-radius:6px;
-    background:white;
-    pointer-events:auto;
-    font-weight:bold;
-}
-
-#reset{
-    position:absolute;
-    left:15px;
-    top:90px;
-    padding:7px 12px;
-    border:2px solid #222;
-    border-radius:6px;
-    background:white;
-    pointer-events:auto;
-    font-weight:bold;
-}
-
-#message{
-    position:absolute;
-    left:50%;
-    top:72%;
-    transform:translateX(-50%);
-    color:white;
-    font-size:18px;
-    font-weight:bold;
-    text-shadow:2px 2px #000;
-    opacity:0;
-    transition:opacity .2s;
-}
-
 @media(max-width:700px){
 
     #help{
@@ -234,51 +233,51 @@ canvas{
 
 <div id="ui">
 
-<div id="title">PIXEL WORLD</div>
+    <div id="title">PIXEL WORLD</div>
 
-<div id="health">
-    <div id="healthBar"></div>
-    <div id="healthText">100 / 100</div>
-</div>
-
-<button id="save">💾 Zapisz</button>
-<button id="reset">🔄 Nowy świat</button>
-
-<div id="help">
-A / D lub ← / → — ruch<br>
-W / ↑ / SPACJA — skok<br>
-LPM — kopanie<br>
-PPM — stawianie
-</div>
-
-<div id="controls">
-    <div class="control" id="left">←</div>
-    <div class="control" id="right">→</div>
-</div>
-
-<div class="control" id="jump">↑</div>
-
-<div id="hotbar">
-
-    <div class="slot selected" data-block="dirt">
-        🟫<span>20</span>
+    <div id="health">
+        <div id="healthBar"></div>
+        <div id="healthText">100 / 100</div>
     </div>
 
-    <div class="slot" data-block="stone">
-        🪨<span>10</span>
+    <button id="save">💾 Zapisz</button>
+    <button id="reset">🔄 Nowy świat</button>
+
+    <div id="help">
+        A / D lub ← / → — ruch<br>
+        W / ↑ / SPACJA — skok<br>
+        LPM — kopanie<br>
+        PPM — stawianie
     </div>
 
-    <div class="slot" data-block="wood">
-        🪵<span>10</span>
+    <div id="controls">
+        <div class="control" id="left">←</div>
+        <div class="control" id="right">→</div>
     </div>
 
-    <div class="slot" data-block="sand">
-        🟨<span>10</span>
+    <div class="control" id="jump">↑</div>
+
+    <div id="hotbar">
+
+        <div class="slot selected" data-block="dirt">
+            🟫<span>20</span>
+        </div>
+
+        <div class="slot" data-block="stone">
+            🪨<span>10</span>
+        </div>
+
+        <div class="slot" data-block="wood">
+            🪵<span>10</span>
+        </div>
+
+        <div class="slot" data-block="sand">
+            🟨<span>10</span>
+        </div>
+
     </div>
 
-</div>
-
-<div id="message"></div>
+    <div id="message"></div>
 
 </div>
 
@@ -361,11 +360,9 @@ const BLOCK={
 
 let world=[];
 
-let seed=Math.floor(Math.random()*100000);
-
 
 /* =====================================================
-   TWORZENIE ŚWIATA
+   GENEROWANIE ŚWIATA
 ===================================================== */
 
 function createWorld(){
@@ -377,11 +374,12 @@ function createWorld(){
         world[y]=[];
 
         for(let x=0;x<WORLD_W;x++){
-
             world[y][x]="air";
         }
     }
 
+
+    /* TEREN */
 
     for(let x=0;x<WORLD_W;x++){
 
@@ -464,12 +462,11 @@ function createWorld(){
 
                         if(
                             Math.abs(xx-x)+
-                            Math.abs(y-top)<=3
+                            Math.abs(y-top)<=3 &&
+                            world[y][xx]==="air"
                         ){
 
-                            if(world[y][xx]==="air"){
-                                world[y][xx]="leaves";
-                            }
+                            world[y][xx]="leaves";
                         }
                     }
                 }
@@ -478,7 +475,7 @@ function createWorld(){
     }
 
 
-    /* WODA */
+    /* MAŁE STAWY */
 
     for(let i=0;i<12;i++){
 
@@ -533,11 +530,9 @@ function findGround(x){
         return 30;
     }
 
-
     for(let y=0;y<WORLD_H;y++){
 
-        let type=world[y][x];
-
+        const type=world[y][x];
 
         if(
             type!=="air" &&
@@ -549,10 +544,8 @@ function findGround(x){
         }
     }
 
-
     return 30;
 }
-
 
 createWorld();
 
@@ -579,7 +572,7 @@ const player={
 
     speed:1.85,
 
-    /* SPOKOJNIEJSZY SKOK */
+    /* NIŻSZY, SPOKOJNIEJSZY SKOK */
 
     jump:8.2,
 
@@ -609,7 +602,6 @@ function spawnPlayer(){
     player.vy=0;
 }
 
-
 spawnPlayer();
 
 
@@ -629,12 +621,11 @@ const camera={
 
 const keys={};
 
-
 window.addEventListener(
     "keydown",
     function(e){
 
-        let key=e.key.toLowerCase();
+        const key=e.key.toLowerCase();
 
         keys[key]=true;
 
@@ -771,10 +762,10 @@ document
 
 function solidAtPixel(px,py){
 
-    let tx=
+    const tx=
         Math.floor(px/TILE);
 
-    let ty=
+    const ty=
         Math.floor(py/TILE);
 
 
@@ -793,8 +784,7 @@ function solidAtPixel(px,py){
     }
 
 
-    let type=world[ty][tx];
-
+    const type=world[ty][tx];
 
     return(
         BLOCK[type] &&
@@ -840,7 +830,7 @@ function playerCollision(x,y){
 
 
 /* =====================================================
-   RUCH
+   RUCH POSTACI
 ===================================================== */
 
 function updatePlayer(){
@@ -876,17 +866,12 @@ function updatePlayer(){
     }
 
 
-    if(
-        Math.abs(player.vx)<0.02
-    ){
-
+    if(Math.abs(player.vx)<0.02){
         player.vx=0;
     }
 
 
-    /*
-       WOLNIEJSZA ANIMACJA
-    */
+    /* WOLNIEJSZA ANIMACJA */
 
     if(
         moving &&
@@ -905,16 +890,14 @@ function updatePlayer(){
 
     player.vy+=0.38;
 
-
     if(player.vy>9){
-
         player.vy=9;
     }
 
 
-    /* RUCH X */
+    /* RUCH POZIOMY */
 
-    let newX=
+    const newX=
         player.x+
         player.vx;
 
@@ -934,9 +917,9 @@ function updatePlayer(){
     }
 
 
-    /* RUCH Y */
+    /* RUCH PIONOWY */
 
-    let newY=
+    const newY=
         player.y+
         player.vy;
 
@@ -959,7 +942,7 @@ function updatePlayer(){
             player.grounded=true;
 
 
-            let tileBottom=
+            const tileBottom=
                 Math.floor(
                     (
                         player.y+
@@ -979,15 +962,15 @@ function updatePlayer(){
     }
 
 
-    /* KAMERA — WOLNIEJSZA */
+    /* KAMERA */
 
-    let targetX=
+    const targetX=
         player.x+
         player.width/2-
         canvas.width/2;
 
 
-    let targetY=
+    const targetY=
         player.y+
         player.height/2-
         canvas.height/2;
@@ -995,19 +978,17 @@ function updatePlayer(){
 
     camera.x+=
         (
-            targetX-
-            camera.x
+            targetX-camera.x
         )*0.055;
 
 
     camera.y+=
         (
-            targetY-
-            camera.y
+            targetY-camera.y
         )*0.055;
 
 
-    let maxX=
+    const maxX=
         Math.max(
             0,
             WORLD_W*TILE-
@@ -1015,7 +996,7 @@ function updatePlayer(){
         );
 
 
-    let maxY=
+    const maxY=
         Math.max(
             0,
             WORLD_H*TILE-
@@ -1116,7 +1097,7 @@ function drawCloud(x,y){
 
 
 /* =====================================================
-   RYSOWANIE ŚWIATA
+   ŚWIAT
 ===================================================== */
 
 function drawWorld(){
@@ -1127,9 +1108,7 @@ function drawWorld(){
     const startX=
         Math.max(
             0,
-            Math.floor(
-                camera.x/TILE
-            )-1
+            Math.floor(camera.x/TILE)-1
         );
 
 
@@ -1148,9 +1127,7 @@ function drawWorld(){
     const startY=
         Math.max(
             0,
-            Math.floor(
-                camera.y/TILE
-            )-1
+            Math.floor(camera.y/TILE)-1
         );
 
 
@@ -1166,17 +1143,9 @@ function drawWorld(){
         );
 
 
-    for(
-        let y=startY;
-        y<endY;
-        y++
-    ){
+    for(let y=startY;y<endY;y++){
 
-        for(
-            let x=startX;
-            x<endX;
-            x++
-        ){
+        for(let x=startX;x<endX;x++){
 
             drawBlock(
                 world[y][x],
@@ -1200,12 +1169,10 @@ function drawBlock(type,tx,ty){
 
 
     const x=
-        tx*TILE-
-        camera.x;
+        tx*TILE-camera.x;
 
     const y=
-        ty*TILE-
-        camera.y;
+        ty*TILE-camera.y;
 
 
     if(
@@ -1218,6 +1185,8 @@ function drawBlock(type,tx,ty){
         return;
     }
 
+
+    /* WODA */
 
     if(type==="water"){
 
@@ -1235,15 +1204,14 @@ function drawBlock(type,tx,ty){
 
         ctx.fillRect(
             x,
-            y+5+
+            y+
+            5+
             Math.sin(
-                Date.now()*0.004+
-                tx
+                Date.now()*0.004+tx
             )*2,
             TILE,
             3
         );
-
 
         return;
     }
@@ -1260,6 +1228,8 @@ function drawBlock(type,tx,ty){
         TILE
     );
 
+
+    /* TRAWА */
 
     if(type==="grass"){
 
@@ -1291,6 +1261,8 @@ function drawBlock(type,tx,ty){
     }
 
 
+    /* ZIEMIA */
+
     if(type==="dirt"){
 
         ctx.fillStyle="#70401f";
@@ -1310,6 +1282,8 @@ function drawBlock(type,tx,ty){
         );
     }
 
+
+    /* KAMIEŃ */
 
     if(type==="stone"){
 
@@ -1331,6 +1305,8 @@ function drawBlock(type,tx,ty){
     }
 
 
+    /* DREWNO */
+
     if(type==="wood"){
 
         ctx.fillStyle="#613716";
@@ -1343,6 +1319,8 @@ function drawBlock(type,tx,ty){
         );
     }
 
+
+    /* LIŚCIE */
 
     if(type==="leaves"){
 
@@ -1363,6 +1341,8 @@ function drawBlock(type,tx,ty){
         );
     }
 
+
+    /* PIACH */
 
     if(type==="sand"){
 
@@ -1386,60 +1366,237 @@ function drawBlock(type,tx,ty){
 
 
 /* =====================================================
-   POSTAĆ PIXEL-ART
+   PRAWDZIWY PIXEL-ART POSTACI
+===================================================== */
+
+const PLAYER_PALETTE={
+
+    H:"#24150f",
+    h:"#492719",
+
+    S:"#f0ad78",
+    s:"#c9784c",
+
+    E:"#171717",
+    W:"#ffffff",
+
+    B:"#287bd0",
+    b:"#18539a",
+
+    P:"#30343b",
+    p:"#1d2025",
+
+    K:"#111111"
+};
+
+
+/*
+    Każdy znak to jeden piksel sprite'a.
+    Sprite ma 10 x 20 pikseli.
+*/
+
+const PLAYER_SPRITES={
+
+    idle:[
+
+        "....HH....",
+        "...HHHH...",
+        "..HHHHHH..",
+        "..HhHHhH..",
+        ".HSSSSSSH.",
+        ".HSESSSEH.",
+        ".HSSSSSSH.",
+        "..HSSSSS..",
+        "..SSSSSS..",
+        ".sBBBBBBs.",
+        ".sBBBBBBs.",
+        "sBBBBBBBbs",
+        "sBBBBBBBbs",
+        "..PPPPPP..",
+        "..PP..PP..",
+        "..PP..PP..",
+        "..PP..PP..",
+        ".KPP..PPK.",
+        "KKK....KKK",
+        ".........."
+    ],
+
+    walk1:[
+
+        "....HH....",
+        "...HHHH...",
+        "..HHHHHH..",
+        "..HhHHhH..",
+        ".HSSSSSSH.",
+        ".HSESSSEH.",
+        ".HSSSSSSH.",
+        "..HSSSSS..",
+        "..SSSSSS..",
+        ".sBBBBBBs.",
+        ".sBBBBBBs.",
+        "sBBBBBBBbs",
+        "sBBBBBBBbs",
+        "..PPPPPP..",
+        "..PP..PP..",
+        "..PP..PP..",
+        ".PPP...PP.",
+        "KPP...PPK.",
+        "KKK...KKKK",
+        ".........."
+    ],
+
+    walk2:[
+
+        "....HH....",
+        "...HHHH...",
+        "..HHHHHH..",
+        "..HhHHhH..",
+        ".HSSSSSSH.",
+        ".HSESSSEH.",
+        ".HSSSSSSH.",
+        "..HSSSSS..",
+        "..SSSSSS..",
+        ".sBBBBBBs.",
+        ".sBBBBBBs.",
+        "sBBBBBBBbs",
+        "sBBBBBBBbs",
+        "..PPPPPP..",
+        "..PP..PP..",
+        ".PPP..PPP.",
+        ".PP....PP.",
+        "KPP....PPK",
+        "KKK....KKK",
+        ".........."
+    ]
+};
+
+
+/* =====================================================
+   MRUGANIE
+===================================================== */
+
+function createBlinkSprite(base){
+
+    return base.map(
+        row=>
+            row
+            .replace(/E/g,"S")
+            .replace(/W/g,"S")
+    );
+}
+
+
+/* =====================================================
+   RYSOWANIE POSTACI
 ===================================================== */
 
 function drawPlayer(){
 
-    const x=
+    const screenX=
         Math.round(
             player.x-camera.x
         );
 
-    const y=
+    const screenY=
         Math.round(
             player.y-camera.y
         );
 
 
-    let frame=0;
+    let sprite;
 
 
-    if(player.grounded){
+    /*
+       Jeżeli stoimy:
+       idle.
 
-        frame=
-            Math.round(
-                Math.sin(
-                    player.walkAnimation
-                )
-            );
+       Jeżeli chodzimy:
+       2 klatki animacji.
+    */
+
+    if(
+        !player.grounded ||
+        Math.abs(player.vx)<0.05
+    ){
+
+        sprite=PLAYER_SPRITES.idle;
+
+    }else{
+
+        const frame=
+            Math.floor(
+                player.walkAnimation*2
+            )%2;
+
+
+        sprite=
+            frame===0
+            ? PLAYER_SPRITES.walk1
+            : PLAYER_SPRITES.walk2;
+    }
+
+
+    /*
+       Mruganie
+    */
+
+    const blinkTime=
+        Math.floor(
+            Date.now()/100
+        )%70;
+
+
+    if(
+        blinkTime===0 ||
+        blinkTime===1
+    ){
+
+        sprite=
+            createBlinkSprite(sprite);
     }
 
 
     ctx.save();
 
+    ctx.imageSmoothingEnabled=false;
+
+
+    /*
+       Sprite 10x20.
+       Każdy pixel = 2x2.
+       Cała postać = 20x40.
+    */
+
+    const pixelSize=2;
+
+
+    /*
+       Patrzenie w lewo
+    */
 
     if(player.direction<0){
 
         ctx.translate(
-            x+player.width,
-            0
+            screenX+player.width,
+            screenY
         );
 
         ctx.scale(-1,1);
 
-        drawPixelCharacter(
+        drawPlayerSprite(
             0,
-            y,
-            frame
+            0,
+            sprite,
+            pixelSize
         );
 
     }else{
 
-        drawPixelCharacter(
-            x,
-            y,
-            frame
+        drawPlayerSprite(
+            screenX,
+            screenY,
+            sprite,
+            pixelSize
         );
     }
 
@@ -1448,366 +1605,68 @@ function drawPlayer(){
 }
 
 
-/*
-   POSTAĆ ZROBIONA JAKO MAŁA
-   SPRITE'OWA POSTAĆ PIXEL-ART.
-*/
+/* =====================================================
+   RYSOWANIE POJEDYNCZYCH PIKSELI
+===================================================== */
 
-function drawPixelCharacter(x,y,frame){
+function drawPlayerSprite(
+    x,
+    y,
+    sprite,
+    pixelSize
+){
 
-    /*
-       Skala sprite'a:
-       każdy element ma kilka
-       pełnych, ostrych pikseli.
-    */
+    for(
+        let row=0;
+        row<sprite.length;
+        row++
+    ){
 
-
-    /* cień */
-
-    ctx.fillStyle="#4d5963";
-
-    ctx.fillRect(
-        x+2,
-        y+39,
-        17,
-        2
-    );
+        const line=sprite[row];
 
 
-    /*
-       NOGI
-    */
+        for(
+            let col=0;
+            col<line.length;
+            col++
+        ){
 
-    ctx.fillStyle="#20242a";
+            const pixel=line[col];
 
 
-    if(frame===1){
+            if(pixel==="."){
+                continue;
+            }
 
-        /* lewa noga do przodu */
 
-        ctx.fillRect(
-            x+3,
-            y+28,
-            6,
-            11
-        );
+            const color=
+                PLAYER_PALETTE[pixel];
 
-        ctx.fillRect(
-            x+12,
-            y+30,
-            6,
-            9
-        );
 
-    }else if(frame===-1){
+            if(!color){
+                continue;
+            }
 
-        /* prawa noga do przodu */
 
-        ctx.fillRect(
-            x+3,
-            y+30,
-            6,
-            9
-        );
+            ctx.fillStyle=color;
 
-        ctx.fillRect(
-            x+12,
-            y+28,
-            6,
-            11
-        );
 
-    }else{
+            /*
+               Jeden znak = jeden piksel.
+            */
 
-        ctx.fillRect(
-            x+3,
-            y+28,
-            6,
-            11
-        );
+            ctx.fillRect(
+                x+
+                col*pixelSize,
 
-        ctx.fillRect(
-            x+12,
-            y+28,
-            6,
-            11
-        );
+                y+
+                row*pixelSize,
+
+                pixelSize,
+                pixelSize
+            );
+        }
     }
-
-
-    /* buty */
-
-    ctx.fillStyle="#111318";
-
-    ctx.fillRect(
-        x+2,
-        y+37,
-        8,
-        4
-    );
-
-    ctx.fillRect(
-        x+11,
-        y+37,
-        8,
-        4
-    );
-
-
-    /*
-       CIAŁO — CZARNY/CIEMNY OBRYS
-    */
-
-    ctx.fillStyle="#102f54";
-
-    ctx.fillRect(
-        x+3,
-        y+14,
-        15,
-        15
-    );
-
-
-    /*
-       BLUZA/KOSZULKA
-    */
-
-    ctx.fillStyle="#2777c9";
-
-    ctx.fillRect(
-        x+5,
-        y+15,
-        11,
-        12
-    );
-
-
-    /* środek bluzy */
-
-    ctx.fillStyle="#398fe3";
-
-    ctx.fillRect(
-        x+8,
-        y+16,
-        5,
-        10
-    );
-
-
-    /*
-       LEWA RĘKA
-    */
-
-    ctx.fillStyle="#bd7548";
-
-    ctx.fillRect(
-        x,
-        y+16+(frame===1?1:0),
-        4,
-        11
-    );
-
-
-    /* lewa dłoń */
-
-    ctx.fillStyle="#e4a06b";
-
-    ctx.fillRect(
-        x,
-        y+26+(frame===1?1:0),
-        4,
-        4
-    );
-
-
-    /*
-       PRAWA RĘKA
-    */
-
-    ctx.fillStyle="#bd7548";
-
-    ctx.fillRect(
-        x+17,
-        y+16+(frame===-1?1:0),
-        4,
-        11
-    );
-
-
-    /* prawa dłoń */
-
-    ctx.fillStyle="#e4a06b";
-
-    ctx.fillRect(
-        x+17,
-        y+26+(frame===-1?1:0),
-        4,
-        4
-    );
-
-
-    /*
-       GŁOWA — PIXELOWY OBRYS
-    */
-
-    ctx.fillStyle="#754329";
-
-    ctx.fillRect(
-        x+1,
-        y,
-        19,
-        15
-    );
-
-
-    /*
-       TWARZ
-    */
-
-    ctx.fillStyle="#edaa72";
-
-    ctx.fillRect(
-        x+3,
-        y+3,
-        15,
-        10
-    );
-
-
-    /*
-       USZY
-    */
-
-    ctx.fillStyle="#d88f5d";
-
-    ctx.fillRect(
-        x,
-        y+6,
-        3,
-        5
-    );
-
-    ctx.fillRect(
-        x+18,
-        y+6,
-        3,
-        5
-    );
-
-
-    /*
-       WŁOSY
-    */
-
-    ctx.fillStyle="#2a1a13";
-
-    ctx.fillRect(
-        x+1,
-        y,
-        19,
-        5
-    );
-
-    ctx.fillRect(
-        x+1,
-        y+4,
-        4,
-        6
-    );
-
-    ctx.fillRect(
-        x+16,
-        y+3,
-        4,
-        7
-    );
-
-
-    /* pikselowa grzywka */
-
-    ctx.fillRect(
-        x+5,
-        y+3,
-        4,
-        4
-    );
-
-    ctx.fillRect(
-        x+10,
-        y+2,
-        4,
-        4
-    );
-
-
-    /*
-       OCZY
-    */
-
-    ctx.fillStyle="#111";
-
-    ctx.fillRect(
-        x+5,
-        y+7,
-        3,
-        3
-    );
-
-    ctx.fillRect(
-        x+13,
-        y+7,
-        3,
-        3
-    );
-
-
-    /*
-       BIAŁE PIKSELE W OCZACH
-    */
-
-    ctx.fillStyle="#fff";
-
-    ctx.fillRect(
-        x+5,
-        y+7,
-        1,
-        1
-    );
-
-    ctx.fillRect(
-        x+13,
-        y+7,
-        1,
-        1
-    );
-
-
-    /*
-       NOS
-    */
-
-    ctx.fillStyle="#c7794d";
-
-    ctx.fillRect(
-        x+9,
-        y+9,
-        2,
-        2
-    );
-
-
-    /*
-       USTA
-    */
-
-    ctx.fillStyle="#813d32";
-
-    ctx.fillRect(
-        x+7,
-        y+12,
-        6,
-        1
-    );
 }
 
 
@@ -1819,6 +1678,7 @@ let selectedBlock="dirt";
 
 
 let inventory={
+
     dirt:20,
     stone:10,
     wood:10,
@@ -1833,7 +1693,7 @@ function updateHotbar(){
     .forEach(
         slot=>{
 
-            let type=
+            const type=
                 slot.dataset.block;
 
 
@@ -1871,7 +1731,9 @@ document
 );
 
 
-/* 1-4 */
+/* =====================================================
+   WYBÓR BLOKÓW 1-4
+===================================================== */
 
 window.addEventListener(
     "keydown",
@@ -1882,11 +1744,11 @@ window.addEventListener(
             e.key<="4"
         ){
 
-            let index=
+            const index=
                 Number(e.key)-1;
 
 
-            let slots=
+            const slots=
                 document.querySelectorAll(
                     ".slot"
                 );
@@ -1912,26 +1774,26 @@ window.addEventListener(
 
 function canReach(tx,ty){
 
-    let px=
+    const px=
         player.x+
         player.width/2;
 
-    let py=
+    const py=
         player.y+
         player.height/2;
 
 
-    let bx=
+    const bx=
         tx*TILE+
         TILE/2;
 
-    let by=
+    const by=
         ty*TILE+
         TILE/2;
 
 
-    let dx=bx-px;
-    let dy=by-py;
+    const dx=bx-px;
+    const dy=by-py;
 
 
     return(
@@ -1955,13 +1817,13 @@ function mouseTile(e){
         canvas.getBoundingClientRect();
 
 
-    let x=
+    const x=
         e.clientX-
         rect.left+
         camera.x;
 
 
-    let y=
+    const y=
         e.clientY-
         rect.top+
         camera.y;
@@ -1986,7 +1848,7 @@ canvas.addEventListener(
     "mousedown",
     e=>{
 
-        let tile=
+        const tile=
             mouseTile(e);
 
 
@@ -2016,7 +1878,7 @@ canvas.addEventListener(
 
         if(e.button===0){
 
-            let type=
+            const type=
                 world[tile.y][tile.x];
 
 
@@ -2085,14 +1947,14 @@ canvas.addEventListener(
             }
 
 
-            let bx=
+            const bx=
                 tile.x*TILE;
 
-            let by=
+            const by=
                 tile.y*TILE;
 
 
-            let overlap=
+            const overlap=
                 bx<
                 player.x+
                 player.width &&
@@ -2126,10 +1988,10 @@ canvas.addEventListener(
 
 
 /* =====================================================
-   ZAPIS
+   ZAPIS GRY
 ===================================================== */
 
-const SAVE_KEY="PIXEL_WORLD_V4";
+const SAVE_KEY="PIXEL_WORLD_V5";
 
 
 function saveGame(){
@@ -2193,16 +2055,11 @@ document
         );
 
 
-        seed=
-            Math.floor(
-                Math.random()*100000
-            );
-
-
         createWorld();
 
 
         inventory={
+
             dirt:20,
             stone:10,
             wood:10,
@@ -2231,14 +2088,14 @@ document
 
 
 /* =====================================================
-   WCZYTYWANIE
+   WCZYTYWANIE ZAPISU
 ===================================================== */
 
 function loadGame(){
 
     try{
 
-        let raw=
+        const raw=
             localStorage.getItem(
                 SAVE_KEY
             );
@@ -2249,7 +2106,7 @@ function loadGame(){
         }
 
 
-        let data=
+        const data=
             JSON.parse(raw);
 
 
@@ -2309,7 +2166,7 @@ function loadGame(){
         if(data.inventory){
 
             for(
-                let type of
+                const type of
                 [
                     "dirt",
                     "stone",
@@ -2379,7 +2236,7 @@ let messageTimer;
 
 function showMessage(text){
 
-    let element=
+    const element=
         document.getElementById(
             "message"
         );
@@ -2406,7 +2263,7 @@ function showMessage(text){
 
 
 /* =====================================================
-   HEALTH
+   ZDROWIE
 ===================================================== */
 
 function updateHealth(){
