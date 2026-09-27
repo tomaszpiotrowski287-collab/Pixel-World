@@ -3,402 +3,166 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>PIXEL WORLD</title>
 
 <style>
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#10151c;
-    font-family:Arial,sans-serif;
-    color:white;
-}
-
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111820;font-family:Arial,sans-serif;color:white}
 body{user-select:none}
-
 canvas{
-    position:absolute;
-    left:0;
-    top:0;
-    width:100%;
-    height:100%;
-    image-rendering:pixelated;
-    image-rendering:crisp-edges;
-    touch-action:none;
+ position:absolute;inset:0;width:100%;height:100%;
+ image-rendering:pixelated;touch-action:none
 }
 
-#ui{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-}
+button,select{font:inherit}
+
+#ui{position:absolute;inset:0;pointer-events:none}
 
 #title{
-    position:absolute;
-    top:12px;
-    left:50%;
-    transform:translateX(-50%);
-    font-size:24px;
-    font-weight:900;
-    letter-spacing:3px;
-    text-shadow:3px 3px #000;
+ position:absolute;top:12px;left:50%;transform:translateX(-50%);
+ font-size:23px;font-weight:900;letter-spacing:3px;
+ text-shadow:3px 3px #000
 }
 
 #health{
-    position:absolute;
-    left:15px;
-    top:15px;
-    width:190px;
-    height:27px;
-    background:#151515;
-    border:3px solid white;
+ position:absolute;left:14px;top:14px;width:185px;height:27px;
+ border:3px solid white;background:#171717
 }
-
-#healthFill{
-    height:100%;
-    width:100%;
-    background:#e53935;
-}
-
+#healthFill{width:100%;height:100%;background:#e53935}
 #healthText{
-    position:absolute;
-    inset:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-weight:bold;
-    font-size:13px;
-    text-shadow:2px 2px #000;
+ position:absolute;inset:0;display:flex;align-items:center;
+ justify-content:center;font-size:12px;font-weight:bold;text-shadow:2px 2px #000
+}
+
+#help{
+ position:absolute;left:15px;top:50px;font-size:12px;
+ text-shadow:2px 2px #000
 }
 
 #topButtons{
-    position:absolute;
-    right:15px;
-    top:15px;
-    display:flex;
-    gap:7px;
-    pointer-events:auto;
+ position:absolute;right:14px;top:14px;display:flex;gap:7px;
+ pointer-events:auto
 }
 
 .uiBtn{
-    border:3px solid white;
-    background:#252d38;
-    color:white;
-    padding:9px 13px;
-    font-weight:bold;
-    cursor:pointer;
-    box-shadow:4px 4px #000;
+ border:3px solid white;background:#252d38;color:white;
+ padding:8px 11px;font-weight:bold;cursor:pointer;
+ box-shadow:4px 4px #000
 }
-
 .uiBtn:hover{background:#3b4654}
 
-#helpText{
-    position:absolute;
-    left:15px;
-    top:52px;
-    font-size:12px;
-    color:white;
-    text-shadow:2px 2px #000;
-}
-
 #hotbar{
-    position:absolute;
-    bottom:12px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    gap:5px;
-    pointer-events:auto;
+ position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
+ display:flex;gap:5px;pointer-events:auto
 }
-
 .slot{
-    width:55px;
-    height:55px;
-    border:3px solid #555;
-    background:#20252c;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    position:relative;
-    cursor:pointer;
+ width:55px;height:55px;background:#20252c;border:3px solid #555;
+ position:relative;display:flex;align-items:center;justify-content:center;
+ cursor:pointer
 }
-
-.slot.selected{
-    border-color:white;
-    transform:translateY(-4px);
-}
-
-.slotIcon{
-    width:26px;
-    height:26px;
-    image-rendering:pixelated;
-}
-
-.slotNumber{
-    position:absolute;
-    left:4px;
-    top:2px;
-    font-size:11px;
-    font-weight:bold;
-}
-
-.slotCount{
-    position:absolute;
-    right:4px;
-    bottom:2px;
-    font-weight:bold;
-    font-size:12px;
-}
+.slot.selected{border-color:white;transform:translateY(-4px)}
+.icon{width:28px;height:28px}
+.slotNum{position:absolute;top:2px;left:4px;font-size:11px}
+.count{position:absolute;right:4px;bottom:2px;font-size:12px;font-weight:bold}
 
 #message{
-    position:absolute;
-    left:50%;
-    bottom:82px;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,.65);
-    padding:7px 13px;
-    opacity:0;
-    transition:.2s;
-    pointer-events:none;
+ position:absolute;left:50%;bottom:80px;transform:translateX(-50%);
+ background:rgba(0,0,0,.7);padding:7px 14px;opacity:0;
+ transition:.2s
 }
 
 #mobileControls{
-    position:absolute;
-    left:15px;
-    bottom:85px;
-    display:none;
-    gap:10px;
-    pointer-events:auto;
+ position:absolute;left:14px;bottom:84px;display:none;gap:9px;
+ pointer-events:auto
 }
-
 .mobileBtn{
-    width:64px;
-    height:64px;
-    background:rgba(25,30,38,.85);
-    border:3px solid white;
-    color:white;
-    font-size:26px;
-    font-weight:bold;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+ width:64px;height:64px;border:3px solid white;
+ background:rgba(25,30,38,.88);color:white;
+ display:flex;align-items:center;justify-content:center;
+ font-size:25px;font-weight:bold
 }
-
 #jumpBtn{
-    position:fixed;
-    right:18px;
-    bottom:85px;
-    display:none;
+ position:absolute;right:15px;bottom:84px;display:none;
+ pointer-events:auto
 }
 
-/* ================= SETTINGS ================= */
+/* SETTINGS */
 
 #settingsOverlay{
-    position:absolute;
-    inset:0;
-    background:rgba(0,0,0,.78);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    pointer-events:auto;
-    z-index:20;
+ position:absolute;inset:0;background:rgba(0,0,0,.8);
+ display:none;align-items:center;justify-content:center;
+ pointer-events:auto;z-index:50
 }
-
 #settingsWindow{
-    width:min(760px,94vw);
-    max-height:88vh;
-    background:#1b222c;
-    border:4px solid white;
-    box-shadow:10px 10px #000;
-    display:flex;
-    flex-direction:column;
+ width:min(780px,95vw);height:min(650px,90vh);
+ background:#1b222c;border:4px solid white;
+ box-shadow:10px 10px #000;display:flex;flex-direction:column
 }
-
 #settingsHeader{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:14px;
-    background:#252e3a;
-    border-bottom:3px solid white;
+ padding:12px 14px;background:#252e3a;border-bottom:3px solid white;
+ display:flex;justify-content:space-between;align-items:center
 }
-
-#settingsHeader h2{
-    margin:0;
-    font-size:22px;
-}
-
+#settingsHeader h2{margin:0;font-size:20px}
 #closeSettings{
-    width:40px;
-    height:40px;
-    border:3px solid white;
-    background:#8e2020;
-    color:white;
-    font-size:20px;
-    font-weight:bold;
-    cursor:pointer;
+ width:40px;height:40px;background:#8d2020;color:white;
+ border:3px solid white;font-weight:bold;font-size:18px
 }
-
-#settingsContent{
-    display:flex;
-    min-height:420px;
-    overflow:hidden;
+#settingsBody{display:flex;flex:1;min-height:0}
+#tabs{
+ width:185px;padding:8px;background:#151a21;
+ border-right:3px solid #555;overflow-y:auto
 }
-
-#settingsTabs{
-    width:190px;
-    background:#151a21;
-    border-right:3px solid #555;
-    padding:8px;
-    overflow-y:auto;
-}
-
 .tab{
-    width:100%;
-    padding:12px 8px;
-    margin-bottom:6px;
-    border:2px solid #555;
-    background:#222a34;
-    color:white;
-    font-weight:bold;
-    text-align:left;
-    cursor:pointer;
+ width:100%;padding:11px 8px;margin-bottom:6px;
+ background:#222a34;color:white;border:2px solid #555;
+ text-align:left;font-weight:bold;cursor:pointer
 }
-
-.tab.active{
-    background:#3a4654;
-    border-color:white;
-}
-
-#settingsPages{
-    flex:1;
-    padding:18px;
-    overflow-y:auto;
-}
-
-.settingsPage{display:none}
-.settingsPage.active{display:block}
-
-.settingsPage h3{
-    margin-top:0;
-    border-bottom:2px solid #555;
-    padding-bottom:8px;
-}
-
+.tab.active{background:#3c4857;border-color:white}
+#pages{flex:1;padding:17px;overflow-y:auto}
+.page{display:none}.page.active{display:block}
+.page h3{margin-top:0;border-bottom:2px solid #555;padding-bottom:8px}
 .option{
-    background:#252d38;
-    border:2px solid #414b58;
-    margin:8px 0;
-    padding:11px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
+ margin:8px 0;padding:11px;background:#252d38;
+ border:2px solid #414b58;display:flex;
+ align-items:center;justify-content:space-between;gap:15px
 }
-
-.optionText{flex:1}
-
-.optionTitle{font-weight:bold}
-
-.optionDesc{
-    font-size:11px;
-    color:#aaa;
-    margin-top:4px;
-}
-
-select,
-.settingButton{
-    background:#151a21;
-    color:white;
-    border:2px solid white;
-    padding:8px;
-    font-weight:bold;
-}
-
-.settingButton{cursor:pointer}
-
+.desc{flex:1}.desc small{display:block;color:#aaa;margin-top:4px}
 .switch{
-    width:48px;
-    height:26px;
-    background:#555;
-    border:2px solid white;
-    position:relative;
-    cursor:pointer;
-    flex-shrink:0;
+ width:48px;height:26px;border:2px solid white;background:#555;
+ position:relative;cursor:pointer;flex-shrink:0
 }
-
-.switch::after{
-    content:"";
-    position:absolute;
-    top:2px;
-    left:2px;
-    width:18px;
-    height:18px;
-    background:white;
+.switch:after{
+ content:"";position:absolute;top:2px;left:2px;
+ width:18px;height:18px;background:white
 }
-
 .switch.on{background:#29823b}
-
-.switch.on::after{left:24px}
-
-.infoBox{
-    background:#11161c;
-    border:2px solid #4d5966;
-    padding:12px;
-    line-height:1.5;
-    margin-top:10px;
+.switch.on:after{left:24px}
+.settingBtn,select{
+ background:#151a21;color:white;border:2px solid white;
+ padding:7px;font-weight:bold;cursor:pointer
 }
-
+.info{
+ background:#11161c;border:2px solid #4d5966;
+ padding:12px;line-height:1.5
+}
 #settingsFooter{
-    padding:10px;
-    border-top:3px solid #555;
-    display:flex;
-    justify-content:flex-end;
-    gap:8px;
+ padding:9px;border-top:3px solid #555;
+ display:flex;justify-content:flex-end;gap:8px
 }
 
 @media(max-width:700px){
-
-    #title{font-size:18px}
-
-    #helpText{display:none}
-
-    #health{width:145px}
-
-    #topButtons{top:50px}
-
-    #topButtons .uiBtn:not(#settingsBtn){
-        display:none;
-    }
-
-    #mobileControls,
-    #jumpBtn{
-        display:flex;
-    }
-
-    #settingsContent{min-height:0}
-
-    #settingsTabs{width:125px}
-
-    .tab{font-size:11px}
-
-    .option{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-
-    .option select,
-    .option button{
-        width:100%;
-    }
+ #title{font-size:17px}
+ #help{display:none}
+ #topButtons{top:48px}
+ #topButtons .uiBtn:not(#settingsBtn){display:none}
+ #mobileControls{display:flex}
+ #jumpBtn{display:flex}
+ #settingsBody{min-height:0}
+ #tabs{width:125px}
+ .tab{font-size:11px}
+ .option{flex-direction:column;align-items:flex-start}
+ .option select,.option button{width:100%}
 }
 </style>
 </head>
@@ -409,400 +173,234 @@ select,
 
 <div id="ui">
 
-    <div id="title">PIXEL WORLD</div>
+<div id="title">PIXEL WORLD</div>
 
-    <div id="health">
-        <div id="healthFill"></div>
-        <div id="healthText">100 / 100</div>
-    </div>
+<div id="health">
+ <div id="healthFill"></div>
+ <div id="healthText">100 / 100</div>
+</div>
 
-    <div id="helpText">
-        A/D lub ←/→ — ruch | W/↑/SPACJA — skok | LPM — kopanie | PPM — stawianie
-    </div>
+<div id="help">
+ A/D lub ←/→ — ruch | W/↑/SPACJA — skok |
+ LPM — kopanie | PPM — stawianie
+</div>
 
-    <div id="topButtons">
-        <button class="uiBtn" id="saveBtn">💾 ZAPISZ</button>
-        <button class="uiBtn" id="resetBtn">↻ RESET</button>
-        <button class="uiBtn" id="settingsBtn">⚙ USTAWIENIA</button>
-    </div>
+<div id="topButtons">
+ <button class="uiBtn" id="saveBtn">💾 ZAPISZ</button>
+ <button class="uiBtn" id="resetBtn">↻ RESET</button>
+ <button class="uiBtn" id="settingsBtn">⚙ USTAWIENIA</button>
+</div>
 
-    <div id="hotbar">
+<div id="hotbar">
+ <div class="slot selected" data-block="dirt">
+  <span class="slotNum">1</span>
+  <div class="icon" style="background:#795548;border-top:7px solid #4caf50"></div>
+  <span class="count" id="count-dirt">20</span>
+ </div>
+ <div class="slot" data-block="stone">
+  <span class="slotNum">2</span>
+  <div class="icon" style="background:#777"></div>
+  <span class="count" id="count-stone">10</span>
+ </div>
+ <div class="slot" data-block="wood">
+  <span class="slotNum">3</span>
+  <div class="icon" style="background:#754c24"></div>
+  <span class="count" id="count-wood">10</span>
+ </div>
+ <div class="slot" data-block="sand">
+  <span class="slotNum">4</span>
+  <div class="icon" style="background:#d9bd70"></div>
+  <span class="count" id="count-sand">10</span>
+ </div>
+</div>
 
-        <div class="slot selected" data-block="dirt">
-            <span class="slotNumber">1</span>
-            <div class="slotIcon" style="background:#795548;border-top:7px solid #4caf50"></div>
-            <span class="slotCount" id="count-dirt">20</span>
-        </div>
+<div id="message"></div>
 
-        <div class="slot" data-block="stone">
-            <span class="slotNumber">2</span>
-            <div class="slotIcon" style="background:#777"></div>
-            <span class="slotCount" id="count-stone">10</span>
-        </div>
+<div id="mobileControls">
+ <button class="mobileBtn" id="leftBtn">◀</button>
+ <button class="mobileBtn" id="rightBtn">▶</button>
+</div>
 
-        <div class="slot" data-block="wood">
-            <span class="slotNumber">3</span>
-            <div class="slotIcon" style="background:#754c24"></div>
-            <span class="slotCount" id="count-wood">10</span>
-        </div>
-
-        <div class="slot" data-block="sand">
-            <span class="slotNumber">4</span>
-            <div class="slotIcon" style="background:#d9bd70"></div>
-            <span class="slotCount" id="count-sand">10</span>
-        </div>
-
-    </div>
-
-    <div id="message"></div>
-
-    <div id="mobileControls">
-        <button class="mobileBtn" id="leftBtn">◀</button>
-        <button class="mobileBtn" id="rightBtn">▶</button>
-    </div>
-
-    <button class="mobileBtn" id="jumpBtn">▲</button>
+<button class="mobileBtn" id="jumpBtn">▲</button>
 
 </div>
 
 
-<!-- ================= SETTINGS ================= -->
+<!-- SETTINGS -->
 
 <div id="settingsOverlay">
 
 <div id="settingsWindow">
 
-    <div id="settingsHeader">
-        <h2>⚙ USTAWIENIA PIXEL WORLD</h2>
-        <button id="closeSettings">✕</button>
-    </div>
-
-    <div id="settingsContent">
-
-        <div id="settingsTabs">
-
-            <button class="tab active" data-page="gamePage">🎮 Gra</button>
-            <button class="tab" data-page="graphicsPage">🎨 Grafika</button>
-            <button class="tab" data-page="soundPage">🔊 Dźwięk</button>
-            <button class="tab" data-page="controlsPage">⌨ Sterowanie</button>
-            <button class="tab" data-page="savePage">💾 Zapis</button>
-            <button class="tab" data-page="helpPage">🆘 Pomoc</button>
-            <button class="tab" data-page="infoPage">ℹ Informacje</button>
-
-        </div>
-
-        <div id="settingsPages">
-
-            <div class="settingsPage active" id="gamePage">
-
-                <h3>🎮 Ustawienia gry</h3>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Przyciski mobilne</div>
-                        <div class="optionDesc">
-                            Pokazuje przyciski ruchu i skoku.
-                        </div>
-                    </div>
-                    <div class="switch on" id="mobileSwitch"></div>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Animacje postaci</div>
-                        <div class="optionDesc">
-                            Chodzenie, ręce, nogi, skok i mruganie.
-                        </div>
-                    </div>
-                    <div class="switch on" id="animationSwitch"></div>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Automatyczny zapis</div>
-                        <div class="optionDesc">
-                            Automatyczny zapis świata co 2 minuty.
-                        </div>
-                    </div>
-                    <div class="switch on" id="autoSaveSwitch"></div>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Pełny ekran</div>
-                        <div class="optionDesc">
-                            Uruchamia grę na pełnym ekranie.
-                        </div>
-                    </div>
-                    <button class="settingButton" id="fullscreenBtn">
-                        WŁĄCZ
-                    </button>
-                </div>
-
-            </div>
-
-
-            <div class="settingsPage" id="graphicsPage">
-
-                <h3>🎨 Grafika</h3>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Jakość grafiki</div>
-                        <div class="optionDesc">
-                            Ustawia jakość renderowania świata.
-                        </div>
-                    </div>
-
-                    <select id="qualitySelect">
-                        <option value="low">Niska</option>
-                        <option value="medium" selected>Średnia</option>
-                        <option value="high">Wysoka</option>
-                    </select>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Pixel Perfect</div>
-                        <div class="optionDesc">
-                            Zachowuje ostre piksele.
-                        </div>
-                    </div>
-                    <div class="switch on" id="pixelSwitch"></div>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Animowana woda</div>
-                        <div class="optionDesc">
-                            Dodaje ruch fal na powierzchni wody.
-                        </div>
-                    </div>
-                    <div class="switch on" id="waterSwitch"></div>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Limit FPS</div>
-                        <div class="optionDesc">
-                            Maksymalna liczba klatek.
-                        </div>
-                    </div>
-
-                    <select id="fpsSelect">
-                        <option value="30">30 FPS</option>
-                        <option value="60" selected>60 FPS</option>
-                        <option value="120">120 FPS</option>
-                        <option value="144">144 FPS</option>
-                        <option value="240">240 FPS</option>
-                    </select>
-                </div>
-
-            </div>
-
-
-            <div class="settingsPage" id="soundPage">
-
-                <h3>🔊 Dźwięk</h3>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Efekty dźwiękowe</div>
-                        <div class="optionDesc">
-                            Kopanie, stawianie, skakanie i przyciski.
-                        </div>
-                    </div>
-                    <div class="switch on" id="soundSwitch"></div>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Muzyka</div>
-                        <div class="optionDesc">
-                            Muzyka w tle.
-                        </div>
-                    </div>
-                    <div class="switch" id="musicSwitch"></div>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Głośność</div>
-                    </div>
-
-                    <select id="volumeSelect">
-                        <option value="0.25">25%</option>
-                        <option value="0.5">50%</option>
-                        <option value="0.75" selected>75%</option>
-                        <option value="1">100%</option>
-                    </select>
-                </div>
-
-            </div>
-
-
-            <div class="settingsPage" id="controlsPage">
-
-                <h3>⌨ Sterowanie</h3>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Lewo</div>
-                    </div>
-                    <b>A / ←</b>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Prawo</div>
-                    </div>
-                    <b>D / →</b>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Skok</div>
-                    </div>
-                    <b>W / ↑ / SPACJA</b>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Kopanie</div>
-                    </div>
-                    <b>LEWY PRZYCISK</b>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Stawianie</div>
-                    </div>
-                    <b>PRAWY PRZYCISK</b>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Hotbar</div>
-                    </div>
-                    <b>1 / 2 / 3 / 4</b>
-                </div>
-
-            </div>
-
-
-            <div class="settingsPage" id="savePage">
-
-                <h3>💾 Zapis gry</h3>
-
-                <div class="infoBox">
-                    Twój świat jest zapisywany w pamięci przeglądarki.
-                    Możesz zamknąć grę i później wrócić do swojego świata.
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Zapisz teraz</div>
-                    </div>
-                    <button class="settingButton" id="saveFromSettings">
-                        💾 ZAPISZ
-                    </button>
-                </div>
-
-                <div class="option">
-                    <div class="optionText">
-                        <div class="optionTitle">Usuń zapis</div>
-                    </div>
-                    <button class="settingButton" id="deleteSaveBtn">
-                        🗑 USUŃ
-                    </button>
-                </div>
-
-            </div>
-
-
-            <div class="settingsPage" id="helpPage">
-
-                <h3>🆘 Pomoc</h3>
-
-                <div class="infoBox">
-
-                    <b>🎮 Poruszanie</b><br>
-                    A/D albo ←/→.<br><br>
-
-                    <b>⬆ Skakanie</b><br>
-                    W, ↑ albo SPACJA.<br><br>
-
-                    <b>⛏ Kopanie</b><br>
-                    Kliknij LPM na blok w zasięgu.<br><br>
-
-                    <b>🧱 Stawianie</b><br>
-                    Wybierz blok i kliknij PPM.<br><br>
-
-                    <b>📦 Hotbar</b><br>
-                    1–4 wybiera blok.<br><br>
-
-                    <b>🌳 Świat</b><br>
-                    Eksploruj teren, drzewa, wodę,
-                    piasek i podziemia.<br><br>
-
-                    <b>💾 Zapis</b><br>
-                    Zapisuj świat ręcznie lub używaj
-                    automatycznego zapisu.
-
-                </div>
-
-            </div>
-
-
-            <div class="settingsPage" id="infoPage">
-
-                <h3>ℹ Informacje o grze</h3>
-
-                <div class="infoBox">
-
-                    <h2>PIXEL WORLD</h2>
-
-                    <p>
-                        Pixel World to pikselowa gra sandboxowa,
-                        w której możesz eksplorować i budować własny świat.
-                    </p>
-
-                    <p>
-                        Możesz chodzić, skakać, kopać bloki,
-                        stawiać bloki i odkrywać teren.
-                    </p>
-
-                    <hr>
-
-                    <b>Wersja:</b> Stable V6 + Settings + Animations<br>
-                    <b>Silnik:</b> HTML5 Canvas + JavaScript<br>
-                    <b>Grafika:</b> Pixel Art<br>
-                    <b>Tryb:</b> Singleplayer<br>
-
-                    <hr>
-
-                    <b>👤 Twórca:</b><br>
-                    Projekt własny użytkownika.
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div id="settingsFooter">
-
-        <button class="settingButton" id="resetSettings">
-            ↻ Przywróć domyślne
-        </button>
-
-        <button class="settingButton" id="closeSettingsBottom">
-            ZAMKNIJ
-        </button>
-
-    </div>
+<div id="settingsHeader">
+ <h2>⚙ USTAWIENIA PIXEL WORLD</h2>
+ <button id="closeSettings">✕</button>
+</div>
+
+<div id="settingsBody">
+
+<div id="tabs">
+ <button class="tab active" data-page="gamePage">🎮 Gra</button>
+ <button class="tab" data-page="graphicsPage">🎨 Grafika</button>
+ <button class="tab" data-page="soundPage">🔊 Dźwięk</button>
+ <button class="tab" data-page="controlsPage">⌨ Sterowanie</button>
+ <button class="tab" data-page="savePage">💾 Zapis</button>
+ <button class="tab" data-page="helpPage">🆘 Pomoc</button>
+ <button class="tab" data-page="infoPage">ℹ Informacje</button>
+</div>
+
+<div id="pages">
+
+<div class="page active" id="gamePage">
+<h3>🎮 Gra</h3>
+
+<div class="option">
+ <div class="desc"><b>Przyciski mobilne</b><small>Przyciski ruchu i skoku.</small></div>
+ <div class="switch on" id="mobileSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc"><b>Animacje postaci</b><small>Chodzenie, ręce, nogi, skok i mruganie.</small></div>
+ <div class="switch on" id="animationSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc"><b>Automatyczny zapis</b><small>Zapis świata co 2 minuty.</small></div>
+ <div class="switch on" id="autoSaveSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc"><b>Pełny ekran</b><small>Uruchamia grę w trybie pełnoekranowym.</small></div>
+ <button class="settingBtn" id="fullscreenBtn">WŁĄCZ</button>
+</div>
+
+</div>
+
+
+<div class="page" id="graphicsPage">
+<h3>🎨 Grafika</h3>
+
+<div class="option">
+ <div class="desc"><b>Jakość</b><small>Wpływa na płynność gry.</small></div>
+ <select id="qualitySelect">
+  <option value="low">Niska</option>
+  <option value="medium">Średnia</option>
+  <option value="high">Wysoka</option>
+ </select>
+</div>
+
+<div class="option">
+ <div class="desc"><b>Pixel Perfect</b><small>Ostre, pikselowe krawędzie.</small></div>
+ <div class="switch on" id="pixelSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc"><b>Animowana woda</b><small>Ruch fal na wodzie.</small></div>
+ <div class="switch on" id="waterSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc"><b>Limit FPS</b></div>
+ <select id="fpsSelect">
+  <option value="30">30 FPS</option>
+  <option value="60">60 FPS</option>
+  <option value="120">120 FPS</option>
+  <option value="144">144 FPS</option>
+  <option value="240">240 FPS</option>
+ </select>
+</div>
+</div>
+
+
+<div class="page" id="soundPage">
+<h3>🔊 Dźwięk</h3>
+
+<div class="option">
+ <div class="desc"><b>Efekty dźwiękowe</b><small>Kopanie, stawianie i skakanie.</small></div>
+ <div class="switch on" id="soundSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc"><b>Muzyka</b><small>Muzyka w tle.</small></div>
+ <div class="switch" id="musicSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc"><b>Głośność</b></div>
+ <select id="volumeSelect">
+  <option value=".25">25%</option>
+  <option value=".5">50%</option>
+  <option value=".75">75%</option>
+  <option value="1">100%</option>
+ </select>
+</div>
+</div>
+
+
+<div class="page" id="controlsPage">
+<h3>⌨ Sterowanie</h3>
+
+<div class="option"><b>Lewo</b><b>A / ←</b></div>
+<div class="option"><b>Prawo</b><b>D / →</b></div>
+<div class="option"><b>Skok</b><b>W / ↑ / SPACJA</b></div>
+<div class="option"><b>Kopanie</b><b>LPM</b></div>
+<div class="option"><b>Stawianie</b><b>PPM</b></div>
+<div class="option"><b>Bloki</b><b>1 / 2 / 3 / 4</b></div>
+</div>
+
+
+<div class="page" id="savePage">
+<h3>💾 Zapis</h3>
+
+<div class="info">
+ Twój świat jest zapisywany lokalnie w przeglądarce.
+ Możesz zamknąć stronę i wrócić później.
+</div>
+
+<br>
+
+<button class="settingBtn" id="saveFromSettings">💾 ZAPISZ TERAZ</button>
+<button class="settingBtn" id="deleteSaveBtn">🗑 USUŃ ZAPIS</button>
+</div>
+
+
+<div class="page" id="helpPage">
+<h3>🆘 Pomoc</h3>
+
+<div class="info">
+<b>Ruch:</b> A/D lub ←/→<br><br>
+<b>Skok:</b> W / ↑ / SPACJA<br><br>
+<b>Kopanie:</b> kliknij blok LPM<br><br>
+<b>Budowanie:</b> wybierz blok i kliknij PPM<br><br>
+<b>Hotbar:</b> klawisze 1–4<br><br>
+<b>Telefon:</b> używaj przycisków na ekranie.<br><br>
+<b>Zapis:</b> zapisuj ręcznie albo włącz autozapis.
+</div>
+</div>
+
+
+<div class="page" id="infoPage">
+<h3>ℹ Informacje</h3>
+
+<div class="info">
+<h2>PIXEL WORLD</h2>
+<p>Pikselowa gra sandboxowa inspirowana klasycznymi grami 2D.</p>
+<p>Eksploruj świat, kop bloki, buduj i odkrywaj podziemia.</p>
+<hr>
+<b>Wersja:</b> Stable V7<br>
+<b>Technologia:</b> HTML5 Canvas + JavaScript<br>
+<b>Tryb:</b> Singleplayer<br>
+<b>Grafika:</b> Pixel Art
+</div>
+</div>
+
+</div>
+</div>
+
+<div id="settingsFooter">
+ <button class="settingBtn" id="resetSettings">↻ DOMYŚLNE</button>
+ <button class="settingBtn" id="closeSettingsBottom">ZAMKNIJ</button>
+</div>
 
 </div>
 </div>
@@ -810,2210 +408,1421 @@ select,
 
 <script>
 
-/* =========================================================
-   PIXEL WORLD
-========================================================= */
+/* =====================================================
+   SETTINGS
+===================================================== */
 
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-ctx.imageSmoothingEnabled=false;
+const defaultSettings={
+ mobile:true,
+ animations:true,
+ autoSave:true,
+ quality:"medium",
+ pixelPerfect:true,
+ water:true,
+ fps:60,
+ sound:true,
+ music:false,
+ volume:.75
+};
 
-let W=innerWidth;
-let H=innerHeight;
+let settings;
+
+try{
+ settings=JSON.parse(localStorage.getItem("PIXEL_WORLD_SETTINGS"))||
+ JSON.parse(JSON.stringify(defaultSettings));
+}catch{
+ settings=JSON.parse(JSON.stringify(defaultSettings));
+}
+
+function saveSettings(){
+ try{
+  localStorage.setItem("PIXEL_WORLD_SETTINGS",JSON.stringify(settings));
+ }catch{}
+}
+
+let W=innerWidth,H=innerHeight;
 
 function resize(){
-
-    W=innerWidth;
-    H=innerHeight;
-
-    canvas.width=W;
-    canvas.height=H;
-
-    ctx.imageSmoothingEnabled=!settings.pixelPerfect;
-
+ W=innerWidth;
+ H=innerHeight;
+ canvas.width=W;
+ canvas.height=H;
+ ctx.imageSmoothingEnabled=!settings.pixelPerfect;
 }
 
 addEventListener("resize",resize);
 
 
-/* =========================================================
-   SETTINGS
-========================================================= */
+/* =====================================================
+   SETTINGS UI
+===================================================== */
 
-const defaultSettings={
-    mobile:true,
-    animations:true,
-    autoSave:true,
-    quality:"medium",
-    pixelPerfect:true,
-    water:true,
-    fps:60,
-    sound:true,
-    music:false,
-    volume:0.75
-};
-
-let settings=JSON.parse(
-    localStorage.getItem("PIXEL_WORLD_SETTINGS") ||
-    JSON.stringify(defaultSettings)
-);
-
-function saveSettings(){
-
-    localStorage.setItem(
-        "PIXEL_WORLD_SETTINGS",
-        JSON.stringify(settings)
-    );
-
-}
-
-function applySettings(){
-
-    document.getElementById("mobileSwitch")
-        .classList.toggle("on",settings.mobile);
-
-    document.getElementById("animationSwitch")
-        .classList.toggle("on",settings.animations);
-
-    document.getElementById("autoSaveSwitch")
-        .classList.toggle("on",settings.autoSave);
-
-    document.getElementById("pixelSwitch")
-        .classList.toggle("on",settings.pixelPerfect);
-
-    document.getElementById("waterSwitch")
-        .classList.toggle("on",settings.water);
-
-    document.getElementById("soundSwitch")
-        .classList.toggle("on",settings.sound);
-
-    document.getElementById("musicSwitch")
-        .classList.toggle("on",settings.music);
-
-    document.getElementById("qualitySelect").value=settings.quality;
-    document.getElementById("fpsSelect").value=settings.fps;
-    document.getElementById("volumeSelect").value=settings.volume;
-
-    document.getElementById("mobileControls").style.display=
-        settings.mobile?"flex":"none";
-
-    document.getElementById("jumpBtn").style.display=
-        settings.mobile?"flex":"none";
-
-    ctx.imageSmoothingEnabled=!settings.pixelPerfect;
-
-    saveSettings();
-
-}
-
-applySettings();
-
-
-/* =========================================================
-   SETTINGS MENU
-========================================================= */
-
-const settingsOverlay=
-    document.getElementById("settingsOverlay");
+const overlay=document.getElementById("settingsOverlay");
 
 function openSettings(){
-    settingsOverlay.style.display="flex";
-    applySettings();
+ overlay.style.display="flex";
+ paused=true;
 }
 
 function closeSettings(){
-    settingsOverlay.style.display="none";
+ overlay.style.display="none";
+ paused=false;
 }
 
-document.getElementById("settingsBtn")
-    .onclick=openSettings;
-
-document.getElementById("closeSettings")
-    .onclick=closeSettings;
-
-document.getElementById("closeSettingsBottom")
-    .onclick=closeSettings;
-
+document.getElementById("settingsBtn").onclick=openSettings;
+document.getElementById("closeSettings").onclick=closeSettings;
+document.getElementById("closeSettingsBottom").onclick=closeSettings;
 
 document.querySelectorAll(".tab").forEach(tab=>{
-
-    tab.onclick=()=>{
-
-        document.querySelectorAll(".tab")
-            .forEach(t=>t.classList.remove("active"));
-
-        document.querySelectorAll(".settingsPage")
-            .forEach(p=>p.classList.remove("active"));
-
-        tab.classList.add("active");
-
-        document.getElementById(tab.dataset.page)
-            .classList.add("active");
-
-    };
-
+ tab.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  tab.classList.add("active");
+  document.getElementById(tab.dataset.page).classList.add("active");
+ };
 });
 
-
-function toggleSetting(name,id){
-
-    settings[name]=!settings[name];
-
-    document.getElementById(id)
-        .classList.toggle("on",settings[name]);
-
-    applySettings();
-
+function updateSwitch(id,value){
+ document.getElementById(id).classList.toggle("on",value);
 }
 
-document.getElementById("mobileSwitch")
-    .onclick=()=>toggleSetting("mobile","mobileSwitch");
+function applySettings(){
+ updateSwitch("mobileSwitch",settings.mobile);
+ updateSwitch("animationSwitch",settings.animations);
+ updateSwitch("autoSaveSwitch",settings.autoSave);
+ updateSwitch("pixelSwitch",settings.pixelPerfect);
+ updateSwitch("waterSwitch",settings.water);
+ updateSwitch("soundSwitch",settings.sound);
+ updateSwitch("musicSwitch",settings.music);
 
-document.getElementById("animationSwitch")
-    .onclick=()=>toggleSetting("animations","animationSwitch");
+ document.getElementById("qualitySelect").value=settings.quality;
+ document.getElementById("fpsSelect").value=settings.fps;
+ document.getElementById("volumeSelect").value=settings.volume;
 
-document.getElementById("autoSaveSwitch")
-    .onclick=()=>toggleSetting("autoSave","autoSaveSwitch");
+ document.getElementById("mobileControls").style.display=
+ settings.mobile?"flex":"none";
 
-document.getElementById("pixelSwitch")
-    .onclick=()=>toggleSetting("pixelPerfect","pixelSwitch");
+ document.getElementById("jumpBtn").style.display=
+ settings.mobile?"flex":"none";
 
-document.getElementById("waterSwitch")
-    .onclick=()=>toggleSetting("water","waterSwitch");
+ ctx.imageSmoothingEnabled=!settings.pixelPerfect;
 
-document.getElementById("soundSwitch")
-    .onclick=()=>toggleSetting("sound","soundSwitch");
+ saveSettings();
+}
 
-document.getElementById("musicSwitch")
-    .onclick=()=>toggleSetting("music","musicSwitch");
+function toggle(name,id){
+ settings[name]=!settings[name];
+ applySettings();
+}
 
+document.getElementById("mobileSwitch").onclick=()=>toggle("mobile");
+document.getElementById("animationSwitch").onclick=()=>toggle("animations");
+document.getElementById("autoSaveSwitch").onclick=()=>toggle("autoSave");
+document.getElementById("pixelSwitch").onclick=()=>toggle("pixelPerfect");
+document.getElementById("waterSwitch").onclick=()=>toggle("water");
+document.getElementById("soundSwitch").onclick=()=>toggle("sound");
+document.getElementById("musicSwitch").onclick=()=>toggle("music");
 
 document.getElementById("qualitySelect").onchange=e=>{
-    settings.quality=e.target.value;
-    saveSettings();
+ settings.quality=e.target.value;
+ saveSettings();
 };
 
 document.getElementById("fpsSelect").onchange=e=>{
-    settings.fps=Number(e.target.value);
-    saveSettings();
+ settings.fps=Number(e.target.value);
+ saveSettings();
 };
 
 document.getElementById("volumeSelect").onchange=e=>{
-    settings.volume=Number(e.target.value);
-    saveSettings();
+ settings.volume=Number(e.target.value);
+ saveSettings();
 };
-
 
 document.getElementById("resetSettings").onclick=()=>{
-
-    settings=JSON.parse(
-        JSON.stringify(defaultSettings)
-    );
-
-    applySettings();
-
-    showMessage("Ustawienia przywrócone!");
-
+ settings=JSON.parse(JSON.stringify(defaultSettings));
+ applySettings();
+ showMessage("Przywrócono ustawienia.");
 };
-
 
 document.getElementById("fullscreenBtn").onclick=async()=>{
-
-    try{
-
-        if(!document.fullscreenElement){
-            await document.documentElement.requestFullscreen();
-        }else{
-            await document.exitFullscreen();
-        }
-
-    }catch(e){}
-
+ try{
+  if(!document.fullscreenElement)
+   await document.documentElement.requestFullscreen();
+  else
+   await document.exitFullscreen();
+ }catch{}
 };
 
 
-/* =========================================================
+/* =====================================================
    SOUND
-========================================================= */
+===================================================== */
 
-let audioContext=null;
+let audio=null;
 
-function playSound(type="click"){
+function sound(type){
+ if(!settings.sound)return;
 
-    if(!settings.sound) return;
+ try{
+  if(!audio)
+   audio=new(window.AudioContext||window.webkitAudioContext)();
 
-    try{
+  const osc=audio.createOscillator();
+  const gain=audio.createGain();
 
-        if(!audioContext){
+  osc.connect(gain);
+  gain.connect(audio.destination);
 
-            audioContext=
-                new(window.AudioContext||
-                window.webkitAudioContext)();
+  let f=400;
+  if(type==="mine")f=170;
+  if(type==="place")f=280;
+  if(type==="jump")f=480;
 
-        }
+  osc.type="square";
+  osc.frequency.value=f;
 
-        const osc=audioContext.createOscillator();
-        const gain=audioContext.createGain();
+  gain.gain.setValueAtTime(
+   settings.volume*.06,
+   audio.currentTime
+  );
 
-        osc.connect(gain);
-        gain.connect(audioContext.destination);
+  gain.gain.exponentialRampToValueAtTime(
+   .001,
+   audio.currentTime+.07
+  );
 
-        let frequency=500;
-
-        if(type==="mine")frequency=180;
-        if(type==="place")frequency=300;
-        if(type==="jump")frequency=450;
-
-        osc.frequency.value=frequency;
-        osc.type="square";
-
-        gain.gain.setValueAtTime(
-            settings.volume*0.08,
-            audioContext.currentTime
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            audioContext.currentTime+0.08
-        );
-
-        osc.start();
-        osc.stop(audioContext.currentTime+0.08);
-
-    }catch(e){}
-
+  osc.start();
+  osc.stop(audio.currentTime+.07);
+ }catch{}
 }
 
 
-/* =========================================================
+/* =====================================================
    WORLD
-========================================================= */
+===================================================== */
 
 const TILE=32;
 const WORLD_W=400;
 const WORLD_H=70;
 
 const BLOCK={
-    air:0,
-    grass:1,
-    dirt:2,
-    stone:3,
-    wood:4,
-    leaves:5,
-    sand:6,
-    water:7
-};
-
-const blockNames={
-    [BLOCK.air]:"air",
-    [BLOCK.grass]:"grass",
-    [BLOCK.dirt]:"dirt",
-    [BLOCK.stone]:"stone",
-    [BLOCK.wood]:"wood",
-    [BLOCK.leaves]:"leaves",
-    [BLOCK.sand]:"sand",
-    [BLOCK.water]:"water"
+ air:0,
+ grass:1,
+ dirt:2,
+ stone:3,
+ wood:4,
+ leaves:5,
+ sand:6,
+ water:7
 };
 
 let world=[];
 
-
 function createWorld(){
 
-    world=[];
+ world=Array.from(
+  {length:WORLD_H},
+  ()=>Array(WORLD_W).fill(BLOCK.air)
+ );
 
-    const heights=[];
+ const height=[];
 
-    for(let x=0;x<WORLD_W;x++){
+ for(let x=0;x<WORLD_W;x++){
 
-        let h=
-            22+
-            Math.floor(
-                Math.sin(x*.045)*3+
-                Math.sin(x*.11)*2+
-                Math.sin(x*.018)*4
-            );
+  height[x]=Math.max(
+   15,
+   Math.min(
+    29,
+    22+
+    Math.floor(
+     Math.sin(x*.045)*3+
+     Math.sin(x*.11)*2+
+     Math.sin(x*.018)*4
+    )
+   )
+  );
+ }
 
-        h=Math.max(14,Math.min(30,h));
+ for(let x=0;x<WORLD_W;x++){
 
-        heights[x]=h;
+  const h=height[x];
 
-    }
+  for(let y=h;y<WORLD_H;y++){
 
+   if(y===h)
+    world[y][x]=BLOCK.grass;
+   else if(y<h+5)
+    world[y][x]=BLOCK.dirt;
+   else
+    world[y][x]=BLOCK.stone;
 
-    for(let y=0;y<WORLD_H;y++){
-
-        world[y]=[];
-
-        for(let x=0;x<WORLD_W;x++){
-
-            const h=heights[x];
-
-            if(y<h)
-                world[y][x]=BLOCK.air;
-            else if(y===h)
-                world[y][x]=BLOCK.grass;
-            else if(y<h+5)
-                world[y][x]=BLOCK.dirt;
-            else
-                world[y][x]=BLOCK.stone;
-
-        }
-
-    }
+  }
+ }
 
 
-    /* DRZEWA */
+ /* drzewa */
 
-    for(
-        let x=8;
-        x<WORLD_W-8;
-        x+=Math.floor(8+Math.random()*9)
-    ){
+ for(let x=8;x<WORLD_W-8;x+=8+Math.floor(Math.random()*8)){
 
-        if(Math.random()<.48)continue;
+  if(Math.random()<.45)continue;
 
-        const ground=heights[x];
+  const ground=height[x];
+  const trunk=4;
 
-        for(let y=ground-1;y>=ground-4;y--){
+  for(let y=1;y<=trunk;y++)
+   if(ground-y>=0)
+    world[ground-y][x]=BLOCK.wood;
 
-            if(y>=0)
-                world[y][x]=BLOCK.wood;
+  const top=ground-trunk-1;
 
-        }
+  for(let yy=-2;yy<=2;yy++){
+   for(let xx=-2;xx<=2;xx++){
 
-        const top=ground-5;
+    if(Math.abs(xx)+Math.abs(yy)<=3){
 
-        for(let yy=-2;yy<=2;yy++){
+     const tx=x+xx,ty=top+yy;
 
-            for(let xx=-2;xx<=2;xx++){
-
-                if(Math.abs(xx)+Math.abs(yy)<=3){
-
-                    const tx=x+xx;
-                    const ty=top+yy;
-
-                    if(
-                        tx>=0&&
-                        tx<WORLD_W&&
-                        ty>=0&&
-                        ty<WORLD_H&&
-                        world[ty][tx]===BLOCK.air
-                    ){
-                        world[ty][tx]=BLOCK.leaves;
-                    }
-
-                }
-
-            }
-
-        }
+     if(tx>=0&&tx<WORLD_W&&ty>=0&&ty<WORLD_H)
+      if(world[ty][tx]===BLOCK.air)
+       world[ty][tx]=BLOCK.leaves;
 
     }
+   }
+  }
+ }
 
 
-    /* WODA */
+ /* małe jeziora */
 
-    for(let i=0;i<12;i++){
+ for(let i=0;i<12;i++){
 
-        const x=20+
-            Math.floor(
-                Math.random()*(WORLD_W-40)
-            );
+  const x=20+Math.floor(Math.random()*(WORLD_W-40));
+  const y=height[x];
 
-        const y=heights[x];
+  const width=2+Math.floor(Math.random()*2);
 
-        if(y<5||y>=WORLD_H-3)continue;
+  for(let xx=-width;xx<=width;xx++){
 
-        const width=2+
-            Math.floor(Math.random()*2);
+   const tx=x+xx;
 
-        for(let xx=-width;xx<=width;xx++){
+   if(tx<1||tx>=WORLD_W-1)continue;
 
-            const tx=x+xx;
+   const h=height[tx];
 
-            if(tx<1||tx>=WORLD_W-1)continue;
+   if(Math.abs(h-y)<=1){
 
-            const surface=heights[tx];
+    world[h][tx]=BLOCK.water;
 
-            if(
-                Math.abs(surface-y)<=1&&
-                world[y][tx]===BLOCK.grass
-            ){
+    if(h+1<WORLD_H)
+     world[h+1][tx]=BLOCK.water;
 
-                world[y][tx]=BLOCK.water;
+    if(world[h][tx-1]===BLOCK.grass)
+     world[h][tx-1]=BLOCK.sand;
 
-                if(y+1<WORLD_H)
-                    world[y+1][tx]=BLOCK.water;
-
-                if(world[y][tx-1]===BLOCK.grass)
-                    world[y][tx-1]=BLOCK.sand;
-
-                if(world[y][tx+1]===BLOCK.grass)
-                    world[y][tx+1]=BLOCK.sand;
-
-            }
-
-        }
-
-    }
+    if(world[h][tx+1]===BLOCK.grass)
+     world[h][tx+1]=BLOCK.sand;
+   }
+  }
+ }
 
 
-    /* BEZPIECZNY START */
+ /* bezpieczny start */
 
-    const sx=12;
+ for(let x=7;x<=18;x++){
+  for(let y=0;y<18;y++){
+   if(y<21)
+    world[y][x]=BLOCK.air;
+  }
+ }
 
-    for(let y=0;y<10;y++){
-
-        for(let x=sx-3;x<=sx+3;x++){
-
-            if(x>=0&&x<WORLD_W)
-                world[y][x]=BLOCK.air;
-
-        }
-
-    }
-
+ for(let x=7;x<=18;x++)
+  world[21][x]=BLOCK.grass;
 }
 
-createWorld();
 
-
-/* =========================================================
+/* =====================================================
    PLAYER
-========================================================= */
+===================================================== */
 
 const player={
-    x:12*TILE,
-    y:0,
-    width:20,
-    height:40,
-    vx:0,
-    vy:0,
-    speed:1.85,
-    jump:8.2,
-    grounded:false,
-    direction:1,
-    walkAnimation:0
+ x:12*TILE,
+ y:0,
+ width:20,
+ height:40,
+ vx:0,
+ vy:0,
+ speed:1.85,
+ jump:8.2,
+ grounded:false,
+ direction:1,
+ anim:0
 };
-
 
 function findSpawn(){
 
-    for(let x=5;x<30;x++){
+ for(let x=8;x<30;x++){
 
-        for(let y=0;y<WORLD_H-2;y++){
+  for(let y=2;y<WORLD_H-2;y++){
 
-            if(
-                world[y][x]!==BLOCK.air&&
-                world[y-1]?.[x]===BLOCK.air&&
-                world[y-2]?.[x]===BLOCK.air
-            ){
+   if(
+    solid(world[y][x])&&
+    !solid(world[y-1][x])&&
+    !solid(world[y-2][x])
+   ){
 
-                player.x=x*TILE+6;
-                player.y=(y-2)*TILE;
-
-                return;
-
-            }
-
-        }
-
-    }
-
+    player.x=x*TILE+6;
+    player.y=(y-2)*TILE;
+    player.vx=0;
+    player.vy=0;
+    player.grounded=false;
+    return;
+   }
+  }
+ }
 }
 
+createWorld();
 findSpawn();
 
 
-/* =========================================================
-   CAMERA
-========================================================= */
-
-const camera={
-    x:0,
-    y:0
-};
-
-
-/* =========================================================
+/* =====================================================
    COLLISION
-========================================================= */
+===================================================== */
 
-function solidBlock(id){
+function solid(id){
+ return id===BLOCK.grass||
+ id===BLOCK.dirt||
+ id===BLOCK.stone||
+ id===BLOCK.wood||
+ id===BLOCK.leaves||
+ id===BLOCK.sand;
+}
 
-    return(
-        id===BLOCK.grass||
-        id===BLOCK.dirt||
-        id===BLOCK.stone||
-        id===BLOCK.wood||
-        id===BLOCK.leaves||
-        id===BLOCK.sand
-    );
+function solidAt(px,py){
 
+ const tx=Math.floor(px/TILE);
+ const ty=Math.floor(py/TILE);
+
+ if(tx<0||tx>=WORLD_W||ty<0)
+  return true;
+
+ if(ty>=WORLD_H)
+  return true;
+
+ return solid(world[ty][tx]);
+}
+
+function collide(x,y){
+
+ const l=x+2;
+ const r=x+player.width-2;
+ const t=y+2;
+ const b=y+player.height-1;
+
+ return solidAt(l,t)||
+ solidAt(r,t)||
+ solidAt(l,b)||
+ solidAt(r,b);
 }
 
 
-function solidAtPixel(px,py){
-
-    const tx=Math.floor(px/TILE);
-    const ty=Math.floor(py/TILE);
-
-    if(
-        tx<0||
-        tx>=WORLD_W||
-        ty<0||
-        ty>=WORLD_H
-    )
-        return true;
-
-    return solidBlock(world[ty][tx]);
-
-}
-
-
-function playerCollision(x,y){
-
-    const left=x+2;
-    const right=x+player.width-2;
-    const top=y+2;
-    const bottom=y+player.height-1;
-
-    return(
-        solidAtPixel(left,top)||
-        solidAtPixel(right,top)||
-        solidAtPixel(left,bottom)||
-        solidAtPixel(right,bottom)
-    );
-
-}
-
-
-/* =========================================================
-   CONTROLS
-========================================================= */
+/* =====================================================
+   INPUT
+===================================================== */
 
 const keys={};
+let jumpLock=false;
 
 addEventListener("keydown",e=>{
 
-    keys[e.code]=true;
+ keys[e.code]=true;
 
-    if(
-        e.code==="Space"||
-        e.code==="ArrowUp"||
-        e.code==="KeyW"
-    )
-        e.preventDefault();
+ if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))
+  e.preventDefault();
 
-    if(e.code==="Digit1")selectBlock("dirt");
-    if(e.code==="Digit2")selectBlock("stone");
-    if(e.code==="Digit3")selectBlock("wood");
-    if(e.code==="Digit4")selectBlock("sand");
-
+ if(e.code==="Digit1")selectBlock("dirt");
+ if(e.code==="Digit2")selectBlock("stone");
+ if(e.code==="Digit3")selectBlock("wood");
+ if(e.code==="Digit4")selectBlock("sand");
 });
-
 
 addEventListener("keyup",e=>{
-    keys[e.code]=false;
+ keys[e.code]=false;
 });
 
-
-function leftPressed(){
-    return keys.KeyA||keys.ArrowLeft;
+function left(){
+ return keys.KeyA||keys.ArrowLeft;
 }
 
-function rightPressed(){
-    return keys.KeyD||keys.ArrowRight;
+function right(){
+ return keys.KeyD||keys.ArrowRight;
 }
 
-function jumpPressed(){
-
-    return(
-        keys.KeyW||
-        keys.ArrowUp||
-        keys.Space
-    );
-
+function jump(){
+ return keys.KeyW||keys.ArrowUp||keys.Space;
 }
 
 
-/* =========================================================
-   MOBILE
-========================================================= */
+/* =====================================================
+   MOBILE INPUT
+===================================================== */
 
-function holdButton(id,key){
+function hold(id,key){
 
-    const el=document.getElementById(id);
+ const el=document.getElementById(id);
 
-    const down=e=>{
-        e.preventDefault();
-        keys[key]=true;
-    };
+ const down=e=>{
+  e.preventDefault();
+  keys[key]=true;
+ };
 
-    const up=e=>{
-        e.preventDefault();
-        keys[key]=false;
-    };
+ const up=e=>{
+  e.preventDefault();
+  keys[key]=false;
+ };
 
-    el.addEventListener(
-        "touchstart",
-        down,
-        {passive:false}
-    );
+ el.addEventListener("touchstart",down,{passive:false});
+ el.addEventListener("touchend",up,{passive:false});
+ el.addEventListener("touchcancel",up,{passive:false});
 
-    el.addEventListener(
-        "touchend",
-        up,
-        {passive:false}
-    );
-
-    el.addEventListener(
-        "touchcancel",
-        up,
-        {passive:false}
-    );
-
-    el.addEventListener("mousedown",down);
-    el.addEventListener("mouseup",up);
-    el.addEventListener("mouseleave",up);
-
+ el.addEventListener("mousedown",down);
+ el.addEventListener("mouseup",up);
+ el.addEventListener("mouseleave",up);
 }
 
-holdButton("leftBtn","ArrowLeft");
-holdButton("rightBtn","ArrowRight");
-holdButton("jumpBtn","Space");
+hold("leftBtn","ArrowLeft");
+hold("rightBtn","ArrowRight");
+hold("jumpBtn","Space");
 
 
-/* =========================================================
-   PLAYER MOVEMENT
-========================================================= */
-
-let jumpWasPressed=false;
-
+/* =====================================================
+   UPDATE PLAYER
+===================================================== */
 
 function updatePlayer(){
 
-    let moving=false;
+ if(left()){
+  player.vx=-player.speed;
+  player.direction=-1;
+ }
+
+ if(right()){
+  player.vx=player.speed;
+  player.direction=1;
+ }
+
+ if(!left()&&!right()){
+  player.vx*=.72;
+  if(Math.abs(player.vx)<.04)
+   player.vx=0;
+ }
+
+ const wantJump=jump();
+
+ if(wantJump&&!jumpLock&&player.grounded){
+
+  player.vy=-player.jump;
+  player.grounded=false;
+  sound("jump");
+ }
+
+ jumpLock=wantJump;
+
+ const moving=Math.abs(player.vx)>.1;
+
+ if(moving&&settings.animations)
+  player.anim+=.16;
+ else
+  player.anim*=.82;
 
 
-    if(leftPressed()){
+ /* X */
 
-        player.vx=-player.speed;
-        player.direction=-1;
-        moving=true;
+ const nx=player.x+player.vx;
 
-    }
-    else if(rightPressed()){
-
-        player.vx=player.speed;
-        player.direction=1;
-        moving=true;
-
-    }
-    else{
-
-        player.vx*=.72;
-
-        if(Math.abs(player.vx)<.05)
-            player.vx=0;
-
-    }
+ if(!collide(nx,player.y))
+  player.x=nx;
+ else
+  player.vx=0;
 
 
-    if(
-        jumpPressed()&&
-        !jumpWasPressed&&
-        player.grounded
-    ){
+ /* gravity */
 
-        player.vy=-player.jump;
-        player.grounded=false;
+ player.vy+=.38;
 
-        playSound("jump");
-
-    }
-
-    jumpWasPressed=jumpPressed();
+ if(player.vy>9)
+  player.vy=9;
 
 
-    if(moving&&settings.animations)
-        player.walkAnimation+=.16;
-    else
-        player.walkAnimation*=.8;
+ /* Y */
+
+ const ny=player.y+player.vy;
+
+ if(!collide(player.x,ny)){
+
+  player.y=ny;
+  player.grounded=false;
+
+ }else{
+
+  if(player.vy>0)
+   player.grounded=true;
+
+  player.vy=0;
+ }
 
 
-    /* X */
+ /* zabezpieczenie */
 
-    let nextX=player.x+player.vx;
+ if(player.y>WORLD_H*TILE+200){
 
-    if(!playerCollision(nextX,player.y))
-        player.x=nextX;
-    else
-        player.vx=0;
+  findSpawn();
+  showMessage("Przywrócono pozycję gracza.");
 
-
-    /* GRAVITY */
-
-    player.vy+=.38;
-
-    if(player.vy>9)
-        player.vy=9;
+ }
 
 
-    let nextY=player.y+player.vy;
+ /* camera */
 
-    if(!playerCollision(player.x,nextY)){
+ camera.targetX=
+ player.x+player.width/2-W/2;
 
-        player.y=nextY;
-        player.grounded=false;
+ camera.targetY=
+ player.y+player.height/2-H/2;
 
-    }
-    else{
+ camera.x+=(camera.targetX-camera.x)*.08;
+ camera.y+=(camera.targetY-camera.y)*.08;
 
-        if(player.vy>0)
-            player.grounded=true;
+ camera.x=Math.max(
+  0,
+  Math.min(WORLD_W*TILE-W,camera.x)
+ );
 
-        player.vy=0;
-
-    }
-
-
-    /* FALL PROTECTION */
-
-    if(player.y>WORLD_H*TILE+300){
-
-        findSpawn();
-        player.vy=0;
-
-    }
-
-
-    /* CAMERA */
-
-    const targetX=
-        player.x+
-        player.width/2-
-        W/2;
-
-    const targetY=
-        player.y+
-        player.height/2-
-        H/2;
-
-    camera.x+=(targetX-camera.x)*.07;
-    camera.y+=(targetY-camera.y)*.07;
-
-
-    camera.x=Math.max(
-        0,
-        Math.min(
-            WORLD_W*TILE-W,
-            camera.x
-        )
-    );
-
-    camera.y=Math.max(
-        0,
-        Math.min(
-            WORLD_H*TILE-H,
-            camera.y
-        )
-    );
-
+ camera.y=Math.max(
+  0,
+  Math.min(WORLD_H*TILE-H,camera.y)
+ );
 }
 
+const camera={
+ x:0,y:0,targetX:0,targetY:0
+};
 
-/* =========================================================
-   BLOCK RENDERING
-========================================================= */
+
+/* =====================================================
+   DRAW WORLD
+===================================================== */
 
 function drawBlock(id,x,y,time){
 
-    const px=x*TILE-camera.x;
-    const py=y*TILE-camera.y;
+ const px=x*TILE-camera.x;
+ const py=y*TILE-camera.y;
 
-    if(
-        px<-TILE||
-        py<-TILE||
-        px>W+TILE||
-        py>H+TILE
-    )
-        return;
+ if(px<-TILE||py<-TILE||px>W+TILE||py>H+TILE)
+  return;
 
+ if(id===BLOCK.grass){
 
-    if(id===BLOCK.grass){
+  ctx.fillStyle="#79512d";
+  ctx.fillRect(px,py,TILE,TILE);
 
-        ctx.fillStyle="#80552f";
-        ctx.fillRect(px,py,TILE,TILE);
+  ctx.fillStyle="#4cae43";
+  ctx.fillRect(px,py,TILE,7);
 
-        ctx.fillStyle="#4fae45";
-        ctx.fillRect(px,py,TILE,7);
+  ctx.fillStyle="#398c36";
 
-        ctx.fillStyle="#3e9139";
+  for(let i=0;i<5;i++)
+   ctx.fillRect(
+    px+(x*13+i*7)%28,
+    py+4+(i%2),
+    2,4
+   );
 
-        for(let i=0;i<5;i++){
+ }
 
-            const gx=(x*17+i*9)%TILE;
+ else if(id===BLOCK.dirt){
 
-            ctx.fillRect(
-                px+gx,
-                py+5-(i%2)*2,
-                2,
-                4
-            );
+  ctx.fillStyle="#79512d";
+  ctx.fillRect(px,py,TILE,TILE);
 
-        }
+  ctx.fillStyle="#674221";
 
-    }
+  for(let i=0;i<4;i++)
+   ctx.fillRect(
+    px+(x*11+i*9)%27,
+    py+(y*13+i*7)%27,
+    3,3
+   );
 
-    else if(id===BLOCK.dirt){
+ }
 
-        ctx.fillStyle="#80552f";
-        ctx.fillRect(px,py,TILE,TILE);
+ else if(id===BLOCK.stone){
 
-        ctx.fillStyle="#704728";
+  ctx.fillStyle="#72777c";
+  ctx.fillRect(px,py,TILE,TILE);
 
-        for(let i=0;i<4;i++){
+  ctx.fillStyle="#5d6267";
 
-            ctx.fillRect(
-                px+((x*13+i*7)%25),
-                py+((y*17+i*9)%25),
-                3,
-                3
-            );
+  for(let i=0;i<5;i++)
+   ctx.fillRect(
+    px+(x*9+i*7)%28,
+    py+(y*7+i*9)%27,
+    4,3
+   );
 
-        }
+ }
 
-    }
+ else if(id===BLOCK.wood){
 
-    else if(id===BLOCK.stone){
+  ctx.fillStyle="#70431f";
+  ctx.fillRect(px,py,TILE,TILE);
 
-        ctx.fillStyle="#73777c";
-        ctx.fillRect(px,py,TILE,TILE);
+  ctx.fillStyle="#9b602d";
+  ctx.fillRect(px+7,py,4,TILE);
+  ctx.fillRect(px+20,py,3,TILE);
 
-        ctx.fillStyle="#5f6368";
+ }
 
-        for(let i=0;i<5;i++){
+ else if(id===BLOCK.leaves){
 
-            ctx.fillRect(
-                px+((x*11+i*8)%28),
-                py+((y*13+i*5)%27),
-                4,
-                3
-            );
+  ctx.fillStyle="#2f8739";
+  ctx.fillRect(px,py,TILE,TILE);
 
-        }
+  ctx.fillStyle="#42a847";
 
-    }
+  for(let i=0;i<4;i++)
+   ctx.fillRect(
+    px+(x*7+i*8)%25,
+    py+(y*9+i*5)%24,
+    5,5
+   );
 
-    else if(id===BLOCK.wood){
+ }
 
-        ctx.fillStyle="#70431f";
-        ctx.fillRect(px,py,TILE,TILE);
+ else if(id===BLOCK.sand){
 
-        ctx.fillStyle="#9b602d";
+  ctx.fillStyle="#d7bc70";
+  ctx.fillRect(px,py,TILE,TILE);
 
-        ctx.fillRect(
-            px+7,
-            py,
-            4,
-            TILE
-        );
+  ctx.fillStyle="#c5a75b";
 
-        ctx.fillRect(
-            px+20,
-            py,
-            3,
-            TILE
-        );
+  for(let i=0;i<4;i++)
+   ctx.fillRect(
+    px+(x*5+i*9)%27,
+    py+(y*11+i*4)%26,
+    2,2
+   );
 
-    }
+ }
 
-    else if(id===BLOCK.leaves){
+ else if(id===BLOCK.water){
 
-        ctx.fillStyle="#2e8738";
-        ctx.fillRect(px,py,TILE,TILE);
+  ctx.fillStyle="#318ccc";
+  ctx.fillRect(px,py,TILE,TILE);
 
-        ctx.fillStyle="#3ca844";
+  if(settings.water){
 
-        for(let i=0;i<4;i++){
+   const wave=Math.sin(time*.003+x)*2;
 
-            ctx.fillRect(
-                px+((x*9+i*5)%24),
-                py+((y*7+i*6)%23),
-                5,
-                5
-            );
+   ctx.fillStyle="#69bae9";
 
-        }
+   ctx.fillRect(
+    px+4,py+7+wave,11,2
+   );
 
-    }
-
-    else if(id===BLOCK.sand){
-
-        ctx.fillStyle="#d7bd71";
-        ctx.fillRect(px,py,TILE,TILE);
-
-        ctx.fillStyle="#c8aa5c";
-
-        for(let i=0;i<4;i++){
-
-            ctx.fillRect(
-                px+((x*5+i*9)%27),
-                py+((y*11+i*3)%25),
-                2,
-                2
-            );
-
-        }
-
-    }
-
-    else if(id===BLOCK.water){
-
-        ctx.fillStyle="#328dcc";
-        ctx.fillRect(px,py,TILE,TILE);
-
-        if(settings.water){
-
-            const wave=
-                Math.sin(time*.003+x)*3;
-
-            ctx.fillStyle="#65b7e9";
-
-            ctx.fillRect(
-                px+4,
-                py+7+wave,
-                10,
-                2
-            );
-
-            ctx.fillRect(
-                px+19,
-                py+15-wave,
-                8,
-                2
-            );
-
-        }
-
-    }
-
+   ctx.fillRect(
+    px+20,py+15-wave,7,2
+   );
+  }
+ }
 }
 
 
-/* =========================================================
-   NOWA ANIMOWANA POSTAĆ
-========================================================= */
+/* =====================================================
+   PLAYER ANIMATION
+===================================================== */
 
 function drawPlayer(time){
 
-    const moving=
-        Math.abs(player.vx)>.1&&
-        settings.animations;
+ let bob=0;
+ let arms=0;
+ let legs=0;
+ let tilt=0;
 
-    const jumping=
-        !player.grounded&&
-        player.vy<-.4;
+ const moving=
+  Math.abs(player.vx)>.1&&settings.animations;
 
-    const falling=
-        !player.grounded&&
-        player.vy>.4;
+ if(player.grounded&&!moving)
+  bob=Math.sin(time*.008)*.5;
 
+ if(moving){
 
-    let bob=0;
-    let bodyTilt=0;
-    let armSwing=0;
-    let legSwing=0;
-    let bodyStretch=1;
+  const w=player.anim;
 
+  bob=Math.abs(Math.sin(w))*1.2;
+  arms=Math.sin(w)*3;
+  legs=Math.sin(w)*4;
+  tilt=Math.sin(w)*.025;
 
-    /*
-        STANIE
-    */
+ }
 
-    if(!moving&&player.grounded){
+ if(!player.grounded&&player.vy<0){
 
-        bob=
-            Math.sin(time*.01*.8)*.5;
+  arms=-4;
+  legs=3;
+  tilt=.025*player.direction;
 
-        bodyStretch=
-            1+
-            Math.sin(time*.01*.8)*.008;
+ }
 
-    }
+ if(!player.grounded&&player.vy>0){
 
+  arms=3;
+  legs=-2;
+ }
 
-    /*
-        CHODZENIE
-    */
+ const cx=Math.round(
+  player.x-camera.x+player.width/2
+ );
 
-    if(moving){
+ const by=Math.round(
+  player.y-camera.y+bob
+ );
 
-        const walk=time*.22;
+ const blink=
+  settings.animations&&
+  Math.floor(time/100)%83===0;
 
-        bob=
-            Math.abs(Math.sin(walk))*1.25;
+ ctx.save();
 
-        armSwing=
-            Math.sin(walk)*3.2;
+ ctx.translate(cx,by);
+ ctx.rotate(tilt*player.direction);
+ ctx.scale(player.direction,1);
 
-        legSwing=
-            Math.sin(walk)*3.8;
+ const s=2;
 
-        bodyTilt=
-            Math.sin(walk)*.025;
+ /* nogi */
 
-        bodyStretch=
-            1+
-            Math.abs(Math.sin(walk))*.018;
+ ctx.fillStyle="#4d3b78";
 
-    }
+ ctx.fillRect(
+  Math.round((1-legs*.08)*s),
+  12*s,
+  6*s,
+  7*s
+ );
 
+ ctx.fillRect(
+  Math.round((4+legs*.08)*s),
+  12*s,
+  6*s,
+  7*s
+ );
 
-    /*
-        SKOK
-    */
+ ctx.fillStyle="#25252b";
 
-    if(jumping){
+ ctx.fillRect(
+  Math.round((0.5-legs*.12)*s),
+  18*s,
+  7*s,2*s
+ );
 
-        bob=-1.5;
+ ctx.fillRect(
+  Math.round((3.5+legs*.12)*s),
+  18*s,
+  7*s,2*s
+ );
 
-        bodyTilt=
-            player.direction*.035;
 
-        armSwing=-4;
-        legSwing=3;
-        bodyStretch=.96;
+ /* ciało */
 
-    }
+ ctx.fillStyle="#315aa0";
+ ctx.fillRect(1*s,5*s,8*s,8*s);
 
+ ctx.fillStyle="#3f73c9";
+ ctx.fillRect(2*s,5*s,6*s,7*s);
 
-    /*
-        SPADANIE
-    */
 
-    if(falling){
+ /* ręce */
 
-        bob=1;
+ ctx.fillStyle="#f0bd91";
 
-        bodyTilt=
-            player.direction*.02;
+ ctx.fillRect(
+  Math.round((-1-arms*.2)*s),
+  Math.round((6+arms*.12)*s),
+  2*s,7*s
+ );
 
-        armSwing=3;
-        legSwing=-2;
-        bodyStretch=1.02;
+ ctx.fillRect(
+  Math.round((9+arms*.2)*s),
+  Math.round((6-arms*.12)*s),
+  2*s,7*s
+ );
 
-    }
 
+ /* szyja */
 
-    /*
-        MRUGANIE
-    */
+ ctx.fillRect(4*s,3*s,2*s,3*s);
 
-    const blink=
-        settings.animations&&
-        Math.floor(time/100)%80===0;
 
+ /* głowa */
 
-    const centerX=
-        player.x-
-        camera.x+
-        player.width/2;
+ ctx.fillStyle="#f0bd91";
+ ctx.fillRect(2*s,1*s,6*s,5*s);
 
-    const baseY=
-        player.y-
-        camera.y+
-        bob;
+ /* uszy */
 
+ ctx.fillRect(1*s,3*s,1*s,2*s);
+ ctx.fillRect(8*s,3*s,1*s,2*s);
 
-    ctx.save();
 
-    /*
-        Przechylenie całej postaci.
-    */
+ /* włosy */
 
-    ctx.translate(
-        Math.round(centerX),
-        Math.round(baseY)
-    );
+ ctx.fillStyle="#542f20";
 
-    ctx.rotate(
-        bodyTilt*
-        player.direction
-    );
+ ctx.fillRect(2*s,0,6*s,2*s);
+ ctx.fillRect(1*s,1*s,2*s,2*s);
+ ctx.fillRect(7*s,1*s,2*s,2*s);
 
-    ctx.scale(
-        player.direction,
-        1
-    );
 
-    ctx.scale(
-        bodyStretch,
-        1
-    );
+ /* oczy */
 
-    ctx.translate(
-        -10*2,
-        0
-    );
+ ctx.fillStyle="#111";
 
+ if(blink){
 
-    const s=2;
+  ctx.fillRect(3*s,3*s,2*s,1*s);
+  ctx.fillRect(6*s,3*s,2*s,1*s);
 
+ }else{
 
-    /*
-        NOGI
-    */
+  ctx.fillRect(3*s,3*s,1*s,1*s);
+  ctx.fillRect(6*s,3*s,1*s,1*s);
 
-    ctx.fillStyle="#382d5d";
+ }
 
-    ctx.fillRect(
-        Math.round(2*s-legSwing*.15),
-        Math.round((12+legSwing*.35)*s),
-        6*s,
-        7*s
-    );
+ ctx.restore();
 
-    ctx.fillStyle="#202026";
 
-    ctx.fillRect(
-        Math.round(1*s-legSwing*.28),
-        18*s,
-        7*s,
-        2*s
-    );
+ /* cień */
 
+ if(player.grounded){
 
-    ctx.fillStyle="#4d3b78";
+  ctx.fillStyle="rgba(0,0,0,.18)";
 
-    ctx.fillRect(
-        Math.round(4*s+legSwing*.15),
-        Math.round((12-legSwing*.35)*s),
-        6*s,
-        7*s
-    );
+  ctx.beginPath();
 
-    ctx.fillStyle="#25252b";
+  ctx.ellipse(
+   cx,
+   player.y-camera.y+player.height+2,
+   moving?10:9,
+   2,
+   0,0,Math.PI*2
+  );
 
-    ctx.fillRect(
-        Math.round(3*s+legSwing*.28),
-        18*s,
-        7*s,
-        2*s
-    );
-
-
-    /*
-        TUŁÓW
-    */
-
-    ctx.fillStyle="#315aa0";
-
-    ctx.fillRect(
-        1*s,
-        5*s,
-        8*s,
-        8*s
-    );
-
-    ctx.fillStyle="#3f73c9";
-
-    ctx.fillRect(
-        2*s,
-        5*s,
-        6*s,
-        7*s
-    );
-
-    ctx.fillStyle="#5790df";
-
-    ctx.fillRect(
-        3*s,
-        6*s,
-        2*s,
-        2*s
-    );
-
-
-    /*
-        TYLNA RĘKA
-    */
-
-    ctx.fillStyle="#d49c78";
-
-    ctx.fillRect(
-        Math.round(-1*s-armSwing*.25),
-        Math.round(6*s+armSwing*.15),
-        2*s,
-        6*s
-    );
-
-
-    ctx.fillStyle="#f0bd91";
-
-    ctx.fillRect(
-        Math.round(-1*s-armSwing*.25),
-        Math.round(12*s+armSwing*.15),
-        2*s,
-        2*s
-    );
-
-
-    /*
-        PRZEDNIA RĘKA
-    */
-
-    ctx.fillStyle="#f0bd91";
-
-    ctx.fillRect(
-        Math.round(9*s+armSwing*.25),
-        Math.round(6*s-armSwing*.15),
-        2*s,
-        6*s
-    );
-
-    ctx.fillRect(
-        Math.round(9*s+armSwing*.25),
-        Math.round(12*s-armSwing*.15),
-        2*s,
-        2*s
-    );
-
-
-    /*
-        SZYJA
-    */
-
-    ctx.fillRect(
-        4*s,
-        3*s,
-        2*s,
-        3*s
-    );
-
-
-    /*
-        TWARZ
-    */
-
-    ctx.fillStyle="#f0bd91";
-
-    ctx.fillRect(
-        2*s,
-        1*s,
-        6*s,
-        5*s
-    );
-
-
-    /*
-        USZY
-    */
-
-    ctx.fillRect(
-        1*s,
-        3*s,
-        1*s,
-        2*s
-    );
-
-    ctx.fillRect(
-        8*s,
-        3*s,
-        1*s,
-        2*s
-    );
-
-
-    /*
-        WŁOSY
-    */
-
-    ctx.fillStyle="#542f20";
-
-    ctx.fillRect(
-        2*s,
-        0,
-        6*s,
-        2*s
-    );
-
-    ctx.fillRect(
-        1*s,
-        1*s,
-        2*s,
-        2*s
-    );
-
-    ctx.fillRect(
-        7*s,
-        1*s,
-        2*s,
-        2*s
-    );
-
-    ctx.fillRect(
-        3*s,
-        1*s,
-        2*s,
-        2*s
-    );
-
-    ctx.fillRect(
-        6*s,
-        1*s,
-        1*s,
-        2*s
-    );
-
-
-    /*
-        OCZY
-    */
-
-    ctx.fillStyle="#111";
-
-    if(blink){
-
-        ctx.fillRect(
-            3*s,
-            3*s,
-            2*s,
-            1*s
-        );
-
-        ctx.fillRect(
-            6*s,
-            3*s,
-            2*s,
-            1*s
-        );
-
-    }
-    else{
-
-        ctx.fillRect(
-            3*s,
-            3*s,
-            1*s,
-            1*s
-        );
-
-        ctx.fillRect(
-            6*s,
-            3*s,
-            1*s,
-            1*s
-        );
-
-    }
-
-
-    /*
-        NOS
-    */
-
-    ctx.fillStyle="#d89f7a";
-
-    ctx.fillRect(
-        5*s,
-        4*s,
-        1*s,
-        1*s
-    );
-
-
-    ctx.restore();
-
-
-    /*
-        CIEŃ
-    */
-
-    if(player.grounded){
-
-        ctx.fillStyle="rgba(0,0,0,.16)";
-
-        ctx.beginPath();
-
-        ctx.ellipse(
-            centerX,
-            player.y-camera.y+
-            player.height+2,
-            moving
-                ? 9+Math.abs(Math.sin(time*.22))*2
-                : 9,
-            2,
-            0,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-    }
-
+  ctx.fill();
+ }
 }
 
 
-/* =========================================================
+/* =====================================================
    BACKGROUND
-========================================================= */
+===================================================== */
 
 function drawBackground(){
 
-    const gradient=
-        ctx.createLinearGradient(
-            0,0,0,H
-        );
+ const g=ctx.createLinearGradient(0,0,0,H);
 
-    gradient.addColorStop(
-        0,
-        "#63c6f2"
-    );
+ g.addColorStop(0,"#62c5f0");
+ g.addColorStop(1,"#d9f3ff");
 
-    gradient.addColorStop(
-        1,
-        "#d8f2ff"
-    );
+ ctx.fillStyle=g;
+ ctx.fillRect(0,0,W,H);
 
-    ctx.fillStyle=gradient;
-    ctx.fillRect(0,0,W,H);
+ ctx.fillStyle="rgba(255,255,255,.7)";
 
+ for(let i=0;i<8;i++){
 
-    ctx.fillStyle="rgba(255,255,255,.75)";
+  const x=((i*570-camera.x*.18)%(W+250))-120;
+  const y=70+(i%4)*60;
 
-    for(let i=0;i<8;i++){
-
-        const x=
-            ((i*550-camera.x*.2)%
-            (W+250))-120;
-
-        const y=
-            70+(i%4)*55;
-
-        ctx.fillRect(
-            x,
-            y,
-            80,
-            20
-        );
-
-        ctx.fillRect(
-            x+20,
-            y-10,
-            50,
-            30
-        );
-
-    }
-
+  ctx.fillRect(x,y,80,20);
+  ctx.fillRect(x+20,y-10,50,30);
+ }
 }
 
 
-/* =========================================================
+/* =====================================================
    RENDER
-========================================================= */
-
-let lastFrame=0;
+===================================================== */
 
 function render(time){
 
-    drawBackground();
+ drawBackground();
 
+ const sx=Math.max(0,Math.floor(camera.x/TILE)-2);
+ const ex=Math.min(WORLD_W,Math.ceil((camera.x+W)/TILE)+2);
+ const sy=Math.max(0,Math.floor(camera.y/TILE)-2);
+ const ey=Math.min(WORLD_H,Math.ceil((camera.y+H)/TILE)+2);
 
-    const startX=Math.max(
-        0,
-        Math.floor(camera.x/TILE)-2
-    );
+ for(let y=sy;y<ey;y++){
+  for(let x=sx;x<ex;x++){
 
-    const endX=Math.min(
-        WORLD_W,
-        Math.ceil((camera.x+W)/TILE)+2
-    );
+   const id=world[y][x];
 
-    const startY=Math.max(
-        0,
-        Math.floor(camera.y/TILE)-2
-    );
+   if(id!==BLOCK.air)
+    drawBlock(id,x,y,time);
+  }
+ }
 
-    const endY=Math.min(
-        WORLD_H,
-        Math.ceil((camera.y+H)/TILE)+2
-    );
-
-
-    for(let y=startY;y<endY;y++){
-
-        for(let x=startX;x<endX;x++){
-
-            const id=world[y][x];
-
-            if(id!==BLOCK.air)
-                drawBlock(id,x,y,time);
-
-        }
-
-    }
-
-
-    drawPlayer(time);
-
+ drawPlayer(time);
 }
 
 
-/* =========================================================
+/* =====================================================
    GAME LOOP
-========================================================= */
+===================================================== */
 
-function gameLoop(time){
+let paused=false;
+let lastTime=0;
 
-    const interval=
-        1000/settings.fps;
+function loop(time){
 
-    if(time-lastFrame>=interval){
+ if(!paused){
 
-        lastFrame=time;
+  const delay=1000/settings.fps;
 
-        updatePlayer();
-        render(time);
+  if(time-lastTime>=delay){
 
-    }
+   lastTime=time;
 
-    requestAnimationFrame(gameLoop);
+   updatePlayer();
+   render(time);
+  }
+ }
 
+ requestAnimationFrame(loop);
 }
 
-requestAnimationFrame(gameLoop);
 
-
-/* =========================================================
+/* =====================================================
    INVENTORY
-========================================================= */
+===================================================== */
 
 let inventory={
-    dirt:20,
-    stone:10,
-    wood:10,
-    sand:10
+ dirt:20,
+ stone:10,
+ wood:10,
+ sand:10
 };
 
 let selectedBlock="dirt";
 
-
 function updateInventory(){
 
-    document.getElementById("count-dirt")
-        .textContent=inventory.dirt;
+ for(const b of ["dirt","stone","wood","sand"]){
 
-    document.getElementById("count-stone")
-        .textContent=inventory.stone;
-
-    document.getElementById("count-wood")
-        .textContent=inventory.wood;
-
-    document.getElementById("count-sand")
-        .textContent=inventory.sand;
-
+  document.getElementById("count-"+b).textContent=
+   inventory[b];
+ }
 }
-
 
 function selectBlock(block){
 
-    selectedBlock=block;
+ if(!inventory.hasOwnProperty(block))
+  return;
 
-    document.querySelectorAll(".slot")
-        .forEach(slot=>{
+ selectedBlock=block;
 
-            slot.classList.toggle(
-                "selected",
-                slot.dataset.block===block
-            );
+ document.querySelectorAll(".slot").forEach(s=>{
+  s.classList.toggle(
+   "selected",
+   s.dataset.block===block
+  );
+ });
 
-        });
-
-    playSound("click");
-
+ sound("click");
 }
 
-
-document.querySelectorAll(".slot")
-    .forEach(slot=>{
-
-        slot.onclick=()=>{
-            selectBlock(slot.dataset.block);
-        };
-
-    });
-
-
-/* =========================================================
-   MINING / PLACING
-========================================================= */
-
-function screenToWorld(clientX,clientY){
-
-    return{
-        x:Math.floor(
-            (clientX+camera.x)/TILE
-        ),
-        y:Math.floor(
-            (clientY+camera.y)/TILE
-        )
-    };
-
-}
-
-
-function canReach(tx,ty){
-
-    const px=
-        player.x+
-        player.width/2;
-
-    const py=
-        player.y+
-        player.height/2;
-
-    const bx=
-        tx*TILE+
-        TILE/2;
-
-    const by=
-        ty*TILE+
-        TILE/2;
-
-    const dx=bx-px;
-    const dy=by-py;
-
-    return Math.sqrt(dx*dx+dy*dy)<=TILE*5;
-
-}
-
-
-function mineAt(clientX,clientY){
-
-    const pos=
-        screenToWorld(
-            clientX,
-            clientY
-        );
-
-    const x=pos.x;
-    const y=pos.y;
-
-    if(
-        x<0||
-        x>=WORLD_W||
-        y<0||
-        y>=WORLD_H
-    )
-        return;
-
-    if(!canReach(x,y)){
-
-        showMessage("Za daleko!");
-
-        return;
-
-    }
-
-
-    const id=world[y][x];
-
-    if(
-        id===BLOCK.air||
-        id===BLOCK.water
-    )
-        return;
-
-
-    const name=blockNames[id];
-
-
-    if(
-        name==="grass"||
-        name==="dirt"
-    )
-        inventory.dirt++;
-
-    else if(name==="stone")
-        inventory.stone++;
-
-    else if(name==="wood")
-        inventory.wood++;
-
-    else if(name==="sand")
-        inventory.sand++;
-
-
-    world[y][x]=BLOCK.air;
-
-    updateInventory();
-
-    playSound("mine");
-
-    saveGame();
-
-}
-
-
-function placeAt(clientX,clientY){
-
-    const pos=
-        screenToWorld(
-            clientX,
-            clientY
-        );
-
-    const x=pos.x;
-    const y=pos.y;
-
-
-    if(
-        x<0||
-        x>=WORLD_W||
-        y<0||
-        y>=WORLD_H
-    )
-        return;
-
-
-    if(!canReach(x,y)){
-
-        showMessage("Za daleko!");
-
-        return;
-
-    }
-
-
-    if(world[y][x]!==BLOCK.air)
-        return;
-
-
-    if(inventory[selectedBlock]<=0){
-
-        showMessage("Nie masz tego bloku!");
-
-        return;
-
-    }
-
-
-    const id=BLOCK[selectedBlock];
-
-    const testX=x*TILE;
-    const testY=y*TILE;
-
-
-    if(
-        testX+TILE>player.x&&
-        testX<player.x+player.width&&
-        testY+TILE>player.y&&
-        testY<player.y+player.height
-    )
-        return;
-
-
-    world[y][x]=id;
-
-    inventory[selectedBlock]--;
-
-    updateInventory();
-
-    playSound("place");
-
-    saveGame();
-
-}
-
-
-/* =========================================================
-   MOUSE
-========================================================= */
-
-canvas.addEventListener("mousedown",e=>{
-
-    if(settingsOverlay.style.display==="flex")
-        return;
-
-    if(e.button===0)
-        mineAt(e.clientX,e.clientY);
-
-    if(e.button===2){
-
-        e.preventDefault();
-
-        placeAt(
-            e.clientX,
-            e.clientY
-        );
-
-    }
-
+document.querySelectorAll(".slot").forEach(s=>{
+ s.onclick=()=>selectBlock(s.dataset.block);
 });
 
 
-canvas.addEventListener(
-    "contextmenu",
-    e=>e.preventDefault()
-);
+/* =====================================================
+   MINE / PLACE
+===================================================== */
+
+function worldPosition(clientX,clientY){
+
+ return{
+  x:Math.floor((clientX+camera.x)/TILE),
+  y:Math.floor((clientY+camera.y)/TILE)
+ };
+}
+
+function reachable(x,y){
+
+ const px=player.x+player.width/2;
+ const py=player.y+player.height/2;
+
+ const bx=x*TILE+TILE/2;
+ const by=y*TILE+TILE/2;
+
+ return Math.hypot(bx-px,by-py)<=TILE*5;
+}
+
+function mine(clientX,clientY){
+
+ const p=worldPosition(clientX,clientY);
+ const x=p.x,y=p.y;
+
+ if(x<0||x>=WORLD_W||y<0||y>=WORLD_H)return;
+
+ if(!reachable(x,y)){
+  showMessage("Za daleko!");
+  return;
+ }
+
+ const id=world[y][x];
+
+ if(id===BLOCK.air||id===BLOCK.water)
+  return;
+
+ if(id===BLOCK.grass||id===BLOCK.dirt)
+  inventory.dirt++;
+ else if(id===BLOCK.stone)
+  inventory.stone++;
+ else if(id===BLOCK.wood)
+  inventory.wood++;
+ else if(id===BLOCK.sand)
+  inventory.sand++;
+
+ world[y][x]=BLOCK.air;
+
+ updateInventory();
+ sound("mine");
+}
+
+function place(clientX,clientY){
+
+ const p=worldPosition(clientX,clientY);
+ const x=p.x,y=p.y;
+
+ if(x<0||x>=WORLD_W||y<0||y>=WORLD_H)return;
+
+ if(!reachable(x,y)){
+  showMessage("Za daleko!");
+  return;
+ }
+
+ if(world[y][x]!==BLOCK.air)return;
+
+ if(inventory[selectedBlock]<=0){
+  showMessage("Brak bloków!");
+  return;
+ }
+
+ const bx=x*TILE;
+ const by=y*TILE;
+
+ if(
+  bx+TILE>player.x&&
+  bx<player.x+player.width&&
+  by+TILE>player.y&&
+  by<player.y+player.height
+ )
+  return;
+
+ world[y][x]=BLOCK[selectedBlock];
+ inventory[selectedBlock]--;
+
+ updateInventory();
+ sound("place");
+}
 
 
-/* =========================================================
-   TOUCH
-========================================================= */
+/* =====================================================
+   MOUSE / TOUCH WORLD
+===================================================== */
 
-let touchStart=null;
+canvas.addEventListener("mousedown",e=>{
+
+ if(paused)return;
+
+ if(e.button===0)
+  mine(e.clientX,e.clientY);
+
+ if(e.button===2){
+  e.preventDefault();
+  place(e.clientX,e.clientY);
+ }
+});
+
+canvas.addEventListener("contextmenu",e=>e.preventDefault());
+
+
+let touchData=null;
 let touchTimer=null;
 
+canvas.addEventListener("touchstart",e=>{
 
-canvas.addEventListener(
-    "touchstart",
-    e=>{
+ if(paused||!e.touches[0])return;
 
-        if(!e.touches[0])
-            return;
+ const t=e.touches[0];
 
-        const t=e.touches[0];
+ touchData={
+  x:t.clientX,
+  y:t.clientY,
+  time:Date.now()
+ };
 
-        touchStart={
-            x:t.clientX,
-            y:t.clientY,
-            time:Date.now()
-        };
+ touchTimer=setTimeout(()=>{
 
+  if(touchData)
+   place(touchData.x,touchData.y);
 
-        touchTimer=setTimeout(()=>{
+ },400);
 
-            if(touchStart){
+},{passive:false});
 
-                placeAt(
-                    touchStart.x,
-                    touchStart.y
-                );
+canvas.addEventListener("touchend",e=>{
 
-            }
+ e.preventDefault();
 
-        },350);
+ if(!touchData)return;
 
-    },
-    {passive:false}
-);
+ clearTimeout(touchTimer);
 
+ if(Date.now()-touchData.time<400)
+  mine(touchData.x,touchData.y);
 
-canvas.addEventListener(
-    "touchend",
-    e=>{
+ touchData=null;
 
-        e.preventDefault();
-
-        if(!touchStart)
-            return;
-
-        clearTimeout(touchTimer);
-
-        const x=touchStart.x;
-        const y=touchStart.y;
-
-        const duration=
-            Date.now()-
-            touchStart.time;
+},{passive:false});
 
 
-        if(duration<350)
-            mineAt(x,y);
+/* =====================================================
+   SAVE SYSTEM
+===================================================== */
 
-        touchStart=null;
-
-    },
-    {passive:false}
-);
-
-
-/* =========================================================
-   SAVE / LOAD
-========================================================= */
-
-const SAVE_KEY=
-    "PIXEL_WORLD_STABLE_V6";
-
+const SAVE_KEY="PIXEL_WORLD_STABLE_V7";
 
 function saveGame(){
 
-    try{
+ try{
 
-        const data={
-            world:world,
+  localStorage.setItem(
+   SAVE_KEY,
+   JSON.stringify({
+    version:7,
+    world:world,
+    player:{
+     x:player.x,
+     y:player.y
+    },
+    inventory:inventory,
+    selectedBlock:selectedBlock
+   })
+  );
 
-            player:{
-                x:player.x,
-                y:player.y
-            },
-
-            inventory:inventory,
-
-            selectedBlock:selectedBlock
-
-        };
-
-        localStorage.setItem(
-            SAVE_KEY,
-            JSON.stringify(data)
-        );
-
-    }catch(e){}
-
+ }catch(e){
+  showMessage("Nie udało się zapisać gry.");
+ }
 }
-
 
 function loadGame(){
 
-    try{
+ try{
 
-        const raw=
-            localStorage.getItem(
-                SAVE_KEY
-            );
+  const raw=localStorage.getItem(SAVE_KEY);
 
-        if(!raw)
-            return false;
+  if(!raw)return false;
 
+  const data=JSON.parse(raw);
 
-        const data=
-            JSON.parse(raw);
+  if(
+   !data||
+   !Array.isArray(data.world)||
+   data.world.length!==WORLD_H
+  )
+   return false;
 
+  for(let y=0;y<WORLD_H;y++){
 
-        if(
-            !Array.isArray(data.world)||
-            data.world.length!==WORLD_H
-        )
-            return false;
+   if(
+    !Array.isArray(data.world[y])||
+    data.world[y].length!==WORLD_W
+   )
+    return false;
+  }
 
+  world=data.world;
 
-        world=data.world;
+  if(data.player){
 
+   if(Number.isFinite(data.player.x))
+    player.x=data.player.x;
 
-        if(data.player){
+   if(Number.isFinite(data.player.y))
+    player.y=data.player.y;
+  }
 
-            player.x=
-                Number(data.player.x)||
-                player.x;
+  if(data.inventory){
 
-            player.y=
-                Number(data.player.y)||
-                player.y;
+   for(const b of ["dirt","stone","wood","sand"]){
 
-        }
+    const n=Number(data.inventory[b]);
 
+    if(Number.isFinite(n))
+     inventory[b]=Math.max(0,Math.floor(n));
+   }
+  }
 
-        if(data.inventory){
+  if(
+   typeof data.selectedBlock==="string"&&
+   inventory.hasOwnProperty(data.selectedBlock)
+  )
+   selectedBlock=data.selectedBlock;
 
-            inventory={
-                ...inventory,
-                ...data.inventory
-            };
+  /* naprawienie uszkodzonej pozycji */
 
-        }
+  if(
+   !Number.isFinite(player.x)||
+   !Number.isFinite(player.y)||
+   player.y<0||
+   player.y>WORLD_H*TILE
+  )
+   findSpawn();
 
+  return true;
 
-        if(data.selectedBlock)
-            selectedBlock=data.selectedBlock;
-
-
-        updateInventory();
-        selectBlock(selectedBlock);
-
-        return true;
-
-    }catch(e){
-
-        return false;
-
-    }
-
+ }catch{
+  return false;
 }
 
 
-if(!loadGame()){
-
-    createWorld();
-    findSpawn();
-
-}
-
-
-/* =========================================================
+/* =====================================================
    RESET
-========================================================= */
+===================================================== */
 
 function resetWorld(){
 
-    const ok=
-        confirm(
-            "Czy na pewno chcesz stworzyć nowy świat?"
-        );
+ if(!confirm("Czy na pewno stworzyć nowy świat?"))
+  return;
 
-    if(!ok)
-        return;
+ createWorld();
+ findSpawn();
 
+ inventory={
+  dirt:20,
+  stone:10,
+  wood:10,
+  sand:10
+ };
 
-    createWorld();
-    findSpawn();
+ selectedBlock="dirt";
 
+ updateInventory();
+ selectBlock("dirt");
+ saveGame();
 
-    inventory={
-        dirt:20,
-        stone:10,
-        wood:10,
-        sand:10
-    };
-
-
-    selectedBlock="dirt";
-
-
-    updateInventory();
-    selectBlock("dirt");
-
-    saveGame();
-
-    showMessage(
-        "Nowy świat został utworzony!"
-    );
-
+ showMessage("Utworzono nowy świat.");
 }
 
+document.getElementById("resetBtn").onclick=resetWorld;
 
-document.getElementById("resetBtn")
-    .onclick=resetWorld;
+document.getElementById("saveBtn").onclick=()=>{
+ saveGame();
+ showMessage("Gra została zapisana!");
+};
 
+document.getElementById("saveFromSettings").onclick=()=>{
+ saveGame();
+ showMessage("Gra została zapisana!");
+};
 
-document.getElementById("saveBtn")
-    .onclick=()=>{
+document.getElementById("deleteSaveBtn").onclick=()=>{
 
-        saveGame();
+ if(!confirm("Usunąć zapis gry?"))
+  return;
 
-        showMessage(
-            "Gra została zapisana!"
-        );
+ localStorage.removeItem(SAVE_KEY);
 
-    };
+ createWorld();
+ findSpawn();
 
+ inventory={
+  dirt:20,
+  stone:10,
+  wood:10,
+  sand:10
+ };
 
-document.getElementById("saveFromSettings")
-    .onclick=()=>{
+ selectedBlock="dirt";
 
-        saveGame();
+ updateInventory();
+ selectBlock("dirt");
 
-        showMessage(
-            "Gra została zapisana!"
-        );
-
-    };
-
-
-document.getElementById("deleteSaveBtn")
-    .onclick=()=>{
-
-        const ok=
-            confirm(
-                "Czy na pewno chcesz usunąć zapis?"
-            );
-
-        if(!ok)
-            return;
+ showMessage("Zapis został usunięty.");
+};
 
 
-        localStorage.removeItem(
-            SAVE_KEY
-        );
-
-
-        createWorld();
-        findSpawn();
-
-
-        inventory={
-            dirt:20,
-            stone:10,
-            wood:10,
-            sand:10
-        };
-
-
-        selectedBlock="dirt";
-
-
-        updateInventory();
-        selectBlock("dirt");
-
-
-        showMessage(
-            "Zapis usunięty."
-        );
-
-    };
-
-
-/* =========================================================
+/* =====================================================
    AUTO SAVE
-========================================================= */
+===================================================== */
 
 setInterval(()=>{
 
-    if(settings.autoSave)
-        saveGame();
+ if(settings.autoSave&&!paused)
+  saveGame();
 
 },120000);
 
 
-/* =========================================================
+/* =====================================================
    MESSAGE
-========================================================= */
+===================================================== */
 
-let messageTimer=null;
-
+let messageTimeout;
 
 function showMessage(text){
 
-    const el=
-        document.getElementById("message");
+ const el=document.getElementById("message");
 
-    el.textContent=text;
-    el.style.opacity="1";
+ el.textContent=text;
+ el.style.opacity="1";
 
+ clearTimeout(messageTimeout);
 
-    clearTimeout(messageTimer);
-
-
-    messageTimer=setTimeout(()=>{
-
-        el.style.opacity="0";
-
-    },1800);
-
+ messageTimeout=setTimeout(()=>{
+  el.style.opacity="0";
+ },1800);
 }
 
 
-/* =========================================================
+/* =====================================================
    START
-========================================================= */
+===================================================== */
 
 resize();
+
+if(!loadGame()){
+ createWorld();
+ findSpawn();
+}
+
 updateInventory();
+selectBlock(selectedBlock);
 applySettings();
 
-showMessage(
-    "Witaj w Pixel World!"
-);
+showMessage("Witaj w Pixel World!");
+
+requestAnimationFrame(loop);
 
 </script>
-
 </body>
 </html>
 ```
