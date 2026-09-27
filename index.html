@@ -1,6324 +1,4624 @@
-```html
-<!--
- PIXEL WORLD
- Kompletna wersja:
- - Main Menu
- - Pixelowa postać
- - Animacje chodzenia
- - Animacje idle/jump/land
- - Animacja kopania
- - Dźwięki kopania, skoku, stawiania i chodzenia
- - NEWS / SHOP / ACCOUNT / SOCIAL
- - Ustawienia
- - Zapis gry
- - Bezpieczny system skoku
- - Sterowanie PC + mobile
--->
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-
 <meta charset="UTF-8">
-
-<meta
- name="viewport"
- content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
->
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>PIXEL WORLD</title>
 
 <style>
-
 *{
- box-sizing:border-box;
- -webkit-tap-highlight-color:transparent;
+  box-sizing:border-box;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
- margin:0;
- width:100%;
- height:100%;
- overflow:hidden;
- background:#111820;
- font-family:Arial,sans-serif;
- color:white;
-}
-
-body{
- user-select:none;
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#101820;
+  font-family:Arial,sans-serif;
+  color:white;
 }
 
 canvas{
- position:absolute;
- inset:0;
- width:100%;
- height:100%;
- image-rendering:pixelated;
- touch-action:none;
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  image-rendering:pixelated;
+  touch-action:none;
 }
 
-button,
-select{
- font:inherit;
-}
-
-
-/* =====================================================
-   MAIN MENU
-===================================================== */
+/* ================= MENU ================= */
 
 #mainMenu{
-
- position:fixed;
-
- inset:0;
-
- z-index:1000;
-
- display:flex;
-
- align-items:center;
-
- justify-content:center;
-
- overflow:hidden;
-
- background:
- linear-gradient(
-  #67c9ff 0%,
-  #b9efff 55%,
-  #7fc95a 55%,
-  #4d9b42 100%
- );
-
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    linear-gradient(
+      #61c9ff 0%,
+      #a8e8ff 54%,
+      #65b94e 54%,
+      #75c85b 100%
+    );
 }
 
-#mainMenu::before{
-
- content:"";
-
- position:absolute;
-
- inset:0;
-
- background:
-
- radial-gradient(
-  circle at 15% 20%,
-  rgba(255,255,255,.9) 0 28px,
-  transparent 29px
- ),
-
- radial-gradient(
-  circle at 82% 14%,
-  rgba(255,255,255,.8) 0 34px,
-  transparent 35px
- ),
-
- linear-gradient(
-  transparent 0 64%,
-  rgba(20,70,35,.16) 64% 65%,
-  transparent 65%
- );
-
- opacity:.8;
-
+.menuBox{
+  width:min(560px,92vw);
+  max-height:95vh;
+  overflow:auto;
+  padding:25px;
+  text-align:center;
+  background:rgba(8,20,40,.95);
+  border:5px solid white;
+  box-shadow:
+    7px 7px 0 #000,
+    0 0 0 5px #263d5e;
 }
 
-
-#mainMenuPanel{
-
- position:relative;
-
- z-index:2;
-
- width:min(520px,92vw);
-
- padding:25px 24px 22px;
-
- text-align:center;
-
- background:rgba(9,25,48,.9);
-
- border:5px solid white;
-
- box-shadow:
-  0 0 0 6px #1b2d48,
-  10px 12px 0 rgba(0,0,0,.35);
-
- image-rendering:pixelated;
-
+.logo{
+  margin:0;
+  color:#fff35a;
+  font-size:clamp(38px,8vw,66px);
+  font-weight:1000;
+  letter-spacing:4px;
+  text-shadow:
+    5px 5px #315080,
+    8px 8px #000;
 }
 
-
-#mainLogo{
-
- margin:0 0 5px;
-
- font-size:clamp(35px,8vw,62px);
-
- font-weight:1000;
-
- letter-spacing:5px;
-
- color:#fff36a;
-
- text-shadow:
-  5px 5px #17345e,
-  8px 8px #000;
-
+.subtitle{
+  margin:5px 0 18px;
+  font-weight:bold;
 }
 
-
-#mainSubtitle{
-
- margin-bottom:18px;
-
- color:#dff8ff;
-
- font-weight:bold;
-
+.menuCharacter{
+  width:80px;
+  height:110px;
+  margin:0 auto 18px;
+  position:relative;
+  animation:menuBob 1.2s steps(4) infinite;
 }
 
-
-/* =====================================================
-   PIXEL CHARACTER W MENU
-===================================================== */
-
-#mainPixelCharacter{
-
- position:relative;
-
- width:72px;
-
- height:105px;
-
- margin:2px auto 18px;
-
- animation:
-  menuCharBob
-  1.2s
-  steps(4,end)
-  infinite;
-
- filter:
-  drop-shadow(
-   7px 8px 0 rgba(0,0,0,.28)
-  );
-
+@keyframes menuBob{
+  50%{transform:translateY(-5px)}
 }
 
-
-#mainPixelCharacter .head{
-
- position:absolute;
-
- left:18px;
- top:4px;
-
- width:36px;
- height:34px;
-
- background:#f0bd91;
-
- border:4px solid #542f20;
-
- box-shadow:
-  inset 0 -5px #d99f78;
-
+.menuCharacter div{
+  position:absolute;
 }
 
-
-#mainPixelCharacter .hair{
-
- position:absolute;
-
- left:14px;
- top:0;
-
- width:44px;
- height:15px;
-
- background:#542f20;
-
- box-shadow:
-  8px 9px 0 #542f20,
-  25px 8px 0 #542f20;
-
+.mcHead{
+  left:22px;
+  top:5px;
+  width:36px;
+  height:35px;
+  background:#efbd91;
+  border:4px solid #542f20;
 }
 
-
-#mainPixelCharacter .eye1,
-#mainPixelCharacter .eye2{
-
- position:absolute;
-
- top:20px;
-
- width:5px;
- height:5px;
-
- background:#111;
-
- z-index:2;
-
+.mcHair{
+  left:18px;
+  top:1px;
+  width:44px;
+  height:18px;
+  background:#542f20;
+  box-shadow:
+    8px 9px #542f20,
+    25px 8px #542f20;
 }
 
-
-#mainPixelCharacter .eye1{
- left:27px;
+.mcEye1,.mcEye2{
+  top:23px;
+  width:5px;
+  height:5px;
+  background:#111;
 }
 
-#mainPixelCharacter .eye2{
- left:43px;
+.mcEye1{left:31px}
+.mcEye2{left:47px}
+
+.mcBody{
+  left:20px;
+  top:43px;
+  width:40px;
+  height:40px;
+  background:#3976ca;
+  border:4px solid #224b86;
 }
 
-
-#mainPixelCharacter .body{
-
- position:absolute;
-
- left:17px;
- top:38px;
-
- width:38px;
- height:39px;
-
- background:#3f73c9;
-
- border:4px solid #23467d;
-
- box-shadow:
-  inset 8px 0 #5790df;
-
+.mcArm{
+  top:46px;
+  width:10px;
+  height:32px;
+  background:#efbd91;
+  border:3px solid #bd765f;
 }
 
+.mcArm1{left:9px}
+.mcArm2{right:9px}
 
-#mainPixelCharacter .arm,
-#mainPixelCharacter .leg{
-
- position:absolute;
-
- background:#f0bd91;
-
- border:3px solid #bd765f;
-
- transform-origin:top center;
-
+.mcLeg{
+  top:80px;
+  width:12px;
+  height:29px;
+  background:#4b3b79;
 }
 
+.mcLeg1{left:23px}
+.mcLeg2{right:23px}
 
-#mainPixelCharacter .arm{
-
- top:42px;
-
- width:10px;
- height:32px;
-
+.menuButtons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
 }
 
-
-.mainArmL{
- left:7px;
+.menuButton{
+  min-height:48px;
+  border:3px solid white;
+  background:linear-gradient(#348bd4,#17549a);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:4px 4px #000;
+  font-size:15px;
 }
 
-.mainArmR{
- right:7px;
+.menuButton:hover{
+  filter:brightness(1.2);
 }
 
-
-#mainPixelCharacter .leg{
-
- top:73px;
-
- width:11px;
- height:29px;
-
- background:#4d3b78;
-
+.menuButton:active{
+  transform:translate(3px,3px);
+  box-shadow:1px 1px #000;
 }
 
-
-.mainLegL{
- left:20px;
+.playButton{
+  grid-column:1/-1;
+  background:linear-gradient(#5fe568,#258c39);
+  font-size:20px;
 }
 
-.mainLegR{
- right:20px;
+#menuMessage{
+  margin-top:15px;
+  min-height:20px;
+  color:#fff35a;
+  font-weight:bold;
 }
 
+/* ================= MODALS ================= */
 
-@keyframes menuCharBob{
-
- 0%,100%{
-  transform:translateY(0);
- }
-
- 50%{
-  transform:translateY(-5px);
- }
-
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.75);
+  padding:15px;
 }
 
-
-/* =====================================================
-   MAIN MENU BUTTONS
-===================================================== */
-
-.mainMenuButtons{
-
- display:grid;
-
- grid-template-columns:
-  1fr 1fr;
-
- gap:9px;
-
- max-width:390px;
-
- margin:auto;
-
+.modalBox{
+  width:min(550px,94vw);
+  max-height:90vh;
+  overflow:auto;
+  background:#09254a;
+  border:4px solid white;
+  box-shadow:7px 7px #000;
+  padding:22px;
+  text-align:center;
 }
 
-
-.mainMenuButton{
-
- min-height:47px;
-
- border:3px solid white;
-
- border-radius:5px;
-
- background:
- linear-gradient(
-  #2787d5,
-  #15509a
- );
-
- color:white;
-
- font-weight:1000;
-
- letter-spacing:1px;
-
- cursor:pointer;
-
- text-shadow:
-  2px 2px #17243b;
-
- box-shadow:
-  4px 4px #08101b;
-
- transition:
-  transform .08s,
-  filter .08s;
-
+.modalBox h2{
+  margin-top:0;
+  color:#fff35a;
 }
 
-
-.mainMenuButton:hover{
-
- filter:brightness(1.2);
-
- transform:
-  translate(
-   -1px,
-   -1px
-  );
-
+.modalBox p{
+  line-height:1.6;
+  white-space:pre-line;
 }
 
-
-.mainMenuButton:active{
-
- transform:
-  translate(
-   3px,
-   3px
-  );
-
- box-shadow:
-  1px 1px #08101b;
-
+.modalButton{
+  padding:10px 20px;
+  border:3px solid white;
+  background:#2878c5;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
 }
 
-
-.mainMenuButton.play{
-
- grid-column:1/-1;
-
- background:
-  linear-gradient(
-   #5bdc63,
-   #248e39
-  );
-
- font-size:19px;
-
-}
-
-
-#mainMenuMessage{
-
- min-height:25px;
-
- margin-top:14px;
-
- color:#fff36a;
-
- font-size:13px;
-
- font-weight:bold;
-
-}
-
-
-/* =====================================================
-   MENU INFO
-===================================================== */
-
-#menuInfoModal{
-
- position:fixed;
-
- inset:0;
-
- z-index:1200;
-
- display:none;
-
- align-items:center;
-
- justify-content:center;
-
- background:
-  rgba(0,0,0,.7);
-
- padding:15px;
-
-}
-
-
-#menuInfoBox{
-
- width:min(420px,92vw);
-
- background:#09254a;
-
- border:4px solid white;
-
- box-shadow:
-  7px 7px #000;
-
- padding:23px;
-
- color:white;
-
- text-align:center;
-
-}
-
-
-#menuInfoBox h2{
-
- margin:
-  0 0 15px;
-
- color:#fff36a;
-
- text-shadow:
-  3px 3px #000;
-
-}
-
-
-#menuInfoBox p{
-
- line-height:1.6;
-
- white-space:pre-line;
-
-}
-
-
-#menuInfoClose{
-
- margin-top:12px;
-
- padding:9px 28px;
-
- border:3px solid white;
-
- background:#2c72bd;
-
- color:white;
-
- font-weight:bold;
-
- cursor:pointer;
-
-}
-
-
-/* =====================================================
-   GAME UI
-===================================================== */
+/* ================= UI ================= */
 
 #ui{
-
- position:absolute;
-
- inset:0;
-
- pointer-events:none;
-
+  position:fixed;
+  inset:0;
+  z-index:100;
+  pointer-events:none;
 }
 
-
-#title{
-
- position:absolute;
-
- top:12px;
-
- left:50%;
-
- transform:
-  translateX(-50%);
-
- font-size:23px;
-
- font-weight:900;
-
- letter-spacing:3px;
-
- text-shadow:
-  3px 3px #000;
-
+#gameTitle{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:21px;
+  font-weight:bold;
+  letter-spacing:3px;
+  text-shadow:3px 3px #000;
 }
-
 
 #health{
-
- position:absolute;
-
- left:14px;
-
- top:14px;
-
- width:185px;
-
- height:27px;
-
- border:3px solid white;
-
- background:#171717;
-
+  position:absolute;
+  top:14px;
+  left:14px;
+  width:190px;
+  height:27px;
+  border:3px solid white;
+  background:#171717;
 }
-
 
 #healthFill{
-
- width:100%;
-
- height:100%;
-
- background:#e53935;
-
+  height:100%;
+  width:100%;
+  background:#e33;
 }
-
 
 #healthText{
-
- position:absolute;
-
- inset:0;
-
- display:flex;
-
- align-items:center;
-
- justify-content:center;
-
- font-size:12px;
-
- font-weight:bold;
-
- text-shadow:
-  2px 2px #000;
-
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:12px;
+  font-weight:bold;
+  text-shadow:2px 2px #000;
 }
-
 
 #help{
-
- position:absolute;
-
- left:15px;
-
- top:50px;
-
- font-size:12px;
-
- text-shadow:
-  2px 2px #000;
-
+  position:absolute;
+  left:15px;
+  top:49px;
+  font-size:12px;
+  text-shadow:2px 2px #000;
 }
-
 
 #topButtons{
-
- position:absolute;
-
- right:14px;
-
- top:14px;
-
- display:flex;
-
- gap:7px;
-
- pointer-events:auto;
-
+  position:absolute;
+  right:14px;
+  top:14px;
+  display:flex;
+  gap:7px;
+  pointer-events:auto;
 }
 
-
-.uiBtn{
-
- border:3px solid white;
-
- background:#252d38;
-
- color:white;
-
- padding:8px 11px;
-
- font-weight:bold;
-
- cursor:pointer;
-
- box-shadow:
-  4px 4px #000;
-
+.uiButton{
+  padding:8px 11px;
+  border:3px solid white;
+  background:#252d38;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:4px 4px #000;
 }
-
-
-.uiBtn:hover{
-
- background:#3b4654;
-
-}
-
 
 #hotbar{
-
- position:absolute;
-
- left:50%;
-
- bottom:12px;
-
- transform:
-  translateX(-50%);
-
- display:flex;
-
- gap:5px;
-
- pointer-events:auto;
-
+  position:absolute;
+  bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:5px;
+  pointer-events:auto;
 }
-
 
 .slot{
-
- width:55px;
-
- height:55px;
-
- background:#20252c;
-
- border:3px solid #555;
-
- position:relative;
-
- display:flex;
-
- align-items:center;
-
- justify-content:center;
-
- cursor:pointer;
-
+  width:57px;
+  height:57px;
+  background:#20252c;
+  border:3px solid #555;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
 }
-
 
 .slot.selected{
-
- border-color:white;
-
- transform:
-  translateY(-4px);
-
+  border-color:white;
+  transform:translateY(-4px);
 }
 
-
-.icon{
-
- width:28px;
-
- height:28px;
-
+.slotIcon{
+  width:30px;
+  height:30px;
 }
 
-
-.slotNum{
-
- position:absolute;
-
- top:2px;
-
- left:4px;
-
- font-size:11px;
-
+.slotNumber{
+  position:absolute;
+  left:4px;
+  top:2px;
+  font-size:11px;
 }
 
-
-.count{
-
- position:absolute;
-
- right:4px;
-
- bottom:2px;
-
- font-size:12px;
-
- font-weight:bold;
-
+.slotCount{
+  position:absolute;
+  right:4px;
+  bottom:2px;
+  font-size:12px;
+  font-weight:bold;
 }
-
 
 #message{
-
- position:absolute;
-
- left:50%;
-
- bottom:80px;
-
- transform:
-  translateX(-50%);
-
- background:
-  rgba(0,0,0,.7);
-
- padding:7px 14px;
-
- opacity:0;
-
- transition:
-  opacity .15s;
-
+  position:absolute;
+  left:50%;
+  bottom:82px;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.75);
+  padding:8px 15px;
+  opacity:0;
+  transition:.15s;
 }
 
+/* ================= MOBILE ================= */
 
 #mobileControls{
-
- position:absolute;
-
- left:15px;
-
- bottom:85px;
-
- display:none;
-
- gap:8px;
-
- pointer-events:auto;
-
+  position:absolute;
+  left:15px;
+  bottom:85px;
+  display:none;
+  gap:8px;
+  pointer-events:auto;
 }
 
-
-.mobileBtn{
-
- width:58px;
-
- height:58px;
-
- border:3px solid white;
-
- background:
-  rgba(20,30,45,.85);
-
- color:white;
-
- font-size:25px;
-
- font-weight:bold;
-
- box-shadow:
-  4px 4px #000;
-
- display:flex;
-
- align-items:center;
-
- justify-content:center;
-
- touch-action:none;
-
+.mobileButton{
+  width:60px;
+  height:60px;
+  border:3px solid white;
+  background:rgba(20,30,45,.85);
+  color:white;
+  font-size:25px;
+  font-weight:bold;
+  box-shadow:4px 4px #000;
+  touch-action:none;
 }
 
-
-#jumpBtn{
-
- position:absolute;
-
- right:15px;
-
- bottom:85px;
-
- display:none;
-
- pointer-events:auto;
-
+#jumpButton{
+  position:absolute;
+  right:15px;
+  bottom:85px;
+  display:none;
+  pointer-events:auto;
 }
 
+/* ================= PAUSE ================= */
 
-/* =====================================================
-   SETTINGS
-===================================================== */
-
-#settingsOverlay{
-
- position:fixed;
-
- inset:0;
-
- z-index:800;
-
- display:none;
-
- align-items:center;
-
- justify-content:center;
-
- background:
-  rgba(0,0,0,.75);
-
- padding:15px;
-
+#pause{
+  position:fixed;
+  inset:0;
+  z-index:700;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.55);
 }
 
-
-#settingsWindow{
-
- width:min(900px,95vw);
-
- height:min(680px,92vh);
-
- background:#18202a;
-
- border:4px solid white;
-
- box-shadow:
-  8px 8px #000;
-
- display:flex;
-
- flex-direction:column;
-
+.pauseBox{
+  background:#142238;
+  border:4px solid white;
+  box-shadow:7px 7px #000;
+  padding:25px;
+  text-align:center;
 }
 
-
-#settingsHeader{
-
- height:60px;
-
- flex-shrink:0;
-
- display:flex;
-
- align-items:center;
-
- justify-content:space-between;
-
- padding:
-  0 14px;
-
- border-bottom:3px solid #555;
-
+.pauseBox h2{
+  color:#fff35a;
 }
 
-
-#settingsHeader h2{
-
- margin:0;
-
- font-size:19px;
-
+.pauseButton{
+  padding:10px 20px;
+  margin:5px;
+  border:3px solid white;
+  background:#2878c5;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
 }
 
+/* ================= SETTINGS ================= */
 
-#closeSettings{
-
- width:40px;
-
- height:40px;
-
- border:2px solid white;
-
- background:#a62c32;
-
- color:white;
-
- font-weight:bold;
-
- cursor:pointer;
-
+#settings{
+  position:fixed;
+  inset:0;
+  z-index:1500;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.78);
+  padding:12px;
 }
 
-
-#settingsBody{
-
- flex:1;
-
- display:flex;
-
- min-height:0;
-
+.settingsBox{
+  width:min(900px,96vw);
+  height:min(700px,94vh);
+  background:#18202a;
+  border:4px solid white;
+  box-shadow:8px 8px #000;
+  display:flex;
+  flex-direction:column;
 }
 
-
-#tabs{
-
- width:175px;
-
- flex-shrink:0;
-
- background:#11171e;
-
- border-right:3px solid #555;
-
- overflow:auto;
-
+.settingsHeader{
+  height:58px;
+  flex-shrink:0;
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:3px solid #555;
 }
 
+.settingsBody{
+  display:flex;
+  flex:1;
+  min-height:0;
+}
+
+.tabs{
+  width:175px;
+  background:#11171e;
+  border-right:3px solid #555;
+  overflow:auto;
+}
 
 .tab{
-
- display:block;
-
- width:100%;
-
- padding:12px 9px;
-
- border:0;
-
- border-bottom:1px solid #343c45;
-
- background:#171e26;
-
- color:white;
-
- text-align:left;
-
- font-weight:bold;
-
- cursor:pointer;
-
+  width:100%;
+  padding:12px 9px;
+  border:0;
+  border-bottom:1px solid #343c45;
+  background:#171e26;
+  color:white;
+  text-align:left;
+  font-weight:bold;
+  cursor:pointer;
 }
-
-
-.tab:hover{
-
- background:#293441;
-
-}
-
 
 .tab.active{
-
- background:#315f93;
-
+  background:#315f93;
 }
 
-
-#pages{
-
- flex:1;
-
- overflow:auto;
-
- padding:16px;
-
+.pages{
+  flex:1;
+  overflow:auto;
+  padding:16px;
 }
-
 
 .page{
-
- display:none;
-
+  display:none;
 }
-
 
 .page.active{
-
- display:block;
-
+  display:block;
 }
-
-
-.page h3{
-
- margin-top:0;
-
-}
-
 
 .option{
-
- margin-bottom:10px;
-
- padding:12px;
-
- background:#252d38;
-
- border:2px solid #414b58;
-
- display:flex;
-
- align-items:center;
-
- justify-content:space-between;
-
- gap:15px;
-
+  margin-bottom:10px;
+  padding:12px;
+  background:#252d38;
+  border:2px solid #414b58;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
 }
 
-
-.desc{
-
- flex:1;
-
+.option small{
+  display:block;
+  color:#aaa;
+  margin-top:4px;
 }
-
-
-.desc small{
-
- display:block;
-
- color:#aaa;
-
- margin-top:4px;
-
-}
-
 
 .switch{
-
- width:48px;
-
- height:26px;
-
- border:2px solid white;
-
- background:#555;
-
- position:relative;
-
- cursor:pointer;
-
- flex-shrink:0;
-
+  width:48px;
+  height:26px;
+  border:2px solid white;
+  background:#555;
+  position:relative;
+  cursor:pointer;
+  flex-shrink:0;
 }
-
 
 .switch:after{
-
- content:"";
-
- position:absolute;
-
- top:2px;
-
- left:2px;
-
- width:18px;
-
- height:18px;
-
- background:white;
-
+  content:"";
+  position:absolute;
+  top:2px;
+  left:2px;
+  width:18px;
+  height:18px;
+  background:white;
 }
-
 
 .switch.on{
-
- background:#29823b;
-
+  background:#29823b;
 }
-
 
 .switch.on:after{
-
- left:24px;
-
+  left:24px;
 }
 
-
-.settingBtn,
-select{
-
- background:#151a21;
-
- color:white;
-
- border:2px solid white;
-
- padding:7px;
-
- font-weight:bold;
-
- cursor:pointer;
-
+select,
+input[type=range],
+.settingButton{
+  background:#151a21;
+  color:white;
+  border:2px solid white;
+  padding:7px;
+  cursor:pointer;
 }
-
 
 .info{
-
- background:#11161c;
-
- border:2px solid #4d5966;
-
- padding:12px;
-
- line-height:1.5;
-
+  background:#11161c;
+  border:2px solid #4d5966;
+  padding:13px;
+  line-height:1.55;
 }
 
-
-#settingsFooter{
-
- padding:9px;
-
- border-top:3px solid #555;
-
- display:flex;
-
- justify-content:flex-end;
-
- gap:8px;
-
+.settingsFooter{
+  padding:9px;
+  border-top:3px solid #555;
+  text-align:right;
 }
 
+/* ================= CRAFT ================= */
+
+#craft{
+  display:none;
+}
+
+/* ================= MOBILE MEDIA ================= */
 
 @media(max-width:700px){
 
- #title{
-  font-size:17px;
- }
+  #gameTitle{
+    font-size:15px;
+  }
 
- #help{
-  display:none;
- }
+  #help{
+    display:none;
+  }
 
- #topButtons{
-  top:48px;
- }
+  #topButtons{
+    top:45px;
+  }
 
- #topButtons .uiBtn:not(#settingsBtn){
-  display:none;
- }
+  #topButtons .uiButton:not(#settingsButton){
+    display:none;
+  }
 
- #mobileControls{
-  display:flex;
- }
+  .menuButtons{
+    grid-template-columns:1fr;
+  }
 
- #jumpBtn{
-  display:flex;
- }
+  .playButton{
+    grid-column:auto;
+  }
 
- #settingsBody{
-  min-height:0;
- }
+  .tabs{
+    width:125px;
+  }
 
- #tabs{
-  width:125px;
- }
+  .tab{
+    font-size:11px;
+  }
 
- .tab{
-  font-size:11px;
- }
+  .option{
+    flex-direction:column;
+    align-items:flex-start;
+  }
 
- .option{
-  flex-direction:column;
-  align-items:flex-start;
- }
-
- .option select,
- .option button{
-  width:100%;
- }
-
- .mainMenuButtons{
-  grid-template-columns:1fr;
- }
-
- .mainMenuButton.play{
-  grid-column:auto;
- }
-
+  select,
+  input[type=range]{
+    width:100%;
+  }
 }
-
 </style>
-
 </head>
-
 
 <body>
 
-
-<!-- =====================================================
-     MAIN MENU
-===================================================== -->
+<!-- ================= MAIN MENU ================= -->
 
 <div id="mainMenu">
 
- <div id="mainMenuPanel">
+  <div class="menuBox">
 
-  <h1 id="mainLogo">
-   PIXEL WORLD
-  </h1>
+    <h1 class="logo">PIXEL WORLD</h1>
 
-  <div id="mainSubtitle">
-   MINI PIXEL SANDBOX
-  </div>
+    <div class="subtitle">
+      MINI PIXEL SANDBOX
+    </div>
 
+    <div class="menuCharacter">
+      <div class="mcHair"></div>
+      <div class="mcHead"></div>
+      <div class="mcEye1"></div>
+      <div class="mcEye2"></div>
+      <div class="mcBody"></div>
+      <div class="mcArm mcArm1"></div>
+      <div class="mcArm mcArm2"></div>
+      <div class="mcLeg mcLeg1"></div>
+      <div class="mcLeg mcLeg2"></div>
+    </div>
 
-  <div
-   id="mainPixelCharacter"
-   aria-label="pixelowa postać"
-  >
+    <div class="menuButtons">
 
-   <div class="hair"></div>
+      <button class="menuButton playButton" id="playButton">
+        ▶ GRAJ
+      </button>
 
-   <div class="head"></div>
+      <button class="menuButton" data-info="NEWS">
+        📰 NEWS
+      </button>
 
-   <div class="eye1"></div>
-   <div class="eye2"></div>
+      <button class="menuButton" data-info="SHOP">
+        🛒 SHOP
+      </button>
 
-   <div class="body"></div>
+      <button class="menuButton" data-info="ACCOUNT">
+        👤 ACCOUNT
+      </button>
 
-   <div class="arm mainArmL"></div>
-   <div class="arm mainArmR"></div>
+      <button class="menuButton" data-info="SOCIAL">
+        👥 SOCIAL
+      </button>
 
-   <div class="leg mainLegL"></div>
-   <div class="leg mainLegR"></div>
+      <button class="menuButton" id="menuSettings">
+        ⚙ USTAWIENIA
+      </button>
 
-  </div>
+    </div>
 
-
-  <div class="mainMenuButtons">
-
-   <button
-    class="mainMenuButton play"
-    id="mainPlay"
-   >
-    ▶ GRAJ
-   </button>
-
-
-   <button
-    class="mainMenuButton"
-    data-menu-info="NEWS"
-   >
-    📰 NEWS
-   </button>
-
-
-   <button
-    class="mainMenuButton"
-    data-menu-info="SHOP"
-   >
-    🛒 SHOP
-   </button>
-
-
-   <button
-    class="mainMenuButton"
-    data-menu-info="ACCOUNT"
-   >
-    👤 ACCOUNT
-   </button>
-
-
-   <button
-    class="mainMenuButton"
-    data-menu-info="SOCIAL"
-   >
-    👥 SOCIAL
-   </button>
-
-
-   <button
-    class="mainMenuButton"
-    id="mainSettings"
-   >
-    ⚙ USTAWIENIA
-   </button>
+    <div id="menuMessage">
+      Kliknij GRAJ, aby rozpocząć
+    </div>
 
   </div>
-
-
-  <div id="mainMenuMessage">
-   Kliknij GRAJ, aby rozpocząć
-  </div>
-
- </div>
 
 </div>
 
+<!-- ================= INFO MODAL ================= -->
 
-<div id="menuInfoModal">
+<div class="modal" id="infoModal">
 
- <div id="menuInfoBox">
+  <div class="modalBox">
 
-  <h2 id="menuInfoTitle"></h2>
+    <h2 id="infoTitle"></h2>
 
-  <p id="menuInfoText"></p>
+    <p id="infoText"></p>
 
-  <button id="menuInfoClose">
-   WRÓĆ
-  </button>
+    <button class="modalButton" id="infoClose">
+      WRÓĆ
+    </button>
 
- </div>
+  </div>
 
 </div>
 
-
-<!-- =====================================================
-     GAME
-===================================================== -->
+<!-- ================= GAME ================= -->
 
 <canvas id="game"></canvas>
 
-
 <div id="ui">
 
-
- <div id="title">
-  PIXEL WORLD
- </div>
-
-
- <div id="health">
-
-  <div id="healthFill"></div>
-
-  <div id="healthText">
-   100 / 100
+  <div id="gameTitle">
+    PIXEL WORLD
   </div>
 
- </div>
+  <div id="health">
+    <div id="healthFill"></div>
+    <div id="healthText">100 / 100</div>
+  </div>
 
+  <div id="help">
+    A/D lub ←/→ — ruch |
+    W/↑/SPACJA — skok |
+    LPM — kopanie |
+    PPM — stawianie |
+    E — crafting |
+    ESC — pauza
+  </div>
 
- <div id="help">
+  <div id="topButtons">
 
-  A/D lub ←/→ — ruch |
-  W/↑/SPACJA — skok |
-  LPM — kopanie |
-  PPM — stawianie
+    <button class="uiButton" id="saveButton">
+      💾 ZAPISZ
+    </button>
 
- </div>
+    <button class="uiButton" id="newWorldButton">
+      ↻ NOWY ŚWIAT
+    </button>
 
-
- <div id="topButtons">
-
-  <button
-   class="uiBtn"
-   id="saveBtn"
-  >
-   💾 ZAPISZ
-  </button>
-
-
-  <button
-   class="uiBtn"
-   id="resetBtn"
-  >
-   ↻ RESET
-  </button>
-
-
-  <button
-   class="uiBtn"
-   id="settingsBtn"
-  >
-   ⚙ USTAWIENIA
-  </button>
-
- </div>
-
-
- <div id="hotbar">
-
-
-  <div
-   class="slot selected"
-   data-block="dirt"
-  >
-
-   <span class="slotNum">
-    1
-   </span>
-
-   <div
-    class="icon"
-    style="
-     background:#795548;
-     border-top:7px solid #4caf50
-    "
-   ></div>
-
-   <span
-    class="count"
-    id="count-dirt"
-   >
-    20
-   </span>
+    <button class="uiButton" id="settingsButton">
+      ⚙ USTAWIENIA
+    </button>
 
   </div>
 
+  <!-- HOTBAR -->
 
-  <div
-   class="slot"
-   data-block="stone"
-  >
+  <div id="hotbar">
 
-   <span class="slotNum">
-    2
-   </span>
+    <div class="slot selected" data-block="dirt">
+      <span class="slotNumber">1</span>
+      <div class="slotIcon"
+           style="background:#795548;border-top:7px solid #4caf50">
+      </div>
+      <span class="slotCount" id="count-dirt">20</span>
+    </div>
 
-   <div
-    class="icon"
-    style="
-     background:#777
-    "
-   ></div>
+    <div class="slot" data-block="stone">
+      <span class="slotNumber">2</span>
+      <div class="slotIcon" style="background:#777"></div>
+      <span class="slotCount" id="count-stone">10</span>
+    </div>
 
-   <span
-    class="count"
-    id="count-stone"
-   >
-    10
-   </span>
+    <div class="slot" data-block="wood">
+      <span class="slotNumber">3</span>
+      <div class="slotIcon" style="background:#754c24"></div>
+      <span class="slotCount" id="count-wood">10</span>
+    </div>
 
-  </div>
+    <div class="slot" data-block="sand">
+      <span class="slotNumber">4</span>
+      <div class="slotIcon" style="background:#d9bd70"></div>
+      <span class="slotCount" id="count-sand">10</span>
+    </div>
 
+    <div class="slot" data-block="glass">
+      <span class="slotNumber">5</span>
+      <div class="slotIcon"
+           style="background:#aee8ff;border:2px solid white">
+      </div>
+      <span class="slotCount" id="count-glass">0</span>
+    </div>
 
-  <div
-   class="slot"
-   data-block="wood"
-  >
-
-   <span class="slotNum">
-    3
-   </span>
-
-   <div
-    class="icon"
-    style="
-     background:#754c24
-    "
-   ></div>
-
-   <span
-    class="count"
-    id="count-wood"
-   >
-    10
-   </span>
+    <div class="slot" data-block="brick">
+      <span class="slotNumber">6</span>
+      <div class="slotIcon" style="background:#a94d3e"></div>
+      <span class="slotCount" id="count-brick">0</span>
+    </div>
 
   </div>
 
+  <div id="message"></div>
 
-  <div
-   class="slot"
-   data-block="sand"
-  >
+  <!-- MOBILE -->
 
-   <span class="slotNum">
-    4
-   </span>
+  <div id="mobileControls">
 
-   <div
-    class="icon"
-    style="
-     background:#d9bd70
-    "
-   ></div>
+    <button class="mobileButton" id="leftButton">
+      ◀
+    </button>
 
-   <span
-    class="count"
-    id="count-sand"
-   >
-    10
-   </span>
+    <button class="mobileButton" id="rightButton">
+      ▶
+    </button>
 
   </div>
 
-
- </div>
-
-
- <div id="message"></div>
-
-
- <div id="mobileControls">
-
-  <button
-   class="mobileBtn"
-   id="leftBtn"
-  >
-   ◀
+  <button class="mobileButton" id="jumpButton">
+    ▲
   </button>
-
-  <button
-   class="mobileBtn"
-   id="rightBtn"
-  >
-   ▶
-  </button>
-
- </div>
-
-
- <button
-  class="mobileBtn"
-  id="jumpBtn"
- >
-  ▲
- </button>
-
 
 </div>
 
+<!-- ================= PAUSE ================= -->
 
-<!-- =====================================================
-     SETTINGS
-===================================================== -->
+<div id="pause">
 
-<div id="settingsOverlay">
+  <div class="pauseBox">
 
- <div id="settingsWindow">
+    <h2>⏸ PAUZA</h2>
 
+    <button class="pauseButton" id="resumeButton">
+      ▶ WRÓĆ DO GRY
+    </button>
 
-  <div id="settingsHeader">
+    <br>
 
-   <h2>
-    ⚙ USTAWIENIA PIXEL WORLD
-   </h2>
+    <button class="pauseButton" id="pauseSettings">
+      ⚙ USTAWIENIA
+    </button>
 
-   <button id="closeSettings">
-    ✕
-   </button>
+    <br>
+
+    <button class="pauseButton" id="pauseMenu">
+      ⌂ MENU GŁÓWNE
+    </button>
 
   </div>
-
-
-  <div id="settingsBody">
-
-
-   <div id="tabs">
-
-    <button
-     class="tab active"
-     data-page="gamePage"
-    >
-     🎮 Gra
-    </button>
-
-    <button
-     class="tab"
-     data-page="graphicsPage"
-    >
-     🎨 Grafika
-    </button>
-
-    <button
-     class="tab"
-     data-page="animationPage"
-    >
-     ✨ Animacje
-    </button>
-
-    <button
-     class="tab"
-     data-page="soundPage"
-    >
-     🔊 Dźwięk
-    </button>
-
-    <button
-     class="tab"
-     data-page="controlsPage"
-    >
-     ⌨ Sterowanie
-    </button>
-
-    <button
-     class="tab"
-     data-page="savePage"
-    >
-     💾 Zapis
-    </button>
-
-    <button
-     class="tab"
-     data-page="helpPage"
-    >
-     🆘 Pomoc
-    </button>
-
-    <button
-     class="tab"
-     data-page="infoPage"
-    >
-     ℹ Informacje
-    </button>
-
-   </div>
-
-
-   <div id="pages">
-
-
-    <div
-     class="page active"
-     id="gamePage"
-    >
-
-     <h3>
-      🎮 Gra
-     </h3>
-
-
-     <div class="option">
-
-      <div class="desc">
-
-       <b>
-        Przyciski mobilne
-       </b>
-
-       <small>
-        Pokazuje przyciski ruchu na telefonie.
-       </small>
-
-      </div>
-
-      <button
-       class="switch"
-       id="mobileSwitch"
-      ></button>
-
-     </div>
-
-
-     <div class="option">
-
-      <div class="desc">
-
-       <b>
-        Automatyczny zapis
-       </b>
-
-       <small>
-        Zapis co 2 minuty.
-       </small>
-
-      </div>
-
-      <button
-       class="switch"
-       id="autoSaveSwitch"
-      ></button>
-
-     </div>
-
-
-    </div>
-
-
-    <div
-     class="page"
-     id="graphicsPage"
-    >
-
-     <h3>
-      🎨 Grafika
-     </h3>
-
-
-     <div class="option">
-
-      <div class="desc">
-       <b>Jakość grafiki</b>
-      </div>
-
-      <select id="qualitySelect">
-
-       <option value="low">
-        Niska
-       </option>
-
-       <option value="medium">
-        Średnia
-       </option>
-
-       <option value="high">
-        Wysoka
-       </option>
-
-      </select>
-
-     </div>
-
-
-     <div class="option">
-
-      <div class="desc">
-       <b>Pixel Perfect</b>
-      </div>
-
-      <button
-       class="switch"
-       id="pixelSwitch"
-      ></button>
-
-     </div>
-
-
-     <div class="option">
-
-      <div class="desc">
-       <b>Animowana woda</b>
-      </div>
-
-      <button
-       class="switch"
-       id="waterSwitch"
-      ></button>
-
-     </div>
-
-
-     <div class="option">
-
-      <div class="desc">
-       <b>Limit FPS</b>
-      </div>
-
-      <select id="fpsSelect">
-
-       <option value="30">
-        30 FPS
-       </option>
-
-       <option value="60">
-        60 FPS
-       </option>
-
-       <option value="120">
-        120 FPS
-       </option>
-
-      </select>
-
-     </div>
-
-    </div>
-
-
-    <div
-     class="page"
-     id="animationPage"
-    >
-
-     <h3>
-      ✨ Animacje
-     </h3>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Wszystkie animacje</b>
-      </div>
-      <button class="switch" id="animationSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Chodzenie</b>
-      </div>
-      <button class="switch" id="walkAnimSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Idle / oddychanie</b>
-      </div>
-      <button class="switch" id="idleAnimSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Mruganie</b>
-      </div>
-      <button class="switch" id="blinkAnimSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Skok</b>
-      </div>
-      <button class="switch" id="jumpAnimSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Lądowanie</b>
-      </div>
-      <button class="switch" id="landAnimSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Włosy</b>
-      </div>
-      <button class="switch" id="hairAnimSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Kurz</b>
-      </div>
-      <button class="switch" id="dustAnimSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Cień</b>
-      </div>
-      <button class="switch" id="shadowAnimSwitch"></button>
-     </div>
-
-
-     <div class="option">
-
-      <div class="desc">
-       <b>Szybkość animacji</b>
-      </div>
-
-      <select id="animationSpeedSelect">
-
-       <option value=".7">
-        Wolna
-       </option>
-
-       <option value="1">
-        Normalna
-       </option>
-
-       <option value="1.35">
-        Szybka
-       </option>
-
-      </select>
-
-     </div>
-
-    </div>
-
-
-    <div
-     class="page"
-     id="soundPage"
-    >
-
-     <h3>
-      🔊 Dźwięk
-     </h3>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Efekty dźwiękowe</b>
-      </div>
-      <button class="switch" id="soundSwitch"></button>
-     </div>
-
-
-     <div class="option">
-      <div class="desc">
-       <b>Muzyka</b>
-      </div>
-      <button class="switch" id="musicSwitch"></button>
-     </div>
-
-
-     <div class="option">
-
-      <div class="desc">
-       <b>Głośność</b>
-      </div>
-
-      <input
-       type="range"
-       id="volumeRange"
-       min="0"
-       max="1"
-       step=".05"
-      >
-
-     </div>
-
-    </div>
-
-
-    <div
-     class="page"
-     id="controlsPage"
-    >
-
-     <h3>
-      ⌨ Sterowanie
-     </h3>
-
-
-     <div class="info">
-
-      <b>PC</b>
-
-      <br><br>
-
-      A / D — ruch
-
-      <br>
-
-      ← / → — ruch
-
-      <br>
-
-      W / ↑ / SPACJA — skok
-
-      <br>
-
-      LPM — kopanie
-
-      <br>
-
-      PPM — stawianie
-
-      <br>
-
-      1–4 — wybór bloku
-
-      <br>
-
-      ESC — zamykanie menu
-
-      <br><br>
-
-      <b>Telefon</b>
-
-      <br><br>
-
-      ◀ / ▶ — ruch
-
-      <br>
-
-      ▲ — skok
-
-      <br>
-
-      Dotknięcie — kopanie
-
-      <br>
-
-      Przytrzymanie — stawianie
-
-     </div>
-
-    </div>
-
-
-    <div
-     class="page"
-     id="savePage"
-    >
-
-     <h3>
-      💾 Zapis
-     </h3>
-
-
-     <div class="info">
-
-      Gra automatycznie zapisuje świat,
-      jeśli włączony jest automatyczny zapis.
-
-     </div>
-
-     <br>
-
-     <button
-      class="settingBtn"
-      id="saveFromSettings"
-     >
-      💾 ZAPISZ TERAZ
-     </button>
-
-     <br><br>
-
-     <button
-      class="settingBtn"
-      id="deleteSaveBtn"
-     >
-      🗑 USUŃ ZAPIS
-     </button>
-
-    </div>
-
-
-    <div
-     class="page"
-     id="helpPage"
-    >
-
-     <h3>
-      🆘 Pomoc
-     </h3>
-
-
-     <div class="info">
-
-      <b>Jak grać?</b>
-
-      <br><br>
-
-      Zbieraj bloki, buduj swój świat
-      i eksploruj mapę.
-
-      <br><br>
-
-      Możesz kopać ziemię, kamień,
-      piasek i drewno.
-
-      <br><br>
-
-      Pamiętaj, że postać skacze
-      tylko po naciśnięciu przycisku skoku.
-
-     </div>
-
-    </div>
-
-
-    <div
-     class="page"
-     id="infoPage"
-    >
-
-     <h3>
-      ℹ Informacje
-     </h3>
-
-
-     <div class="info">
-
-      <b>PIXEL WORLD</b>
-
-      <br><br>
-
-      Wersja: 1.0
-
-      <br>
-
-      Mini Pixel Sandbox
-
-      <br><br>
-
-      Gra wykorzystuje HTML5 Canvas
-      i JavaScript.
-
-      <br><br>
-
-      Miłej zabawy! 🎮
-
-     </div>
-
-    </div>
-
-
-   </div>
-
-  </div>
-
-
-  <div id="settingsFooter">
-
-   <button
-    class="settingBtn"
-    id="closeSettingsBottom"
-   >
-    ZAMKNIJ
-   </button>
-
-  </div>
-
- </div>
 
 </div>
 
+<!-- ================= CRAFTING ================= -->
+
+<div class="modal" id="craft">
+
+  <div class="modalBox">
+
+    <h2>🔨 CRAFTING</h2>
+
+    <p>
+      Twórz nowe bloki z zebranych materiałów.
+    </p>
+
+    <button class="modalButton craftButton" data-craft="glass">
+      🧊 SZKŁO — 2 PIASKU → 1 SZKŁO
+    </button>
+
+    <br><br>
+
+    <button class="modalButton craftButton" data-craft="brick">
+      🧱 CEGŁA — 2 KAMIENIE → 1 CEGŁA
+    </button>
+
+    <br><br>
+
+    <button class="modalButton" id="craftClose">
+      ZAMKNIJ
+    </button>
+
+  </div>
+
+</div>
+
+<!-- ================= SETTINGS ================= -->
+
+<div id="settings">
+
+  <div class="settingsBox">
+
+    <div class="settingsHeader">
+
+      <h2>
+        ⚙ USTAWIENIA PIXEL WORLD
+      </h2>
+
+      <button class="modalButton" id="closeSettings">
+        ✕
+      </button>
+
+    </div>
+
+    <div class="settingsBody">
+
+      <div class="tabs">
+
+        <button class="tab active" data-page="gamePage">
+          🎮 Gra
+        </button>
+
+        <button class="tab" data-page="graphicsPage">
+          🎨 Grafika
+        </button>
+
+        <button class="tab" data-page="animationPage">
+          ✨ Animacje
+        </button>
+
+        <button class="tab" data-page="soundPage">
+          🔊 Dźwięk
+        </button>
+
+        <button class="tab" data-page="controlsPage">
+          ⌨ Sterowanie
+        </button>
+
+        <button class="tab" data-page="savePage">
+          💾 Zapis
+        </button>
+
+        <button class="tab" data-page="helpPage">
+          🆘 Pomoc
+        </button>
+
+        <button class="tab" data-page="infoPage">
+          ℹ Informacje
+        </button>
+
+      </div>
+
+      <div class="pages">
+
+        <!-- GAME -->
+
+        <div class="page active" id="gamePage">
+
+          <h3>🎮 Gra</h3>
+
+          <div class="option">
+            <div>
+              <b>Przyciski mobilne</b>
+              <small>Pokazuje sterowanie telefonu.</small>
+            </div>
+            <button class="switch" id="mobileSwitch"></button>
+          </div>
+
+          <div class="option">
+            <div>
+              <b>Automatyczny zapis</b>
+              <small>Zapisuje świat co 2 minuty.</small>
+            </div>
+            <button class="switch" id="autoSaveSwitch"></button>
+          </div>
+
+          <div class="option">
+            <div>
+              <b>Dzień / noc</b>
+              <small>Włącza cykl dnia i nocy.</small>
+            </div>
+            <button class="switch" id="dayNightSwitch"></button>
+          </div>
+
+          <div class="option">
+            <div>
+              <b>Cząsteczki</b>
+              <small>Kurz, kopanie i lądowanie.</small>
+            </div>
+            <button class="switch" id="particlesSwitch"></button>
+          </div>
+
+        </div>
+
+        <!-- GRAPHICS -->
+
+        <div class="page" id="graphicsPage">
+
+          <h3>🎨 Grafika</h3>
+
+          <div class="option">
+            <b>Jakość</b>
+
+            <select id="qualitySelect">
+              <option value="low">Niska</option>
+              <option value="medium">Średnia</option>
+              <option value="high">Wysoka</option>
+            </select>
+          </div>
+
+          <div class="option">
+            <b>Pixel Perfect</b>
+            <button class="switch" id="pixelSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Animowana woda</b>
+            <button class="switch" id="waterSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Limit FPS</b>
+
+            <select id="fpsSelect">
+              <option value="30">30 FPS</option>
+              <option value="60">60 FPS</option>
+              <option value="120">120 FPS</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- ANIMATIONS -->
+
+        <div class="page" id="animationPage">
+
+          <h3>✨ Animacje</h3>
+
+          <div class="option">
+            <b>Wszystkie animacje</b>
+            <button class="switch" id="animationsSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Chodzenie</b>
+            <button class="switch" id="walkSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Idle</b>
+            <button class="switch" id="idleSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Mruganie</b>
+            <button class="switch" id="blinkSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Skok i lądowanie</b>
+            <button class="switch" id="jumpSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Włosy</b>
+            <button class="switch" id="hairSwitch"></button>
+          </div>
+
+          <div class="option">
+
+            <b>Szybkość animacji</b>
+
+            <select id="animSpeed">
+              <option value=".7">Wolna</option>
+              <option value="1">Normalna</option>
+              <option value="1.35">Szybka</option>
+            </select>
+
+          </div>
+
+        </div>
+
+        <!-- SOUND -->
+
+        <div class="page" id="soundPage">
+
+          <h3>🔊 Dźwięk</h3>
+
+          <div class="option">
+            <b>Efekty dźwiękowe</b>
+            <button class="switch" id="soundSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Muzyka</b>
+            <button class="switch" id="musicSwitch"></button>
+          </div>
+
+          <div class="option">
+            <b>Głośność</b>
+            <input
+              type="range"
+              id="volumeRange"
+              min="0"
+              max="1"
+              step=".05">
+          </div>
+
+        </div>
+
+        <!-- CONTROLS -->
+
+        <div class="page" id="controlsPage">
+
+          <h3>⌨ Sterowanie</h3>
+
+          <div class="info">
+
+            <b>💻 KOMPUTER</b>
+
+            <br><br>
+
+            A / D lub ← / → — ruch<br>
+            W / ↑ / SPACJA — skok<br>
+            LPM — kopanie<br>
+            PPM — stawianie<br>
+            1–6 — wybór bloku<br>
+            E — crafting<br>
+            ESC — pauza
+
+            <br><br>
+
+            <b>📱 TELEFON</b>
+
+            <br><br>
+
+            ◀ / ▶ — ruch<br>
+            ▲ — skok<br>
+            Dotknięcie — kopanie<br>
+            Przytrzymanie — stawianie
+
+          </div>
+
+        </div>
+
+        <!-- SAVE -->
+
+        <div class="page" id="savePage">
+
+          <h3>💾 Zapis</h3>
+
+          <div class="info">
+
+            Świat, ekwipunek, ustawienia i pozycja
+            są zapisywane lokalnie w przeglądarce.
+
+          </div>
+
+          <br>
+
+          <button class="settingButton" id="saveSettings">
+            💾 ZAPISZ TERAZ
+          </button>
+
+          <br><br>
+
+          <button class="settingButton" id="deleteSave">
+            🗑 USUŃ ZAPIS
+          </button>
+
+        </div>
+
+        <!-- HELP -->
+
+        <div class="page" id="helpPage">
+
+          <h3>🆘 Pomoc</h3>
+
+          <div class="info">
+
+            <b>KOPANIE</b><br>
+            Kliknij LPM na komputerze lub dotknij blok na telefonie.
+
+            <br><br>
+
+            <b>BUDOWANIE</b><br>
+            Wybierz blok i kliknij PPM.
+            Na telefonie przytrzymaj ekran.
+
+            <br><br>
+
+            <b>SKAKANIE</b><br>
+            Skok działa tylko po faktycznym naciśnięciu.
+            Przytrzymanie klawisza nie powoduje ciągłego skakania.
+
+            <br><br>
+
+            <b>CRAFTING</b><br>
+            Naciśnij E.
+
+          </div>
+
+        </div>
+
+        <!-- INFO -->
+
+        <div class="page" id="infoPage">
+
+          <h3>ℹ Informacje</h3>
+
+          <div class="info">
+
+            <b>PIXEL WORLD</b>
+
+            <br><br>
+
+            Complete Edition
+
+            <br><br>
+
+            ✔ Main Menu<br>
+            ✔ Shop / Account / Social<br>
+            ✔ Crafting<br>
+            ✔ Dzień / noc<br>
+            ✔ Jaskinie<br>
+            ✔ Woda<br>
+            ✔ Drzewa<br>
+            ✔ Animacje<br>
+            ✔ Dźwięki<br>
+            ✔ Zapis gry<br>
+            ✔ Sterowanie PC<br>
+            ✔ Sterowanie telefonem
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="settingsFooter">
+
+      <button class="settingButton" id="closeSettingsBottom">
+        ZAMKNIJ
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
 <script>
+"use strict";
 
-/* =====================================================
-   USTAWIENIA
-===================================================== */
+/* =========================================================
+   PIXEL WORLD — COMPLETE EDITION
+   ========================================================= */
 
-const defaultSettings={
+const TILE = 32;
+const WORLD_W = 420;
+const WORLD_H = 90;
 
- mobile:true,
+const BLOCK = {
+  air:0,
+  grass:1,
+  dirt:2,
+  stone:3,
+  wood:4,
+  leaves:5,
+  sand:6,
+  water:7,
+  glass:8,
+  brick:9
+};
 
- animations:true,
+const SAVE_KEY = "PIXEL_WORLD_COMPLETE_V3";
 
- autoSave:true,
+const defaults = {
+  mobile:true,
+  autoSave:true,
+  dayNight:true,
+  particles:true,
+  quality:"medium",
+  pixelPerfect:true,
+  water:true,
+  fps:60,
+  sound:true,
+  music:false,
+  volume:.65,
+  animations:true,
+  walk:true,
+  idle:true,
+  blink:true,
+  jump:true,
+  hair:true,
+  animSpeed:1
+};
 
- quality:"medium",
+let settings = {...defaults};
 
- pixelPerfect:true,
+let world = [];
+let heights = [];
 
- water:true,
+let inventory = {
+  dirt:20,
+  stone:10,
+  wood:10,
+  sand:10,
+  glass:0,
+  brick:0
+};
 
- fps:60,
+let selectedBlock = "dirt";
 
- sound:true,
+let particles = [];
 
- music:false,
+let gameStarted = false;
+let paused = true;
 
- volume:.75,
+let keys = {};
 
- walkAnim:true,
+let jumpRequested = false;
 
- idleAnim:true,
+let W = innerWidth;
+let H = innerHeight;
 
- blinkAnim:true,
+let camera = {
+  x:0,
+  y:0
+};
 
- jumpAnim:true,
+let lastTime = 0;
+let gameTime = 0;
+let dayTime = 0;
 
- landAnim:true,
+let messageTimer = null;
 
- hairAnim:true,
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
- dustAnim:true,
+const player = {
 
- shadowAnim:true,
+  x:0,
+  y:0,
 
- animationSpeed:1
+  w:20,
+  h:40,
+
+  vx:0,
+  vy:0,
+
+  speed:185,
+  jump:440,
+
+  grounded:false,
+
+  dir:1,
+
+  anim:0,
+
+  mine:0,
+
+  land:0,
+
+  stepTimer:0,
+
+  health:100,
+  maxHealth:100
 
 };
 
-
-let settings={
- ...defaultSettings
-};
-
-
-/* =====================================================
-   AUDIO
-===================================================== */
-
-let audio=null;
-
-
-function initAudio(){
-
- if(!settings.sound)
-  return;
-
- try{
-
-  if(!audio){
-
-   audio=
-    new(
-     window.AudioContext||
-     window.webkitAudioContext
-    )();
-
-  }
-
-  if(audio.state==="suspended")
-   audio.resume();
-
- }catch{}
-
-}
-
-
-function sound(type){
-
- if(!settings.sound)
-  return;
-
- try{
-
-  initAudio();
-
-  if(!audio)
-   return;
-
-
-  const osc=
-   audio.createOscillator();
-
-  const gain=
-   audio.createGain();
-
-
-  osc.connect(gain);
-
-  gain.connect(
-   audio.destination
-  );
-
-
-  let frequency=400;
-
-  let duration=.07;
-
-
-  if(type==="mine"){
-
-   frequency=170;
-
-   duration=.08;
-
-  }
-
-
-  if(type==="place"){
-
-   frequency=280;
-
-   duration=.07;
-
-  }
-
-
-  if(type==="jump"){
-
-   frequency=480;
-
-   duration=.09;
-
-  }
-
-
-  if(type==="land"){
-
-   frequency=120;
-
-   duration=.08;
-
-  }
-
-
-  if(type==="step"){
-
-   frequency=90;
-
-   duration=.035;
-
-  }
-
-
-  osc.type="square";
-
-  osc.frequency.value=
-   frequency;
-
-
-  gain.gain.setValueAtTime(
-   settings.volume*.045,
-   audio.currentTime
-  );
-
-
-  gain.gain.exponentialRampToValueAtTime(
-   .001,
-   audio.currentTime+duration
-  );
-
-
-  osc.start();
-
-  osc.stop(
-   audio.currentTime+duration
-  );
-
-
- }catch{}
-
-}
-
-
-/* =====================================================
-   WORLD
-===================================================== */
-
-const TILE=32;
-
-const WORLD_W=400;
-
-const WORLD_H=70;
-
-
-const BLOCK={
-
- air:0,
-
- grass:1,
-
- dirt:2,
-
- stone:3,
-
- wood:4,
-
- leaves:5,
-
- sand:6,
-
- water:7
-
-};
-
-
-let world=[];
-
-
-function createWorld(){
-
- world=
-  Array.from(
-   {length:WORLD_H},
-   ()=>Array(WORLD_W)
-    .fill(BLOCK.air)
-  );
-
-
- const heights=[];
-
-
- for(let x=0;x<WORLD_W;x++){
-
-  heights[x]=
-   Math.min(
-    29,
-    22+
-    Math.floor(
-     Math.sin(x*.045)*3+
-     Math.sin(x*.11)*2+
-     Math.sin(x*.018)*4
-    )
-   );
-
- }
-
-
- for(let x=0;x<WORLD_W;x++){
-
-  const h=heights[x];
-
-
-  for(let y=h;y<WORLD_H;y++){
-
-   if(y===h)
-    world[y][x]=
-     BLOCK.grass;
-
-   else if(y<h+5)
-    world[y][x]=
-     BLOCK.dirt;
-
-   else
-    world[y][x]=
-     BLOCK.stone;
-
-  }
-
- }
-
-
- /* =================================================
-    DRZEWA
- ================================================= */
-
- for(
-  let x=8;
-  x<WORLD_W-8;
-  x+=8+
-   Math.floor(
-    Math.random()*8
-   )
- ){
-
-  if(Math.random()<.45)
-   continue;
-
-
-  const ground=
-   heights[x];
-
-
-  for(
-   let y=1;
-   y<=4;
-   y++
-  ){
-
-   if(ground-y>=0)
-    world[ground-y][x]=
-     BLOCK.wood;
-
-  }
-
-
-  const top=
-   ground-5;
-
-
-  for(
-   let yy=-2;
-   yy<=2;
-   yy++
-  ){
-
-   for(
-    let xx=-2;
-    xx<=2;
-    xx++
-   ){
-
-    if(
-     Math.abs(xx)+
-     Math.abs(yy)<=3
-    ){
-
-     const tx=x+xx;
-     const ty=top+yy;
-
-
-     if(
-      tx>=0&&
-      tx<WORLD_W&&
-      ty>=0&&
-      ty<WORLD_H
-     ){
-
-      world[ty][tx]=
-       BLOCK.leaves;
-
-     }
-
-    }
-
-   }
-
-  }
-
- }
-
-
- /* =================================================
-    MAŁE PŁYTKIE JEZIORKA
- ================================================= */
-
- for(
-  let pond=0;
-  pond<3;
-  pond++
- ){
-
-  const px=
-   25+
-   Math.floor(
-    Math.random()*
-    (WORLD_W-50)
-   );
-
-
-  const ground=
-   heights[px];
-
-
-  if(ground<8)
-   continue;
-
-
-  for(
-   let x=px-2;
-   x<=px+2;
-   x++
-  ){
-
-   if(
-    x<0||
-    x>=WORLD_W
-   )
-    continue;
-
-
-   const h=
-    heights[x];
-
-
-   for(
-    let y=h;
-    y<=h+1;
-    y++
-   ){
-
-    if(
-     y>=0&&
-     y<WORLD_H
-    ){
-
-     world[y][x]=
-      BLOCK.water;
-
-    }
-
-   }
-
-
-   if(
-    h>=0&&
-    h<WORLD_H
-   ){
-
-    world[h][x]=
-     BLOCK.sand;
-
-   }
-
-  }
-
- }
-
-}
-
-
-/* =====================================================
-   SPAWN
-===================================================== */
-
-function findSpawn(){
-
- const x=12;
-
-
- for(
-  let y=0;
-  y<WORLD_H-1;
-  y++
- ){
-
-  if(
-   world[y][x]!==BLOCK.air&&
-   world[y][x]!==BLOCK.water
-  ){
-
-   player.x=
-    x*TILE;
-
-   player.y=
-    y*TILE-
-    player.height;
-
-   player.vx=0;
-   player.vy=0;
-
-   return;
-
-  }
-
- }
-
- player.x=
-  x*TILE;
-
- player.y=
-  10*TILE;
-
-}
-
-
-/* =====================================================
-   PLAYER
-===================================================== */
-
-const player={
-
- x:12*TILE,
-
- y:0,
-
- width:20,
-
- height:40,
-
- vx:0,
-
- vy:0,
-
- speed:1.85,
-
- jump:8.2,
-
- grounded:false,
-
- direction:1,
-
- anim:0,
-
- wasGrounded:false,
-
- landTimer:0,
-
- stepTimer:0,
-
- idleTime:0,
-
- blinkTime:0,
-
- blinkDuration:0,
-
- lookX:0,
-
- lookTarget:0,
-
- mineTimer:0
-
-};
-
-
-/* =====================================================
-   INVENTORY
-===================================================== */
-
-let inventory={
-
- dirt:20,
-
- stone:10,
-
- wood:10,
-
- sand:10
-
-};
-
-
-let selectedBlock="dirt";
-
-
-function selectBlock(block){
-
- selectedBlock=block;
-
-
- document.querySelectorAll(".slot")
-  .forEach(slot=>{
-
-   slot.classList.toggle(
-    "selected",
-    slot.dataset.block===block
-   );
-
-  });
-
-}
-
-
-document.querySelectorAll(".slot")
- .forEach(slot=>{
-
-  slot.onclick=()=>{
-
-   selectBlock(
-    slot.dataset.block
-   );
-
-  };
-
- });
-
-
-function updateInventory(){
-
- for(
-  const b of
-  [
-   "dirt",
-   "stone",
-   "wood",
-   "sand"
-  ]
- ){
-
-  const el=
-   document.getElementById(
-    "count-"+b
-   );
-
-  if(el)
-   el.textContent=
-    inventory[b];
-
- }
-
-}
-
-
-/* =====================================================
-   INPUT
-===================================================== */
-
-const keys={};
-
-let jumpRequested=false;
-
-
-addEventListener(
- "keydown",
- e=>{
-
-  keys[e.code]=true;
-
-
-  if([
-   "Space",
-   "ArrowUp",
-   "ArrowDown",
-   "ArrowLeft",
-   "ArrowRight"
-  ].includes(e.code))
-   e.preventDefault();
-
-
-  /*
-   Jedno naciśnięcie
-   = jedna prośba o skok.
-  */
-
-  if(
-   (
-    e.code==="Space"||
-    e.code==="ArrowUp"||
-    e.code==="KeyW"
-   )&&
-   !e.repeat
-  ){
-
-   jumpRequested=true;
-
-  }
-
-
-  if(e.code==="Digit1")
-   selectBlock("dirt");
-
-
-  if(e.code==="Digit2")
-   selectBlock("stone");
-
-
-  if(e.code==="Digit3")
-   selectBlock("wood");
-
-
-  if(e.code==="Digit4")
-   selectBlock("sand");
-
-
-  if(e.code==="Escape"){
-
-   const info=
-    document.getElementById(
-     "menuInfoModal"
-    );
-
-   if(
-    info.style.display==="flex"
-   ){
-
-    info.style.display="none";
-
-   }
-
-   else if(
-    document.getElementById(
-     "settingsOverlay"
-    ).style.display==="flex"
-   ){
-
-    closeSettings();
-
-   }
-
-  }
-
- });
-
-
-addEventListener(
- "keyup",
- e=>{
-
-  keys[e.code]=false;
-
- });
-
-
-function left(){
-
- return(
-  keys.KeyA||
-  keys.ArrowLeft
- );
-
-}
-
-
-function right(){
-
- return(
-  keys.KeyD||
-  keys.ArrowRight
- );
-
-}
-
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-function hold(id,key){
-
- const el=
-  document.getElementById(id);
-
-
- const down=e=>{
-
-  e.preventDefault();
-
-  keys[key]=true;
-
- };
-
-
- const up=e=>{
-
-  e.preventDefault();
-
-  keys[key]=false;
-
- };
-
-
- el.addEventListener(
-  "pointerdown",
-  down,
-  {passive:false}
- );
-
-
- el.addEventListener(
-  "pointerup",
-  up,
-  {passive:false}
- );
-
-
- el.addEventListener(
-  "pointercancel",
-  up,
-  {passive:false}
- );
-
-
- el.addEventListener(
-  "pointerleave",
-  up,
-  {passive:false}
- );
-
-}
-
-
-hold(
- "leftBtn",
- "ArrowLeft"
-);
-
-
-hold(
- "rightBtn",
- "ArrowRight"
-);
-
-
-/* SKOK MOBILNY */
-
-const jumpBtn=
- document.getElementById(
-  "jumpBtn"
- );
-
-
-jumpBtn.addEventListener(
- "pointerdown",
- e=>{
-
-  e.preventDefault();
-
-  jumpRequested=true;
-
-  initAudio();
-
- },
- {
-  passive:false
- }
-);
-
-
-/* =====================================================
-   FIZYKA
-===================================================== */
-
-function solidAt(x,y){
-
- if(
-  x<0||
-  x>=WORLD_W||
-  y<0||
-  y>=WORLD_H
- )
-  return true;
-
-
- const id=
-  world[y][x];
-
-
- return(
-  id!==BLOCK.air&&
-  id!==BLOCK.water&&
-  id!==BLOCK.leaves
- );
-
-}
-
-
-function collisionRect(
- x,
- y,
- w,
- h
-){
-
- const left=
-  Math.floor(x/TILE);
-
- const right=
-  Math.floor(
-   (x+w-1)/TILE
-  );
-
- const top=
-  Math.floor(y/TILE);
-
- const bottom=
-  Math.floor(
-   (y+h-1)/TILE
-  );
-
-
- return(
-  solidAt(left,top)||
-  solidAt(right,top)||
-  solidAt(left,bottom)||
-  solidAt(right,bottom)
- );
-
-}
-
-
-/* =====================================================
-   UPDATE PLAYER
-===================================================== */
-
-function updatePlayer(){
-
- player.mineTimer=
-  Math.max(
-   0,
-   player.mineTimer-1
-  );
-
-
- const wasGrounded=
-  player.grounded;
-
-
- const movingLeft=
-  left();
-
-
- const movingRight=
-  right();
-
-
- /* RUCH */
-
- if(movingLeft){
-
-  player.vx=
-   -player.speed;
-
-  player.direction=
-   -1;
-
- }
-
- else if(movingRight){
-
-  player.vx=
-   player.speed;
-
-  player.direction=
-   1;
-
- }
-
- else{
-
-  player.vx*=.72;
-
-
-  if(
-   Math.abs(player.vx)<.04
-  )
-   player.vx=0;
-
- }
-
-
- const moving=
-  Math.abs(player.vx)>.1;
-
-
- /* =================================================
-    SKOK
- ================================================= */
-
- if(
-  jumpRequested&&
-  player.grounded
- ){
-
-  player.vy=
-   -player.jump;
-
-  player.grounded=
-   false;
-
-
-  sound("jump");
-
-
-  spawnDust(
-   player.x+
-   player.width/2,
-
-   player.y+
-   player.height,
-
-   3
-  );
-
- }
-
-
- /*
-  Bardzo ważne:
-  zerujemy żądanie po jednej klatce.
-  Dzięki temu przytrzymanie klawisza
-  nie robi automatycznego skakania.
- */
-
- jumpRequested=false;
-
-
- /* =================================================
-    ANIMACJA CHODZENIA
- ================================================= */
-
- if(
-  moving&&
-  player.grounded&&
-  settings.animations&&
-  settings.walkAnim
- ){
-
-  player.anim+=
-   .16*
-   settings.animationSpeed;
-
-  player.idleTime=0;
-
- }
-
- else{
-
-  player.anim*=.82;
-
-  player.idleTime+=1;
-
- }
-
-
- /* =================================================
-    KROKI
- ================================================= */
-
- if(
-  moving&&
-  player.grounded&&
-  settings.animations
- ){
-
-  player.stepTimer-=1;
-
-
-  if(
-   player.stepTimer<=0
-  ){
-
-   spawnDust(
-    player.x+
-    player.width/2,
-
-    player.y+
-    player.height,
-
-    1
-   );
-
-
-   sound("step");
-
-
-   player.stepTimer=
-    Math.max(
-     7,
-     15/
-     settings.animationSpeed
-    );
-
-  }
-
- }
-
-
- /* =================================================
-    GRAWITACJA
- ================================================= */
-
- player.vy+=.38;
-
-
- if(player.vy>10)
-  player.vy=10;
-
-
- /* =================================================
-    X
- ================================================= */
-
- const nextX=
-  player.x+
-  player.vx;
-
-
- if(
-  !collisionRect(
-   nextX,
-   player.y,
-   player.width,
-   player.height
-  )
- ){
-
-  player.x=nextX;
-
- }
-
- else{
-
-  player.vx=0;
-
- }
-
-
- /* =================================================
-    Y
- ================================================= */
-
- const nextY=
-  player.y+
-  player.vy;
-
-
- if(
-  !collisionRect(
-   player.x,
-   nextY,
-   player.width,
-   player.height
-  )
- ){
-
-  player.y=nextY;
-
-  player.grounded=false;
-
- }
-
- else{
-
-  if(player.vy>0){
-
-   player.grounded=true;
-
-   player.landTimer=10;
-
-  }
-
-
-  if(player.vy<0){
-
-   player.vy=0;
-
-  }
-
-  else{
-
-   player.vy=0;
-
-  }
-
- }
-
-
- if(player.landTimer>0)
-  player.landTimer--;
-
-
- if(
-  !wasGrounded&&
-  player.grounded
- ){
-
-  sound("land");
-
-
-  spawnDust(
-   player.x+
-   player.width/2,
-
-   player.y+
-   player.height,
-
-   4
-  );
-
- }
-
-
- player.wasGrounded=
-  player.grounded;
-
-
- /* GRANICE */
-
- player.x=
-  Math.max(
-   0,
-   Math.min(
-    WORLD_W*TILE-
-    player.width,
-    player.x
-   )
-  );
-
-
- if(
-  player.y>
-  WORLD_H*TILE
- ){
-
-  findSpawn();
-
- }
-
-}
-
-
-/* =====================================================
-   PARTICLES
-===================================================== */
-
-let particles=[];
-
-
-function spawnDust(
- x,
- y,
- amount
-){
-
- if(!settings.dustAnim)
-  return;
-
-
- for(
-  let i=0;
-  i<amount;
-  i++
- ){
-
-  particles.push({
-
-   x,
-   y,
-
-   vx:
-    (Math.random()-.5)*2,
-
-   vy:
-    -Math.random()*2,
-
-   life:
-    20+
-    Math.random()*15
-
-  });
-
- }
-
-}
-
-
-function updateParticles(){
-
- for(
-  let i=particles.length-1;
-  i>=0;
-  i--
- ){
-
-  const p=
-   particles[i];
-
-
-  p.x+=p.vx;
-
-  p.y+=p.vy;
-
-  p.vy+=.08;
-
-  p.life--;
-
-
-  if(p.life<=0)
-   particles.splice(i,1);
-
- }
-
-}
-
-
-/* =====================================================
-   CAMERA
-===================================================== */
-
-let camera={
-
- x:0,
-
- y:0
-
-};
-
-
-function updateCamera(){
-
- const targetX=
-  player.x+
-  player.width/2-
-  W/2;
-
-
- const targetY=
-  player.y+
-  player.height/2-
-  H/2;
-
-
- camera.x+=
-  (
-   targetX-
-   camera.x
-  )*.1;
-
-
- camera.y+=
-  (
-   targetY-
-   camera.y
-  )*.1;
-
-
- camera.x=
-  Math.max(
-   0,
-   Math.min(
-    Math.max(
-     0,
-     WORLD_W*TILE-W
-    ),
-    camera.x
-   )
-  );
-
-
- camera.y=
-  Math.max(
-   0,
-   Math.min(
-    Math.max(
-     0,
-     WORLD_H*TILE-H
-    ),
-    camera.y
-   )
-  );
-
-}
-
-
-/* =====================================================
-   DRAW WORLD
-===================================================== */
-
-function drawWorld(time){
-
- const startX=
-  Math.max(
-   0,
-   Math.floor(
-    camera.x/TILE
-   )-2
-  );
-
-
- const endX=
-  Math.min(
-   WORLD_W,
-   Math.ceil(
-    (camera.x+W)/TILE
-   )+2
-  );
-
-
- const startY=
-  Math.max(
-   0,
-   Math.floor(
-    camera.y/TILE
-   )-2
-  );
-
-
- const endY=
-  Math.min(
-   WORLD_H,
-   Math.ceil(
-    (camera.y+H)/TILE
-   )+2
-  );
-
-
- for(
-  let y=startY;
-  y<endY;
-  y++
- ){
-
-  for(
-   let x=startX;
-   x<endX;
-   x++
-  ){
-
-   const id=
-    world[y][x];
-
-
-   if(
-    id===BLOCK.air
-   )
-    continue;
-
-
-   const px=
-    x*TILE-
-    camera.x;
-
-
-   const py=
-    y*TILE-
-    camera.y;
-
-
-   if(
-    id===BLOCK.grass
-   ){
-
-    ctx.fillStyle=
-     "#795548";
-
-    ctx.fillRect(
-     px,
-     py,
-     TILE,
-     TILE
-    );
-
-
-    ctx.fillStyle=
-     "#45a943";
-
-    ctx.fillRect(
-     px,
-     py,
-     TILE,
-     7
-    );
-
-   }
-
-
-   else if(
-    id===BLOCK.dirt
-   ){
-
-    ctx.fillStyle=
-     "#795548";
-
-    ctx.fillRect(
-     px,
-     py,
-     TILE,
-     TILE
-    );
-
-   }
-
-
-   else if(
-    id===BLOCK.stone
-   ){
-
-    ctx.fillStyle=
-     "#777";
-
-    ctx.fillRect(
-     px,
-     py,
-     TILE,
-     TILE
-    );
-
-
-    ctx.fillStyle=
-     "#686868";
-
-    ctx.fillRect(
-     px+5,
-     py+6,
-     5,
-     5
-    );
-
-    ctx.fillRect(
-     px+19,
-     py+18,
-     4,
-     4
-    );
-
-   }
-
-
-   else if(
-    id===BLOCK.wood
-   ){
-
-    ctx.fillStyle=
-     "#754c24";
-
-    ctx.fillRect(
-     px,
-     py,
-     TILE,
-     TILE
-    );
-
-
-    ctx.fillStyle=
-     "#9a6532";
-
-    ctx.fillRect(
-     px+7,
-     py,
-     4,
-     TILE
-    );
-
-   }
-
-
-   else if(
-    id===BLOCK.leaves
-   ){
-
-    ctx.fillStyle=
-     "#319447";
-
-    ctx.fillRect(
-     px,
-     py,
-     TILE,
-     TILE
-    );
-
-
-    ctx.fillStyle=
-     "#45b957";
-
-    ctx.fillRect(
-     px+5,
-     py+5,
-     7,
-     7
-    );
-
-    ctx.fillRect(
-     px+18,
-     py+12,
-     6,
-     6
-    );
-
-   }
-
-
-   else if(
-    id===BLOCK.sand
-   ){
-
-    ctx.fillStyle=
-     "#d9bd70";
-
-    ctx.fillRect(
-     px,
-     py,
-     TILE,
-     TILE
-    );
-
-   }
-
-
-   else if(
-    id===BLOCK.water
-   ){
-
-    ctx.fillStyle=
-     "rgba(48,151,225,.72)";
-
-    ctx.fillRect(
-     px,
-     py,
-     TILE,
-     TILE
-    );
-
-
-    if(
-     settings.water
-    ){
-
-     ctx.fillStyle=
-      "rgba(255,255,255,.28)";
-
-
-     const wave=
-      Math.sin(
-       time*.003+
-       x*.7
-      )*3;
-
-
-     ctx.fillRect(
-      px,
-      py+
-      7+
-      wave,
-      TILE,
-      3
-     );
-
-    }
-
-   }
-
-  }
-
- }
-
-
- /* GRID-LIKE PIXEL DETAIL */
-
-}
-
-
-/* =====================================================
-   PLAYER
-===================================================== */
-
-function drawPlayer(time){
-
- const speed=
-  settings.animationSpeed;
-
-
- const walking=
-  Math.abs(player.vx)>.1&&
-  player.grounded&&
-  settings.animations&&
-  settings.walkAnim;
-
-
- const airborne=
-  !player.grounded;
-
-
- let bob=0;
-
- let armSwing=0;
-
- let legSwing=0;
-
- let tilt=0;
-
- let squash=1;
-
- let stretch=1;
-
- let headBob=0;
-
- let landing=0;
-
-
- /* =================================================
-    IDLE
- ================================================= */
-
- if(
-  !walking&&
-  player.grounded&&
-  settings.animations&&
-  settings.idleAnim
- ){
-
-  const idle=
-   time*.0012;
-
-
-  bob=
-   Math.sin(idle)*.55;
-
-
-  headBob=
-   Math.sin(
-    idle*1.25
-   )*.35;
-
-
-  stretch=
-   1+
-   Math.sin(idle)*.006;
-
- }
-
-
- /* =================================================
-    WALK
- ================================================= */
-
- if(walking){
-
-  const walk=
-   player.anim;
-
-
-  const wave=
-   Math.sin(walk);
-
-
-  const wave2=
-   Math.sin(walk*2);
-
-
-  bob=
-   Math.abs(wave)*1.2;
-
-
-  armSwing=
-   wave*3.4;
-
-
-  legSwing=
-   wave*4.3;
-
-
-  tilt=
-   wave*.027;
-
-
-  headBob=
-   wave2*.4;
-
-
-  stretch=
-   1+
-   Math.abs(wave)*.018;
-
- }
-
-
- /* =================================================
-    JUMP
- ================================================= */
-
- if(
-  airborne&&
-  settings.animations&&
-  settings.jumpAnim
- ){
-
-  if(player.vy<0){
-
-   armSwing=-4.5;
-
-   legSwing=2.5;
-
-   stretch=1.025;
-
-   squash=.96;
-
-   tilt=
-    -.035*
-    player.direction;
-
-  }
-
-  else{
-
-   armSwing=3.5;
-
-   legSwing=-2.5;
-
-   stretch=.98;
-
-   squash=1.03;
-
-   tilt=
-    .025*
-    player.direction;
-
-  }
-
- }
-
-
- /* =================================================
-    LĄDOWANIE
- ================================================= */
-
- if(
-  player.landTimer>0&&
-  settings.landAnim
- ){
-
-  landing=
-   player.landTimer/10;
-
-
-  squash=
-   1-
-   .12*
-   landing;
-
-
-  stretch=
-   1+
-   .08*
-   landing;
-
-
-  bob=
-   2*
-   landing;
-
- }
-
-
- /* =================================================
-    KOPANIE
- ================================================= */
-
- if(
-  player.mineTimer>0&&
-  settings.animations
- ){
-
-  const m=
-   Math.sin(
-    (
-     1-
-     player.mineTimer/12
-    )*
-    Math.PI
-   );
-
-
-  armSwing=
-   -18*m;
-
-
-  tilt=
-   -.08*
-   m*
-   player.direction;
-
-
-  bob+=
-   Math.abs(m)*1.2;
-
- }
-
-
- /* =================================================
-    POZYCJA
- ================================================= */
-
- const cx=
-  Math.round(
-   player.x-
-   camera.x+
-   player.width/2
-  );
-
-
- const baseY=
-  Math.round(
-   player.y-
-   camera.y+
-   bob
-  );
-
-
- /* =================================================
-    CIEŃ
- ================================================= */
-
- if(
-  settings.shadowAnim&&
-  player.grounded
- ){
-
-  ctx.save();
-
-
-  ctx.fillStyle=
-   "rgba(0,0,0,.2)";
-
-
-  const shadowSize=
-   walking
-   ?
-    10+
-    Math.abs(
-     Math.sin(
-      player.anim
-     )
-    )*2
-   :
-    9;
-
-
-  ctx.beginPath();
-
-
-  ctx.ellipse(
-
-   cx,
-
-   player.y-
-   camera.y+
-   player.height+2,
-
-   shadowSize,
-
-   2,
-
-   0,
-
-   0,
-
-   Math.PI*2
-
-  );
-
-
-  ctx.fill();
-
-  ctx.restore();
-
- }
-
-
- /* =================================================
-    POSTAĆ
- ================================================= */
-
- ctx.save();
-
-
- ctx.translate(
-  cx,
-  baseY
- );
-
-
- ctx.rotate(
-  tilt*
-  player.direction
- );
-
-
- ctx.scale(
-  player.direction,
-  1
- );
-
-
- ctx.scale(
-  stretch,
-  squash
- );
-
-
- const s=2;
-
-
- /* TYLNA NOGA */
-
- ctx.fillStyle=
-  "#4d3b78";
-
-
- ctx.save();
-
-
- ctx.translate(
-  -legSwing*.12,
-  0
- );
-
-
- ctx.fillRect(
-  1*s,
-  12*s,
-  6*s,
-  7*s
- );
-
-
- ctx.fillStyle=
-  "#25252b";
-
-
- ctx.fillRect(
-  .5*s,
-  18*s,
-  7*s,
-  2*s
- );
-
-
- ctx.restore();
-
-
- /* PRZEDNIA NOGA */
-
- ctx.fillStyle=
-  "#4d3b78";
-
-
- ctx.save();
-
-
- ctx.translate(
-  legSwing*.12,
-  0
- );
-
-
- ctx.fillRect(
-  4*s,
-  12*s,
-  6*s,
-  7*s
- );
-
-
- ctx.fillStyle=
-  "#25252b";
-
-
- ctx.fillRect(
-  3.5*s,
-  18*s,
-  7*s,
-  2*s
- );
-
-
- ctx.restore();
-
-
- /* TUŁÓW */
-
- ctx.fillStyle=
-  "#315aa0";
-
-
- ctx.fillRect(
-  1*s,
-  5*s,
-  8*s,
-  8*s
- );
-
-
- ctx.fillStyle=
-  "#3f73c9";
-
-
- ctx.fillRect(
-  2*s,
-  5*s,
-  6*s,
-  7*s
- );
-
-
- /* LOGO */
-
- ctx.fillStyle=
-  "#5790df";
-
-
- ctx.fillRect(
-  3*s,
-  6*s,
-  2*s,
-  2*s
- );
-
-
- /* TYLNA RĘKA */
-
- ctx.fillStyle=
-  "#d49c78";
-
-
- ctx.save();
-
-
- ctx.translate(
-  -armSwing*.18,
-  0
- );
-
-
- ctx.rotate(
-  armSwing*.018
- );
-
-
- ctx.fillRect(
-  -1*s,
-  6*s,
-  2*s,
-  7*s
- );
-
-
- ctx.fillStyle=
-  "#f0bd91";
-
-
- ctx.fillRect(
-  -1*s,
-  12*s,
-  2*s,
-  2*s
- );
-
-
- ctx.restore();
-
-
- /* PRZEDNIA RĘKA */
-
- ctx.fillStyle=
-  "#f0bd91";
-
-
- ctx.save();
-
-
- ctx.translate(
-  armSwing*.18,
-  0
- );
-
-
- ctx.rotate(
-  -armSwing*.018
- );
-
-
- ctx.fillRect(
-  9*s,
-  6*s,
-  2*s,
-  7*s
- );
-
-
- ctx.fillRect(
-  9*s,
-  12*s,
-  2*s,
-  2*s
- );
-
-
- /* KILOF PODCZAS KOPANIA */
-
- if(
-  player.mineTimer>0
- ){
-
-  ctx.save();
-
-
-  ctx.translate(
-   10*s,
-   7*s
-  );
-
-
-  ctx.rotate(
-   -.8+
-   Math.sin(
-    player.mineTimer*.5
-   )*.35
-  );
-
-
-  ctx.fillStyle=
-   "#704728";
-
-
-  ctx.fillRect(
-   0,
-   0,
-   2*s,
-   10*s
-  );
-
-
-  ctx.fillStyle=
-   "#9ca3aa";
-
-
-  ctx.fillRect(
-   -4*s,
-   0,
-   10*s,
-   2*s
-  );
-
-
-  ctx.restore();
-
- }
-
-
- ctx.restore();
-
-
- /* SZYJA */
-
- ctx.fillStyle=
-  "#f0bd91";
-
-
- ctx.fillRect(
-  4*s,
-  3*s,
-  2*s,
-  3*s
- );
-
-
- /* GŁOWA */
-
- ctx.save();
-
-
- ctx.translate(
-  player.lookX,
-  headBob
- );
-
-
- ctx.fillStyle=
-  "#f0bd91";
-
-
- ctx.fillRect(
-  2*s,
-  1*s,
-  6*s,
-  5*s
- );
-
-
- /* USZY */
-
- ctx.fillRect(
-  1*s,
-  3*s,
-  1*s,
-  2*s
- );
-
-
- ctx.fillRect(
-  8*s,
-  3*s,
-  1*s,
-  2*s
- );
-
-
- /* WŁOSY */
-
- ctx.fillStyle=
-  "#542f20";
-
-
- let hairWave=0;
-
-
- if(
-  settings.hairAnim&&
-  settings.animations
- ){
-
-  hairWave=
-   Math.sin(
-    time*.008+
-    player.vx*.4
-   )*.7;
-
- }
-
-
- ctx.fillRect(
-  2*s,
-  0,
-  6*s,
-  2*s
- );
-
-
- ctx.fillRect(
-  1*s,
-  1*s,
-  2*s,
-  2*s
- );
-
-
- ctx.fillRect(
-  7*s+
-  hairWave,
-  1*s,
-  2*s,
-  2*s
- );
-
-
- ctx.fillRect(
-  3*s,
-  1*s,
-  2*s,
-  2*s
- );
-
-
- /* OCZY */
-
- ctx.fillStyle=
-  "#111";
-
-
- let blinking=false;
-
-
- if(
-  settings.blinkAnim&&
-  settings.animations
- ){
-
-  blinking=
-   Math.floor(
-    time/100
-   )%83===0;
-
- }
-
-
- if(blinking){
-
-  ctx.fillRect(
-   3*s,
-   3*s,
-   2*s,
-   1*s
-  );
-
-
-  ctx.fillRect(
-   6*s,
-   3*s,
-   2*s,
-   1*s
-  );
-
- }
-
- else{
-
-  ctx.fillRect(
-   3*s,
-   3*s,
-   1*s,
-   1*s
-  );
-
-
-  ctx.fillRect(
-   6*s,
-   3*s,
-   1*s,
-   1*s
-  );
-
- }
-
-
- /* NOS */
-
- ctx.fillStyle=
-  "#d89f7a";
-
-
- ctx.fillRect(
-  5*s,
-  4*s,
-  1*s,
-  1*s
- );
-
-
- /* UŚMIECH */
-
- if(
-  walking||
-  player.grounded
- ){
-
-  ctx.fillStyle=
-   "#bd765f";
-
-
-  ctx.fillRect(
-   4*s,
-   5*s,
-   3*s,
-   1*s
-  );
-
- }
-
-
- ctx.restore();
-
-
- ctx.restore();
-
-}
-
-
-/* =====================================================
-   PARTICLES RENDER
-===================================================== */
-
-function drawParticles(){
-
- for(
-  const p of particles
- ){
-
-  ctx.fillStyle=
-   "rgba(210,190,150,.8)";
-
-
-  ctx.fillRect(
-   Math.round(
-    p.x-camera.x
-   ),
-   Math.round(
-    p.y-camera.y
-   ),
-   3,
-   3
-  );
-
- }
-
-}
-
-
-/* =====================================================
-   RENDER
-===================================================== */
-
-let W=innerWidth;
-
-let H=innerHeight;
-
-
-const canvas=
- document.getElementById(
-  "game"
- );
-
-
-const ctx=
- canvas.getContext("2d");
-
+/* =========================================================
+   RESIZE
+   ========================================================= */
 
 function resize(){
 
- W=innerWidth;
+  W = innerWidth;
+  H = innerHeight;
 
- H=innerHeight;
+  canvas.width = W;
+  canvas.height = H;
 
+  ctx.imageSmoothingEnabled = !settings.pixelPerfect;
+}
 
- canvas.width=W;
+addEventListener("resize",resize);
 
- canvas.height=H;
+/* =========================================================
+   WORLD
+   ========================================================= */
 
+function terrainHeight(x){
 
- ctx.imageSmoothingEnabled=
-  !settings.pixelPerfect;
+  return Math.max(
+    17,
+    Math.min(
+      36,
+      Math.floor(
+        25 +
+        Math.sin(x*.13)*2.5 +
+        Math.sin(x*.037)*4 +
+        Math.sin(x*.011)*5
+      )
+    )
+  );
 
 }
 
+function createWorld(){
 
-addEventListener(
- "resize",
- resize
-);
-
-
-/* =====================================================
-   MENU
-===================================================== */
-
-const overlay=
- document.getElementById(
-  "settingsOverlay"
- );
-
-
-let paused=true;
-
-let gameStarted=false;
-
-
-const mainMenu=
- document.getElementById(
-  "mainMenu"
- );
-
-
-const menuInfoModal=
- document.getElementById(
-  "menuInfoModal"
- );
-
-
-const menuInfoTitle=
- document.getElementById(
-  "menuInfoTitle"
- );
-
-
-const menuInfoText=
- document.getElementById(
-  "menuInfoText"
- );
-
-
-const menuInfo={
-
- NEWS:{
-  title:"📰 NEWS",
-
-  text:
-   "✨ Ulepszone animacje postaci\n"+
-   "⛏️ Animacja kopania i dźwięk kopania\n"+
-   "🌳 Pixelowy świat i drzewa\n"+
-   "⚙️ Rozbudowane ustawienia\n"+
-   "🔊 Efekty dźwiękowe"
- },
-
-
- SHOP:{
-  title:"🛒 SHOP",
-
-  text:
-   "Sklep jest przygotowany jako część menu.\n\n"+
-   "W przyszłości mogą pojawić się tutaj "+
-   "skórki, przedmioty i dodatki."
- },
-
-
- ACCOUNT:{
-  title:"👤 ACCOUNT",
-
-  text:
-   "PIXEL PLAYER\n\n"+
-   "Poziom: 1\n"+
-   "Światy: 1\n"+
-   "Status: ONLINE"
- },
-
-
- SOCIAL:{
-  title:"👥 SOCIAL",
-
-  text:
-   "Sekcja społecznościowa jest gotowa "+
-   "na przyszłe funkcje, takie jak znajomi, "+
-   "wspólne światy i multiplayer."
- }
-
-};
-
-
-document
- .querySelectorAll(
-  "[data-menu-info]"
- )
- .forEach(btn=>{
-
-  btn.addEventListener(
-   "click",
-   ()=>{
-
-    const type=
-     btn.dataset.menuInfo;
-
-
-    const info=
-     menuInfo[type];
-
-
-    if(!info)
-     return;
-
-
-    menuInfoTitle.textContent=
-     info.title;
-
-
-    menuInfoText.textContent=
-     info.text;
-
-
-    menuInfoModal.style.display=
-     "flex";
-
-
-    sound("place");
-
-   }
+  world = Array.from(
+    {length:WORLD_H},
+    () => Array(WORLD_W).fill(BLOCK.air)
   );
 
- });
+  heights = [];
 
+  for(let x=0;x<WORLD_W;x++){
 
-document.getElementById(
- "menuInfoClose"
-).onclick=()=>{
+    const h = terrainHeight(x);
 
- menuInfoModal.style.display=
-  "none";
+    heights[x] = h;
 
-};
+    for(let y=h;y<WORLD_H;y++){
 
+      if(y===h){
+        world[y][x] = BLOCK.grass;
+      }
+      else if(y<h+5){
+        world[y][x] = BLOCK.dirt;
+      }
+      else{
+        world[y][x] = BLOCK.stone;
+      }
 
-menuInfoModal.addEventListener(
- "click",
- e=>{
-
-  if(
-   e.target===
-   menuInfoModal
-  ){
-
-   menuInfoModal.style.display=
-    "none";
+    }
 
   }
 
- }
-);
+  /* JASKINIE */
 
+  for(let x=4;x<WORLD_W-4;x++){
 
-/* GRAJ */
+    for(let y=heights[x]+7;y<WORLD_H-6;y++){
 
-document.getElementById(
- "mainPlay"
-).onclick=()=>{
+      const n =
+        Math.sin(x*.17+y*.29) +
+        Math.sin(x*.07-y*.13);
 
- gameStarted=true;
+      if(n>1.35 && y<72){
+        world[y][x]=BLOCK.air;
+      }
 
- mainMenu.style.display=
-  "none";
-
- paused=false;
-
- initAudio();
-
- sound("place");
-
-};
-
-
-/* USTAWIENIA */
-
-function openSettings(){
-
- overlay.style.display=
-  "flex";
-
- paused=true;
-
-}
-
-
-function closeSettings(){
-
- overlay.style.display=
-  "none";
-
- paused=
-  !gameStarted;
-
-
- if(!gameStarted)
-  mainMenu.style.display=
-   "flex";
-
-}
-
-
-document.getElementById(
- "settingsBtn"
-).onclick=
- openSettings;
-
-
-document.getElementById(
- "mainSettings"
-).onclick=()=>{
-
- mainMenu.style.display=
-  "none";
-
- openSettings();
-
-};
-
-
-document.getElementById(
- "closeSettings"
-).onclick=
- closeSettings;
-
-
-document.getElementById(
- "closeSettingsBottom"
-).onclick=
- closeSettings;
-
-
-/* TABS */
-
-document
- .querySelectorAll(".tab")
- .forEach(tab=>{
-
-  tab.onclick=()=>{
-
-   document
-    .querySelectorAll(".tab")
-    .forEach(x=>
-     x.classList.remove(
-      "active"
-     )
-    );
-
-
-   document
-    .querySelectorAll(".page")
-    .forEach(x=>
-     x.classList.remove(
-      "active"
-     )
-    );
-
-
-   tab.classList.add(
-    "active"
-   );
-
-
-   document.getElementById(
-    tab.dataset.page
-   ).classList.add(
-    "active"
-   );
-
-  };
-
- });
-
-
-function switchUI(
- id,
- value
-){
-
- document.getElementById(id)
-  .classList.toggle(
-   "on",
-   value
-  );
-
-}
-
-
-function applySettings(){
-
- switchUI(
-  "mobileSwitch",
-  settings.mobile
- );
-
-
- switchUI(
-  "animationSwitch",
-  settings.animations
- );
-
-
- switchUI(
-  "autoSaveSwitch",
-  settings.autoSave
- );
-
-
- switchUI(
-  "pixelSwitch",
-  settings.pixelPerfect
- );
-
-
- switchUI(
-  "waterSwitch",
-  settings.water
- );
-
-
- switchUI(
-  "soundSwitch",
-  settings.sound
- );
-
-
- switchUI(
-  "musicSwitch",
-  settings.music
- );
-
-
- switchUI(
-  "walkAnimSwitch",
-  settings.walkAnim
- );
-
-
- switchUI(
-  "idleAnimSwitch",
-  settings.idleAnim
- );
-
-
- switchUI(
-  "blinkAnimSwitch",
-  settings.blinkAnim
- );
-
-
- switchUI(
-  "jumpAnimSwitch",
-  settings.jumpAnim
- );
-
-
- switchUI(
-  "landAnimSwitch",
-  settings.landAnim
- );
-
-
- switchUI(
-  "hairAnimSwitch",
-  settings.hairAnim
- );
-
-
- switchUI(
-  "dustAnimSwitch",
-  settings.dustAnim
- );
-
-
- switchUI(
-  "shadowAnimSwitch",
-  settings.shadowAnim
- );
-
-
- document.getElementById(
-  "qualitySelect"
- ).value=
-  settings.quality;
-
-
- document.getElementById(
-  "fpsSelect"
- ).value=
-  settings.fps;
-
-
- document.getElementById(
-  "volumeRange"
- ).value=
-  settings.volume;
-
-
- document.getElementById(
-  "animationSpeedSelect"
- ).value=
-  settings.animationSpeed;
-
-
- document.getElementById(
-  "mobileControls"
- ).style.display=
-  settings.mobile
-  ?
-   "flex"
-  :
-   "none";
-
-
- document.getElementById(
-  "jumpBtn"
- ).style.display=
-  settings.mobile
-  ?
-   "flex"
-  :
-   "none";
-
-}
-
-
-function setupSwitch(
- id,
- key
-){
-
- const el=
-  document.getElementById(id);
-
-
- el.onclick=()=>{
-
-  settings[key]=
-   !settings[key];
-
-
-  switchUI(
-   id,
-   settings[key]
-  );
-
- };
-
-}
-
-
-setupSwitch(
- "mobileSwitch",
- "mobile"
-);
-
-
-setupSwitch(
- "animationSwitch",
- "animations"
-);
-
-
-setupSwitch(
- "autoSaveSwitch",
- "autoSave"
-);
-
-
-setupSwitch(
- "pixelSwitch",
- "pixelPerfect"
-);
-
-
-setupSwitch(
- "waterSwitch",
- "water"
-);
-
-
-setupSwitch(
- "soundSwitch",
- "sound"
-);
-
-
-setupSwitch(
- "musicSwitch",
- "music"
-);
-
-
-setupSwitch(
- "walkAnimSwitch",
- "walkAnim"
-);
-
-
-setupSwitch(
- "idleAnimSwitch",
- "idleAnim"
-);
-
-
-setupSwitch(
- "blinkAnimSwitch",
- "blinkAnim"
-);
-
-
-setupSwitch(
- "jumpAnimSwitch",
- "jumpAnim"
-);
-
-
-setupSwitch(
- "landAnimSwitch",
- "landAnim"
-);
-
-
-setupSwitch(
- "hairAnimSwitch",
- "hairAnim"
-);
-
-
-setupSwitch(
- "dustAnimSwitch",
- "dustAnim"
-);
-
-
-setupSwitch(
- "shadowAnimSwitch",
- "shadowAnim"
-);
-
-
-document.getElementById(
- "qualitySelect"
-).onchange=e=>{
-
- settings.quality=
-  e.target.value;
-
-};
-
-
-document.getElementById(
- "fpsSelect"
-).onchange=e=>{
-
- settings.fps=
-  Number(
-   e.target.value
-  );
-
-};
-
-
-document.getElementById(
- "volumeRange"
-).oninput=e=>{
-
- settings.volume=
-  Number(
-   e.target.value
-  );
-
-};
-
-
-document.getElementById(
- "animationSpeedSelect"
-).onchange=e=>{
-
- settings.animationSpeed=
-  Number(
-   e.target.value
-  );
-
-};
-
-
-/* =====================================================
-   WORLD SCREEN
-===================================================== */
-
-function worldPosition(
- clientX,
- clientY
-){
-
- return{
-
-  x:
-   Math.floor(
-    (
-     clientX+
-     camera.x
-    )/
-    TILE
-   ),
-
-  y:
-   Math.floor(
-    (
-     clientY+
-     camera.y
-    )/
-    TILE
-   )
-
- };
-
-}
-
-
-function reachable(
- x,
- y
-){
-
- const px=
-  player.x+
-  player.width/2;
-
-
- const py=
-  player.y+
-  player.height/2;
-
-
- const bx=
-  x*TILE+
-  TILE/2;
-
-
- const by=
-  y*TILE+
-  TILE/2;
-
-
- return(
-  Math.hypot(
-   bx-px,
-   by-py
-  )<=
-  TILE*5
- );
-
-}
-
-
-/* =====================================================
-   MINING
-===================================================== */
-
-function mine(
- clientX,
- clientY
-){
-
- const p=
-  worldPosition(
-   clientX,
-   clientY
-  );
-
-
- const x=p.x;
-
- const y=p.y;
-
-
- if(
-  x<0||
-  x>=WORLD_W||
-  y<0||
-  y>=WORLD_H
- )
-  return;
-
-
- if(
-  !reachable(x,y)
- ){
-
-  showMessage(
-   "Za daleko!"
-  );
-
-  return;
-
- }
-
-
- const id=
-  world[y][x];
-
-
- if(
-  id===BLOCK.air||
-  id===BLOCK.water
- )
-  return;
-
-
- if(
-  id===BLOCK.grass||
-  id===BLOCK.dirt
- ){
-
-  inventory.dirt++;
-
- }
-
- else if(
-  id===BLOCK.stone
- ){
-
-  inventory.stone++;
-
- }
-
- else if(
-  id===BLOCK.wood
- ){
-
-  inventory.wood++;
-
- }
-
- else if(
-  id===BLOCK.sand
- ){
-
-  inventory.sand++;
-
- }
-
-
- world[y][x]=
-  BLOCK.air;
-
-
- player.mineTimer=
-  12;
-
-
- updateInventory();
-
-
- sound("mine");
-
-
- spawnDust(
-  x*TILE+
-  TILE/2,
-
-  y*TILE+
-  TILE/2,
-
-  5
- );
-
-}
-
-
-/* =====================================================
-   PLACE
-===================================================== */
-
-function place(
- clientX,
- clientY
-){
-
- const p=
-  worldPosition(
-   clientX,
-   clientY
-  );
-
-
- const x=p.x;
-
- const y=p.y;
-
-
- if(
-  x<0||
-  x>=WORLD_W||
-  y<0||
-  y>=WORLD_H
- )
-  return;
-
-
- if(
-  !reachable(x,y)
- )
-  return;
-
-
- if(
-  world[y][x]!==BLOCK.air
- )
-  return;
-
-
- if(
-  inventory[selectedBlock]<=0
- )
-  return;
-
-
- const px=
-  player.x+
-  player.width/2;
-
-
- const py=
-  player.y+
-  player.height/2;
-
-
- const bx=
-  x*TILE+
-  TILE/2;
-
-
- const by=
-  y*TILE+
-  TILE/2;
-
-
- if(
-  Math.abs(
-   bx-px
-  )<TILE&&
-  Math.abs(
-   by-py
-  )<TILE
- )
-  return;
-
-
- world[y][x]=
-  BLOCK[
-   selectedBlock
-  ];
-
-
- inventory[
-  selectedBlock
- ]--;
-
-
- updateInventory();
-
-
- sound("place");
-
-}
-
-
-/* =====================================================
-   MOUSE
-===================================================== */
-
-canvas.addEventListener(
- "mousedown",
- e=>{
-
-  if(paused)
-   return;
-
-
-  initAudio();
-
-
-  if(e.button===0){
-
-   mine(
-    e.clientX,
-    e.clientY
-   );
+    }
 
   }
 
-
-  if(e.button===2){
-
-   e.preventDefault();
-
-
-   place(
-    e.clientX,
-    e.clientY
-   );
-
-  }
-
- });
-
-
-canvas.addEventListener(
- "contextmenu",
- e=>
-  e.preventDefault()
-);
-
-
-/* =====================================================
-   DOTYK
-===================================================== */
-
-let touchData=null;
-
-let touchTimer=null;
-
-
-canvas.addEventListener(
- "touchstart",
- e=>{
-
-  if(
-   paused||
-   !e.touches[0]
-  )
-   return;
-
-
-  e.preventDefault();
-
-
-  const t=
-   e.touches[0];
-
-
-  touchData={
-
-   x:t.clientX,
-
-   y:t.clientY,
-
-   time:Date.now()
-
-  };
-
-
-  touchTimer=
-   setTimeout(
-    ()=>{
-
-     if(touchData){
-
-      place(
-       touchData.x,
-       touchData.y
-      );
-
-     }
-
-    },
-    400
-   );
-
- },
- {
-  passive:false
- }
-);
-
-
-canvas.addEventListener(
- "touchend",
- e=>{
-
-  e.preventDefault();
-
-
-  if(!touchData)
-   return;
-
-
-  clearTimeout(
-   touchTimer
-  );
-
-
-  if(
-   Date.now()-
-   touchData.time<
-   400
-  ){
-
-   mine(
-    touchData.x,
-    touchData.y
-   );
-
-  }
-
-
-  touchData=null;
-
- },
- {
-  passive:false
- }
-);
-
-
-/* =====================================================
-   SAVE
-===================================================== */
-
-const SAVE_KEY=
- "PIXEL_WORLD_STABLE_V8";
-
-
-function saveGame(){
-
- try{
-
-  localStorage.setItem(
-   SAVE_KEY,
-
-   JSON.stringify({
-
-    version:8,
-
-    world:world,
-
-    player:{
-     x:player.x,
-     y:player.y
-    },
-
-    inventory:inventory,
-
-    selectedBlock:
-     selectedBlock
-
-   })
-
-  );
-
- }
- catch{
-
-  showMessage(
-   "Nie udało się zapisać."
-  );
-
- }
-
-}
-
-
-function loadGame(){
-
- try{
-
-  const raw=
-   localStorage.getItem(
-    SAVE_KEY
-   );
-
-
-  if(!raw)
-   return false;
-
-
-  const data=
-   JSON.parse(raw);
-
-
-  if(
-   !data||
-   !Array.isArray(data.world)||
-   data.world.length!==WORLD_H
-  )
-   return false;
-
+  /* DRZEWA */
 
   for(
-   let y=0;
-   y<WORLD_H;
-   y++
+    let x=12;
+    x<WORLD_W-10;
+    x+=8+Math.floor(Math.random()*8)
   ){
 
-   if(
-    !Array.isArray(
-     data.world[y]
-    )||
-    data.world[y].length!==WORLD_W
-   )
-    return false;
+    if(Math.random()>.62) continue;
 
+    const ground=heights[x];
 
-   for(
-    let x=0;
-    x<WORLD_W;
-    x++
-   ){
+    for(let y=1;y<=4;y++){
 
-    const id=
-     data.world[y][x];
+      if(
+        ground-y>=0 &&
+        world[ground-y][x]===BLOCK.air
+      ){
+        world[ground-y][x]=BLOCK.wood;
+      }
 
+    }
 
-    if(
-     !Number.isInteger(id)||
-     id<BLOCK.air||
-     id>BLOCK.water
-    )
-     return false;
+    const top=ground-5;
 
-   }
+    for(let yy=-2;yy<=2;yy++){
 
-  }
+      for(let xx=-2;xx<=2;xx++){
 
+        if(Math.abs(xx)+Math.abs(yy)<=3){
 
-  world=
-   data.world;
+          const tx=x+xx;
+          const ty=top+yy;
 
+          if(
+            tx>=0 &&
+            tx<WORLD_W &&
+            ty>=0 &&
+            ty<WORLD_H &&
+            world[ty][tx]===BLOCK.air
+          ){
+            world[ty][tx]=BLOCK.leaves;
+          }
 
-  if(data.player){
+        }
 
-   if(
-    Number.isFinite(
-     data.player.x
-    )
-   )
-    player.x=
-     data.player.x;
+      }
 
-
-   if(
-    Number.isFinite(
-     data.player.y
-    )
-   )
-    player.y=
-     data.player.y;
+    }
 
   }
 
+  /* MAŁE STAWY */
 
-  if(data.inventory){
+  for(let p=0;p<3;p++){
 
-   for(
-    const b of
-    [
-     "dirt",
-     "stone",
-     "wood",
-     "sand"
-    ]
-   ){
+    const px=
+      30+
+      Math.floor(
+        Math.random()*(WORLD_W-60)
+      );
 
-    const n=
-     Number(
-      data.inventory[b]
-     );
-
-
-    if(
-     Number.isFinite(n)
+    for(
+      let x=px-2;
+      x<=px+2;
+      x++
     ){
 
-     inventory[b]=
-      Math.max(
-       0,
-       Math.floor(n)
+      if(x<0 || x>=WORLD_W) continue;
+
+      const h=heights[x];
+
+      if(world[h][x]===BLOCK.grass){
+        world[h][x]=BLOCK.sand;
+      }
+
+      if(h+1<WORLD_H){
+        world[h+1][x]=BLOCK.water;
+      }
+
+    }
+
+  }
+
+}
+
+/* =========================================================
+   COLLISION
+   ========================================================= */
+
+function solidAt(x,y){
+
+  if(
+    x<0 ||
+    x>=WORLD_W ||
+    y<0 ||
+    y>=WORLD_H
+  ){
+    return true;
+  }
+
+  const id=world[y][x];
+
+  return (
+    id!==BLOCK.air &&
+    id!==BLOCK.water &&
+    id!==BLOCK.leaves
+  );
+
+}
+
+function collision(x,y,w,h){
+
+  const left=Math.floor(x/TILE);
+  const right=Math.floor((x+w-1)/TILE);
+  const top=Math.floor(y/TILE);
+  const bottom=Math.floor((y+h-1)/TILE);
+
+  return (
+    solidAt(left,top) ||
+    solidAt(right,top) ||
+    solidAt(left,bottom) ||
+    solidAt(right,bottom)
+  );
+
+}
+
+function findSpawn(){
+
+  const x=12;
+
+  for(let y=0;y<WORLD_H-2;y++){
+
+    if(solidAt(x,y)){
+
+      player.x=x*TILE;
+      player.y=y*TILE-player.h;
+
+      player.vx=0;
+      player.vy=0;
+
+      player.grounded=true;
+
+      return;
+
+    }
+
+  }
+
+  player.x=12*TILE;
+  player.y=10*TILE;
+
+}
+
+/* =========================================================
+   AUDIO
+   ========================================================= */
+
+let audio=null;
+
+function initAudio(){
+
+  if(!settings.sound) return;
+
+  try{
+
+    if(!audio){
+
+      audio=
+        new(
+          window.AudioContext ||
+          window.webkitAudioContext
+        )();
+
+    }
+
+    if(audio.state==="suspended"){
+      audio.resume();
+    }
+
+  }
+  catch(e){}
+
+}
+
+function sound(type){
+
+  if(!settings.sound) return;
+
+  try{
+
+    initAudio();
+
+    if(!audio) return;
+
+    const osc=
+      audio.createOscillator();
+
+    const gain=
+      audio.createGain();
+
+    osc.connect(gain);
+    gain.connect(audio.destination);
+
+    const frequencies={
+      mine:150,
+      place:270,
+      jump:480,
+      land:100,
+      step:85,
+      craft:620
+    };
+
+    const durations={
+      mine:.07,
+      place:.06,
+      jump:.1,
+      land:.08,
+      step:.025,
+      craft:.14
+    };
+
+    const frequency=
+      frequencies[type]||300;
+
+    const duration=
+      durations[type]||.06;
+
+    osc.type=
+      type==="step"
+      ? "triangle"
+      : "square";
+
+    osc.frequency.value=frequency;
+
+    gain.gain.setValueAtTime(
+      settings.volume*.04,
+      audio.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      .001,
+      audio.currentTime+duration
+    );
+
+    osc.start();
+
+    osc.stop(
+      audio.currentTime+duration
+    );
+
+  }
+  catch(e){}
+
+}
+
+/* =========================================================
+   PARTICLES
+   ========================================================= */
+
+function spawnDust(x,y,count=4){
+
+  if(!settings.particles) return;
+
+  for(let i=0;i<count;i++){
+
+    particles.push({
+
+      x:x,
+      y:y,
+
+      vx:(Math.random()-.5)*90,
+
+      vy:-Math.random()*100,
+
+      life:.25+
+        Math.random()*.3,
+
+      max:.5
+
+    });
+
+  }
+
+}
+
+function updateParticles(dt){
+
+  for(
+    let i=particles.length-1;
+    i>=0;
+    i--
+  ){
+
+    const p=particles[i];
+
+    p.x+=p.vx*dt;
+
+    p.y+=p.vy*dt;
+
+    p.vy+=260*dt;
+
+    p.life-=dt;
+
+    if(p.life<=0){
+      particles.splice(i,1);
+    }
+
+  }
+
+}
+
+/* =========================================================
+   PLAYER
+   ========================================================= */
+
+function updatePlayer(dt){
+
+  player.mine=
+    Math.max(
+      0,
+      player.mine-dt
+    );
+
+  player.land=
+    Math.max(
+      0,
+      player.land-dt
+    );
+
+  const left=
+    keys.KeyA ||
+    keys.ArrowLeft;
+
+  const right=
+    keys.KeyD ||
+    keys.ArrowRight;
+
+  if(left){
+
+    player.vx=-player.speed;
+    player.dir=-1;
+
+  }
+  else if(right){
+
+    player.vx=player.speed;
+    player.dir=1;
+
+  }
+  else{
+
+    player.vx *=
+      Math.pow(.06,dt);
+
+  }
+
+  if(Math.abs(player.vx)<4){
+    player.vx=0;
+  }
+
+  /*
+    WAŻNE:
+    skok jest jednorazowym żądaniem.
+    Nie ma automatycznego skakania.
+  */
+
+  if(
+    jumpRequested &&
+    player.grounded
+  ){
+
+    player.vy=-player.jump;
+
+    player.grounded=false;
+
+    jumpRequested=false;
+
+    sound("jump");
+
+    spawnDust(
+      player.x+10,
+      player.y+40,
+      4
+    );
+
+  }
+
+  jumpRequested=false;
+
+  const moving=
+    Math.abs(player.vx)>10;
+
+  if(
+    moving &&
+    player.grounded &&
+    settings.animations &&
+    settings.walk
+  ){
+
+    player.anim+=
+      dt*10*settings.animSpeed;
+
+  }
+  else{
+
+    player.anim *=
+      Math.pow(.15,dt);
+
+  }
+
+  /* KROKI */
+
+  if(
+    moving &&
+    player.grounded
+  ){
+
+    player.stepTimer-=dt;
+
+    if(player.stepTimer<=0){
+
+      sound("step");
+
+      spawnDust(
+        player.x+10,
+        player.y+40,
+        1
+      );
+
+      player.stepTimer=
+        .18/settings.animSpeed;
+
+    }
+
+  }
+
+  player.vy +=
+    1250*dt;
+
+  player.vy=
+    Math.min(
+      player.vy,
+      650
+    );
+
+  /* RUCH X */
+
+  const nx=
+    player.x+
+    player.vx*dt;
+
+  if(
+    !collision(
+      nx,
+      player.y,
+      player.w,
+      player.h
+    )
+  ){
+
+    player.x=nx;
+
+  }
+  else{
+
+    player.vx=0;
+
+  }
+
+  /* RUCH Y */
+
+  const ny=
+    player.y+
+    player.vy*dt;
+
+  if(
+    !collision(
+      player.x,
+      ny,
+      player.w,
+      player.h
+    )
+  ){
+
+    player.y=ny;
+
+    player.grounded=false;
+
+  }
+  else{
+
+    if(
+      player.vy>0 &&
+      !player.grounded
+    ){
+
+      player.land=.3;
+
+      sound("land");
+
+      spawnDust(
+        player.x+10,
+        player.y+40,
+        5
       );
 
     }
 
-   }
+    if(player.vy>0){
+
+      player.grounded=true;
+
+    }
+
+    player.vy=0;
 
   }
 
+  player.x=
+    Math.max(
+      0,
+      Math.min(
+        WORLD_W*TILE-player.w,
+        player.x
+      )
+    );
 
   if(
-   typeof data.selectedBlock===
-   "string"&&
-   Object.prototype.hasOwnProperty.call(
-    inventory,
-    data.selectedBlock
-   )
-  ){
-
-   selectedBlock=
-    data.selectedBlock;
-
-  }
-
-
-  if(
-   !Number.isFinite(
-    player.x
-   )||
-   !Number.isFinite(
-    player.y
-   )||
-   player.y<0||
-   player.y>
+    player.y>
     WORLD_H*TILE
   ){
 
-   findSpawn();
+    findSpawn();
+
+    player.health=player.maxHealth;
 
   }
 
+}
 
-  return true;
+/* =========================================================
+   CAMERA
+   ========================================================= */
 
- }
- catch{
+function updateCamera(dt){
 
-  return false;
+  const targetX=
+    player.x+
+    player.w/2-
+    W/2;
 
- }
+  const targetY=
+    player.y+
+    player.h/2-
+    H/2;
+
+  camera.x +=
+    (targetX-camera.x)*
+    Math.min(1,dt*7);
+
+  camera.y +=
+    (targetY-camera.y)*
+    Math.min(1,dt*7);
+
+  camera.x=
+    Math.max(
+      0,
+      Math.min(
+        Math.max(
+          0,
+          WORLD_W*TILE-W
+        ),
+        camera.x
+      )
+    );
+
+  camera.y=
+    Math.max(
+      0,
+      Math.min(
+        Math.max(
+          0,
+          WORLD_H*TILE-H
+        ),
+        camera.y
+      )
+    );
 
 }
 
+/* =========================================================
+   SKY
+   ========================================================= */
 
-/* =====================================================
-   RESET
-===================================================== */
+function drawSky(){
 
-function resetWorld(){
+  let night=0;
 
- if(
-  !confirm(
-   "Czy na pewno stworzyć nowy świat?"
-  )
- )
-  return;
+  if(settings.dayNight){
 
+    night=
+      Math.max(
+        0,
+        (
+          Math.sin(
+            dayTime*.00008*
+            Math.PI*2
+          )+1
+        )/2
+      );
 
- createWorld();
+  }
 
- findSpawn();
+  const gradient=
+    ctx.createLinearGradient(
+      0,0,
+      0,H
+    );
 
+  gradient.addColorStop(
+    0,
+    night>.6
+      ? "#08152e"
+      : "#69c9ff"
+  );
 
- inventory={
+  gradient.addColorStop(
+    .65,
+    night>.6
+      ? "#1d3d63"
+      : "#b9edff"
+  );
 
-  dirt:20,
+  gradient.addColorStop(
+    1,
+    night>.6
+      ? "#203d39"
+      : "#8ad05e"
+  );
 
-  stone:10,
+  ctx.fillStyle=gradient;
 
-  wood:10,
+  ctx.fillRect(
+    0,0,W,H
+  );
 
-  sand:10
+  if(night>.45){
 
- };
+    ctx.fillStyle=
+      "rgba(255,255,255,.8)";
 
+    for(let i=0;i<55;i++){
 
- selectedBlock=
-  "dirt";
+      const x=
+        (i*83)%W;
 
+      const y=
+        (i*47)%(H*.6);
 
- updateInventory();
+      ctx.fillRect(
+        x,y,
+        2,2
+      );
 
- selectBlock(
-  "dirt"
- );
+    }
 
-
- saveGame();
-
-
- showMessage(
-  "Utworzono nowy świat."
- );
+  }
 
 }
 
+/* =========================================================
+   WORLD DRAW
+   ========================================================= */
 
-document.getElementById(
- "resetBtn"
-).onclick=
- resetWorld;
+function drawWorld(time){
 
+  const startX=
+    Math.max(
+      0,
+      Math.floor(camera.x/TILE)-2
+    );
 
-document.getElementById(
- "saveBtn"
-).onclick=()=>{
+  const endX=
+    Math.min(
+      WORLD_W,
+      Math.ceil(
+        (camera.x+W)/TILE
+      )+2
+    );
 
- saveGame();
+  const startY=
+    Math.max(
+      0,
+      Math.floor(camera.y/TILE)-2
+    );
 
+  const endY=
+    Math.min(
+      WORLD_H,
+      Math.ceil(
+        (camera.y+H)/TILE
+      )+2
+    );
 
- showMessage(
-  "Gra została zapisana!"
- );
+  for(
+    let y=startY;
+    y<endY;
+    y++
+  ){
 
-};
+    for(
+      let x=startX;
+      x<endX;
+      x++
+    ){
 
+      const id=
+        world[y][x];
 
-document.getElementById(
- "saveFromSettings"
-).onclick=()=>{
+      if(id===BLOCK.air) continue;
 
- saveGame();
+      const px=
+        x*TILE-camera.x;
 
+      const py=
+        y*TILE-camera.y;
 
- showMessage(
-  "Gra została zapisana!"
- );
+      /* GRASS */
 
-};
+      if(id===BLOCK.grass){
 
+        ctx.fillStyle="#795548";
 
-document.getElementById(
- "deleteSaveBtn"
-).onclick=()=>{
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
 
- if(
-  !confirm(
-   "Usunąć zapis gry?"
-  )
- )
-  return;
+        ctx.fillStyle="#45a943";
 
+        ctx.fillRect(
+          px,py,
+          TILE,7
+        );
 
- localStorage.removeItem(
-  SAVE_KEY
- );
+      }
 
+      /* DIRT */
 
- createWorld();
+      else if(id===BLOCK.dirt){
 
- findSpawn();
+        ctx.fillStyle="#795548";
 
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
 
- inventory={
+        ctx.fillStyle=
+          "rgba(50,25,15,.18)";
 
-  dirt:20,
+        ctx.fillRect(
+          px+5,
+          py+8,
+          4,4
+        );
 
-  stone:10,
+      }
 
-  wood:10,
+      /* STONE */
 
-  sand:10
+      else if(id===BLOCK.stone){
 
- };
+        ctx.fillStyle="#777";
 
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
 
- selectedBlock=
-  "dirt";
+        ctx.fillStyle="#5f5f5f";
 
+        ctx.fillRect(
+          px+5,
+          py+6,
+          5,5
+        );
 
- updateInventory();
+        ctx.fillRect(
+          px+19,
+          py+18,
+          4,4
+        );
 
- selectBlock(
-  "dirt"
- );
+      }
 
+      /* WOOD */
 
- showMessage(
-  "Zapis został usunięty."
- );
+      else if(id===BLOCK.wood){
 
-};
+        ctx.fillStyle="#754c24";
 
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
 
-/* =====================================================
-   AUTO SAVE
-===================================================== */
+        ctx.fillStyle="#a16a32";
 
-setInterval(
- ()=>{
+        ctx.fillRect(
+          px+7,
+          py,
+          4,TILE
+        );
+
+      }
+
+      /* LEAVES */
+
+      else if(id===BLOCK.leaves){
+
+        ctx.fillStyle="#319447";
+
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
+
+        ctx.fillStyle="#45b957";
+
+        ctx.fillRect(
+          px+5,
+          py+5,
+          7,7
+        );
+
+        ctx.fillRect(
+          px+18,
+          py+12,
+          6,6
+        );
+
+      }
+
+      /* SAND */
+
+      else if(id===BLOCK.sand){
+
+        ctx.fillStyle="#d9bd70";
+
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
+
+      }
+
+      /* WATER */
+
+      else if(id===BLOCK.water){
+
+        ctx.fillStyle=
+          "rgba(48,151,225,.72)";
+
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
+
+        if(settings.water){
+
+          ctx.fillStyle=
+            "rgba(255,255,255,.28)";
+
+          ctx.fillRect(
+            px,
+            py+
+              7+
+              Math.sin(
+                time*.003+
+                x*.7
+              )*2,
+            TILE,
+            3
+          );
+
+        }
+
+      }
+
+      /* GLASS */
+
+      else if(id===BLOCK.glass){
+
+        ctx.fillStyle=
+          "rgba(174,232,255,.65)";
+
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
+
+        ctx.strokeStyle="#eaffff";
+
+        ctx.strokeRect(
+          px+3,
+          py+3,
+          TILE-6,
+          TILE-6
+        );
+
+      }
+
+      /* BRICK */
+
+      else if(id===BLOCK.brick){
+
+        ctx.fillStyle="#a94d3e";
+
+        ctx.fillRect(
+          px,py,
+          TILE,TILE
+        );
+
+        ctx.fillStyle="#6e352e";
+
+        ctx.fillRect(
+          px,
+          py+15,
+          TILE,
+          2
+        );
+
+        ctx.fillRect(
+          px+14,
+          py,
+          2,15
+        );
+
+        ctx.fillRect(
+          px+25,
+          py+17,
+          2,15
+        );
+
+      }
+
+    }
+
+  }
+
+}
+
+/* =========================================================
+   PLAYER DRAW
+   ========================================================= */
+
+function drawPlayer(time){
+
+  const walking=
+    Math.abs(player.vx)>10 &&
+    player.grounded &&
+    settings.animations &&
+    settings.walk;
+
+  let bob=0;
+  let arm=0;
+  let leg=0;
+  let rotation=0;
+
+  if(walking){
+
+    const s=
+      Math.sin(player.anim);
+
+    bob=
+      Math.abs(s)*1.3;
+
+    arm=s*3.5;
+
+    leg=s*4.5;
+
+    rotation=
+      s*.025;
+
+  }
+  else if(
+    player.grounded &&
+    settings.animations &&
+    settings.idle
+  ){
+
+    bob=
+      Math.sin(
+        time*.002
+      )*.6;
+
+  }
 
   if(
-   settings.autoSave&&
-   !paused
-  )
-   saveGame();
+    !player.grounded &&
+    settings.animations &&
+    settings.jump
+  ){
 
- },
- 120000
-);
+    arm=
+      player.vy<0
+      ? -5
+      : 4;
 
+    leg=
+      player.vy<0
+      ? 3
+      : -3;
 
-/* =====================================================
-   MESSAGE
-===================================================== */
+  }
 
-let messageTimeout;
+  if(player.mine>0){
 
+    const m=
+      Math.sin(
+        (
+          .2-player.mine
+        )/.2*
+        Math.PI
+      );
 
-function showMessage(
- text
-){
+    arm=
+      -18*m;
 
- const el=
-  document.getElementById(
-   "message"
+    rotation=
+      -.08*m*player.dir;
+
+  }
+
+  const cx=
+    Math.round(
+      player.x-
+      camera.x+
+      player.w/2
+    );
+
+  const base=
+    Math.round(
+      player.y-
+      camera.y+
+      bob
+    );
+
+  /* SHADOW */
+
+  if(player.grounded){
+
+    ctx.fillStyle=
+      "rgba(0,0,0,.22)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      cx,
+      player.y-
+        camera.y+
+        42,
+      11,
+      3,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+  ctx.save();
+
+  ctx.translate(
+    cx,
+    base
   );
 
-
- el.textContent=
-  text;
-
-
- el.style.opacity=
-  "1";
-
-
- clearTimeout(
-  messageTimeout
- );
-
-
- messageTimeout=
-  setTimeout(
-   ()=>{
-
-    el.style.opacity=
-     "0";
-
-   },
-   1800
+  ctx.scale(
+    player.dir,
+    1
   );
+
+  ctx.rotate(rotation);
+
+  /* NOGI */
+
+  ctx.fillStyle="#4d3b78";
+
+  ctx.fillRect(
+    -4-leg*.12,
+    24,
+    12,
+    14
+  );
+
+  ctx.fillStyle="#25252b";
+
+  ctx.fillRect(
+    -5-leg*.12,
+    37,
+    14,
+    4
+  );
+
+  ctx.fillStyle="#4d3b78";
+
+  ctx.fillRect(
+    2+leg*.12,
+    24,
+    12,
+    14
+  );
+
+  ctx.fillStyle="#25252b";
+
+  ctx.fillRect(
+    1+leg*.12,
+    37,
+    14,
+    4
+  );
+
+  /* BODY */
+
+  ctx.fillStyle="#315aa0";
+
+  ctx.fillRect(
+    -9,
+    10,
+    18,
+    16
+  );
+
+  ctx.fillStyle="#3f73c9";
+
+  ctx.fillRect(
+    -7,
+    10,
+    14,
+    14
+  );
+
+  /* LEWA RĘKA */
+
+  ctx.save();
+
+  ctx.translate(
+    -4-arm*.18,
+    0
+  );
+
+  ctx.rotate(
+    arm*.018
+  );
+
+  ctx.fillStyle="#d49c78";
+
+  ctx.fillRect(
+    -4,
+    12,
+    4,
+    14
+  );
+
+  ctx.fillStyle="#f0bd91";
+
+  ctx.fillRect(
+    -4,
+    24,
+    4,
+    4
+  );
+
+  ctx.restore();
+
+  /* PRAWA RĘKA */
+
+  ctx.save();
+
+  ctx.translate(
+    4+arm*.18,
+    0
+  );
+
+  ctx.rotate(
+    -arm*.018
+  );
+
+  ctx.fillStyle="#f0bd91";
+
+  ctx.fillRect(
+    14,
+    12,
+    4,
+    14
+  );
+
+  ctx.fillRect(
+    14,
+    24,
+    4,
+    4
+  );
+
+  /* KILOF */
+
+  if(player.mine>0){
+
+    ctx.save();
+
+    ctx.translate(
+      17,
+      14
+    );
+
+    ctx.rotate(
+      -.8+
+      Math.sin(
+        player.mine*20
+      )*.35
+    );
+
+    ctx.fillStyle="#704728";
+
+    ctx.fillRect(
+      0,
+      0,
+      4,
+      20
+    );
+
+    ctx.fillStyle="#9ca3aa";
+
+    ctx.fillRect(
+      -8,
+      0,
+      20,
+      4
+    );
+
+    ctx.restore();
+
+  }
+
+  ctx.restore();
+
+  /* GŁOWA */
+
+  ctx.fillStyle="#f0bd91";
+
+  ctx.fillRect(
+    -4,
+    6,
+    8,
+    6
+  );
+
+  ctx.fillRect(
+    -10,
+    12,
+    4,
+    6
+  );
+
+  ctx.fillRect(
+    6,
+    12,
+    4,
+    6
+  );
+
+  /* WŁOSY */
+
+  ctx.fillStyle="#542f20";
+
+  ctx.fillRect(
+    -6,
+    0,
+    12,
+    5
+  );
+
+  if(settings.hair){
+
+    ctx.fillRect(
+      -8,
+      2,
+      4,
+      5
+    );
+
+    ctx.fillRect(
+      4,
+      2,
+      5,
+      5
+    );
+
+  }
+
+  /* TWARZ */
+
+  ctx.fillStyle="#f0bd91";
+
+  ctx.fillRect(
+    -6,
+    4,
+    12,
+    10
+  );
+
+  /* OCZY */
+
+  ctx.fillStyle="#111";
+
+  const blink=
+    settings.animations &&
+    settings.blink &&
+    Math.floor(time/100)%83===0;
+
+  if(blink){
+
+    ctx.fillRect(
+      -4,
+      9,
+      3,
+      1
+    );
+
+    ctx.fillRect(
+      2,
+      9,
+      3,
+      1
+    );
+
+  }
+  else{
+
+    ctx.fillRect(
+      -4,
+      8,
+      2,
+      2
+    );
+
+    ctx.fillRect(
+      2,
+      8,
+      2,
+      2
+    );
+
+  }
+
+  /* NOS */
+
+  ctx.fillStyle="#d89f7a";
+
+  ctx.fillRect(
+    0,
+    10,
+    2,
+    2
+  );
+
+  /* USTA */
+
+  ctx.fillStyle="#bd765f";
+
+  ctx.fillRect(
+    -2,
+    12,
+    6,
+    2
+  );
+
+  ctx.restore();
 
 }
 
+/* =========================================================
+   PARTICLES DRAW
+   ========================================================= */
 
-/* =====================================================
-   LOOP
-===================================================== */
+function drawParticles(){
 
-let lastFrame=0;
+  for(const p of particles){
 
+    ctx.fillStyle=
+      "rgba(210,190,150,.8)";
+
+    ctx.fillRect(
+      Math.round(
+        p.x-camera.x
+      ),
+      Math.round(
+        p.y-camera.y
+      ),
+      3,
+      3
+    );
+
+  }
+
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
 
 function render(time){
 
- ctx.clearRect(
-  0,
-  0,
-  W,
-  H
- );
-
-
- /* NIEBO */
-
- const sky=
-  ctx.createLinearGradient(
-   0,
-   0,
-   0,
-   H
+  ctx.clearRect(
+    0,
+    0,
+    W,
+    H
   );
 
+  drawSky();
 
- sky.addColorStop(
-  0,
-  "#69c9ff"
- );
+  drawWorld(time);
 
+  drawParticles();
 
- sky.addColorStop(
-  .65,
-  "#b9edff"
- );
+  drawPlayer(time);
 
+  if(settings.dayNight){
 
- sky.addColorStop(
-  1,
-  "#8ad05e"
- );
+    const night=
+      Math.max(
+        0,
+        (
+          Math.sin(
+            dayTime*.00008*
+            Math.PI*2
+          )+1
+        )/2
+      );
 
+    if(night>.35){
 
- ctx.fillStyle=
-  sky;
+      ctx.fillStyle=
+        `rgba(5,10,30,${(night-.35)*.48})`;
 
+      ctx.fillRect(
+        0,0,W,H
+      );
 
- ctx.fillRect(
-  0,
-  0,
-  W,
-  H
- );
-
-
- updateCamera();
-
-
- drawWorld(time);
-
-
- drawParticles();
-
-
- drawPlayer(time);
-
-
- updateParticles();
-
-}
-
-
-function loop(time){
-
- if(!paused){
-
-  const delay=
-   1000/
-   Math.max(
-    30,
-    Number(settings.fps)||60
-   );
-
-
-  if(
-   time-lastFrame>=delay
-  ){
-
-   lastFrame=time;
-
-
-   updatePlayer();
-
-
-   render(time);
+    }
 
   }
 
- }
-
-
- requestAnimationFrame(
-  loop
- );
+  updateHealth();
 
 }
 
+/* =========================================================
+   MINING / PLACING
+   ========================================================= */
 
-/* =====================================================
+function screenToBlock(x,y){
+
+  return {
+
+    x:Math.floor(
+      (x+camera.x)/TILE
+    ),
+
+    y:Math.floor(
+      (y+camera.y)/TILE
+    )
+
+  };
+
+}
+
+function reachable(x,y){
+
+  const px=
+    player.x+
+    player.w/2;
+
+  const py=
+    player.y+
+    player.h/2;
+
+  const bx=
+    x*TILE+
+    TILE/2;
+
+  const by=
+    y*TILE+
+    TILE/2;
+
+  return Math.hypot(
+    bx-px,
+    by-py
+  )<=TILE*5.2;
+
+}
+
+function mine(clientX,clientY){
+
+  const p=
+    screenToBlock(
+      clientX,
+      clientY
+    );
+
+  if(
+    p.x<0 ||
+    p.x>=WORLD_W ||
+    p.y<0 ||
+    p.y>=WORLD_H
+  ) return;
+
+  if(!reachable(p.x,p.y)){
+
+    showMessage(
+      "Za daleko!"
+    );
+
+    return;
+
+  }
+
+  const id=
+    world[p.y][p.x];
+
+  if(
+    id===BLOCK.air ||
+    id===BLOCK.water
+  ) return;
+
+  const names={
+    1:"dirt",
+    2:"dirt",
+    3:"stone",
+    4:"wood",
+    5:null,
+    6:"sand",
+    8:"glass",
+    9:"brick"
+  };
+
+  const item=
+    names[id];
+
+  if(item){
+
+    inventory[item]++;
+
+  }
+
+  world[p.y][p.x]=
+    BLOCK.air;
+
+  player.mine=.2;
+
+  sound("mine");
+
+  spawnDust(
+    p.x*TILE+16,
+    p.y*TILE+16,
+    6
+  );
+
+  updateInventory();
+
+}
+
+function place(clientX,clientY){
+
+  const p=
+    screenToBlock(
+      clientX,
+      clientY
+    );
+
+  if(
+    p.x<0 ||
+    p.x>=WORLD_W ||
+    p.y<0 ||
+    p.y>=WORLD_H
+  ) return;
+
+  if(
+    !reachable(
+      p.x,
+      p.y
+    )
+  ) return;
+
+  if(
+    world[p.y][p.x]!==BLOCK.air
+  ) return;
+
+  if(
+    inventory[selectedBlock]<=0
+  ){
+
+    showMessage(
+      "Brak bloku!"
+    );
+
+    return;
+
+  }
+
+  const bx=
+    p.x*TILE+
+    TILE/2;
+
+  const by=
+    p.y*TILE+
+    TILE/2;
+
+  const px=
+    player.x+
+    player.w/2;
+
+  const py=
+    player.y+
+    player.h/2;
+
+  /* nie można postawić w graczu */
+
+  if(
+    Math.abs(bx-px)<TILE &&
+    Math.abs(by-py)<TILE
+  ) return;
+
+  world[p.y][p.x]=
+    BLOCK[selectedBlock];
+
+  inventory[selectedBlock]--;
+
+  sound("place");
+
+  spawnDust(
+    bx,
+    by,
+    3
+  );
+
+  updateInventory();
+
+}
+
+/* =========================================================
+   MOUSE / TOUCH
+   ========================================================= */
+
+canvas.addEventListener(
+  "mousedown",
+  e=>{
+
+    if(paused) return;
+
+    initAudio();
+
+    if(e.button===0){
+
+      mine(
+        e.clientX,
+        e.clientY
+      );
+
+    }
+
+    if(e.button===2){
+
+      place(
+        e.clientX,
+        e.clientY
+      );
+
+    }
+
+  }
+);
+
+canvas.addEventListener(
+  "contextmenu",
+  e=>e.preventDefault()
+);
+
+let touchData=null;
+let touchTimer=null;
+
+canvas.addEventListener(
+  "touchstart",
+  e=>{
+
+    if(
+      paused ||
+      !e.touches[0]
+    ) return;
+
+    e.preventDefault();
+
+    const t=e.touches[0];
+
+    touchData={
+      x:t.clientX,
+      y:t.clientY,
+      time:performance.now()
+    };
+
+    touchTimer=
+      setTimeout(
+        ()=>{
+
+          if(touchData){
+
+            place(
+              touchData.x,
+              touchData.y
+            );
+
+          }
+
+        },
+        400
+      );
+
+  },
+  {passive:false}
+);
+
+canvas.addEventListener(
+  "touchend",
+  e=>{
+
+    e.preventDefault();
+
+    if(!touchData) return;
+
+    clearTimeout(
+      touchTimer
+    );
+
+    if(
+      performance.now()-
+      touchData.time<400
+    ){
+
+      mine(
+        touchData.x,
+        touchData.y
+      );
+
+    }
+
+    touchData=null;
+
+  },
+  {passive:false}
+);
+
+/* =========================================================
+   MOBILE BUTTONS
+   ========================================================= */
+
+function holdButton(
+  id,
+  key
+){
+
+  const el=
+    document.getElementById(id);
+
+  function down(e){
+
+    e.preventDefault();
+
+    keys[key]=true;
+
+  }
+
+  function up(e){
+
+    e.preventDefault();
+
+    keys[key]=false;
+
+  }
+
+  el.addEventListener(
+    "pointerdown",
+    down,
+    {passive:false}
+  );
+
+  el.addEventListener(
+    "pointerup",
+    up,
+    {passive:false}
+  );
+
+  el.addEventListener(
+    "pointercancel",
+    up,
+    {passive:false}
+  );
+
+  el.addEventListener(
+    "pointerleave",
+    up,
+    {passive:false}
+  );
+
+}
+
+holdButton(
+  "leftButton",
+  "ArrowLeft"
+);
+
+holdButton(
+  "rightButton",
+  "ArrowRight"
+);
+
+document
+  .getElementById("jumpButton")
+  .addEventListener(
+    "pointerdown",
+    e=>{
+
+      e.preventDefault();
+
+      initAudio();
+
+      /*
+        tylko jedno żądanie skoku
+      */
+
+      jumpRequested=true;
+
+    },
+    {passive:false}
+  );
+
+/* =========================================================
+   KEYBOARD
+   ========================================================= */
+
+addEventListener(
+  "keydown",
+  e=>{
+
+    keys[e.code]=true;
+
+    if([
+      "Space",
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight"
+    ].includes(e.code)){
+
+      e.preventDefault();
+
+    }
+
+    if(
+      (
+        e.code==="Space" ||
+        e.code==="ArrowUp" ||
+        e.code==="KeyW"
+      ) &&
+      !e.repeat
+    ){
+
+      jumpRequested=true;
+
+    }
+
+    const blocks={
+
+      Digit1:"dirt",
+      Digit2:"stone",
+      Digit3:"wood",
+      Digit4:"sand",
+      Digit5:"glass",
+      Digit6:"brick"
+
+    };
+
+    if(blocks[e.code]){
+
+      selectBlock(
+        blocks[e.code]
+      );
+
+    }
+
+    if(
+      e.code==="KeyE" &&
+      !e.repeat &&
+      gameStarted &&
+      !paused
+    ){
+
+      openCraft();
+
+    }
+
+    if(
+      e.code==="Escape" &&
+      !e.repeat
+    ){
+
+      if(
+        document.getElementById(
+          "settings"
+        ).style.display==="flex"
+      ){
+
+        closeSettings();
+
+      }
+      else if(
+        document.getElementById(
+          "craft"
+        ).style.display==="flex"
+      ){
+
+        closeCraft();
+
+      }
+      else{
+
+        togglePause();
+
+      }
+
+    }
+
+  }
+);
+
+addEventListener(
+  "keyup",
+  e=>{
+    keys[e.code]=false;
+  }
+);
+
+/* =========================================================
+   INVENTORY
+   ========================================================= */
+
+function selectBlock(block){
+
+  if(
+    inventory[block]===undefined
+  ) return;
+
+  selectedBlock=block;
+
+  document
+    .querySelectorAll(".slot")
+    .forEach(
+      slot=>{
+        slot.classList.toggle(
+          "selected",
+          slot.dataset.block===block
+        );
+      }
+    );
+
+}
+
+document
+  .querySelectorAll(".slot")
+  .forEach(
+    slot=>{
+
+      slot.onclick=()=>{
+
+        selectBlock(
+          slot.dataset.block
+        );
+
+      };
+
+    }
+  );
+
+function updateInventory(){
+
+  for(
+    const block of
+    Object.keys(inventory)
+  ){
+
+    const element=
+      document.getElementById(
+        "count-"+block
+      );
+
+    if(element){
+
+      element.textContent=
+        inventory[block];
+
+    }
+
+  }
+
+}
+
+/* =========================================================
+   HEALTH
+   ========================================================= */
+
+function updateHealth(){
+
+  const percent=
+    Math.max(
+      0,
+      Math.min(
+        100,
+        player.health/
+        player.maxHealth*
+        100
+      )
+    );
+
+  document
+    .getElementById(
+      "healthFill"
+    )
+    .style.width=
+      percent+"%";
+
+  document
+    .getElementById(
+      "healthText"
+    )
+    .textContent=
+      Math.ceil(player.health)+
+      " / "+
+      player.maxHealth;
+
+}
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+function showMessage(text){
+
+  const element=
+    document.getElementById(
+      "message"
+    );
+
+  element.textContent=text;
+
+  element.style.opacity="1";
+
+  clearTimeout(
+    messageTimer
+  );
+
+  messageTimer=
+    setTimeout(
+      ()=>{
+        element.style.opacity="0";
+      },
+      1600
+    );
+
+}
+
+/* =========================================================
+   SAVE
+   ========================================================= */
+
+function saveGame(){
+
+  try{
+
+    localStorage.setItem(
+      SAVE_KEY,
+      JSON.stringify({
+
+        version:3,
+
+        world:world,
+
+        player:{
+          x:player.x,
+          y:player.y,
+          health:player.health
+        },
+
+        inventory:inventory,
+
+        selectedBlock:selectedBlock,
+
+        settings:settings
+
+      })
+    );
+
+    showMessage(
+      "Gra została zapisana!"
+    );
+
+  }
+  catch(e){
+
+    showMessage(
+      "Nie udało się zapisać."
+    );
+
+  }
+
+}
+
+function loadGame(){
+
+  try{
+
+    const raw=
+      localStorage.getItem(
+        SAVE_KEY
+      );
+
+    if(!raw) return false;
+
+    const data=
+      JSON.parse(raw);
+
+    if(
+      !data ||
+      !Array.isArray(data.world) ||
+      data.world.length!==WORLD_H
+    ){
+
+      return false;
+
+    }
+
+    world=data.world;
+
+    if(
+      data.player
+    ){
+
+      player.x=
+        Number(data.player.x)||0;
+
+      player.y=
+        Number(data.player.y)||0;
+
+      player.health=
+        Number(data.player.health)||100;
+
+    }
+
+    if(data.inventory){
+
+      for(
+        const block of
+        Object.keys(inventory)
+      ){
+
+        inventory[block]=
+          Math.max(
+            0,
+            Math.floor(
+              Number(
+                data.inventory[block]
+              )||0
+            )
+          );
+
+      }
+
+    }
+
+    if(
+      data.selectedBlock &&
+      inventory[
+        data.selectedBlock
+      ]!==undefined
+    ){
+
+      selectedBlock=
+        data.selectedBlock;
+
+    }
+
+    if(data.settings){
+
+      settings={
+        ...defaults,
+        ...data.settings
+      };
+
+    }
+
+    return true;
+
+  }
+  catch(e){
+
+    return false;
+
+  }
+
+}
+
+function saveSettingsOnly(){
+
+  try{
+
+    const old=
+      JSON.parse(
+        localStorage.getItem(
+          SAVE_KEY
+        )||"{}"
+      );
+
+    old.settings=settings;
+
+    localStorage.setItem(
+      SAVE_KEY,
+      JSON.stringify(old)
+    );
+
+  }
+  catch(e){}
+
+}
+
+/* =========================================================
+   NEW WORLD
+   ========================================================= */
+
+function newWorld(){
+
+  if(
+    !confirm(
+      "Czy na pewno stworzyć nowy świat?"
+    )
+  ) return;
+
+  createWorld();
+
+  findSpawn();
+
+  inventory={
+    dirt:20,
+    stone:10,
+    wood:10,
+    sand:10,
+    glass:0,
+    brick:0
+  };
+
+  selectedBlock="dirt";
+
+  updateInventory();
+
+  selectBlock(
+    "dirt"
+  );
+
+  saveGame();
+
+  showMessage(
+    "Utworzono nowy świat!"
+  );
+
+}
+
+document
+  .getElementById(
+    "saveButton"
+  )
+  .onclick=saveGame;
+
+document
+  .getElementById(
+    "newWorldButton"
+  )
+  .onclick=newWorld;
+
+/* =========================================================
+   CRAFTING
+   ========================================================= */
+
+function openCraft(){
+
+  if(paused) return;
+
+  paused=true;
+
+  document
+    .getElementById(
+      "craft"
+    )
+    .style.display="flex";
+
+}
+
+function closeCraft(){
+
+  document
+    .getElementById(
+      "craft"
+    )
+    .style.display="none";
+
+  paused=false;
+
+}
+
+document
+  .getElementById(
+    "craftClose"
+  )
+  .onclick=closeCraft;
+
+document
+  .querySelectorAll(
+    ".craftButton"
+  )
+  .forEach(
+    button=>{
+
+      button.onclick=()=>{
+
+        const type=
+          button.dataset.craft;
+
+        if(
+          type==="glass" &&
+          inventory.sand>=2
+        ){
+
+          inventory.sand-=2;
+          inventory.glass++;
+
+          sound("craft");
+
+          showMessage(
+            "Stworzono szkło!"
+          );
+
+        }
+        else if(
+          type==="brick" &&
+          inventory.stone>=2
+        ){
+
+          inventory.stone-=2;
+          inventory.brick++;
+
+          sound("craft");
+
+          showMessage(
+            "Stworzono cegłę!"
+          );
+
+        }
+        else{
+
+          showMessage(
+            "Brak materiałów!"
+          );
+
+        }
+
+        updateInventory();
+
+      };
+
+    }
+  );
+
+/* =========================================================
+   PAUSE
+   ========================================================= */
+
+function togglePause(){
+
+  if(!gameStarted) return;
+
+  paused=!paused;
+
+  document
+    .getElementById(
+      "pause"
+    )
+    .style.display=
+      paused
+      ? "flex"
+      : "none";
+
+}
+
+document
+  .getElementById(
+    "resumeButton"
+  )
+  .onclick=()=>{
+
+    paused=false;
+
+    document
+      .getElementById(
+        "pause"
+      )
+      .style.display="none";
+
+  };
+
+document
+  .getElementById(
+    "pauseMenu"
+  )
+  .onclick=()=>{
+
+    saveGame();
+
+    paused=true;
+
+    gameStarted=false;
+
+    document
+      .getElementById(
+        "pause"
+      )
+      .style.display="none";
+
+    document
+      .getElementById(
+        "mainMenu"
+      )
+      .style.display="flex";
+
+  };
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
+function openSettings(){
+
+  document
+    .getElementById(
+      "settings"
+    )
+    .style.display="flex";
+
+  paused=true;
+
+}
+
+function closeSettings(){
+
+  document
+    .getElementById(
+      "settings"
+    )
+    .style.display="none";
+
+  applySettings();
+
+  saveSettingsOnly();
+
+  if(gameStarted){
+
+    paused=false;
+
+    document
+      .getElementById(
+        "pause"
+      )
+      .style.display="none";
+
+  }
+  else{
+
+    document
+      .getElementById(
+        "mainMenu"
+      )
+      .style.display="flex";
+
+  }
+
+}
+
+document
+  .getElementById(
+    "settingsButton"
+  )
+  .onclick=openSettings;
+
+document
+  .getElementById(
+    "menuSettings"
+  )
+  .onclick=()=>{
+
+    document
+      .getElementById(
+        "mainMenu"
+      )
+      .style.display="none";
+
+    openSettings();
+
+  };
+
+document
+  .getElementById(
+    "pauseSettings"
+  )
+  .onclick=()=>{
+
+    document
+      .getElementById(
+        "pause"
+      )
+      .style.display="none";
+
+    openSettings();
+
+  };
+
+document
+  .getElementById(
+    "closeSettings"
+  )
+  .onclick=closeSettings;
+
+document
+  .getElementById(
+    "closeSettingsBottom"
+  )
+  .onclick=closeSettings;
+
+/* SETTINGS TABS */
+
+document
+  .querySelectorAll(
+    ".tab"
+  )
+  .forEach(
+    tab=>{
+
+      tab.onclick=()=>{
+
+        document
+          .querySelectorAll(
+            ".tab"
+          )
+          .forEach(
+            x=>
+              x.classList.remove(
+                "active"
+              )
+          );
+
+        document
+          .querySelectorAll(
+            ".page"
+          )
+          .forEach(
+            x=>
+              x.classList.remove(
+                "active"
+              )
+          );
+
+        tab.classList.add(
+          "active"
+        );
+
+        document
+          .getElementById(
+            tab.dataset.page
+          )
+          .classList.add(
+            "active"
+          );
+
+      };
+
+    }
+  );
+
+/* SWITCH */
+
+function updateSwitch(
+  id,
+  value
+){
+
+  document
+    .getElementById(id)
+    .classList.toggle(
+      "on",
+      !!value
+    );
+
+}
+
+function setupSwitch(
+  id,
+  key
+){
+
+  document
+    .getElementById(id)
+    .onclick=()=>{
+
+      settings[key]=
+        !settings[key];
+
+      updateSwitch(
+        id,
+        settings[key]
+      );
+
+      applySettings();
+
+    };
+
+}
+
+/* SWITCHES */
+
+setupSwitch(
+  "mobileSwitch",
+  "mobile"
+);
+
+setupSwitch(
+  "autoSaveSwitch",
+  "autoSave"
+);
+
+setupSwitch(
+  "dayNightSwitch",
+  "dayNight"
+);
+
+setupSwitch(
+  "particlesSwitch",
+  "particles"
+);
+
+setupSwitch(
+  "pixelSwitch",
+  "pixelPerfect"
+);
+
+setupSwitch(
+  "waterSwitch",
+  "water"
+);
+
+setupSwitch(
+  "animationsSwitch",
+  "animations"
+);
+
+setupSwitch(
+  "walkSwitch",
+  "walk"
+);
+
+setupSwitch(
+  "idleSwitch",
+  "idle"
+);
+
+setupSwitch(
+  "blinkSwitch",
+  "blink"
+);
+
+setupSwitch(
+  "jumpSwitch",
+  "jump"
+);
+
+setupSwitch(
+  "hairSwitch",
+  "hair"
+);
+
+setupSwitch(
+  "soundSwitch",
+  "sound"
+);
+
+setupSwitch(
+  "musicSwitch",
+  "music"
+);
+
+/* SELECTS */
+
+document
+  .getElementById(
+    "qualitySelect"
+  )
+  .onchange=e=>{
+
+    settings.quality=
+      e.target.value;
+
+  };
+
+document
+  .getElementById(
+    "fpsSelect"
+  )
+  .onchange=e=>{
+
+    settings.fps=
+      Number(e.target.value);
+
+  };
+
+document
+  .getElementById(
+    "volumeRange"
+  )
+  .oninput=e=>{
+
+    settings.volume=
+      Number(e.target.value);
+
+  };
+
+document
+  .getElementById(
+    "animSpeed"
+  )
+  .onchange=e=>{
+
+    settings.animSpeed=
+      Number(e.target.value);
+
+  };
+
+/* APPLY SETTINGS */
+
+function applySettings(){
+
+  updateSwitch(
+    "mobileSwitch",
+    settings.mobile
+  );
+
+  updateSwitch(
+    "autoSaveSwitch",
+    settings.autoSave
+  );
+
+  updateSwitch(
+    "dayNightSwitch",
+    settings.dayNight
+  );
+
+  updateSwitch(
+    "particlesSwitch",
+    settings.particles
+  );
+
+  updateSwitch(
+    "pixelSwitch",
+    settings.pixelPerfect
+  );
+
+  updateSwitch(
+    "waterSwitch",
+    settings.water
+  );
+
+  updateSwitch(
+    "animationsSwitch",
+    settings.animations
+  );
+
+  updateSwitch(
+    "walkSwitch",
+    settings.walk
+  );
+
+  updateSwitch(
+    "idleSwitch",
+    settings.idle
+  );
+
+  updateSwitch(
+    "blinkSwitch",
+    settings.blink
+  );
+
+  updateSwitch(
+    "jumpSwitch",
+    settings.jump
+  );
+
+  updateSwitch(
+    "hairSwitch",
+    settings.hair
+  );
+
+  updateSwitch(
+    "soundSwitch",
+    settings.sound
+  );
+
+  updateSwitch(
+    "musicSwitch",
+    settings.music
+  );
+
+  document
+    .getElementById(
+      "qualitySelect"
+    )
+    .value=
+      settings.quality;
+
+  document
+    .getElementById(
+      "fpsSelect"
+    )
+    .value=
+      settings.fps;
+
+  document
+    .getElementById(
+      "volumeRange"
+    )
+    .value=
+      settings.volume;
+
+  document
+    .getElementById(
+      "animSpeed"
+    )
+    .value=
+      settings.animSpeed;
+
+  document
+    .getElementById(
+      "mobileControls"
+    )
+    .style.display=
+      settings.mobile
+      ? "flex"
+      : "none";
+
+  document
+    .getElementById(
+      "jumpButton"
+    )
+    .style.display=
+      settings.mobile
+      ? "block"
+      : "none";
+
+  resize();
+
+}
+
+/* SAVE SETTINGS */
+
+document
+  .getElementById(
+    "saveSettings"
+  )
+  .onclick=saveGame;
+
+/* DELETE SAVE */
+
+document
+  .getElementById(
+    "deleteSave"
+  )
+  .onclick=()=>{
+
+    if(
+      !confirm(
+        "Usunąć zapis gry?"
+      )
+    ) return;
+
+    localStorage.removeItem(
+      SAVE_KEY
+    );
+
+    createWorld();
+
+    findSpawn();
+
+    inventory={
+      dirt:20,
+      stone:10,
+      wood:10,
+      sand:10,
+      glass:0,
+      brick:0
+    };
+
+    selectedBlock="dirt";
+
+    updateInventory();
+
+    selectBlock(
+      "dirt"
+    );
+
+    showMessage(
+      "Zapis usunięty."
+    );
+
+  };
+
+/* =========================================================
+   MENU INFO
+   ========================================================= */
+
+const info={
+
+  NEWS:[
+    "📰 NEWS",
+
+    `✨ COMPLETE EDITION
+
+🌙 Dzień i noc
+⛏️ Animacja kopania
+🔊 Dźwięki
+🌳 Drzewa
+🌊 Woda
+🏔️ Jaskinie
+🔨 Crafting
+🧱 Nowe bloki
+📱 Sterowanie mobilne
+💾 Poprawiony zapis`
+  ],
+
+  SHOP:[
+    "🛒 SHOP",
+
+    `Sklep jest przygotowany
+pod przyszłe dodatki
+i kosmetyczne elementy gry.`
+  ],
+
+  ACCOUNT:[
+    "👤 ACCOUNT",
+
+    `PIXEL PLAYER
+
+Poziom: 1
+Światy: 1
+Status: ONLINE`
+  ],
+
+  SOCIAL:[
+    "👥 SOCIAL",
+
+    `Sekcja społecznościowa
+jest przygotowana pod
+znajomych i przyszły
+multiplayer.`
+  ]
+
+};
+
+document
+  .querySelectorAll(
+    "[data-info]"
+  )
+  .forEach(
+    button=>{
+
+      button.onclick=()=>{
+
+        const data=
+          info[
+            button.dataset.info
+          ];
+
+        document
+          .getElementById(
+            "infoTitle"
+          )
+          .textContent=
+            data[0];
+
+        document
+          .getElementById(
+            "infoText"
+          )
+          .textContent=
+            data[1];
+
+        document
+          .getElementById(
+            "infoModal"
+          )
+          .style.display=
+            "flex";
+
+        sound("place");
+
+      };
+
+    }
+  );
+
+document
+  .getElementById(
+    "infoClose"
+  )
+  .onclick=()=>{
+
+    document
+      .getElementById(
+        "infoModal"
+      )
+      .style.display=
+        "none";
+
+  };
+
+/* =========================================================
    START
-===================================================== */
+   ========================================================= */
+
+document
+  .getElementById(
+    "playButton"
+  )
+  .onclick=()=>{
+
+    gameStarted=true;
+
+    paused=false;
+
+    document
+      .getElementById(
+        "mainMenu"
+      )
+      .style.display=
+        "none";
+
+    initAudio();
+
+    sound("place");
+
+  };
+
+/* =========================================================
+   AUTO SAVE
+   ========================================================= */
+
+setInterval(
+  ()=>{
+
+    if(
+      settings.autoSave &&
+      gameStarted &&
+      !paused
+    ){
+
+      saveGame();
+
+    }
+
+  },
+  120000
+);
+
+/* =========================================================
+   GAME LOOP
+   ========================================================= */
+
+function gameLoop(time){
+
+  const dt=
+    Math.min(
+      .033,
+      Math.max(
+        .001,
+        (time-lastTime)/1000 ||
+        .016
+      )
+    );
+
+  lastTime=time;
+
+  if(!paused){
+
+    gameTime+=dt;
+
+    dayTime+=
+      dt*1000;
+
+    updatePlayer(dt);
+
+    updateParticles(dt);
+
+    updateCamera(dt);
+
+    render(time);
+
+  }
+
+  requestAnimationFrame(
+    gameLoop
+  );
+
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
 
 resize();
 
-
 if(!loadGame()){
 
- try{
-  localStorage.removeItem(
-   SAVE_KEY
-  );
- }
- catch{}
+  createWorld();
 
-
- createWorld();
-
-
- findSpawn();
+  findSpawn();
 
 }
 
-
-mainMenu.style.display=
- "flex";
-
-
-paused=true;
-
-
-menuInfoModal.style.display=
- "none";
-
-
 updateInventory();
 
-
 selectBlock(
- selectedBlock
+  selectedBlock
 );
-
 
 applySettings();
 
-
-showMessage(
- "Witaj w Pixel World!"
-);
-
+document
+  .getElementById(
+    "mainMenu"
+  )
+  .style.display=
+    "flex";
 
 requestAnimationFrame(
- loop
+  gameLoop
 );
 
 </script>
 
 </body>
 </html>
-```
