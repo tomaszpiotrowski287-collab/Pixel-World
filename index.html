@@ -1,4 +1,12 @@
 ```html
+<!--
+WERSJA Z ROZBUDOWANYM SYSTEMEM ANIMACJI
+
+WAŻNE:
+Wstaw ten cały plik zamiast poprzedniego index.html.
+Animacje są zrobione bez zmieniania hitboxa gracza.
+-->
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -7,162 +15,382 @@
 <title>PIXEL WORLD</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111820;font-family:Arial,sans-serif;color:white}
+*{
+ box-sizing:border-box;
+ -webkit-tap-highlight-color:transparent
+}
+
+html,body{
+ margin:0;
+ width:100%;
+ height:100%;
+ overflow:hidden;
+ background:#111820;
+ font-family:Arial,sans-serif;
+ color:white
+}
+
 body{user-select:none}
+
 canvas{
- position:absolute;inset:0;width:100%;height:100%;
- image-rendering:pixelated;touch-action:none
+ position:absolute;
+ inset:0;
+ width:100%;
+ height:100%;
+ image-rendering:pixelated;
+ touch-action:none
 }
 
 button,select{font:inherit}
 
-#ui{position:absolute;inset:0;pointer-events:none}
+#ui{
+ position:absolute;
+ inset:0;
+ pointer-events:none
+}
 
 #title{
- position:absolute;top:12px;left:50%;transform:translateX(-50%);
- font-size:23px;font-weight:900;letter-spacing:3px;
+ position:absolute;
+ top:12px;
+ left:50%;
+ transform:translateX(-50%);
+ font-size:23px;
+ font-weight:900;
+ letter-spacing:3px;
  text-shadow:3px 3px #000
 }
 
 #health{
- position:absolute;left:14px;top:14px;width:185px;height:27px;
- border:3px solid white;background:#171717
+ position:absolute;
+ left:14px;
+ top:14px;
+ width:185px;
+ height:27px;
+ border:3px solid white;
+ background:#171717
 }
-#healthFill{width:100%;height:100%;background:#e53935}
+
+#healthFill{
+ width:100%;
+ height:100%;
+ background:#e53935
+}
+
 #healthText{
- position:absolute;inset:0;display:flex;align-items:center;
- justify-content:center;font-size:12px;font-weight:bold;text-shadow:2px 2px #000
+ position:absolute;
+ inset:0;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:12px;
+ font-weight:bold;
+ text-shadow:2px 2px #000
 }
 
 #help{
- position:absolute;left:15px;top:50px;font-size:12px;
+ position:absolute;
+ left:15px;
+ top:50px;
+ font-size:12px;
  text-shadow:2px 2px #000
 }
 
 #topButtons{
- position:absolute;right:14px;top:14px;display:flex;gap:7px;
+ position:absolute;
+ right:14px;
+ top:14px;
+ display:flex;
+ gap:7px;
  pointer-events:auto
 }
 
 .uiBtn{
- border:3px solid white;background:#252d38;color:white;
- padding:8px 11px;font-weight:bold;cursor:pointer;
+ border:3px solid white;
+ background:#252d38;
+ color:white;
+ padding:8px 11px;
+ font-weight:bold;
+ cursor:pointer;
  box-shadow:4px 4px #000
 }
+
 .uiBtn:hover{background:#3b4654}
 
 #hotbar{
- position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
- display:flex;gap:5px;pointer-events:auto
+ position:absolute;
+ left:50%;
+ bottom:12px;
+ transform:translateX(-50%);
+ display:flex;
+ gap:5px;
+ pointer-events:auto
 }
+
 .slot{
- width:55px;height:55px;background:#20252c;border:3px solid #555;
- position:relative;display:flex;align-items:center;justify-content:center;
+ width:55px;
+ height:55px;
+ background:#20252c;
+ border:3px solid #555;
+ position:relative;
+ display:flex;
+ align-items:center;
+ justify-content:center;
  cursor:pointer
 }
-.slot.selected{border-color:white;transform:translateY(-4px)}
-.icon{width:28px;height:28px}
-.slotNum{position:absolute;top:2px;left:4px;font-size:11px}
-.count{position:absolute;right:4px;bottom:2px;font-size:12px;font-weight:bold}
+
+.slot.selected{
+ border-color:white;
+ transform:translateY(-4px)
+}
+
+.icon{
+ width:28px;
+ height:28px
+}
+
+.slotNum{
+ position:absolute;
+ top:2px;
+ left:4px;
+ font-size:11px
+}
+
+.count{
+ position:absolute;
+ right:4px;
+ bottom:2px;
+ font-size:12px;
+ font-weight:bold
+}
 
 #message{
- position:absolute;left:50%;bottom:80px;transform:translateX(-50%);
- background:rgba(0,0,0,.7);padding:7px 14px;opacity:0;
+ position:absolute;
+ left:50%;
+ bottom:80px;
+ transform:translateX(-50%);
+ background:rgba(0,0,0,.7);
+ padding:7px 14px;
+ opacity:0;
  transition:.2s
 }
 
 #mobileControls{
- position:absolute;left:14px;bottom:84px;display:none;gap:9px;
+ position:absolute;
+ left:14px;
+ bottom:84px;
+ display:none;
+ gap:9px;
  pointer-events:auto
 }
+
 .mobileBtn{
- width:64px;height:64px;border:3px solid white;
- background:rgba(25,30,38,.88);color:white;
- display:flex;align-items:center;justify-content:center;
- font-size:25px;font-weight:bold
+ width:64px;
+ height:64px;
+ border:3px solid white;
+ background:rgba(25,30,38,.88);
+ color:white;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:25px;
+ font-weight:bold
 }
+
 #jumpBtn{
- position:absolute;right:15px;bottom:84px;display:none;
+ position:absolute;
+ right:15px;
+ bottom:84px;
+ display:none;
  pointer-events:auto
 }
+
 
 /* SETTINGS */
 
 #settingsOverlay{
- position:absolute;inset:0;background:rgba(0,0,0,.8);
- display:none;align-items:center;justify-content:center;
- pointer-events:auto;z-index:50
+ position:absolute;
+ inset:0;
+ background:rgba(0,0,0,.8);
+ display:none;
+ align-items:center;
+ justify-content:center;
+ pointer-events:auto;
+ z-index:50
 }
+
 #settingsWindow{
- width:min(780px,95vw);height:min(650px,90vh);
- background:#1b222c;border:4px solid white;
- box-shadow:10px 10px #000;display:flex;flex-direction:column
+ width:min(780px,95vw);
+ height:min(650px,90vh);
+ background:#1b222c;
+ border:4px solid white;
+ box-shadow:10px 10px #000;
+ display:flex;
+ flex-direction:column
 }
+
 #settingsHeader{
- padding:12px 14px;background:#252e3a;border-bottom:3px solid white;
- display:flex;justify-content:space-between;align-items:center
+ padding:12px 14px;
+ background:#252e3a;
+ border-bottom:3px solid white;
+ display:flex;
+ justify-content:space-between;
+ align-items:center
 }
-#settingsHeader h2{margin:0;font-size:20px}
+
+#settingsHeader h2{
+ margin:0;
+ font-size:20px
+}
+
 #closeSettings{
- width:40px;height:40px;background:#8d2020;color:white;
- border:3px solid white;font-weight:bold;font-size:18px
+ width:40px;
+ height:40px;
+ background:#8d2020;
+ color:white;
+ border:3px solid white;
+ font-weight:bold;
+ font-size:18px
 }
-#settingsBody{display:flex;flex:1;min-height:0}
+
+#settingsBody{
+ display:flex;
+ flex:1;
+ min-height:0
+}
+
 #tabs{
- width:185px;padding:8px;background:#151a21;
- border-right:3px solid #555;overflow-y:auto
+ width:185px;
+ padding:8px;
+ background:#151a21;
+ border-right:3px solid #555;
+ overflow-y:auto
 }
+
 .tab{
- width:100%;padding:11px 8px;margin-bottom:6px;
- background:#222a34;color:white;border:2px solid #555;
- text-align:left;font-weight:bold;cursor:pointer
+ width:100%;
+ padding:11px 8px;
+ margin-bottom:6px;
+ background:#222a34;
+ color:white;
+ border:2px solid #555;
+ text-align:left;
+ font-weight:bold;
+ cursor:pointer
 }
-.tab.active{background:#3c4857;border-color:white}
-#pages{flex:1;padding:17px;overflow-y:auto}
-.page{display:none}.page.active{display:block}
-.page h3{margin-top:0;border-bottom:2px solid #555;padding-bottom:8px}
+
+.tab.active{
+ background:#3c4857;
+ border-color:white
+}
+
+#pages{
+ flex:1;
+ padding:17px;
+ overflow-y:auto
+}
+
+.page{display:none}
+.page.active{display:block}
+
+.page h3{
+ margin-top:0;
+ border-bottom:2px solid #555;
+ padding-bottom:8px
+}
+
 .option{
- margin:8px 0;padding:11px;background:#252d38;
- border:2px solid #414b58;display:flex;
- align-items:center;justify-content:space-between;gap:15px
+ margin:8px 0;
+ padding:11px;
+ background:#252d38;
+ border:2px solid #414b58;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:15px
 }
-.desc{flex:1}.desc small{display:block;color:#aaa;margin-top:4px}
+
+.desc{flex:1}
+.desc small{
+ display:block;
+ color:#aaa;
+ margin-top:4px
+}
+
 .switch{
- width:48px;height:26px;border:2px solid white;background:#555;
- position:relative;cursor:pointer;flex-shrink:0
+ width:48px;
+ height:26px;
+ border:2px solid white;
+ background:#555;
+ position:relative;
+ cursor:pointer;
+ flex-shrink:0
 }
+
 .switch:after{
- content:"";position:absolute;top:2px;left:2px;
- width:18px;height:18px;background:white
+ content:"";
+ position:absolute;
+ top:2px;
+ left:2px;
+ width:18px;
+ height:18px;
+ background:white
 }
+
 .switch.on{background:#29823b}
 .switch.on:after{left:24px}
+
 .settingBtn,select{
- background:#151a21;color:white;border:2px solid white;
- padding:7px;font-weight:bold;cursor:pointer
+ background:#151a21;
+ color:white;
+ border:2px solid white;
+ padding:7px;
+ font-weight:bold;
+ cursor:pointer
 }
+
 .info{
- background:#11161c;border:2px solid #4d5966;
- padding:12px;line-height:1.5
+ background:#11161c;
+ border:2px solid #4d5966;
+ padding:12px;
+ line-height:1.5
 }
+
 #settingsFooter{
- padding:9px;border-top:3px solid #555;
- display:flex;justify-content:flex-end;gap:8px
+ padding:9px;
+ border-top:3px solid #555;
+ display:flex;
+ justify-content:flex-end;
+ gap:8px
 }
 
 @media(max-width:700px){
+
  #title{font-size:17px}
  #help{display:none}
+
  #topButtons{top:48px}
- #topButtons .uiBtn:not(#settingsBtn){display:none}
+
+ #topButtons .uiBtn:not(#settingsBtn){
+  display:none
+ }
+
  #mobileControls{display:flex}
  #jumpBtn{display:flex}
+
  #settingsBody{min-height:0}
  #tabs{width:125px}
+
  .tab{font-size:11px}
- .option{flex-direction:column;align-items:flex-start}
- .option select,.option button{width:100%}
+
+ .option{
+  flex-direction:column;
+  align-items:flex-start
+ }
+
+ .option select,
+ .option button{
+  width:100%
+ }
 }
 </style>
 </head>
@@ -192,26 +420,31 @@ button,select{font:inherit}
 </div>
 
 <div id="hotbar">
+
  <div class="slot selected" data-block="dirt">
   <span class="slotNum">1</span>
   <div class="icon" style="background:#795548;border-top:7px solid #4caf50"></div>
   <span class="count" id="count-dirt">20</span>
  </div>
+
  <div class="slot" data-block="stone">
   <span class="slotNum">2</span>
   <div class="icon" style="background:#777"></div>
   <span class="count" id="count-stone">10</span>
  </div>
+
  <div class="slot" data-block="wood">
   <span class="slotNum">3</span>
   <div class="icon" style="background:#754c24"></div>
   <span class="count" id="count-wood">10</span>
  </div>
+
  <div class="slot" data-block="sand">
   <span class="slotNum">4</span>
   <div class="icon" style="background:#d9bd70"></div>
   <span class="count" id="count-sand">10</span>
  </div>
+
 </div>
 
 <div id="message"></div>
@@ -240,37 +473,53 @@ button,select{font:inherit}
 <div id="settingsBody">
 
 <div id="tabs">
+
  <button class="tab active" data-page="gamePage">🎮 Gra</button>
  <button class="tab" data-page="graphicsPage">🎨 Grafika</button>
+ <button class="tab" data-page="animationPage">✨ Animacje</button>
  <button class="tab" data-page="soundPage">🔊 Dźwięk</button>
  <button class="tab" data-page="controlsPage">⌨ Sterowanie</button>
  <button class="tab" data-page="savePage">💾 Zapis</button>
  <button class="tab" data-page="helpPage">🆘 Pomoc</button>
  <button class="tab" data-page="infoPage">ℹ Informacje</button>
+
 </div>
 
 <div id="pages">
 
+
 <div class="page active" id="gamePage">
+
 <h3>🎮 Gra</h3>
 
 <div class="option">
- <div class="desc"><b>Przyciski mobilne</b><small>Przyciski ruchu i skoku.</small></div>
+ <div class="desc">
+  <b>Przyciski mobilne</b>
+  <small>Przyciski ruchu i skoku.</small>
+ </div>
  <div class="switch on" id="mobileSwitch"></div>
 </div>
 
 <div class="option">
- <div class="desc"><b>Animacje postaci</b><small>Chodzenie, ręce, nogi, skok i mruganie.</small></div>
+ <div class="desc">
+  <b>Animacje postaci</b>
+  <small>Wszystkie animacje bohatera.</small>
+ </div>
  <div class="switch on" id="animationSwitch"></div>
 </div>
 
 <div class="option">
- <div class="desc"><b>Automatyczny zapis</b><small>Zapis świata co 2 minuty.</small></div>
+ <div class="desc">
+  <b>Automatyczny zapis</b>
+  <small>Zapis świata co 2 minuty.</small>
+ </div>
  <div class="switch on" id="autoSaveSwitch"></div>
 </div>
 
 <div class="option">
- <div class="desc"><b>Pełny ekran</b><small>Uruchamia grę w trybie pełnoekranowym.</small></div>
+ <div class="desc">
+  <b>Pełny ekran</b>
+ </div>
  <button class="settingBtn" id="fullscreenBtn">WŁĄCZ</button>
 </div>
 
@@ -278,10 +527,15 @@ button,select{font:inherit}
 
 
 <div class="page" id="graphicsPage">
+
 <h3>🎨 Grafika</h3>
 
 <div class="option">
- <div class="desc"><b>Jakość</b><small>Wpływa na płynność gry.</small></div>
+ <div class="desc">
+  <b>Jakość</b>
+  <small>Wpływa na wydajność.</small>
+ </div>
+
  <select id="qualitySelect">
   <option value="low">Niska</option>
   <option value="medium">Średnia</option>
@@ -290,17 +544,24 @@ button,select{font:inherit}
 </div>
 
 <div class="option">
- <div class="desc"><b>Pixel Perfect</b><small>Ostre, pikselowe krawędzie.</small></div>
+ <div class="desc">
+  <b>Pixel Perfect</b>
+ </div>
  <div class="switch on" id="pixelSwitch"></div>
 </div>
 
 <div class="option">
- <div class="desc"><b>Animowana woda</b><small>Ruch fal na wodzie.</small></div>
+ <div class="desc">
+  <b>Animowana woda</b>
+ </div>
  <div class="switch on" id="waterSwitch"></div>
 </div>
 
 <div class="option">
- <div class="desc"><b>Limit FPS</b></div>
+ <div class="desc">
+  <b>Limit FPS</b>
+ </div>
+
  <select id="fpsSelect">
   <option value="30">30 FPS</option>
   <option value="60">60 FPS</option>
@@ -309,24 +570,119 @@ button,select{font:inherit}
   <option value="240">240 FPS</option>
  </select>
 </div>
+
+</div>
+
+
+<!-- NOWE USTAWIENIA ANIMACJI -->
+
+<div class="page" id="animationPage">
+
+<h3>✨ Animacje postaci</h3>
+
+<div class="option">
+ <div class="desc">
+  <b>Animowane chodzenie</b>
+  <small>Ręce, nogi, głowa i ciało.</small>
+ </div>
+ <div class="switch on" id="walkAnimSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc">
+  <b>Animacja bezczynności</b>
+  <small>Oddychanie, lekkie poruszanie postacią.</small>
+ </div>
+ <div class="switch on" id="idleAnimSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc">
+  <b>Mruganie</b>
+  <small>Postać naturalnie mruga oczami.</small>
+ </div>
+ <div class="switch on" id="blinkAnimSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc">
+  <b>Animacja skoku</b>
+  <small>Inna poza podczas skakania.</small>
+ </div>
+ <div class="switch on" id="jumpAnimSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc">
+  <b>Animacja lądowania</b>
+  <small>Postać ugina nogi po lądowaniu.</small>
+ </div>
+ <div class="switch on" id="landAnimSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc">
+  <b>Animacja włosów</b>
+  <small>Włosy lekko reagują na ruch.</small>
+ </div>
+ <div class="switch on" id="hairAnimSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc">
+  <b>Kurz</b>
+  <small>Małe pikselowe cząsteczki przy ruchu.</small>
+ </div>
+ <div class="switch on" id="dustAnimSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc">
+  <b>Cień</b>
+  <small>Cień reaguje na skok i ruch.</small>
+ </div>
+ <div class="switch on" id="shadowAnimSwitch"></div>
+</div>
+
+<div class="option">
+ <div class="desc">
+  <b>Prędkość animacji</b>
+ </div>
+
+ <select id="animationSpeedSelect">
+  <option value=".7">Wolna</option>
+  <option value="1">Normalna</option>
+  <option value="1.25">Szybka</option>
+  <option value="1.5">Bardzo szybka</option>
+ </select>
+</div>
+
 </div>
 
 
 <div class="page" id="soundPage">
+
 <h3>🔊 Dźwięk</h3>
 
 <div class="option">
- <div class="desc"><b>Efekty dźwiękowe</b><small>Kopanie, stawianie i skakanie.</small></div>
+ <div class="desc">
+  <b>Efekty</b>
+ </div>
  <div class="switch on" id="soundSwitch"></div>
 </div>
 
 <div class="option">
- <div class="desc"><b>Muzyka</b><small>Muzyka w tle.</small></div>
+ <div class="desc">
+  <b>Muzyka</b>
+ </div>
  <div class="switch" id="musicSwitch"></div>
 </div>
 
 <div class="option">
- <div class="desc"><b>Głośność</b></div>
+ <div class="desc">
+  <b>Głośność</b>
+ </div>
+
  <select id="volumeSelect">
   <option value=".25">25%</option>
   <option value=".5">50%</option>
@@ -334,10 +690,12 @@ button,select{font:inherit}
   <option value="1">100%</option>
  </select>
 </div>
+
 </div>
 
 
 <div class="page" id="controlsPage">
+
 <h3>⌨ Sterowanie</h3>
 
 <div class="option"><b>Lewo</b><b>A / ←</b></div>
@@ -346,56 +704,79 @@ button,select{font:inherit}
 <div class="option"><b>Kopanie</b><b>LPM</b></div>
 <div class="option"><b>Stawianie</b><b>PPM</b></div>
 <div class="option"><b>Bloki</b><b>1 / 2 / 3 / 4</b></div>
+
 </div>
 
 
 <div class="page" id="savePage">
+
 <h3>💾 Zapis</h3>
 
 <div class="info">
- Twój świat jest zapisywany lokalnie w przeglądarce.
- Możesz zamknąć stronę i wrócić później.
+ Świat zapisuje się lokalnie w przeglądarce.
 </div>
 
 <br>
 
-<button class="settingBtn" id="saveFromSettings">💾 ZAPISZ TERAZ</button>
-<button class="settingBtn" id="deleteSaveBtn">🗑 USUŃ ZAPIS</button>
+<button class="settingBtn" id="saveFromSettings">
+ 💾 ZAPISZ TERAZ
+</button>
+
+<button class="settingBtn" id="deleteSaveBtn">
+ 🗑 USUŃ ZAPIS
+</button>
+
 </div>
 
 
 <div class="page" id="helpPage">
+
 <h3>🆘 Pomoc</h3>
 
 <div class="info">
+
 <b>Ruch:</b> A/D lub ←/→<br><br>
 <b>Skok:</b> W / ↑ / SPACJA<br><br>
-<b>Kopanie:</b> kliknij blok LPM<br><br>
-<b>Budowanie:</b> wybierz blok i kliknij PPM<br><br>
-<b>Hotbar:</b> klawisze 1–4<br><br>
-<b>Telefon:</b> używaj przycisków na ekranie.<br><br>
-<b>Zapis:</b> zapisuj ręcznie albo włącz autozapis.
+<b>Kopanie:</b> LPM<br><br>
+<b>Budowanie:</b> PPM<br><br>
+<b>Bloki:</b> 1–4<br><br>
+<b>Telefon:</b> przyciski na ekranie.
+
 </div>
+
 </div>
 
 
 <div class="page" id="infoPage">
+
 <h3>ℹ Informacje</h3>
 
 <div class="info">
+
 <h2>PIXEL WORLD</h2>
-<p>Pikselowa gra sandboxowa inspirowana klasycznymi grami 2D.</p>
-<p>Eksploruj świat, kop bloki, buduj i odkrywaj podziemia.</p>
+
+<p>
+Pikselowa gra sandboxowa.
+</p>
+
+<p>
+Eksploruj świat, kop, buduj i odkrywaj.
+</p>
+
 <hr>
-<b>Wersja:</b> Stable V7<br>
+
+<b>Wersja:</b> Animation Update<br>
 <b>Technologia:</b> HTML5 Canvas + JavaScript<br>
 <b>Tryb:</b> Singleplayer<br>
 <b>Grafika:</b> Pixel Art
+
 </div>
+
 </div>
 
 </div>
 </div>
+
 
 <div id="settingsFooter">
  <button class="settingBtn" id="resetSettings">↻ DOMYŚLNE</button>
@@ -409,7 +790,7 @@ button,select{font:inherit}
 <script>
 
 /* =====================================================
-   SETTINGS
+   USTAWIENIA
 ===================================================== */
 
 const canvas=document.getElementById("game");
@@ -425,31 +806,56 @@ const defaultSettings={
  fps:60,
  sound:true,
  music:false,
- volume:.75
+ volume:.75,
+
+ walkAnim:true,
+ idleAnim:true,
+ blinkAnim:true,
+ jumpAnim:true,
+ landAnim:true,
+ hairAnim:true,
+ dustAnim:true,
+ shadowAnim:true,
+ animationSpeed:1
 };
 
 let settings;
 
 try{
- settings=JSON.parse(localStorage.getItem("PIXEL_WORLD_SETTINGS"))||
+ settings=
+ JSON.parse(localStorage.getItem("PIXEL_WORLD_SETTINGS"))||
  JSON.parse(JSON.stringify(defaultSettings));
 }catch{
  settings=JSON.parse(JSON.stringify(defaultSettings));
 }
 
+/* zgodność ze starszym zapisem ustawień */
+
+for(const key in defaultSettings){
+ if(settings[key]===undefined)
+  settings[key]=defaultSettings[key];
+}
+
 function saveSettings(){
  try{
-  localStorage.setItem("PIXEL_WORLD_SETTINGS",JSON.stringify(settings));
+  localStorage.setItem(
+   "PIXEL_WORLD_SETTINGS",
+   JSON.stringify(settings)
+  );
  }catch{}
 }
 
-let W=innerWidth,H=innerHeight;
+let W=innerWidth;
+let H=innerHeight;
 
 function resize(){
+
  W=innerWidth;
  H=innerHeight;
+
  canvas.width=W;
  canvas.height=H;
+
  ctx.imageSmoothingEnabled=!settings.pixelPerfect;
 }
 
@@ -457,10 +863,13 @@ addEventListener("resize",resize);
 
 
 /* =====================================================
-   SETTINGS UI
+   MENU
 ===================================================== */
 
-const overlay=document.getElementById("settingsOverlay");
+const overlay=
+ document.getElementById("settingsOverlay");
+
+let paused=false;
 
 function openSettings(){
  overlay.style.display="flex";
@@ -477,98 +886,198 @@ document.getElementById("closeSettings").onclick=closeSettings;
 document.getElementById("closeSettingsBottom").onclick=closeSettings;
 
 document.querySelectorAll(".tab").forEach(tab=>{
+
  tab.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+
+  document.querySelectorAll(".tab")
+   .forEach(x=>x.classList.remove("active"));
+
+  document.querySelectorAll(".page")
+   .forEach(x=>x.classList.remove("active"));
+
   tab.classList.add("active");
-  document.getElementById(tab.dataset.page).classList.add("active");
+
+  document.getElementById(
+   tab.dataset.page
+  ).classList.add("active");
+
  };
+
 });
 
-function updateSwitch(id,value){
- document.getElementById(id).classList.toggle("on",value);
+
+function switchUI(id,value){
+
+ document.getElementById(id)
+  .classList.toggle("on",value);
+
 }
 
-function applySettings(){
- updateSwitch("mobileSwitch",settings.mobile);
- updateSwitch("animationSwitch",settings.animations);
- updateSwitch("autoSaveSwitch",settings.autoSave);
- updateSwitch("pixelSwitch",settings.pixelPerfect);
- updateSwitch("waterSwitch",settings.water);
- updateSwitch("soundSwitch",settings.sound);
- updateSwitch("musicSwitch",settings.music);
 
- document.getElementById("qualitySelect").value=settings.quality;
- document.getElementById("fpsSelect").value=settings.fps;
- document.getElementById("volumeSelect").value=settings.volume;
+function applySettings(){
+
+ switchUI("mobileSwitch",settings.mobile);
+ switchUI("animationSwitch",settings.animations);
+ switchUI("autoSaveSwitch",settings.autoSave);
+
+ switchUI("pixelSwitch",settings.pixelPerfect);
+ switchUI("waterSwitch",settings.water);
+
+ switchUI("soundSwitch",settings.sound);
+ switchUI("musicSwitch",settings.music);
+
+ switchUI("walkAnimSwitch",settings.walkAnim);
+ switchUI("idleAnimSwitch",settings.idleAnim);
+ switchUI("blinkAnimSwitch",settings.blinkAnim);
+ switchUI("jumpAnimSwitch",settings.jumpAnim);
+ switchUI("landAnimSwitch",settings.landAnim);
+ switchUI("hairAnimSwitch",settings.hairAnim);
+ switchUI("dustAnimSwitch",settings.dustAnim);
+ switchUI("shadowAnimSwitch",settings.shadowAnim);
+
+ document.getElementById("qualitySelect").value=
+  settings.quality;
+
+ document.getElementById("fpsSelect").value=
+  settings.fps;
+
+ document.getElementById("volumeSelect").value=
+  settings.volume;
+
+ document.getElementById("animationSpeedSelect").value=
+  settings.animationSpeed;
 
  document.getElementById("mobileControls").style.display=
- settings.mobile?"flex":"none";
+  settings.mobile?"flex":"none";
 
  document.getElementById("jumpBtn").style.display=
- settings.mobile?"flex":"none";
+  settings.mobile?"flex":"none";
 
- ctx.imageSmoothingEnabled=!settings.pixelPerfect;
+ ctx.imageSmoothingEnabled=
+  !settings.pixelPerfect;
 
  saveSettings();
 }
 
-function toggle(name,id){
+
+function toggleSetting(name){
  settings[name]=!settings[name];
  applySettings();
 }
 
-document.getElementById("mobileSwitch").onclick=()=>toggle("mobile");
-document.getElementById("animationSwitch").onclick=()=>toggle("animations");
-document.getElementById("autoSaveSwitch").onclick=()=>toggle("autoSave");
-document.getElementById("pixelSwitch").onclick=()=>toggle("pixelPerfect");
-document.getElementById("waterSwitch").onclick=()=>toggle("water");
-document.getElementById("soundSwitch").onclick=()=>toggle("sound");
-document.getElementById("musicSwitch").onclick=()=>toggle("music");
+
+document.getElementById("mobileSwitch")
+ .onclick=()=>toggleSetting("mobile");
+
+document.getElementById("animationSwitch")
+ .onclick=()=>toggleSetting("animations");
+
+document.getElementById("autoSaveSwitch")
+ .onclick=()=>toggleSetting("autoSave");
+
+document.getElementById("pixelSwitch")
+ .onclick=()=>toggleSetting("pixelPerfect");
+
+document.getElementById("waterSwitch")
+ .onclick=()=>toggleSetting("water");
+
+document.getElementById("soundSwitch")
+ .onclick=()=>toggleSetting("sound");
+
+document.getElementById("musicSwitch")
+ .onclick=()=>toggleSetting("music");
+
+document.getElementById("walkAnimSwitch")
+ .onclick=()=>toggleSetting("walkAnim");
+
+document.getElementById("idleAnimSwitch")
+ .onclick=()=>toggleSetting("idleAnim");
+
+document.getElementById("blinkAnimSwitch")
+ .onclick=()=>toggleSetting("blinkAnim");
+
+document.getElementById("jumpAnimSwitch")
+ .onclick=()=>toggleSetting("jumpAnim");
+
+document.getElementById("landAnimSwitch")
+ .onclick=()=>toggleSetting("landAnim");
+
+document.getElementById("hairAnimSwitch")
+ .onclick=()=>toggleSetting("hairAnim");
+
+document.getElementById("dustAnimSwitch")
+ .onclick=()=>toggleSetting("dustAnim");
+
+document.getElementById("shadowAnimSwitch")
+ .onclick=()=>toggleSetting("shadowAnim");
+
 
 document.getElementById("qualitySelect").onchange=e=>{
  settings.quality=e.target.value;
  saveSettings();
 };
 
+
 document.getElementById("fpsSelect").onchange=e=>{
  settings.fps=Number(e.target.value);
  saveSettings();
 };
+
 
 document.getElementById("volumeSelect").onchange=e=>{
  settings.volume=Number(e.target.value);
  saveSettings();
 };
 
-document.getElementById("resetSettings").onclick=()=>{
- settings=JSON.parse(JSON.stringify(defaultSettings));
- applySettings();
- showMessage("Przywrócono ustawienia.");
+
+document.getElementById("animationSpeedSelect").onchange=e=>{
+ settings.animationSpeed=Number(e.target.value);
+ saveSettings();
 };
 
+
+document.getElementById("resetSettings").onclick=()=>{
+
+ settings=
+ JSON.parse(JSON.stringify(defaultSettings));
+
+ applySettings();
+
+ showMessage("Ustawienia przywrócone.");
+
+};
+
+
 document.getElementById("fullscreenBtn").onclick=async()=>{
+
  try{
+
   if(!document.fullscreenElement)
    await document.documentElement.requestFullscreen();
   else
    await document.exitFullscreen();
+
  }catch{}
+
 };
 
 
 /* =====================================================
-   SOUND
+   DŹWIĘK
 ===================================================== */
 
 let audio=null;
 
 function sound(type){
+
  if(!settings.sound)return;
 
  try{
+
   if(!audio)
-   audio=new(window.AudioContext||window.webkitAudioContext)();
+   audio=
+   new(window.AudioContext||
+   window.webkitAudioContext)();
 
   const osc=audio.createOscillator();
   const gain=audio.createGain();
@@ -576,32 +1085,37 @@ function sound(type){
   osc.connect(gain);
   gain.connect(audio.destination);
 
-  let f=400;
-  if(type==="mine")f=170;
-  if(type==="place")f=280;
-  if(type==="jump")f=480;
+  let frequency=400;
+
+  if(type==="mine")frequency=170;
+  if(type==="place")frequency=280;
+  if(type==="jump")frequency=480;
+  if(type==="land")frequency=120;
+  if(type==="step")frequency=90;
 
   osc.type="square";
-  osc.frequency.value=f;
+  osc.frequency.value=frequency;
 
   gain.gain.setValueAtTime(
-   settings.volume*.06,
+   settings.volume*.045,
    audio.currentTime
   );
 
   gain.gain.exponentialRampToValueAtTime(
    .001,
-   audio.currentTime+.07
+   audio.currentTime+.06
   );
 
   osc.start();
-  osc.stop(audio.currentTime+.07);
+  osc.stop(audio.currentTime+.06);
+
  }catch{}
+
 }
 
 
 /* =====================================================
-   WORLD
+   ŚWIAT
 ===================================================== */
 
 const TILE=32;
@@ -628,11 +1142,11 @@ function createWorld(){
   ()=>Array(WORLD_W).fill(BLOCK.air)
  );
 
- const height=[];
+ const heights=[];
 
  for(let x=0;x<WORLD_W;x++){
 
-  height[x]=Math.max(
+  heights[x]=Math.max(
    15,
    Math.min(
     29,
@@ -644,11 +1158,13 @@ function createWorld(){
     )
    )
   );
+
  }
+
 
  for(let x=0;x<WORLD_W;x++){
 
-  const h=height[x];
+  const h=heights[x];
 
   for(let y=h;y<WORLD_H;y++){
 
@@ -663,54 +1179,74 @@ function createWorld(){
  }
 
 
- /* drzewa */
+ /* DRZEWA */
 
- for(let x=8;x<WORLD_W-8;x+=8+Math.floor(Math.random()*8)){
+ for(
+  let x=8;
+  x<WORLD_W-8;
+  x+=8+Math.floor(Math.random()*8)
+ ){
 
   if(Math.random()<.45)continue;
 
-  const ground=height[x];
-  const trunk=4;
+  const ground=heights[x];
 
-  for(let y=1;y<=trunk;y++)
+  for(let y=1;y<=4;y++){
+
    if(ground-y>=0)
     world[ground-y][x]=BLOCK.wood;
 
-  const top=ground-trunk-1;
+  }
+
+  const top=ground-5;
 
   for(let yy=-2;yy<=2;yy++){
+
    for(let xx=-2;xx<=2;xx++){
 
     if(Math.abs(xx)+Math.abs(yy)<=3){
 
-     const tx=x+xx,ty=top+yy;
+     const tx=x+xx;
+     const ty=top+yy;
 
-     if(tx>=0&&tx<WORLD_W&&ty>=0&&ty<WORLD_H)
-      if(world[ty][tx]===BLOCK.air)
-       world[ty][tx]=BLOCK.leaves;
-
+     if(
+      tx>=0&&
+      tx<WORLD_W&&
+      ty>=0&&
+      ty<WORLD_H&&
+      world[ty][tx]===BLOCK.air
+     )
+      world[ty][tx]=BLOCK.leaves;
     }
    }
   }
  }
 
 
- /* małe jeziora */
+ /* WODA */
 
  for(let i=0;i<12;i++){
 
-  const x=20+Math.floor(Math.random()*(WORLD_W-40));
-  const y=height[x];
+  const x=
+   20+
+   Math.floor(
+    Math.random()*(WORLD_W-40)
+   );
 
-  const width=2+Math.floor(Math.random()*2);
+  const y=heights[x];
+
+  const width=
+   2+
+   Math.floor(Math.random()*2);
 
   for(let xx=-width;xx<=width;xx++){
 
    const tx=x+xx;
 
-   if(tx<1||tx>=WORLD_W-1)continue;
+   if(tx<1||tx>=WORLD_W-1)
+    continue;
 
-   const h=height[tx];
+   const h=heights[tx];
 
    if(Math.abs(h-y)<=1){
 
@@ -724,22 +1260,106 @@ function createWorld(){
 
     if(world[h][tx+1]===BLOCK.grass)
      world[h][tx+1]=BLOCK.sand;
+
    }
   }
  }
 
 
- /* bezpieczny start */
+ /* BEZPIECZNY START */
 
  for(let x=7;x<=18;x++){
-  for(let y=0;y<18;y++){
-   if(y<21)
-    world[y][x]=BLOCK.air;
-  }
+
+  for(let y=0;y<21;y++)
+   world[y][x]=BLOCK.air;
+
  }
 
  for(let x=7;x<=18;x++)
   world[21][x]=BLOCK.grass;
+
+}
+
+
+/* =====================================================
+   CZĄSTECZKI
+===================================================== */
+
+const particles=[];
+
+function spawnDust(x,y,count=2){
+
+ if(!settings.dustAnim||!settings.animations)
+  return;
+
+ for(let i=0;i<count;i++){
+
+  particles.push({
+
+   x:x,
+   y:y,
+
+   vx:(Math.random()-.5)*1.3,
+   vy:-Math.random()*1.2,
+
+   life:1,
+
+   size:
+    1+
+    Math.random()*2
+
+  });
+
+ }
+
+}
+
+
+function updateParticles(){
+
+ for(let i=particles.length-1;i>=0;i--){
+
+  const p=particles[i];
+
+  p.x+=p.vx;
+  p.y+=p.vy;
+
+  p.vy+=.06;
+  p.life-=.035;
+
+  if(p.life<=0)
+   particles.splice(i,1);
+
+ }
+
+}
+
+
+function drawParticles(){
+
+ if(!settings.dustAnim)
+  return;
+
+ for(const p of particles){
+
+  const x=p.x-camera.x;
+  const y=p.y-camera.y;
+
+  ctx.globalAlpha=Math.max(0,p.life);
+
+  ctx.fillStyle="#c7b08a";
+
+  ctx.fillRect(
+   Math.round(x),
+   Math.round(y),
+   Math.max(1,Math.round(p.size)),
+   Math.max(1,Math.round(p.size))
+  );
+
+ }
+
+ ctx.globalAlpha=1;
+
 }
 
 
@@ -748,18 +1368,43 @@ function createWorld(){
 ===================================================== */
 
 const player={
+
  x:12*TILE,
  y:0,
+
  width:20,
  height:40,
+
  vx:0,
  vy:0,
+
  speed:1.85,
  jump:8.2,
+
  grounded:false,
+
  direction:1,
- anim:0
+
+ anim:0,
+
+ wasGrounded:false,
+
+ landTimer:0,
+
+ stepTimer:0,
+
+ idleTime:0,
+
+ blinkTime:0,
+
+ blinkDuration:0,
+
+ lookX:0,
+
+ lookTarget:0
+
 };
+
 
 function findSpawn(){
 
@@ -775,31 +1420,36 @@ function findSpawn(){
 
     player.x=x*TILE+6;
     player.y=(y-2)*TILE;
+
     player.vx=0;
     player.vy=0;
+
     player.grounded=false;
+
     return;
    }
   }
  }
 }
 
-createWorld();
-findSpawn();
-
 
 /* =====================================================
-   COLLISION
+   KOLIZJE
 ===================================================== */
 
 function solid(id){
- return id===BLOCK.grass||
- id===BLOCK.dirt||
- id===BLOCK.stone||
- id===BLOCK.wood||
- id===BLOCK.leaves||
- id===BLOCK.sand;
+
+ return(
+  id===BLOCK.grass||
+  id===BLOCK.dirt||
+  id===BLOCK.stone||
+  id===BLOCK.wood||
+  id===BLOCK.leaves||
+  id===BLOCK.sand
+ );
+
 }
+
 
 function solidAt(px,py){
 
@@ -813,19 +1463,24 @@ function solidAt(px,py){
   return true;
 
  return solid(world[ty][tx]);
+
 }
+
 
 function collide(x,y){
 
- const l=x+2;
- const r=x+player.width-2;
- const t=y+2;
- const b=y+player.height-1;
+ const left=x+2;
+ const right=x+player.width-2;
+ const top=y+2;
+ const bottom=y+player.height-1;
 
- return solidAt(l,t)||
- solidAt(r,t)||
- solidAt(l,b)||
- solidAt(r,b);
+ return(
+  solidAt(left,top)||
+  solidAt(right,top)||
+  solidAt(left,bottom)||
+  solidAt(right,bottom)
+ );
+
 }
 
 
@@ -834,24 +1489,41 @@ function collide(x,y){
 ===================================================== */
 
 const keys={};
+
 let jumpLock=false;
 
 addEventListener("keydown",e=>{
 
  keys[e.code]=true;
 
- if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))
+ if([
+  "Space",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight"
+ ].includes(e.code))
   e.preventDefault();
 
- if(e.code==="Digit1")selectBlock("dirt");
- if(e.code==="Digit2")selectBlock("stone");
- if(e.code==="Digit3")selectBlock("wood");
- if(e.code==="Digit4")selectBlock("sand");
+ if(e.code==="Digit1")
+  selectBlock("dirt");
+
+ if(e.code==="Digit2")
+  selectBlock("stone");
+
+ if(e.code==="Digit3")
+  selectBlock("wood");
+
+ if(e.code==="Digit4")
+  selectBlock("sand");
+
 });
+
 
 addEventListener("keyup",e=>{
  keys[e.code]=false;
 });
+
 
 function left(){
  return keys.KeyA||keys.ArrowLeft;
@@ -867,7 +1539,7 @@ function jump(){
 
 
 /* =====================================================
-   MOBILE INPUT
+   MOBILE
 ===================================================== */
 
 function hold(id,key){
@@ -884,13 +1556,39 @@ function hold(id,key){
   keys[key]=false;
  };
 
- el.addEventListener("touchstart",down,{passive:false});
- el.addEventListener("touchend",up,{passive:false});
- el.addEventListener("touchcancel",up,{passive:false});
+ el.addEventListener(
+  "touchstart",
+  down,
+  {passive:false}
+ );
 
- el.addEventListener("mousedown",down);
- el.addEventListener("mouseup",up);
- el.addEventListener("mouseleave",up);
+ el.addEventListener(
+  "touchend",
+  up,
+  {passive:false}
+ );
+
+ el.addEventListener(
+  "touchcancel",
+  up,
+  {passive:false}
+ );
+
+ el.addEventListener(
+  "mousedown",
+  down
+ );
+
+ el.addEventListener(
+  "mouseup",
+  up
+ );
+
+ el.addEventListener(
+  "mouseleave",
+  up
+ );
+
 }
 
 hold("leftBtn","ArrowLeft");
@@ -899,47 +1597,134 @@ hold("jumpBtn","Space");
 
 
 /* =====================================================
-   UPDATE PLAYER
+   AKTUALIZACJA GRACZA
 ===================================================== */
 
 function updatePlayer(){
 
- if(left()){
+ const wasGrounded=player.grounded;
+
+ const movingLeft=left();
+ const movingRight=right();
+
+
+ /* RUCH */
+
+ if(movingLeft){
+
   player.vx=-player.speed;
   player.direction=-1;
+
  }
 
- if(right()){
+ else if(movingRight){
+
   player.vx=player.speed;
   player.direction=1;
+
  }
 
- if(!left()&&!right()){
+ else{
+
   player.vx*=.72;
+
   if(Math.abs(player.vx)<.04)
    player.vx=0;
+
  }
 
- const wantJump=jump();
 
- if(wantJump&&!jumpLock&&player.grounded){
+ const moving=
+  Math.abs(player.vx)>.1;
+
+
+ /* SKOK */
+
+ const wantsJump=jump();
+
+ if(
+  wantsJump&&
+  !jumpLock&&
+  player.grounded
+ ){
 
   player.vy=-player.jump;
+
   player.grounded=false;
+
   sound("jump");
+
+  spawnDust(
+   player.x+player.width/2,
+   player.y+player.height,
+   3
+  );
+
  }
 
- jumpLock=wantJump;
+ jumpLock=wantsJump;
 
- const moving=Math.abs(player.vx)>.1;
 
- if(moving&&settings.animations)
-  player.anim+=.16;
- else
+ /* ANIMACJA CHODZENIA */
+
+ if(
+  moving&&
+  player.grounded&&
+  settings.animations&&
+  settings.walkAnim
+ ){
+
+  player.anim+=
+   .16*
+   settings.animationSpeed;
+
+  player.idleTime=0;
+
+ }
+ else{
+
   player.anim*=.82;
 
+  player.idleTime+=1;
 
- /* X */
+ }
+
+
+ /* KROKI */
+
+ if(
+  moving&&
+  player.grounded&&
+  settings.animations
+ ){
+
+  player.stepTimer-=1;
+
+  if(player.stepTimer<=0){
+
+   spawnDust(
+    player.x+player.width/2,
+    player.y+player.height,
+    1
+   );
+
+   player.stepTimer=
+    Math.max(
+     7,
+     15/settings.animationSpeed
+    );
+
+  }
+
+ }
+ else{
+
+  player.stepTimer=0;
+
+ }
+
+
+ /* RUCH X */
 
  const nx=player.x+player.vx;
 
@@ -949,7 +1734,7 @@ function updatePlayer(){
   player.vx=0;
 
 
- /* gravity */
+ /* GRAWITACJA */
 
  player.vy+=.38;
 
@@ -957,7 +1742,7 @@ function updatePlayer(){
   player.vy=9;
 
 
- /* Y */
+ /* RUCH Y */
 
  const ny=player.y+player.vy;
 
@@ -966,54 +1751,135 @@ function updatePlayer(){
   player.y=ny;
   player.grounded=false;
 
- }else{
+ }
+ else{
 
   if(player.vy>0)
    player.grounded=true;
 
   player.vy=0;
+
  }
 
 
- /* zabezpieczenie */
+ /* LĄDOWANIE */
 
- if(player.y>WORLD_H*TILE+200){
+ if(
+  !wasGrounded&&
+  player.grounded&&
+  settings.landAnim
+ ){
+
+  player.landTimer=10;
+
+  spawnDust(
+   player.x+player.width/2,
+   player.y+player.height,
+   5
+  );
+
+  sound("land");
+
+ }
+
+
+ if(player.landTimer>0)
+  player.landTimer--;
+
+
+ /* IDLE LOOK */
+
+ if(
+  settings.animations&&
+  settings.idleAnim
+ ){
+
+  player.lookTarget=
+   Math.sin(
+    performance.now()*.0007
+   )*.7;
+
+  player.lookX+=
+   (player.lookTarget-player.lookX)*.04;
+
+ }
+
+
+ /* ZABEZPIECZENIE */
+
+ if(
+  player.y>
+  WORLD_H*TILE+200
+ ){
 
   findSpawn();
-  showMessage("Przywrócono pozycję gracza.");
+
+  player.vx=0;
+  player.vy=0;
+
+  showMessage(
+   "Przywrócono pozycję gracza."
+  );
 
  }
 
 
- /* camera */
+ /* CZĄSTECZKI */
+
+ updateParticles();
+
+
+ /* KAMERA */
 
  camera.targetX=
- player.x+player.width/2-W/2;
+  player.x+
+  player.width/2-
+  W/2;
 
  camera.targetY=
- player.y+player.height/2-H/2;
+  player.y+
+  player.height/2-
+  H/2;
 
- camera.x+=(camera.targetX-camera.x)*.08;
- camera.y+=(camera.targetY-camera.y)*.08;
+ camera.x+=
+  (camera.targetX-camera.x)*.08;
+
+ camera.y+=
+  (camera.targetY-camera.y)*.08;
 
  camera.x=Math.max(
   0,
-  Math.min(WORLD_W*TILE-W,camera.x)
+  Math.min(
+   WORLD_W*TILE-W,
+   camera.x
+  )
  );
 
  camera.y=Math.max(
   0,
-  Math.min(WORLD_H*TILE-H,camera.y)
+  Math.min(
+   WORLD_H*TILE-H,
+   camera.y
+  )
  );
+
 }
 
+
+/* =====================================================
+   KAMERA
+===================================================== */
+
 const camera={
- x:0,y:0,targetX:0,targetY:0
+ x:0,
+ y:0,
+ targetX:0,
+ targetY:0
 };
 
 
 /* =====================================================
-   DRAW WORLD
+   BLOKI
 ===================================================== */
 
 function drawBlock(id,x,y,time){
@@ -1021,8 +1887,14 @@ function drawBlock(id,x,y,time){
  const px=x*TILE-camera.x;
  const py=y*TILE-camera.y;
 
- if(px<-TILE||py<-TILE||px>W+TILE||py>H+TILE)
+ if(
+  px<-TILE||
+  py<-TILE||
+  px>W+TILE||
+  py>H+TILE
+ )
   return;
+
 
  if(id===BLOCK.grass){
 
@@ -1034,14 +1906,18 @@ function drawBlock(id,x,y,time){
 
   ctx.fillStyle="#398c36";
 
-  for(let i=0;i<5;i++)
+  for(let i=0;i<5;i++){
+
    ctx.fillRect(
     px+(x*13+i*7)%28,
     py+4+(i%2),
     2,4
    );
 
+  }
+
  }
+
 
  else if(id===BLOCK.dirt){
 
@@ -1050,14 +1926,18 @@ function drawBlock(id,x,y,time){
 
   ctx.fillStyle="#674221";
 
-  for(let i=0;i<4;i++)
+  for(let i=0;i<4;i++){
+
    ctx.fillRect(
     px+(x*11+i*9)%27,
     py+(y*13+i*7)%27,
     3,3
    );
 
+  }
+
  }
+
 
  else if(id===BLOCK.stone){
 
@@ -1066,14 +1946,18 @@ function drawBlock(id,x,y,time){
 
   ctx.fillStyle="#5d6267";
 
-  for(let i=0;i<5;i++)
+  for(let i=0;i<5;i++){
+
    ctx.fillRect(
     px+(x*9+i*7)%28,
     py+(y*7+i*9)%27,
     4,3
    );
 
+  }
+
  }
+
 
  else if(id===BLOCK.wood){
 
@@ -1081,10 +1965,17 @@ function drawBlock(id,x,y,time){
   ctx.fillRect(px,py,TILE,TILE);
 
   ctx.fillStyle="#9b602d";
-  ctx.fillRect(px+7,py,4,TILE);
-  ctx.fillRect(px+20,py,3,TILE);
+
+  ctx.fillRect(
+   px+7,py,4,TILE
+  );
+
+  ctx.fillRect(
+   px+20,py,3,TILE
+  );
 
  }
+
 
  else if(id===BLOCK.leaves){
 
@@ -1093,14 +1984,18 @@ function drawBlock(id,x,y,time){
 
   ctx.fillStyle="#42a847";
 
-  for(let i=0;i<4;i++)
+  for(let i=0;i<4;i++){
+
    ctx.fillRect(
     px+(x*7+i*8)%25,
     py+(y*9+i*5)%24,
     5,5
    );
 
+  }
+
  }
+
 
  else if(id===BLOCK.sand){
 
@@ -1109,14 +2004,18 @@ function drawBlock(id,x,y,time){
 
   ctx.fillStyle="#c5a75b";
 
-  for(let i=0;i<4;i++)
+  for(let i=0;i<4;i++){
+
    ctx.fillRect(
     px+(x*5+i*9)%27,
     py+(y*11+i*4)%26,
     2,2
    );
 
+  }
+
  }
+
 
  else if(id===BLOCK.water){
 
@@ -1125,97 +2024,296 @@ function drawBlock(id,x,y,time){
 
   if(settings.water){
 
-   const wave=Math.sin(time*.003+x)*2;
+   const wave=
+    Math.sin(time*.003+x)*2;
 
    ctx.fillStyle="#69bae9";
 
    ctx.fillRect(
-    px+4,py+7+wave,11,2
+    px+4,
+    py+7+wave,
+    11,2
    );
 
    ctx.fillRect(
-    px+20,py+15-wave,7,2
+    px+20,
+    py+15-wave,
+    7,2
    );
+
   }
+
  }
+
 }
 
 
 /* =====================================================
-   PLAYER ANIMATION
+   ROZBUDOWANA ANIMACJA POSTACI
 ===================================================== */
 
 function drawPlayer(time){
 
+ const speed=
+  settings.animationSpeed;
+
+
+ const walking=
+  Math.abs(player.vx)>.1&&
+  player.grounded&&
+  settings.animations&&
+  settings.walkAnim;
+
+
+ const airborne=!player.grounded;
+
+
  let bob=0;
- let arms=0;
- let legs=0;
+ let armSwing=0;
+ let legSwing=0;
  let tilt=0;
 
- const moving=
-  Math.abs(player.vx)>.1&&settings.animations;
+ let squash=1;
+ let stretch=1;
 
- if(player.grounded&&!moving)
-  bob=Math.sin(time*.008)*.5;
+ let headBob=0;
 
- if(moving){
+ let landing=0;
 
-  const w=player.anim;
 
-  bob=Math.abs(Math.sin(w))*1.2;
-  arms=Math.sin(w)*3;
-  legs=Math.sin(w)*4;
-  tilt=Math.sin(w)*.025;
+ /* ===============================
+    IDLE
+ =============================== */
 
- }
-
- if(!player.grounded&&player.vy<0){
-
-  arms=-4;
-  legs=3;
-  tilt=.025*player.direction;
-
- }
-
- if(!player.grounded&&player.vy>0){
-
-  arms=3;
-  legs=-2;
- }
-
- const cx=Math.round(
-  player.x-camera.x+player.width/2
- );
-
- const by=Math.round(
-  player.y-camera.y+bob
- );
-
- const blink=
+ if(
+  !walking&&
+  player.grounded&&
   settings.animations&&
-  Math.floor(time/100)%83===0;
+  settings.idleAnim
+ ){
+
+  const idle=
+   time*.0012;
+
+  bob=
+   Math.sin(idle)*.55;
+
+  headBob=
+   Math.sin(idle*1.25)*.35;
+
+  stretch=
+   1+
+   Math.sin(idle)*.006;
+
+ }
+
+
+ /* ===============================
+    WALK
+ =============================== */
+
+ if(walking){
+
+  const walk=
+   player.anim;
+
+  const wave=
+   Math.sin(walk);
+
+  const wave2=
+   Math.sin(walk*2);
+
+  bob=
+   Math.abs(wave)*1.2;
+
+  armSwing=
+   wave*3.4;
+
+  legSwing=
+   wave*4.3;
+
+  tilt=
+   wave*.027;
+
+  headBob=
+   wave2*.4;
+
+  stretch=
+   1+
+   Math.abs(wave)*.018;
+
+ }
+
+
+ /* ===============================
+    JUMP
+ =============================== */
+
+ if(
+  airborne&&
+  settings.animations&&
+  settings.jumpAnim
+ ){
+
+  if(player.vy<0){
+
+   /* unoszenie */
+
+   armSwing=-4.5;
+   legSwing=2.5;
+
+   stretch=1.025;
+   squash=.96;
+
+   tilt=
+    -.035*
+    player.direction;
+
+  }else{
+
+   /* opadanie */
+
+   armSwing=3.5;
+   legSwing=-2.5;
+
+   stretch=.98;
+   squash=1.03;
+
+   tilt=
+    .025*
+    player.direction;
+
+  }
+
+ }
+
+
+ /* ===============================
+    LĄDOWANIE
+ =============================== */
+
+ if(
+  player.landTimer>0&&
+  settings.landAnim
+ ){
+
+  landing=
+   player.landTimer/10;
+
+  squash=
+   1-
+   .12*landing;
+
+  stretch=
+   1+
+   .08*landing;
+
+  bob=
+   2*landing;
+
+ }
+
+
+ /* ===============================
+    POZYCJA
+ =============================== */
+
+ const cx=
+  Math.round(
+   player.x-
+   camera.x+
+   player.width/2
+  );
+
+ const baseY=
+  Math.round(
+   player.y-
+   camera.y+
+   bob
+  );
+
+
+ /* ===============================
+    CIEŃ
+ =============================== */
+
+ if(
+  settings.shadowAnim&&
+  player.grounded
+ ){
+
+  ctx.save();
+
+  ctx.fillStyle="rgba(0,0,0,.2)";
+
+  const shadowSize=
+   walking
+   ? 10+Math.abs(Math.sin(player.anim))*2
+   : 9;
+
+  ctx.beginPath();
+
+  ctx.ellipse(
+   cx,
+   player.y-
+   camera.y+
+   player.height+2,
+   shadowSize,
+   2,
+   0,
+   0,
+   Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.restore();
+
+ }
+
+
+ /* ===============================
+    POSTAĆ
+ =============================== */
 
  ctx.save();
 
- ctx.translate(cx,by);
- ctx.rotate(tilt*player.direction);
- ctx.scale(player.direction,1);
+ ctx.translate(cx,baseY);
+
+ ctx.rotate(
+  tilt*
+  player.direction
+ );
+
+ ctx.scale(
+  player.direction,
+  1
+ );
+
+ ctx.scale(
+  stretch,
+  squash
+ );
+
 
  const s=2;
 
- /* nogi */
+
+ /* ===============================
+    TYLNA NOGA
+ =============================== */
 
  ctx.fillStyle="#4d3b78";
 
- ctx.fillRect(
-  Math.round((1-legs*.08)*s),
-  12*s,
-  6*s,
-  7*s
+ ctx.save();
+
+ ctx.translate(
+  -legSwing*.12,
+  0
  );
 
  ctx.fillRect(
-  Math.round((4+legs*.08)*s),
+  1*s,
   12*s,
   6*s,
   7*s
@@ -1224,133 +2322,402 @@ function drawPlayer(time){
  ctx.fillStyle="#25252b";
 
  ctx.fillRect(
-  Math.round((0.5-legs*.12)*s),
+  .5*s,
   18*s,
-  7*s,2*s
+  7*s,
+  2*s
+ );
+
+ ctx.restore();
+
+
+ /* ===============================
+    PRZEDNIA NOGA
+ =============================== */
+
+ ctx.fillStyle="#4d3b78";
+
+ ctx.save();
+
+ ctx.translate(
+  legSwing*.12,
+  0
  );
 
  ctx.fillRect(
-  Math.round((3.5+legs*.12)*s),
-  18*s,
-  7*s,2*s
+  4*s,
+  12*s,
+  6*s,
+  7*s
  );
 
+ ctx.fillStyle="#25252b";
 
- /* ciało */
+ ctx.fillRect(
+  3.5*s,
+  18*s,
+  7*s,
+  2*s
+ );
+
+ ctx.restore();
+
+
+ /* ===============================
+    TUŁÓW
+ =============================== */
 
  ctx.fillStyle="#315aa0";
- ctx.fillRect(1*s,5*s,8*s,8*s);
+
+ ctx.fillRect(
+  1*s,
+  5*s,
+  8*s,
+  8*s
+ );
 
  ctx.fillStyle="#3f73c9";
- ctx.fillRect(2*s,5*s,6*s,7*s);
+
+ ctx.fillRect(
+  2*s,
+  5*s,
+  6*s,
+  7*s
+ );
 
 
- /* ręce */
+ /* małe logo/środek koszulki */
+
+ ctx.fillStyle="#5790df";
+
+ ctx.fillRect(
+  3*s,
+  6*s,
+  2*s,
+  2*s
+ );
+
+
+ /* ===============================
+    TYLNA RĘKA
+ =============================== */
+
+ ctx.fillStyle="#d49c78";
+
+ ctx.save();
+
+ ctx.translate(
+  -armSwing*.18,
+  0
+ );
+
+ ctx.rotate(
+  armSwing*.018
+ );
+
+ ctx.fillRect(
+  -1*s,
+  6*s,
+  2*s,
+  7*s
+ );
 
  ctx.fillStyle="#f0bd91";
 
  ctx.fillRect(
-  Math.round((-1-arms*.2)*s),
-  Math.round((6+arms*.12)*s),
-  2*s,7*s
+  -1*s,
+  12*s,
+  2*s,
+  2*s
+ );
+
+ ctx.restore();
+
+
+ /* ===============================
+    PRZEDNIA RĘKA
+ =============================== */
+
+ ctx.fillStyle="#f0bd91";
+
+ ctx.save();
+
+ ctx.translate(
+  armSwing*.18,
+  0
+ );
+
+ ctx.rotate(
+  -armSwing*.018
  );
 
  ctx.fillRect(
-  Math.round((9+arms*.2)*s),
-  Math.round((6-arms*.12)*s),
-  2*s,7*s
+  9*s,
+  6*s,
+  2*s,
+  7*s
+ );
+
+ ctx.fillRect(
+  9*s,
+  12*s,
+  2*s,
+  2*s
+ );
+
+ ctx.restore();
+
+
+ /* ===============================
+    SZYJA
+ =============================== */
+
+ ctx.fillStyle="#f0bd91";
+
+ ctx.fillRect(
+  4*s,
+  3*s,
+  2*s,
+  3*s
  );
 
 
- /* szyja */
+ /* ===============================
+    GŁOWA
+ =============================== */
 
- ctx.fillRect(4*s,3*s,2*s,3*s);
+ ctx.save();
 
-
- /* głowa */
+ ctx.translate(
+  player.lookX,
+  headBob
+ );
 
  ctx.fillStyle="#f0bd91";
- ctx.fillRect(2*s,1*s,6*s,5*s);
+
+ ctx.fillRect(
+  2*s,
+  1*s,
+  6*s,
+  5*s
+ );
+
 
  /* uszy */
 
- ctx.fillRect(1*s,3*s,1*s,2*s);
- ctx.fillRect(8*s,3*s,1*s,2*s);
+ ctx.fillRect(
+  1*s,
+  3*s,
+  1*s,
+  2*s
+ );
+
+ ctx.fillRect(
+  8*s,
+  3*s,
+  1*s,
+  2*s
+ );
 
 
- /* włosy */
+ /* ===============================
+    WŁOSY
+ =============================== */
 
  ctx.fillStyle="#542f20";
 
- ctx.fillRect(2*s,0,6*s,2*s);
- ctx.fillRect(1*s,1*s,2*s,2*s);
- ctx.fillRect(7*s,1*s,2*s,2*s);
+ let hairWave=0;
+
+ if(
+  settings.hairAnim&&
+  settings.animations
+ ){
+
+  hairWave=
+   Math.sin(
+    time*.008+
+    player.vx*.4
+   )*0.7;
+
+ }
+
+ ctx.fillRect(
+  2*s,
+  0,
+  6*s,
+  2*s
+ );
+
+ ctx.fillRect(
+  1*s,
+  1*s,
+  2*s,
+  2*s
+ );
+
+ ctx.fillRect(
+  7*s+hairWave,
+  1*s,
+  2*s,
+  2*s
+ );
+
+ ctx.fillRect(
+  3*s,
+  1*s,
+  2*s,
+  2*s
+ );
 
 
- /* oczy */
+ /* ===============================
+    OCZY
+ =============================== */
 
  ctx.fillStyle="#111";
 
- if(blink){
+ let blinking=false;
 
-  ctx.fillRect(3*s,3*s,2*s,1*s);
-  ctx.fillRect(6*s,3*s,2*s,1*s);
+ if(
+  settings.blinkAnim&&
+  settings.animations
+ ){
+
+  blinking=
+   Math.floor(time/100)%83===0;
+
+ }
+
+ if(blinking){
+
+  ctx.fillRect(
+   3*s,
+   3*s,
+   2*s,
+   1*s
+  );
+
+  ctx.fillRect(
+   6*s,
+   3*s,
+   2*s,
+   1*s
+  );
 
  }else{
 
-  ctx.fillRect(3*s,3*s,1*s,1*s);
-  ctx.fillRect(6*s,3*s,1*s,1*s);
+  ctx.fillRect(
+   3*s,
+   3*s,
+   1*s,
+   1*s
+  );
+
+  ctx.fillRect(
+   6*s,
+   3*s,
+   1*s,
+   1*s
+  );
+
+ }
+
+
+ /* ===============================
+    NOS
+ =============================== */
+
+ ctx.fillStyle="#d89f7a";
+
+ ctx.fillRect(
+  5*s,
+  4*s,
+  1*s,
+  1*s
+ );
+
+
+ /* ===============================
+    LEKKI UŚMIECH
+ =============================== */
+
+ if(
+  walking||
+  player.grounded
+ ){
+
+  ctx.fillStyle="#bd765f";
+
+  ctx.fillRect(
+   5*s,
+   5*s,
+   2*s,
+   1*s
+  );
 
  }
 
  ctx.restore();
 
+ ctx.restore();
 
- /* cień */
-
- if(player.grounded){
-
-  ctx.fillStyle="rgba(0,0,0,.18)";
-
-  ctx.beginPath();
-
-  ctx.ellipse(
-   cx,
-   player.y-camera.y+player.height+2,
-   moving?10:9,
-   2,
-   0,0,Math.PI*2
-  );
-
-  ctx.fill();
- }
 }
 
 
 /* =====================================================
-   BACKGROUND
+   TŁO
 ===================================================== */
 
 function drawBackground(){
 
- const g=ctx.createLinearGradient(0,0,0,H);
+ const gradient=
+  ctx.createLinearGradient(
+   0,0,0,H
+  );
 
- g.addColorStop(0,"#62c5f0");
- g.addColorStop(1,"#d9f3ff");
+ gradient.addColorStop(
+  0,
+  "#62c5f0"
+ );
 
- ctx.fillStyle=g;
+ gradient.addColorStop(
+  1,
+  "#d9f3ff"
+ );
+
+ ctx.fillStyle=gradient;
  ctx.fillRect(0,0,W,H);
 
- ctx.fillStyle="rgba(255,255,255,.7)";
+
+ /* chmury */
+
+ ctx.fillStyle="rgba(255,255,255,.72)";
 
  for(let i=0;i<8;i++){
 
-  const x=((i*570-camera.x*.18)%(W+250))-120;
-  const y=70+(i%4)*60;
+  const x=
+   ((i*570-camera.x*.18)%
+   (W+250))-120;
 
-  ctx.fillRect(x,y,80,20);
-  ctx.fillRect(x+20,y-10,50,30);
+  const y=
+   70+(i%4)*60;
+
+  ctx.fillRect(
+   x,
+   y,
+   80,
+   20
+  );
+
+  ctx.fillRect(
+   x+20,
+   y-10,
+   50,
+   30
+  );
+
  }
+
 }
 
 
@@ -1362,22 +2729,53 @@ function render(time){
 
  drawBackground();
 
- const sx=Math.max(0,Math.floor(camera.x/TILE)-2);
- const ex=Math.min(WORLD_W,Math.ceil((camera.x+W)/TILE)+2);
- const sy=Math.max(0,Math.floor(camera.y/TILE)-2);
- const ey=Math.min(WORLD_H,Math.ceil((camera.y+H)/TILE)+2);
+ const sx=
+  Math.max(
+   0,
+   Math.floor(camera.x/TILE)-2
+  );
+
+ const ex=
+  Math.min(
+   WORLD_W,
+   Math.ceil((camera.x+W)/TILE)+2
+  );
+
+ const sy=
+  Math.max(
+   0,
+   Math.floor(camera.y/TILE)-2
+  );
+
+ const ey=
+  Math.min(
+   WORLD_H,
+   Math.ceil((camera.y+H)/TILE)+2
+  );
+
 
  for(let y=sy;y<ey;y++){
+
   for(let x=sx;x<ex;x++){
 
    const id=world[y][x];
 
    if(id!==BLOCK.air)
-    drawBlock(id,x,y,time);
+    drawBlock(
+     id,
+     x,
+     y,
+     time
+    );
+
   }
  }
 
+
+ drawParticles();
+
  drawPlayer(time);
+
 }
 
 
@@ -1385,22 +2783,31 @@ function render(time){
    GAME LOOP
 ===================================================== */
 
-let paused=false;
-let lastTime=0;
+let lastFrame=0;
 
 function loop(time){
 
  if(!paused){
 
-  const delay=1000/settings.fps;
+  const delay=
+   1000/
+   Math.max(
+    30,
+    Number(settings.fps)||60
+   );
 
-  if(time-lastTime>=delay){
+  if(
+   time-lastFrame>=delay
+  ){
 
-   lastTime=time;
+   lastFrame=time;
 
    updatePlayer();
+
    render(time);
+
   }
+
  }
 
  requestAnimationFrame(loop);
@@ -1422,111 +2829,215 @@ let selectedBlock="dirt";
 
 function updateInventory(){
 
- for(const b of ["dirt","stone","wood","sand"]){
+ for(
+  const block of
+  ["dirt","stone","wood","sand"]
+ ){
 
-  document.getElementById("count-"+b).textContent=
-   inventory[b];
+  document.getElementById(
+   "count-"+block
+  ).textContent=
+   inventory[block];
+
  }
+
 }
 
 function selectBlock(block){
 
- if(!inventory.hasOwnProperty(block))
+ if(
+  !Object.prototype.hasOwnProperty.call(
+   inventory,
+   block
+  )
+ )
   return;
 
  selectedBlock=block;
 
- document.querySelectorAll(".slot").forEach(s=>{
-  s.classList.toggle(
+ document.querySelectorAll(".slot")
+ .forEach(slot=>{
+
+  slot.classList.toggle(
    "selected",
-   s.dataset.block===block
+   slot.dataset.block===block
   );
+
  });
 
  sound("click");
+
 }
 
-document.querySelectorAll(".slot").forEach(s=>{
- s.onclick=()=>selectBlock(s.dataset.block);
+document.querySelectorAll(".slot")
+.forEach(slot=>{
+
+ slot.onclick=()=>{
+
+  selectBlock(
+   slot.dataset.block
+  );
+
+ };
+
 });
 
 
 /* =====================================================
-   MINE / PLACE
+   KOPANIE / STAWIANIE
 ===================================================== */
 
 function worldPosition(clientX,clientY){
 
  return{
-  x:Math.floor((clientX+camera.x)/TILE),
-  y:Math.floor((clientY+camera.y)/TILE)
+
+  x:Math.floor(
+   (clientX+camera.x)/TILE
+  ),
+
+  y:Math.floor(
+   (clientY+camera.y)/TILE
+  )
+
  };
+
 }
+
 
 function reachable(x,y){
 
- const px=player.x+player.width/2;
- const py=player.y+player.height/2;
+ const px=
+  player.x+
+  player.width/2;
 
- const bx=x*TILE+TILE/2;
- const by=y*TILE+TILE/2;
+ const py=
+  player.y+
+  player.height/2;
 
- return Math.hypot(bx-px,by-py)<=TILE*5;
+ const bx=
+  x*TILE+
+  TILE/2;
+
+ const by=
+  y*TILE+
+  TILE/2;
+
+ return Math.hypot(
+  bx-px,
+  by-py
+ )<=TILE*5;
+
 }
+
 
 function mine(clientX,clientY){
 
- const p=worldPosition(clientX,clientY);
- const x=p.x,y=p.y;
+ const p=
+  worldPosition(
+   clientX,
+   clientY
+  );
 
- if(x<0||x>=WORLD_W||y<0||y>=WORLD_H)return;
+ const x=p.x;
+ const y=p.y;
+
+ if(
+  x<0||
+  x>=WORLD_W||
+  y<0||
+  y>=WORLD_H
+ )
+  return;
 
  if(!reachable(x,y)){
+
   showMessage("Za daleko!");
+
   return;
  }
 
  const id=world[y][x];
 
- if(id===BLOCK.air||id===BLOCK.water)
+ if(
+  id===BLOCK.air||
+  id===BLOCK.water
+ )
   return;
 
- if(id===BLOCK.grass||id===BLOCK.dirt)
+
+ if(
+  id===BLOCK.grass||
+  id===BLOCK.dirt
+ )
   inventory.dirt++;
+
  else if(id===BLOCK.stone)
   inventory.stone++;
+
  else if(id===BLOCK.wood)
   inventory.wood++;
+
  else if(id===BLOCK.sand)
   inventory.sand++;
+
 
  world[y][x]=BLOCK.air;
 
  updateInventory();
+
  sound("mine");
+
+ spawnDust(
+  x*TILE+TILE/2,
+  y*TILE+TILE/2,
+  5
+ );
+
 }
+
 
 function place(clientX,clientY){
 
- const p=worldPosition(clientX,clientY);
- const x=p.x,y=p.y;
+ const p=
+  worldPosition(
+   clientX,
+   clientY
+  );
 
- if(x<0||x>=WORLD_W||y<0||y>=WORLD_H)return;
+ const x=p.x;
+ const y=p.y;
+
+ if(
+  x<0||
+  x>=WORLD_W||
+  y<0||
+  y>=WORLD_H
+ )
+  return;
 
  if(!reachable(x,y)){
+
   showMessage("Za daleko!");
+
   return;
  }
 
- if(world[y][x]!==BLOCK.air)return;
+ if(world[y][x]!==BLOCK.air)
+  return;
 
- if(inventory[selectedBlock]<=0){
+ if(
+  inventory[selectedBlock]<=0
+ ){
+
   showMessage("Brak bloków!");
+
   return;
  }
+
 
  const bx=x*TILE;
  const by=y*TILE;
+
 
  if(
   bx+TILE>player.x&&
@@ -1536,79 +3047,139 @@ function place(clientX,clientY){
  )
   return;
 
+
  world[y][x]=BLOCK[selectedBlock];
+
  inventory[selectedBlock]--;
 
  updateInventory();
+
  sound("place");
+
 }
 
 
 /* =====================================================
-   MOUSE / TOUCH WORLD
+   MYSZ
 ===================================================== */
 
-canvas.addEventListener("mousedown",e=>{
+canvas.addEventListener(
+ "mousedown",
+ e=>{
 
- if(paused)return;
+  if(paused)
+   return;
 
- if(e.button===0)
-  mine(e.clientX,e.clientY);
+  if(e.button===0)
+   mine(
+    e.clientX,
+    e.clientY
+   );
 
- if(e.button===2){
-  e.preventDefault();
-  place(e.clientX,e.clientY);
+  if(e.button===2){
+
+   e.preventDefault();
+
+   place(
+    e.clientX,
+    e.clientY
+   );
+
+  }
+
  }
-});
+);
 
-canvas.addEventListener("contextmenu",e=>e.preventDefault());
+canvas.addEventListener(
+ "contextmenu",
+ e=>e.preventDefault()
+);
 
+
+/* =====================================================
+   DOTYK
+===================================================== */
 
 let touchData=null;
 let touchTimer=null;
 
-canvas.addEventListener("touchstart",e=>{
+canvas.addEventListener(
+ "touchstart",
+ e=>{
 
- if(paused||!e.touches[0])return;
+  if(
+   paused||
+   !e.touches[0]
+  )
+   return;
 
- const t=e.touches[0];
+  const t=e.touches[0];
 
- touchData={
-  x:t.clientX,
-  y:t.clientY,
-  time:Date.now()
- };
+  touchData={
+   x:t.clientX,
+   y:t.clientY,
+   time:Date.now()
+  };
 
- touchTimer=setTimeout(()=>{
+  touchTimer=
+   setTimeout(()=>{
 
-  if(touchData)
-   place(touchData.x,touchData.y);
+    if(touchData){
 
- },400);
+     place(
+      touchData.x,
+      touchData.y
+     );
 
-},{passive:false});
+    }
 
-canvas.addEventListener("touchend",e=>{
+   },400);
 
- e.preventDefault();
+ },
+ {passive:false}
+);
 
- if(!touchData)return;
 
- clearTimeout(touchTimer);
+canvas.addEventListener(
+ "touchend",
+ e=>{
 
- if(Date.now()-touchData.time<400)
-  mine(touchData.x,touchData.y);
+  e.preventDefault();
 
- touchData=null;
+  if(!touchData)
+   return;
 
-},{passive:false});
+  clearTimeout(
+   touchTimer
+  );
+
+  if(
+   Date.now()-
+   touchData.time<
+   400
+  ){
+
+   mine(
+    touchData.x,
+    touchData.y
+   );
+
+  }
+
+  touchData=null;
+
+ },
+ {passive:false}
+);
 
 
 /* =====================================================
-   SAVE SYSTEM
+   SAVE
 ===================================================== */
 
-const SAVE_KEY="PIXEL_WORLD_STABLE_V7";
+const SAVE_KEY=
+ "PIXEL_WORLD_STABLE_V8";
+
 
 function saveGame(){
 
@@ -1617,31 +3188,48 @@ function saveGame(){
   localStorage.setItem(
    SAVE_KEY,
    JSON.stringify({
-    version:7,
+
+    version:8,
+
     world:world,
+
     player:{
      x:player.x,
      y:player.y
     },
+
     inventory:inventory,
+
     selectedBlock:selectedBlock
+
    })
   );
 
- }catch(e){
-  showMessage("Nie udało się zapisać gry.");
+ }catch{
+
+  showMessage(
+   "Nie udało się zapisać."
+  );
+
  }
+
 }
+
 
 function loadGame(){
 
  try{
 
-  const raw=localStorage.getItem(SAVE_KEY);
+  const raw=
+   localStorage.getItem(
+    SAVE_KEY
+   );
 
-  if(!raw)return false;
+  if(!raw)
+   return false;
 
-  const data=JSON.parse(raw);
+  const data=
+   JSON.parse(raw);
 
   if(
    !data||
@@ -1657,50 +3245,88 @@ function loadGame(){
     data.world[y].length!==WORLD_W
    )
     return false;
+
   }
+
 
   world=data.world;
 
+
   if(data.player){
 
-   if(Number.isFinite(data.player.x))
+   if(
+    Number.isFinite(
+     data.player.x
+    )
+   )
     player.x=data.player.x;
 
-   if(Number.isFinite(data.player.y))
+   if(
+    Number.isFinite(
+     data.player.y
+    )
+   )
     player.y=data.player.y;
+
   }
+
 
   if(data.inventory){
 
-   for(const b of ["dirt","stone","wood","sand"]){
+   for(
+    const b of
+    ["dirt","stone","wood","sand"]
+   ){
 
-    const n=Number(data.inventory[b]);
+    const n=
+     Number(
+      data.inventory[b]
+     );
 
     if(Number.isFinite(n))
-     inventory[b]=Math.max(0,Math.floor(n));
+     inventory[b]=
+      Math.max(
+       0,
+       Math.floor(n)
+      );
+
    }
+
   }
 
-  if(
-   typeof data.selectedBlock==="string"&&
-   inventory.hasOwnProperty(data.selectedBlock)
-  )
-   selectedBlock=data.selectedBlock;
 
-  /* naprawienie uszkodzonej pozycji */
+  if(
+   typeof data.selectedBlock===
+   "string"&&
+   Object.prototype.hasOwnProperty.call(
+    inventory,
+    data.selectedBlock
+   )
+  )
+   selectedBlock=
+    data.selectedBlock;
+
 
   if(
    !Number.isFinite(player.x)||
    !Number.isFinite(player.y)||
    player.y<0||
    player.y>WORLD_H*TILE
-  )
+  ){
+
    findSpawn();
+
+  }
+
 
   return true;
 
  }catch{
+
   return false;
+
+ }
+
 }
 
 
@@ -1710,11 +3336,18 @@ function loadGame(){
 
 function resetWorld(){
 
- if(!confirm("Czy na pewno stworzyć nowy świat?"))
+ if(
+  !confirm(
+   "Czy na pewno stworzyć nowy świat?"
+  )
+ )
   return;
 
+
  createWorld();
+
  findSpawn();
+
 
  inventory={
   dirt:20,
@@ -1723,36 +3356,72 @@ function resetWorld(){
   sand:10
  };
 
+
  selectedBlock="dirt";
 
+
  updateInventory();
+
  selectBlock("dirt");
+
  saveGame();
 
- showMessage("Utworzono nowy świat.");
+ showMessage(
+  "Utworzono nowy świat."
+ );
+
 }
 
-document.getElementById("resetBtn").onclick=resetWorld;
+document.getElementById(
+ "resetBtn"
+).onclick=resetWorld;
 
-document.getElementById("saveBtn").onclick=()=>{
+
+document.getElementById(
+ "saveBtn"
+).onclick=()=>{
+
  saveGame();
- showMessage("Gra została zapisana!");
+
+ showMessage(
+  "Gra została zapisana!"
+ );
+
 };
 
-document.getElementById("saveFromSettings").onclick=()=>{
+
+document.getElementById(
+ "saveFromSettings"
+).onclick=()=>{
+
  saveGame();
- showMessage("Gra została zapisana!");
+
+ showMessage(
+  "Gra została zapisana!"
+ );
+
 };
 
-document.getElementById("deleteSaveBtn").onclick=()=>{
 
- if(!confirm("Usunąć zapis gry?"))
+document.getElementById(
+ "deleteSaveBtn"
+).onclick=()=>{
+
+ if(
+  !confirm(
+   "Usunąć zapis gry?"
+  )
+ )
   return;
 
- localStorage.removeItem(SAVE_KEY);
+ localStorage.removeItem(
+  SAVE_KEY
+ );
 
  createWorld();
+
  findSpawn();
+
 
  inventory={
   dirt:20,
@@ -1761,12 +3430,19 @@ document.getElementById("deleteSaveBtn").onclick=()=>{
   sand:10
  };
 
+
  selectedBlock="dirt";
 
+
  updateInventory();
+
  selectBlock("dirt");
 
- showMessage("Zapis został usunięty.");
+
+ showMessage(
+  "Zapis został usunięty."
+ );
+
 };
 
 
@@ -1776,30 +3452,42 @@ document.getElementById("deleteSaveBtn").onclick=()=>{
 
 setInterval(()=>{
 
- if(settings.autoSave&&!paused)
+ if(
+  settings.autoSave&&
+  !paused
+ )
   saveGame();
 
 },120000);
 
 
 /* =====================================================
-   MESSAGE
+   WIADOMOŚĆ
 ===================================================== */
 
 let messageTimeout;
 
 function showMessage(text){
 
- const el=document.getElementById("message");
+ const el=
+  document.getElementById(
+   "message"
+  );
 
  el.textContent=text;
  el.style.opacity="1";
 
- clearTimeout(messageTimeout);
+ clearTimeout(
+  messageTimeout
+ );
 
- messageTimeout=setTimeout(()=>{
-  el.style.opacity="0";
- },1800);
+ messageTimeout=
+  setTimeout(()=>{
+
+   el.style.opacity="0";
+
+  },1800);
+
 }
 
 
@@ -1810,19 +3498,31 @@ function showMessage(text){
 resize();
 
 if(!loadGame()){
+
  createWorld();
+
  findSpawn();
+
 }
 
 updateInventory();
-selectBlock(selectedBlock);
+
+selectBlock(
+ selectedBlock
+);
+
 applySettings();
 
-showMessage("Witaj w Pixel World!");
+showMessage(
+ "Witaj w Pixel World!"
+);
 
-requestAnimationFrame(loop);
+requestAnimationFrame(
+ loop
+);
 
 </script>
+
 </body>
 </html>
 ```
