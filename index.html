@@ -1,25 +1,38 @@
-```html
 <!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Pixel World 2.0</title>
+<title>Pixel World</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    user-select:none;
+    -webkit-user-select:none;
+}
+
 html,body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#70c9ff;
+    background:#72c9ff;
     font-family:Arial,sans-serif;
 }
+
 canvas{
+    position:fixed;
+    inset:0;
     width:100%;
     height:100%;
     display:block;
     image-rendering:pixelated;
+}
+
+button{
+    font-family:Arial,sans-serif;
 }
 
 #ui{
@@ -30,145 +43,41 @@ canvas{
 
 #logo{
     position:absolute;
-    top:12px;
+    top:10px;
     left:50%;
     transform:translateX(-50%);
     color:white;
-    font-size:24px;
+    font-size:23px;
     font-weight:bold;
     text-shadow:3px 3px #222;
 }
 
 #health{
     position:absolute;
-    top:15px;
     left:15px;
-    width:180px;
-    height:24px;
+    top:15px;
+    width:185px;
+    height:25px;
     border:3px solid #222;
-    background:#222;
+    background:#333;
 }
 
 #healthBar{
-    width:100%;
     height:100%;
+    width:100%;
     background:#e53935;
+    transition:width .15s;
 }
 
 #healthText{
     position:absolute;
-    left:0;
-    top:1px;
-    width:100%;
+    inset:0;
     text-align:center;
+    line-height:19px;
     color:white;
-    font-weight:bold;
-    font-size:14px;
-    text-shadow:1px 1px #000;
-}
-
-#hotbar{
-    position:absolute;
-    bottom:15px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    gap:5px;
-    pointer-events:auto;
-}
-
-.slot{
-    width:58px;
-    height:58px;
-    border:3px solid #222;
-    background:rgba(55,55,55,.88);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-    font-size:28px;
-}
-
-.slot.selected{
-    border-color:#fff;
-    box-shadow:0 0 0 2px #111;
-}
-
-.slot span{
-    position:absolute;
-    right:3px;
-    bottom:2px;
-    color:#fff;
     font-size:13px;
     font-weight:bold;
     text-shadow:1px 1px #000;
-}
-
-#controls{
-    position:absolute;
-    left:15px;
-    bottom:18px;
-    display:flex;
-    gap:8px;
-    pointer-events:auto;
-}
-
-.btn{
-    width:65px;
-    height:65px;
-    border:3px solid #222;
-    border-radius:12px;
-    background:rgba(255,255,255,.55);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:30px;
-    font-weight:bold;
-    touch-action:none;
-}
-
-#jump{
-    position:absolute;
-    right:18px;
-    bottom:18px;
-    pointer-events:auto;
-}
-
-#craft{
-    position:absolute;
-    top:52px;
-    right:15px;
-    pointer-events:auto;
-    padding:10px 15px;
-    border:3px solid #222;
-    border-radius:8px;
-    background:rgba(255,255,255,.75);
-    font-weight:bold;
-}
-
-#crafting{
-    display:none;
-    position:absolute;
-    top:100px;
-    right:15px;
-    width:260px;
-    background:rgba(25,25,25,.95);
-    border:3px solid #111;
-    padding:12px;
-    color:white;
-    pointer-events:auto;
-}
-
-.recipe{
-    background:#444;
-    margin-top:8px;
-    padding:10px;
-    border:2px solid #777;
-    cursor:pointer;
-}
-
-.recipe:hover{
-    background:#555;
 }
 
 #info{
@@ -178,32 +87,181 @@ canvas{
     color:white;
     text-align:right;
     font-size:13px;
+    line-height:18px;
     text-shadow:2px 2px #000;
 }
 
-#save{
+.uiButton{
+    pointer-events:auto;
+    border:2px solid #222;
+    border-radius:7px;
+    background:rgba(255,255,255,.78);
+    color:#111;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#saveButton{
+    position:absolute;
+    top:52px;
+    left:15px;
+    padding:7px 10px;
+}
+
+#craftButton{
+    position:absolute;
+    top:52px;
+    right:15px;
+    padding:7px 10px;
+}
+
+#crafting{
+    display:none;
+    position:absolute;
+    top:100px;
+    right:15px;
+    width:270px;
+    padding:12px;
+    background:rgba(20,20,20,.96);
+    color:white;
+    border:3px solid #111;
+    border-radius:8px;
+    pointer-events:auto;
+}
+
+.recipe{
+    margin-top:8px;
+    padding:10px;
+    background:#444;
+    border:2px solid #666;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.recipe:active{
+    background:#666;
+}
+
+#hotbar{
+    position:absolute;
+    left:50%;
+    bottom:12px;
+    transform:translateX(-50%);
+    display:flex;
+    gap:4px;
+    pointer-events:auto;
+}
+
+.slot{
+    width:57px;
+    height:57px;
+    border:3px solid #222;
+    border-radius:4px;
+    background:rgba(45,45,45,.9);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    color:white;
+    font-size:27px;
+    cursor:pointer;
+}
+
+.slot.selected{
+    border-color:white;
+    box-shadow:0 0 0 2px #111;
+}
+
+.slot span{
+    position:absolute;
+    right:3px;
+    bottom:1px;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    text-shadow:2px 2px #000;
+}
+
+#controls{
     position:absolute;
     left:15px;
-    top:48px;
-    padding:7px 10px;
-    border:2px solid #222;
-    border-radius:6px;
-    background:rgba(255,255,255,.7);
+    bottom:15px;
+    display:flex;
+    gap:8px;
     pointer-events:auto;
+}
+
+.control{
+    width:65px;
+    height:65px;
+    border:3px solid #222;
+    border-radius:12px;
+    background:rgba(255,255,255,.55);
+    color:#111;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
     font-weight:bold;
+    touch-action:none;
+}
+
+#jumpButton{
+    position:absolute;
+    right:18px;
+    bottom:18px;
+    pointer-events:auto;
 }
 
 #message{
     position:absolute;
     left:50%;
-    top:75%;
+    top:70%;
     transform:translateX(-50%);
     color:white;
     font-weight:bold;
     font-size:18px;
     text-shadow:2px 2px #000;
     opacity:0;
-    transition:.2s;
+    transition:opacity .2s;
+    white-space:nowrap;
+}
+
+@media(max-width:700px){
+
+    #info{
+        display:none;
+    }
+
+    #logo{
+        font-size:18px;
+    }
+
+    #health{
+        width:145px;
+    }
+
+    #hotbar{
+        bottom:8px;
+    }
+
+    .slot{
+        width:48px;
+        height:48px;
+        font-size:22px;
+    }
+
+    #controls{
+        bottom:72px;
+    }
+
+    #jumpButton{
+        bottom:72px;
+    }
+
+    #crafting{
+        width:230px;
+    }
 }
 </style>
 </head>
@@ -214,211 +272,327 @@ canvas{
 
 <div id="ui">
 
-<div id="logo">PIXEL WORLD</div>
+    <div id="logo">PIXEL WORLD</div>
 
-<div id="health">
-    <div id="healthBar"></div>
-    <div id="healthText">100 / 100</div>
-</div>
-
-<button id="save">💾 ZAPISZ</button>
-<button id="craft">🔨 CRAFTING</button>
-
-<div id="crafting">
-    <b>CRAFTING</b>
-
-    <div class="recipe" data-recipe="wood">
-        🪵 4 Drewna → 8 Desek
+    <div id="health">
+        <div id="healthBar"></div>
+        <div id="healthText">100 / 100</div>
     </div>
 
-    <div class="recipe" data-recipe="torch">
-        🔥 1 Drewno + 1 Kamień → 4 Pochodnie
+    <button id="saveButton" class="uiButton">
+        💾 Zapisz
+    </button>
+
+    <button id="craftButton" class="uiButton">
+        🔨 Crafting
+    </button>
+
+    <div id="crafting">
+
+        <b>CRAFTING</b>
+
+        <div class="recipe" data-recipe="planks">
+            🪵 2 drewna → 8 desek
+        </div>
+
+        <div class="recipe" data-recipe="torch">
+            🔥 1 drewno + 1 kamień → 4 pochodnie
+        </div>
+
+        <div class="recipe" data-recipe="pickaxe">
+            ⛏️ 5 drewna + 3 kamienie → kilof
+        </div>
+
     </div>
 
-    <div class="recipe" data-recipe="pickaxe">
-        ⛏️ 5 Drewna + 3 Kamienie → Kilof
-    </div>
-</div>
-
-<div id="info">
-    A / D lub ← / → — ruch<br>
-    W / ↑ / SPACJA — skok<br>
-    LPM — kopanie<br>
-    PPM — stawianie
-</div>
-
-<div id="controls">
-    <div class="btn" id="left">←</div>
-    <div class="btn" id="right">→</div>
-</div>
-
-<div class="btn" id="jump">↑</div>
-
-<div id="hotbar">
-
-    <div class="slot selected" data-block="dirt">
-        🟫<span>0</span>
+    <div id="info">
+        A / D lub ← / → — ruch<br>
+        W / ↑ / Spacja — skok<br>
+        LPM — kopanie<br>
+        PPM — stawianie
     </div>
 
-    <div class="slot" data-block="stone">
-        🪨<span>0</span>
+    <div id="controls">
+        <div class="control" id="leftButton">←</div>
+        <div class="control" id="rightButton">→</div>
     </div>
 
-    <div class="slot" data-block="wood">
-        🪵<span>0</span>
+    <div class="control" id="jumpButton">↑</div>
+
+    <div id="hotbar">
+
+        <div class="slot selected" data-block="dirt">
+            🟫<span>20</span>
+        </div>
+
+        <div class="slot" data-block="stone">
+            🪨<span>10</span>
+        </div>
+
+        <div class="slot" data-block="wood">
+            🪵<span>10</span>
+        </div>
+
+        <div class="slot" data-block="sand">
+            🟨<span>10</span>
+        </div>
+
+        <div class="slot" data-block="torch">
+            🔥<span>4</span>
+        </div>
+
     </div>
 
-    <div class="slot" data-block="sand">
-        🟨<span>0</span>
-    </div>
-
-    <div class="slot" data-block="torch">
-        🔥<span>0</span>
-    </div>
-
-</div>
-
-<div id="message"></div>
+    <div id="message"></div>
 
 </div>
 
 <script>
 
-/* =====================================================
-   PIXEL WORLD 2.0
-===================================================== */
+/* =========================================================
+   PIXEL WORLD
+   STABILNA WERSJA
+========================================================= */
 
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
+"use strict";
 
-function resize(){
-    canvas.width=innerWidth;
-    canvas.height=innerHeight;
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+ctx.imageSmoothingEnabled = false;
+
+function resizeCanvas(){
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    ctx.imageSmoothingEnabled = false;
 }
-resize();
-addEventListener("resize",resize);
 
-const TILE=32;
-const WORLD_W=700;
-const WORLD_H=100;
+resizeCanvas();
 
-const blocks={
-    air:{solid:false,color:null},
-    grass:{solid:true,color:"#55a832"},
-    dirt:{solid:true,color:"#8a542b"},
-    stone:{solid:true,color:"#777"},
-    wood:{solid:true,color:"#92552a"},
-    leaves:{solid:false,color:"#2e9638"},
-    sand:{solid:true,color:"#dbc67d"},
-    water:{solid:false,color:"#35a9df"},
-    torch:{solid:false,color:"#ffb52e"}
+window.addEventListener("resize",resizeCanvas);
+
+
+/* =========================================================
+   USTAWIENIA
+========================================================= */
+
+const TILE = 32;
+
+const WORLD_WIDTH = 600;
+const WORLD_HEIGHT = 90;
+
+const GRAVITY = 0.45;
+const MAX_FALL_SPEED = 11;
+
+const SAVE_KEY = "PIXEL_WORLD_SAVE_V3";
+
+
+/* =========================================================
+   BLOKI
+========================================================= */
+
+const BLOCKS = {
+
+    air:{
+        solid:false,
+        color:null
+    },
+
+    grass:{
+        solid:true,
+        color:"#4fa532"
+    },
+
+    dirt:{
+        solid:true,
+        color:"#895229"
+    },
+
+    stone:{
+        solid:true,
+        color:"#737373"
+    },
+
+    wood:{
+        solid:true,
+        color:"#925429"
+    },
+
+    leaves:{
+        solid:false,
+        color:"#299438"
+    },
+
+    sand:{
+        solid:true,
+        color:"#d9c478"
+    },
+
+    water:{
+        solid:false,
+        color:"#329ed7"
+    },
+
+    torch:{
+        solid:false,
+        color:"#ffad2e"
+    }
 };
 
-let world=[];
-let seed=Math.random()*10000;
 
-/* =====================================================
-   INVENTORY
-===================================================== */
+/* =========================================================
+   ŚWIAT
+========================================================= */
 
-let inventory={
-    dirt:20,
-    stone:10,
-    wood:10,
-    sand:10,
-    torch:4
-};
+let world = [];
 
-let selected="dirt";
+let worldSeed =
+    Math.floor(Math.random()*999999);
 
-function updateHotbar(){
 
-    document.querySelectorAll(".slot").forEach(slot=>{
-        const type=slot.dataset.block;
-        slot.querySelector("span").textContent=inventory[type]||0;
+function createEmptyWorld(){
 
-        slot.classList.toggle(
-            "selected",
-            type===selected
+    world =
+        Array.from(
+            {length:WORLD_HEIGHT},
+            () => Array(WORLD_WIDTH).fill("air")
         );
-    });
 }
 
-document.querySelectorAll(".slot").forEach(slot=>{
-    slot.addEventListener("click",()=>{
-        selected=slot.dataset.block;
-        updateHotbar();
-    });
-});
 
-/* =====================================================
-   WORLD GENERATION
-===================================================== */
+/* =========================================================
+   DETERMINISTYCZNY NOISE
+========================================================= */
 
-function noise(x){
-    return Math.sin(x*.055+seed)*3+
-           Math.sin(x*.019+seed*.4)*6+
-           Math.sin(x*.009+seed*.2)*9;
+function wave(x){
+
+    return (
+        Math.sin(
+            x*0.055 + worldSeed
+        ) * 3 +
+
+        Math.sin(
+            x*0.021 + worldSeed*0.4
+        ) * 6 +
+
+        Math.sin(
+            x*0.008 + worldSeed*0.17
+        ) * 8
+    );
 }
 
-function surface(x){
-    return Math.floor(31+noise(x));
+
+function getSurface(x){
+
+    return Math.floor(
+        31 + wave(x)
+    );
 }
+
+
+/* =========================================================
+   GENEROWANIE ŚWIATA
+========================================================= */
 
 function generateWorld(){
 
-    world=Array.from(
-        {length:WORLD_H},
-        ()=>Array(WORLD_W).fill("air")
-    );
+    createEmptyWorld();
 
-    for(let x=0;x<WORLD_W;x++){
 
-        let ground=surface(x);
+    /* ziemia */
 
-        for(let y=ground;y<WORLD_H;y++){
+    for(let x=0;x<WORLD_WIDTH;x++){
+
+        let ground =
+            Math.max(
+                15,
+                Math.min(
+                    WORLD_HEIGHT-15,
+                    getSurface(x)
+                )
+            );
+
+        for(let y=ground;y<WORLD_HEIGHT;y++){
 
             if(y===ground){
+
                 world[y][x]="grass";
-            }
-            else if(y<ground+6){
+
+            }else if(y<ground+6){
+
                 world[y][x]="dirt";
-            }
-            else{
+
+            }else{
+
                 world[y][x]="stone";
             }
         }
     }
 
+
     /* jaskinie */
 
-    for(let i=0;i<220;i++){
+    for(let i=0;i<230;i++){
 
-        let cx=Math.floor(
-            Math.random()*WORLD_W
-        );
+        const cx =
+            Math.floor(
+                10 +
+                Math.random()*
+                (WORLD_WIDTH-20)
+            );
 
-        let cy=Math.floor(
-            42+Math.random()*40
-        );
+        const cy =
+            Math.floor(
+                42 +
+                Math.random()*35
+            );
 
-        let rx=2+Math.random()*6;
-        let ry=1+Math.random()*4;
+        const rx =
+            2+Math.random()*6;
 
-        for(let y=cy-ry;y<=cy+ry;y++){
-            for(let x=cx-rx;x<=cx+rx;x++){
+        const ry =
+            1.5+Math.random()*4;
+
+
+        for(
+            let y=Math.floor(cy-ry);
+            y<=Math.ceil(cy+ry);
+            y++
+        ){
+
+            for(
+                let x=Math.floor(cx-rx);
+                x<=Math.ceil(cx+rx);
+                x++
+            ){
 
                 if(
-                    x>=0&&
-                    x<WORLD_W&&
-                    y>=0&&
-                    y<WORLD_H
+                    x<1 ||
+                    x>=WORLD_WIDTH-1 ||
+                    y<1 ||
+                    y>=WORLD_HEIGHT-1
+                ) continue;
+
+
+                const dx=(x-cx)/rx;
+                const dy=(y-cy)/ry;
+
+
+                if(
+                    dx*dx+dy*dy<1
                 ){
 
-                    let dx=(x-cx)/rx;
-                    let dy=(y-cy)/ry;
+                    /*
+                     * Nie wycinamy powierzchni.
+                     * Dzięki temu gracz nie wpada
+                     * od razu pod mapę.
+                     */
 
-                    if(dx*dx+dy*dy<1){
+                    if(
+                        y>getSurface(x)+5
+                    ){
                         world[y][x]="air";
                     }
                 }
@@ -426,39 +600,77 @@ function generateWorld(){
         }
     }
 
+
     /* drzewa */
 
-    for(let x=5;x<WORLD_W-5;x++){
+    for(
+        let x=6;
+        x<WORLD_WIDTH-6;
+        x++
+    ){
 
-        if(Math.random()<.045){
+        if(Math.random()<0.045){
 
-            let g=surface(x);
+            const ground =
+                getSurface(x);
 
-            let h=4+Math.floor(
-                Math.random()*3
-            );
+            const height =
+                4+
+                Math.floor(
+                    Math.random()*3
+                );
 
-            for(let y=g-1;y>=g-h;y--){
-                if(y>=0)world[y][x]="wood";
+
+            /* pień */
+
+            for(
+                let y=ground-1;
+                y>=ground-height;
+                y--
+            ){
+
+                if(y>=1)
+                    world[y][x]="wood";
             }
 
-            for(let yy=g-h-2;yy<=g-h+1;yy++){
 
-                for(let xx=x-2;xx<=x+2;xx++){
+            /* liście */
+
+            const top =
+                ground-height;
+
+
+            for(
+                let y=top-2;
+                y<=top+1;
+                y++
+            ){
+
+                for(
+                    let xx=x-2;
+                    xx<=x+2;
+                    xx++
+                ){
 
                     if(
-                        xx>=0&&
-                        xx<WORLD_W&&
-                        yy>=0&&
-                        yy<WORLD_H
-                    ){
+                        xx<0 ||
+                        xx>=WORLD_WIDTH ||
+                        y<1 ||
+                        y>=WORLD_HEIGHT
+                    ) continue;
 
-                        let d=
-                            Math.abs(xx-x)+
-                            Math.abs(yy-(g-h));
 
-                        if(d<4){
-                            world[yy][xx]="leaves";
+                    const distance =
+                        Math.abs(xx-x)+
+                        Math.abs(y-top);
+
+
+                    if(distance<=3){
+
+                        if(
+                            world[y][xx]==="air"
+                        ){
+                            world[y][xx]="leaves";
                         }
                     }
                 }
@@ -466,197 +678,600 @@ function generateWorld(){
         }
     }
 
-    /* jeziora */
 
-    for(let i=0;i<18;i++){
+    /* małe zbiorniki wodne */
 
-        let x=10+
+    for(let i=0;i<15;i++){
+
+        const center =
+            15+
             Math.floor(
-                Math.random()*(WORLD_W-20)
+                Math.random()*
+                (WORLD_WIDTH-30)
             );
 
-        let width=2+
-            Math.floor(Math.random()*4);
+        const width =
+            2+
+            Math.floor(
+                Math.random()*3
+            );
 
-        for(let xx=x-width;xx<=x+width;xx++){
 
-            if(xx<0||xx>=WORLD_W)continue;
+        for(
+            let x=center-width;
+            x<=center+width;
+            x++
+        ){
 
-            let g=surface(xx);
+            if(
+                x<2 ||
+                x>=WORLD_WIDTH-2
+            ) continue;
 
-            world[g][xx]="water";
 
-            if(g+1<WORLD_H)
-                world[g+1][xx]="water";
+            const ground =
+                getSurface(x);
+
+
+            /*
+             * Woda jest tylko na powierzchni.
+             * Nie tworzymy dziwnych jezior
+             * wysoko w powietrzu.
+             */
+
+            world[ground][x]="water";
+
+            if(
+                ground+1<WORLD_HEIGHT
+            ){
+                world[ground+1][x]="water";
+            }
+        }
+    }
+
+
+    /* bezpieczny spawn */
+
+    prepareSpawn();
+}
+
+
+/* =========================================================
+   BEZPIECZNY SPAWN
+========================================================= */
+
+function prepareSpawn(){
+
+    const spawnX=12;
+
+    const ground=
+        getSurface(spawnX);
+
+
+    /*
+     * Czyścimy miejsce nad graczem.
+     */
+
+    for(
+        let y=ground-8;
+        y<ground;
+        y++
+    ){
+
+        if(y>=0)
+            world[y][spawnX]="air";
+    }
+
+
+    /*
+     * Pod spawnem musi być ziemia.
+     */
+
+    world[ground][spawnX]="grass";
+
+
+    /*
+     * Wyczyść kilka bloków obok,
+     * żeby gracz nie pojawił się
+     * wewnątrz drzewa.
+     */
+
+    for(
+        let x=spawnX-2;
+        x<=spawnX+2;
+        x++
+    ){
+
+        for(
+            let y=ground-7;
+            y<ground;
+            y++
+        ){
+
+            if(
+                x>=0 &&
+                x<WORLD_WIDTH &&
+                y>=0
+            ){
+                world[y][x]="air";
+            }
         }
     }
 }
 
+
 generateWorld();
 
-/* =====================================================
-   PLAYER
-===================================================== */
+
+/* =========================================================
+   EKWIPUNEK
+========================================================= */
+
+let inventory={
+
+    dirt:20,
+    stone:10,
+    wood:10,
+    sand:10,
+    torch:4
+};
+
+let selectedBlock="dirt";
+
+
+function updateHotbar(){
+
+    document
+    .querySelectorAll(".slot")
+    .forEach(slot=>{
+
+        const type=
+            slot.dataset.block;
+
+        const amount=
+            inventory[type] || 0;
+
+        const counter=
+            slot.querySelector("span");
+
+        if(counter){
+            counter.textContent=amount;
+        }
+
+        slot.classList.toggle(
+            "selected",
+            type===selectedBlock
+        );
+    });
+}
+
+
+document
+.querySelectorAll(".slot")
+.forEach(slot=>{
+
+    slot.addEventListener(
+        "click",
+        ()=>{
+
+            selectedBlock=
+                slot.dataset.block;
+
+            updateHotbar();
+        }
+    );
+});
+
+
+/* klawisze 1-5 */
+
+window.addEventListener(
+    "keydown",
+    e=>{
+
+        if(
+            e.key>="1" &&
+            e.key<="5"
+        ){
+
+            const index=
+                Number(e.key)-1;
+
+            const slots=
+                document.querySelectorAll(
+                    ".slot"
+                );
+
+            if(slots[index]){
+
+                selectedBlock=
+                    slots[index].dataset.block;
+
+                updateHotbar();
+            }
+        }
+    }
+);
+
+
+/* =========================================================
+   GRACZ
+========================================================= */
 
 const player={
-    x:10*TILE,
-    y:20*TILE,
-    w:22,
-    h:43,
+
+    x:12*TILE,
+
+    y:0,
+
+    width:22,
+
+    height:43,
+
     vx:0,
+
     vy:0,
-    speed:3.5,
-    jump:10,
+
+    speed:3.4,
+
+    jumpPower:9.5,
+
     grounded:false,
+
     direction:1,
-    anim:0,
+
+    animation:0,
+
     health:100,
+
     maxHealth:100
 };
 
-/* =====================================================
-   CAMERA
-===================================================== */
+
+/* spawn na ziemi */
+
+function placePlayerAtSpawn(){
+
+    const x=12;
+
+    const ground=
+        getSurface(x);
+
+    player.x=
+        x*TILE+
+        (TILE-player.width)/2;
+
+    player.y=
+        ground*TILE-
+        player.height-
+        1;
+
+    player.vx=0;
+    player.vy=0;
+}
+
+placePlayerAtSpawn();
+
+
+/* =========================================================
+   KAMERA
+========================================================= */
 
 const camera={
     x:0,
     y:0
 };
 
-/* =====================================================
+
+/* =========================================================
    INPUT
-===================================================== */
+========================================================= */
 
 const keys={};
 
-addEventListener("keydown",e=>{
 
-    keys[e.key.toLowerCase()]=true;
+window.addEventListener(
+    "keydown",
+    e=>{
 
-    if(
-        e.key===" "||
-        e.key==="ArrowUp"||
-        e.key.toLowerCase()==="w"
-    ){
-        jump();
+        const key=
+            e.key.toLowerCase();
+
+        keys[key]=true;
+
+
+        if(
+            key===" " ||
+            key==="w" ||
+            key==="arrowup"
+        ){
+
+            e.preventDefault();
+
+            jump();
+        }
     }
-});
+);
 
-addEventListener("keyup",e=>{
-    keys[e.key.toLowerCase()]=false;
-});
+
+window.addEventListener(
+    "keyup",
+    e=>{
+
+        keys[
+            e.key.toLowerCase()
+        ]=false;
+    }
+);
+
+
+/* =========================================================
+   SKOK
+========================================================= */
+
+let jumpLock=false;
+
 
 function jump(){
 
-    if(player.grounded){
-        player.vy=-player.jump;
+    if(
+        player.grounded &&
+        !jumpLock
+    ){
+
+        player.vy=
+            -player.jumpPower;
+
         player.grounded=false;
+
+        jumpLock=true;
+
+        setTimeout(
+            ()=>{
+                jumpLock=false;
+            },
+            120
+        );
     }
 }
 
-/* =====================================================
-   MOBILE CONTROLS
-===================================================== */
 
-function holdButton(id,key){
+/* =========================================================
+   MOBILNE PRZYCISKI
+========================================================= */
 
-    const b=document.getElementById(id);
+function setupHoldButton(
+    element,
+    key
+){
 
-    b.addEventListener(
+    const start=e=>{
+
+        e.preventDefault();
+
+        keys[key]=true;
+    };
+
+    const end=e=>{
+
+        e.preventDefault();
+
+        keys[key]=false;
+    };
+
+
+    element.addEventListener(
         "touchstart",
-        e=>{
-            e.preventDefault();
-            keys[key]=true;
-        }
+        start,
+        {passive:false}
     );
 
-    b.addEventListener(
+    element.addEventListener(
         "touchend",
-        e=>{
-            e.preventDefault();
-            keys[key]=false;
-        }
+        end,
+        {passive:false}
     );
 
-    b.addEventListener(
+    element.addEventListener(
+        "touchcancel",
+        end,
+        {passive:false}
+    );
+
+
+    element.addEventListener(
         "mousedown",
-        ()=>{
-            keys[key]=true;
-        }
+        start
     );
 
-    b.addEventListener(
+    window.addEventListener(
         "mouseup",
-        ()=>{
-            keys[key]=false;
-        }
+        end
     );
 }
 
-holdButton("left","arrowleft");
-holdButton("right","arrowright");
 
-document.getElementById("jump")
-.addEventListener("touchstart",e=>{
-    e.preventDefault();
-    jump();
-});
+setupHoldButton(
+    document.getElementById(
+        "leftButton"
+    ),
+    "arrowleft"
+);
 
-document.getElementById("jump")
-.addEventListener("mousedown",jump);
 
-/* =====================================================
-   COLLISION
-===================================================== */
+setupHoldButton(
+    document.getElementById(
+        "rightButton"
+    ),
+    "arrowright"
+);
 
-function solidAt(px,py){
 
-    const tx=Math.floor(px/TILE);
-    const ty=Math.floor(py/TILE);
+const jumpButton=
+    document.getElementById(
+        "jumpButton"
+    );
+
+
+jumpButton.addEventListener(
+    "touchstart",
+    e=>{
+        e.preventDefault();
+        jump();
+    },
+    {passive:false}
+);
+
+
+jumpButton.addEventListener(
+    "mousedown",
+    e=>{
+        e.preventDefault();
+        jump();
+    }
+);
+
+
+/* =========================================================
+   KOLIZJE
+========================================================= */
+
+function isSolidTile(tx,ty){
 
     if(
-        tx<0||
-        tx>=WORLD_W||
-        ty<0||
-        ty>=WORLD_H
-    )return true;
+        tx<0 ||
+        tx>=WORLD_WIDTH ||
+        ty<0 ||
+        ty>=WORLD_HEIGHT
+    ){
 
-    return blocks[
-        world[ty][tx]
-    ]?.solid===true;
+        return true;
+    }
+
+
+    const type=
+        world[ty][tx];
+
+
+    return (
+        BLOCKS[type] &&
+        BLOCKS[type].solid
+    );
 }
 
-function collides(x,y){
 
-    const p=2;
+function isSolidPixel(px,py){
 
-    return(
-        solidAt(x+p,y+p)||
-        solidAt(x+player.w-p,y+p)||
-        solidAt(x+p,y+player.h-p)||
-        solidAt(
-            x+player.w-p,
-            y+player.h-p
+    const tx=
+        Math.floor(px/TILE);
+
+    const ty=
+        Math.floor(py/TILE);
+
+    return isSolidTile(tx,ty);
+}
+
+
+function playerCollides(
+    x,
+    y
+){
+
+    /*
+     * Mały margines zapobiega
+     * blokowaniu się o rogi.
+     */
+
+    const pad=2;
+
+
+    return (
+
+        isSolidPixel(
+            x+pad,
+            y+pad
+        )
+
+        ||
+
+        isSolidPixel(
+            x+player.width-pad,
+            y+pad
+        )
+
+        ||
+
+        isSolidPixel(
+            x+pad,
+            y+player.height-pad
+        )
+
+        ||
+
+        isSolidPixel(
+            x+player.width-pad,
+            y+player.height-pad
         )
     );
 }
 
-/* =====================================================
-   UPDATE
-===================================================== */
 
-function update(){
+/* =========================================================
+   CZY GRACZ JEST W WODZIE
+========================================================= */
+
+function playerInWater(){
+
+    const centerX=
+        player.x+
+        player.width/2;
+
+    const centerY=
+        player.y+
+        player.height/2;
+
+    const tx=
+        Math.floor(centerX/TILE);
+
+    const ty=
+        Math.floor(centerY/TILE);
+
+
+    if(
+        tx<0||
+        tx>=WORLD_WIDTH||
+        ty<0||
+        ty>=WORLD_HEIGHT
+    ){
+        return false;
+    }
+
+
+    return world[ty][tx]==="water";
+}
+
+
+/* =========================================================
+   UPDATE GRACZA
+========================================================= */
+
+function updatePlayer(){
 
     let moving=false;
+
 
     if(
         keys["a"]||
         keys["arrowleft"]
     ){
 
-        player.vx=-player.speed;
+        player.vx=
+            -player.speed;
+
         player.direction=-1;
+
         moving=true;
+
     }
 
     else if(
@@ -664,137 +1279,338 @@ function update(){
         keys["arrowright"]
     ){
 
-        player.vx=player.speed;
+        player.vx=
+            player.speed;
+
         player.direction=1;
+
         moving=true;
     }
 
     else{
-        player.vx*=.75;
+
+        player.vx*=0.72;
     }
 
-    if(moving){
-        player.anim+=.22;
-    }
 
-    player.vy+=.45;
-
-    if(player.vy>12)
-        player.vy=12;
-
-    let nx=player.x+player.vx;
-
-    if(!collides(nx,player.y)){
-        player.x=nx;
-    }else{
+    if(Math.abs(player.vx)<0.05){
         player.vx=0;
     }
 
-    let ny=player.y+player.vy;
 
-    if(!collides(player.x,ny)){
+    /*
+     * Animacja chodzenia
+     */
 
-        player.y=ny;
+    if(moving && player.grounded){
+
+        player.animation+=0.22;
+
+    }else{
+
+        player.animation*=0.85;
+    }
+
+
+    /*
+     * Woda
+     */
+
+    const swimming=
+        playerInWater();
+
+
+    if(swimming){
+
+        player.vy+=0.16;
+
+        if(player.vy>3)
+            player.vy=3;
+
+    }else{
+
+        player.vy+=GRAVITY;
+
+        if(player.vy>MAX_FALL_SPEED)
+            player.vy=MAX_FALL_SPEED;
+    }
+
+
+    /* ruch poziomy */
+
+    let newX=
+        player.x+
+        player.vx;
+
+
+    if(
+        !playerCollides(
+            newX,
+            player.y
+        )
+    ){
+
+        player.x=newX;
+
+    }else{
+
+        player.vx=0;
+    }
+
+
+    /*
+     * Ruch pionowy
+     */
+
+    let newY=
+        player.y+
+        player.vy;
+
+
+    if(
+        !playerCollides(
+            player.x,
+            newY
+        )
+    ){
+
+        player.y=newY;
+
         player.grounded=false;
 
     }else{
 
-        if(player.vy>0)
+        if(player.vy>0){
+
             player.grounded=true;
+
+            /*
+             * Dociśnięcie do góry
+             * zapobiega mikro-spadaniu.
+             */
+
+            player.y=
+                Math.floor(
+                    (player.y+
+                    player.height)/TILE
+                )*TILE-
+                player.height-
+                0.01;
+
+        }
 
         player.vy=0;
     }
 
-    /* kamera */
+
+    /*
+     * Kamera
+     */
 
     const targetX=
-        player.x-
-        canvas.width/2+
-        player.w/2;
+        player.x+
+        player.width/2-
+        canvas.width/2;
 
     const targetY=
-        player.y-
-        canvas.height/2+
-        player.h/2;
+        player.y+
+        player.height/2-
+        canvas.height/2;
 
-    camera.x+=(targetX-camera.x)*.1;
-    camera.y+=(targetY-camera.y)*.1;
 
-    camera.x=Math.max(
-        0,
-        Math.min(
-            camera.x,
-            WORLD_W*TILE-canvas.width
-        )
-    );
+    camera.x+=
+        (targetX-camera.x)*0.1;
 
-    camera.y=Math.max(
-        0,
-        Math.min(
-            camera.y,
-            WORLD_H*TILE-canvas.height
-        )
-    );
+    camera.y+=
+        (targetY-camera.y)*0.1;
 
-    /* spadanie */
 
-    if(player.y>WORLD_H*TILE){
+    const maxCameraX=
+        Math.max(
+            0,
+            WORLD_WIDTH*TILE-
+            canvas.width
+        );
 
-        player.x=10*TILE;
-        player.y=20*TILE;
-        damage(20);
+    const maxCameraY=
+        Math.max(
+            0,
+            WORLD_HEIGHT*TILE-
+            canvas.height
+        );
+
+
+    camera.x=
+        Math.max(
+            0,
+            Math.min(
+                camera.x,
+                maxCameraX
+            )
+        );
+
+
+    camera.y=
+        Math.max(
+            0,
+            Math.min(
+                camera.y,
+                maxCameraY
+            )
+        );
+
+
+    /*
+     * Zabezpieczenie przed wypadnięciem
+     */
+
+    if(
+        player.y>
+        WORLD_HEIGHT*TILE+300
+    ){
+
+        respawn();
     }
 }
 
-/* =====================================================
-   DRAW WORLD
-===================================================== */
 
-let time=0;
+/* =========================================================
+   RYSOWANIE ŚWIATA
+========================================================= */
+
+let gameTime=0;
+
 
 function drawWorld(){
 
-    time+=.001;
+    gameTime+=0.0007;
 
-    let night=
-        (Math.sin(time)-.15)*.5;
 
-    let skyR=80;
-    let skyG=190;
-    let skyB=250;
+    /*
+     * Dzień/noc
+     */
+
+    const cycle=
+        (Math.sin(gameTime)+1)/2;
+
+
+    const skyR=
+        Math.floor(
+            35+
+            cycle*80
+        );
+
+    const skyG=
+        Math.floor(
+            80+
+            cycle*130
+        );
+
+    const skyB=
+        Math.floor(
+            140+
+            cycle*110
+        );
+
 
     ctx.fillStyle=
         `rgb(${skyR},${skyG},${skyB})`;
 
     ctx.fillRect(
-        0,0,
+        0,
+        0,
         canvas.width,
         canvas.height
     );
 
-    const sx=
-        Math.floor(camera.x/TILE)-1;
 
-    const ex=
-        Math.ceil(
-            (camera.x+canvas.width)/TILE
-        )+1;
+    /*
+     * Słońce / księżyc
+     */
 
-    const sy=
-        Math.floor(camera.y/TILE)-1;
+    const celestialX=
+        canvas.width*
+        (0.15+cycle*0.7);
 
-    const ey=
-        Math.ceil(
-            (camera.y+canvas.height)/TILE
-        )+1;
+    const celestialY=
+        100+
+        Math.sin(
+            cycle*Math.PI
+        )*-65;
 
-    for(let y=sy;y<ey;y++){
 
-        if(y<0||y>=WORLD_H)continue;
+    ctx.fillStyle=
+        cycle>0.5
+        ?"#ffe680"
+        :"#eeeeff";
 
-        for(let x=sx;x<ex;x++){
 
-            if(x<0||x>=WORLD_W)continue;
+    ctx.beginPath();
+
+    ctx.arc(
+        celestialX,
+        celestialY,
+        28,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+     * Widoczne bloki
+     */
+
+    const startX=
+        Math.max(
+            0,
+            Math.floor(
+                camera.x/TILE
+            )-1
+        );
+
+
+    const endX=
+        Math.min(
+            WORLD_WIDTH,
+            Math.ceil(
+                (camera.x+
+                canvas.width)/TILE
+            )+1
+        );
+
+
+    const startY=
+        Math.max(
+            0,
+            Math.floor(
+                camera.y/TILE
+            )-1
+        );
+
+
+    const endY=
+        Math.min(
+            WORLD_HEIGHT,
+            Math.ceil(
+                (camera.y+
+                canvas.height)/TILE
+            )+1
+        );
+
+
+    for(
+        let y=startY;
+        y<endY;
+        y++
+    ){
+
+        for(
+            let x=startX;
+            x<endX;
+            x++
+        ){
 
             drawBlock(
                 world[y][x],
@@ -804,54 +1620,94 @@ function drawWorld(){
         }
     }
 
-    /* słońce */
 
-    ctx.fillStyle="#ffe477";
+    /*
+     * Lekka warstwa nocna
+     */
 
-    ctx.beginPath();
+    if(cycle<0.35){
 
-    ctx.arc(
-        canvas.width*.82,
-        80,
-        32,
-        0,
-        Math.PI*2
-    );
+        ctx.fillStyle=
+            `rgba(15,25,70,${
+                (0.35-cycle)*0.8
+            })`;
 
-    ctx.fill();
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+    }
 }
 
-function drawBlock(type,x,y){
 
-    if(type==="air")return;
+/* =========================================================
+   RYSOWANIE BLOKU
+========================================================= */
 
-    const px=x*TILE-camera.x;
-    const py=y*TILE-camera.y;
+function drawBlock(
+    type,
+    tx,
+    ty
+){
 
     if(
-        px<-TILE||
-        py<-TILE||
-        px>canvas.width||
-        py>canvas.height
-    )return;
+        type==="air"
+    ){
+        return;
+    }
+
+
+    const x=
+        tx*TILE-
+        camera.x;
+
+    const y=
+        ty*TILE-
+        camera.y;
+
+
+    if(
+        x<-TILE||
+        y<-TILE||
+        x>canvas.width||
+        y>canvas.height
+    ){
+        return;
+    }
+
+
+    /*
+     * WODA
+     */
 
     if(type==="water"){
 
-        ctx.fillStyle="#319fd5";
+        ctx.fillStyle=
+            BLOCKS.water.color;
 
         ctx.fillRect(
-            px,py,
-            TILE,TILE
+            x,
+            y,
+            TILE,
+            TILE
         );
+
 
         ctx.fillStyle="#73d5fa";
 
-        ctx.fillRect(
-            px,
-            py+5+
+
+        const wave=
             Math.sin(
-                Date.now()*.004+x
-            )*2,
+                Date.now()*0.004+
+                tx*0.7
+            )*2;
+
+
+        ctx.fillRect(
+            x,
+            y+4+wave,
             TILE,
             3
         );
@@ -859,31 +1715,38 @@ function drawBlock(type,x,y){
         return;
     }
 
+
+    /*
+     * POCHODNIA
+     */
+
     if(type==="torch"){
 
-        ctx.fillStyle="#70401d";
+        ctx.fillStyle="#653917";
 
         ctx.fillRect(
-            px+14,
-            py+8,
+            x+14,
+            y+10,
             4,
-            24
+            20
         );
 
-        ctx.fillStyle="#ff8c00";
+
+        ctx.fillStyle="#ff8d00";
 
         ctx.fillRect(
-            px+10,
-            py+3,
+            x+10,
+            y+3,
             12,
-            12
+            13
         );
 
-        ctx.fillStyle="#fff27a";
+
+        ctx.fillStyle="#fff27b";
 
         ctx.fillRect(
-            px+13,
-            py+5,
+            x+13,
+            y+5,
             6,
             8
         );
@@ -891,152 +1754,262 @@ function drawBlock(type,x,y){
         return;
     }
 
-    ctx.fillStyle=blocks[type].color;
+
+    /*
+     * ZWYKŁY BLOK
+     */
+
+    ctx.fillStyle=
+        BLOCKS[type].color;
 
     ctx.fillRect(
-        px,py,
-        TILE,TILE
+        x,
+        y,
+        TILE,
+        TILE
     );
 
-    /* grass */
+
+    /*
+     * TRAWA
+     */
 
     if(type==="grass"){
 
-        ctx.fillStyle="#75d63c";
+        ctx.fillStyle="#73d43a";
 
         ctx.fillRect(
-            px,py,
-            TILE,6
+            x,
+            y,
+            TILE,
+            6
+        );
+
+
+        ctx.fillStyle="#3e8d29";
+
+        ctx.fillRect(
+            x+6,
+            y+4,
+            3,
+            5
+        );
+
+        ctx.fillRect(
+            x+22,
+            y+3,
+            3,
+            6
         );
     }
 
-    /* dirt */
+
+    /*
+     * ZIEMIA
+     */
 
     if(type==="dirt"){
 
         ctx.fillStyle="#70411f";
 
-        for(let i=0;i<3;i++){
+        const a=
+            (tx*13+
+             ty*7)%24;
 
-            ctx.fillRect(
-                px+
-                ((x*13+i*7)%25),
-                py+
-                ((y*9+i*11)%25),
-                4,4
-            );
-        }
+        const b=
+            (tx*7+
+             ty*11)%23;
+
+
+        ctx.fillRect(
+            x+4+a/4,
+            y+8+b/5,
+            4,
+            4
+        );
+
+        ctx.fillRect(
+            x+21,
+            y+22,
+            4,
+            4
+        );
     }
 
-    /* stone */
+
+    /*
+     * KAMIEŃ
+     */
 
     if(type==="stone"){
 
-        ctx.fillStyle="#606060";
+        ctx.fillStyle="#5f5f5f";
 
         ctx.fillRect(
-            px+5,py+7,6,5
+            x+5,
+            y+7,
+            6,
+            5
         );
 
         ctx.fillRect(
-            px+21,py+20,5,5
+            x+20,
+            y+20,
+            6,
+            5
         );
     }
 
-    /* wood */
+
+    /*
+     * DREWNO
+     */
 
     if(type==="wood"){
 
-        ctx.fillStyle="#633715";
+        ctx.fillStyle="#603715";
 
         ctx.fillRect(
-            px+13,py,
-            5,TILE
+            x+12,
+            y,
+            5,
+            TILE
+        );
+
+        ctx.fillStyle="#b16b35";
+
+        ctx.fillRect(
+            x+20,
+            y+7,
+            3,
+            5
         );
     }
 
-    /* leaves */
+
+    /*
+     * LIŚCIE
+     */
 
     if(type==="leaves"){
 
-        ctx.fillStyle="#1d7529";
+        ctx.fillStyle="#1e782b";
 
         ctx.fillRect(
-            px+5,py+7,
-            8,7
+            x+5,
+            y+7,
+            7,
+            7
         );
 
         ctx.fillRect(
-            px+19,py+17,
-            7,6
+            x+20,
+            y+17,
+            7,
+            6
         );
     }
 
-    /* sand */
+
+    /*
+     * PIACH
+     */
 
     if(type==="sand"){
 
-        ctx.fillStyle="#bca763";
+        ctx.fillStyle="#b8a461";
 
         ctx.fillRect(
-            px+6,py+10,3,3
+            x+6,
+            y+9,
+            3,
+            3
         );
 
         ctx.fillRect(
-            px+22,py+21,3,3
+            x+21,
+            y+21,
+            3,
+            3
         );
     }
 }
 
-/* =====================================================
-   PLAYER DRAW
-===================================================== */
+
+/* =========================================================
+   GRACZ
+========================================================= */
 
 function drawPlayer(){
 
     const x=
-        player.x-camera.x;
+        player.x-
+        camera.x;
 
     const y=
-        player.y-camera.y;
+        player.y-
+        camera.y;
+
 
     let leg=0;
 
+
     if(player.grounded){
+
         leg=
-            Math.sin(player.anim)*4;
+            Math.sin(
+                player.animation
+            )*4;
     }
 
+
     ctx.save();
+
 
     if(player.direction<0){
 
         ctx.translate(
-            x+player.w,
+            x+player.width,
             0
         );
 
-        ctx.scale(-1,1);
+        ctx.scale(
+            -1,
+            1
+        );
+
 
         drawCharacter(
-            0,y,leg
+            0,
+            y,
+            leg
         );
 
     }else{
 
         drawCharacter(
-            x,y,leg
+            x,
+            y,
+            leg
         );
     }
+
 
     ctx.restore();
 }
 
-function drawCharacter(x,y,leg){
 
-    /* nogi */
+function drawCharacter(
+    x,
+    y,
+    leg
+){
 
-    ctx.fillStyle="#303030";
+    /*
+     * nogi
+     */
+
+    ctx.fillStyle="#292929";
 
     ctx.fillRect(
         x+4,
@@ -1052,9 +2025,12 @@ function drawCharacter(x,y,leg){
         14
     );
 
-    /* ciało */
 
-    ctx.fillStyle="#2775d8";
+    /*
+     * ciało
+     */
+
+    ctx.fillStyle="#2776d8";
 
     ctx.fillRect(
         x+3,
@@ -1063,9 +2039,12 @@ function drawCharacter(x,y,leg){
         18
     );
 
-    /* ręce */
 
-    ctx.fillStyle="#f0b982";
+    /*
+     * ręce
+     */
+
+    ctx.fillStyle="#efb985";
 
     ctx.fillRect(
         x-2,
@@ -1081,9 +2060,12 @@ function drawCharacter(x,y,leg){
         15
     );
 
-    /* głowa */
 
-    ctx.fillStyle="#f0b982";
+    /*
+     * głowa
+     */
+
+    ctx.fillStyle="#efb985";
 
     ctx.fillRect(
         x+2,
@@ -1092,140 +2074,476 @@ function drawCharacter(x,y,leg){
         17
     );
 
-    /* włosy */
 
-    ctx.fillStyle="#4b2b19";
+    /*
+     * włosy
+     */
+
+    ctx.fillStyle="#482a18";
 
     ctx.fillRect(
-        x+2,y,
-        20,5
+        x+2,
+        y,
+        20,
+        5
     );
 
     ctx.fillRect(
-        x+2,y+4,
-        4,6
+        x+2,
+        y+4,
+        4,
+        6
     );
 
-    /* oczy */
+
+    /*
+     * oczy
+     */
 
     ctx.fillStyle="#111";
 
     ctx.fillRect(
-        x+7,y+8,
-        3,3
+        x+7,
+        y+8,
+        3,
+        3
     );
 
     ctx.fillRect(
-        x+15,y+8,
-        3,3
+        x+15,
+        y+8,
+        3,
+        3
     );
 }
 
-/* =====================================================
-   BLOCK INTERACTION
-===================================================== */
+
+/* =========================================================
+   INTERAKCJA Z BLOKAMI
+========================================================= */
+
+function getMouseTile(event){
+
+    const rect=
+        canvas.getBoundingClientRect();
+
+
+    const screenX=
+        event.clientX-
+        rect.left;
+
+
+    const screenY=
+        event.clientY-
+        rect.top;
+
+
+    const worldX=
+        screenX+
+        camera.x;
+
+
+    const worldY=
+        screenY+
+        camera.y;
+
+
+    return{
+
+        x:Math.floor(
+            worldX/TILE
+        ),
+
+        y:Math.floor(
+            worldY/TILE
+        )
+    };
+}
+
+
+function tileInsideWorld(
+    x,
+    y
+){
+
+    return(
+        x>=0 &&
+        x<WORLD_WIDTH &&
+        y>=0 &&
+        y<WORLD_HEIGHT
+    );
+}
+
+
+function tileTouchesPlayer(
+    tx,
+    ty
+){
+
+    const bx=tx*TILE;
+    const by=ty*TILE;
+
+
+    return(
+
+        bx<
+        player.x+
+        player.width &&
+
+        bx+TILE>
+        player.x &&
+
+        by<
+        player.y+
+        player.height &&
+
+        by+TILE>
+        player.y
+    );
+}
+
+
+function canReachTile(
+    tx,
+    ty
+){
+
+    /*
+     * Gracz nie może niszczyć
+     * bloków z całej mapy.
+     */
+
+    const centerX=
+        player.x+
+        player.width/2;
+
+    const centerY=
+        player.y+
+        player.height/2;
+
+
+    const tileCenterX=
+        tx*TILE+
+        TILE/2;
+
+    const tileCenterY=
+        ty*TILE+
+        TILE/2;
+
+
+    const dx=
+        tileCenterX-centerX;
+
+    const dy=
+        tileCenterY-centerY;
+
+
+    return(
+        Math.sqrt(dx*dx+dy*dy)
+        <=
+        TILE*5
+    );
+}
+
+
+function mineBlock(
+    tx,
+    ty
+){
+
+    if(
+        !tileInsideWorld(tx,ty)
+    ){
+        return;
+    }
+
+
+    if(
+        !canReachTile(tx,ty)
+    ){
+        return;
+    }
+
+
+    const type=
+        world[ty][tx];
+
+
+    if(
+        type==="air"||
+        type==="water"||
+        type==="leaves"
+    ){
+        return;
+    }
+
+
+    world[ty][tx]="air";
+
+
+    /*
+     * Drop przedmiotu
+     */
+
+    if(
+        type==="grass"||
+        type==="dirt"
+    ){
+
+        inventory.dirt++;
+    }
+
+    else if(type==="stone"){
+
+        inventory.stone++;
+    }
+
+    else if(type==="wood"){
+
+        inventory.wood++;
+    }
+
+    else if(type==="sand"){
+
+        inventory.sand++;
+    }
+
+
+    updateHotbar();
+}
+
+
+function placeBlock(
+    tx,
+    ty
+){
+
+    if(
+        !tileInsideWorld(tx,ty)
+    ){
+        return;
+    }
+
+
+    if(
+        !canReachTile(tx,ty)
+    ){
+        return;
+    }
+
+
+    /*
+     * Nie pozwalamy stawiać
+     * bloku w graczu.
+     */
+
+    if(
+        tileTouchesPlayer(tx,ty)
+    ){
+        return;
+    }
+
+
+    /*
+     * Można stawiać tylko
+     * w pustym miejscu.
+     */
+
+    if(
+        world[ty][tx]!=="air"
+    ){
+        return;
+    }
+
+
+    const type=
+        selectedBlock;
+
+
+    if(
+        !inventory[type] ||
+        inventory[type]<=0
+    ){
+
+        showMessage(
+            "Brak tego bloku!"
+        );
+
+        return;
+    }
+
+
+    world[ty][tx]=type;
+
+    inventory[type]--;
+
+    updateHotbar();
+}
+
+
+/* =========================================================
+   MYSZKA
+========================================================= */
 
 canvas.addEventListener(
     "contextmenu",
     e=>e.preventDefault()
 );
 
+
 canvas.addEventListener(
     "mousedown",
     e=>{
 
-        const rect=
-            canvas.getBoundingClientRect();
-
-        const tx=Math.floor(
-            (e.clientX+camera.x)/TILE
-        );
-
-        const ty=Math.floor(
-            (e.clientY+camera.y)/TILE
-        );
-
         if(
-            tx<0||
-            tx>=WORLD_W||
-            ty<0||
-            ty>=WORLD_H
-        )return;
+            e.button!==0 &&
+            e.button!==2
+        ){
+            return;
+        }
 
-        const current=
-            world[ty][tx];
 
-        /* kopanie */
+        const tile=
+            getMouseTile(e);
+
 
         if(e.button===0){
 
-            if(
-                current!=="air"&&
-                current!=="water"&&
-                current!=="leaves"
-            ){
-
-                world[ty][tx]="air";
-
-                if(current==="grass"||
-                   current==="dirt")
-                    inventory.dirt++;
-
-                if(current==="stone")
-                    inventory.stone++;
-
-                if(current==="wood")
-                    inventory.wood++;
-
-                if(current==="sand")
-                    inventory.sand++;
-
-                updateHotbar();
-            }
+            mineBlock(
+                tile.x,
+                tile.y
+            );
         }
 
-        /* stawianie */
 
         if(e.button===2){
 
-            if(
-                current==="air"||
-                current==="water"||
-                current==="leaves"
-            ){
-
-                if(
-                    inventory[selected]>0
-                ){
-
-                    /* nie stawiaj na graczu */
-
-                    const bx=tx*TILE;
-                    const by=ty*TILE;
-
-                    const overlap=
-                        bx<player.x+player.w&&
-                        bx+TILE>player.x&&
-                        by<player.y+player.h&&
-                        by+TILE>player.y;
-
-                    if(!overlap){
-
-                        world[ty][tx]=selected;
-
-                        inventory[selected]--;
-
-                        updateHotbar();
-                    }
-                }
-            }
+            placeBlock(
+                tile.x,
+                tile.y
+            );
         }
     }
 );
 
-/* =====================================================
-   HEALTH
-===================================================== */
+
+/* =========================================================
+   DOTYK — KOPANIE / STAWIANIE
+========================================================= */
+
+let touchStart=null;
+
+
+canvas.addEventListener(
+    "touchstart",
+    e=>{
+
+        /*
+         * Jeżeli dotykamy canvasu,
+         * zapamiętujemy pozycję.
+         */
+
+        if(e.touches.length!==1)
+            return;
+
+
+        const touch=e.touches[0];
+
+
+        touchStart={
+            x:touch.clientX,
+            y:touch.clientY
+        };
+    },
+    {passive:true}
+);
+
+
+canvas.addEventListener(
+    "touchend",
+    e=>{
+
+        if(!touchStart)
+            return;
+
+
+        const touch=
+            e.changedTouches[0];
+
+
+        const dx=
+            touch.clientX-
+            touchStart.x;
+
+        const dy=
+            touch.clientY-
+            touchStart.y;
+
+
+        /*
+         * Tylko krótki tap.
+         * Przy przesuwaniu palcem
+         * niczego nie niszczymy.
+         */
+
+        if(
+            Math.abs(dx)<12 &&
+            Math.abs(dy)<12
+        ){
+
+            const fakeEvent={
+                clientX:touch.clientX,
+                clientY:touch.clientY
+            };
+
+
+            const tile=
+                getMouseTile(fakeEvent);
+
+
+            mineBlock(
+                tile.x,
+                tile.y
+            );
+        }
+
+
+        touchStart=null;
+    },
+    {passive:true}
+);
+
+
+/* =========================================================
+   ZDROWIE
+========================================================= */
+
+function updateHealth(){
+
+    const percent=
+        Math.max(
+            0,
+            Math.min(
+                100,
+                player.health
+            )
+        );
+
+
+    document.getElementById(
+        "healthBar"
+    ).style.width=
+        percent+"%";
+
+
+    document.getElementById(
+        "healthText"
+    ).textContent=
+        Math.round(player.health)+
+        " / "+
+        player.maxHealth;
+}
+
 
 function damage(amount){
 
@@ -1235,56 +2553,60 @@ function damage(amount){
             player.health-amount
         );
 
+
     updateHealth();
 
-    if(player.health<=0){
 
-        player.health=100;
+    if(
+        player.health<=0
+    ){
 
-        player.x=10*TILE;
-        player.y=20*TILE;
-
-        showMessage(
-            "💀 Odrodziłeś się!"
-        );
+        respawn();
     }
 }
 
-function updateHealth(){
 
-    const percent=
-        player.health/player.maxHealth*100;
+function respawn(){
 
-    document.getElementById(
-        "healthBar"
-    ).style.width=
-        percent+"%";
+    placePlayerAtSpawn();
 
-    document.getElementById(
-        "healthText"
-    ).textContent=
-        player.health+
-        " / "+
+    player.health=
         player.maxHealth;
+
+    updateHealth();
+
+    showMessage(
+        "💀 Odrodziłeś się!"
+    );
 }
 
-/* =====================================================
+
+/* =========================================================
    CRAFTING
-===================================================== */
+========================================================= */
 
 const crafting=
-    document.getElementById("crafting");
+    document.getElementById(
+        "crafting"
+    );
 
-document.getElementById("craft")
-.addEventListener("click",()=>{
 
-    crafting.style.display=
-        crafting.style.display==="block"
-        ?"none"
-        :"block";
-});
+document.getElementById(
+    "craftButton"
+).addEventListener(
+    "click",
+    ()=>{
 
-document.querySelectorAll(".recipe")
+        crafting.style.display=
+            crafting.style.display==="block"
+            ?"none"
+            :"block";
+    }
+);
+
+
+document
+.querySelectorAll(".recipe")
 .forEach(recipe=>{
 
     recipe.addEventListener(
@@ -1294,50 +2616,72 @@ document.querySelectorAll(".recipe")
             const type=
                 recipe.dataset.recipe;
 
-            if(type==="wood"){
 
-                if(inventory.wood>=4){
+            if(
+                type==="planks"
+            ){
 
-                    inventory.wood-=4;
-                    inventory.dirt+=8;
+                if(
+                    inventory.wood>=2
+                ){
+
+                    inventory.wood-=2;
+
+                    /*
+                     * Deski wykorzystujemy
+                     * jako zwykłe drewno,
+                     * żeby nie tworzyć kolejnego
+                     * rodzaju itemu.
+                     */
+
+                    inventory.wood+=8;
 
                     showMessage(
-                        "Zrobiono 8 desek!"
+                        "🪵 Zrobiono deski!"
                     );
-                }
-                else{
+
+                }else{
+
                     showMessage(
                         "Brakuje drewna!"
                     );
                 }
             }
 
-            if(type==="torch"){
+
+            if(
+                type==="torch"
+            ){
 
                 if(
-                    inventory.wood>=1&&
+                    inventory.wood>=1 &&
                     inventory.stone>=1
                 ){
 
                     inventory.wood--;
                     inventory.stone--;
+
                     inventory.torch+=4;
 
                     showMessage(
-                        "Zrobiono 4 pochodnie!"
+                        "🔥 Zrobiono 4 pochodnie!"
                     );
-                }
-                else{
+
+                }else{
+
                     showMessage(
                         "Brakuje surowców!"
                     );
                 }
             }
 
-            if(type==="pickaxe"){
+
+            if(
+                type==="pickaxe"
+            ){
 
                 if(
-                    inventory.wood>=5&&
+                    inventory.wood>=5 &&
                     inventory.stone>=3
                 ){
 
@@ -1347,130 +2691,377 @@ document.querySelectorAll(".recipe")
                     showMessage(
                         "⛏️ Stworzono kilof!"
                     );
-                }
-                else{
+
+                }else{
+
                     showMessage(
                         "Brakuje surowców!"
                     );
                 }
             }
 
+
             updateHotbar();
         }
     );
 });
 
-/* =====================================================
-   SAVE / LOAD
-===================================================== */
 
-document.getElementById("save")
-.addEventListener("click",()=>{
+/* =========================================================
+   ZAPIS
+========================================================= */
 
-    localStorage.setItem(
-        "pixelWorldSave",
-        JSON.stringify({
+function saveGame(){
+
+    try{
+
+        const data={
+
+            version:3,
+
+            worldSeed,
+
             world,
+
             player:{
                 x:player.x,
-                y:player.y
+                y:player.y,
+                health:player.health
             },
-            inventory
-        })
-    );
 
-    showMessage(
-        "💾 Świat zapisany!"
-    );
-});
+            inventory,
+
+            selectedBlock
+        };
+
+
+        localStorage.setItem(
+            SAVE_KEY,
+            JSON.stringify(data)
+        );
+
+
+        showMessage(
+            "💾 Świat zapisany!"
+        );
+
+    }catch(error){
+
+        console.error(
+            "Błąd zapisu:",
+            error
+        );
+
+        showMessage(
+            "❌ Nie udało się zapisać!"
+        );
+    }
+}
+
 
 function loadGame(){
 
     try{
 
-        const save=
-            JSON.parse(
-                localStorage.getItem(
-                    "pixelWorldSave"
-                )
+        const raw=
+            localStorage.getItem(
+                SAVE_KEY
             );
 
-        if(!save)return;
 
-        if(save.world)
-            world=save.world;
-
-        if(save.player){
-
-            player.x=
-                save.player.x;
-
-            player.y=
-                save.player.y;
+        if(!raw){
+            return false;
         }
 
-        if(save.inventory)
-            inventory=save.inventory;
+
+        const data=
+            JSON.parse(raw);
+
+
+        /*
+         * Sprawdzamy podstawowe dane,
+         * zanim użyjemy zapisu.
+         */
+
+        if(
+            !data ||
+            !Array.isArray(data.world)
+        ){
+            return false;
+        }
+
+
+        if(
+            data.world.length!==WORLD_HEIGHT
+        ){
+            return false;
+        }
+
+
+        if(
+            !data.world.every(
+                row=>
+                    Array.isArray(row)&&
+                    row.length===WORLD_WIDTH
+            )
+        ){
+            return false;
+        }
+
+
+        world=data.world;
+
+        worldSeed=
+            Number.isFinite(
+                data.worldSeed
+            )
+            ?data.worldSeed
+            :worldSeed;
+
+
+        if(data.player){
+
+            if(
+                Number.isFinite(
+                    data.player.x
+                )
+            ){
+                player.x=
+                    data.player.x;
+            }
+
+            if(
+                Number.isFinite(
+                    data.player.y
+                )
+            ){
+                player.y=
+                    data.player.y;
+            }
+
+            if(
+                Number.isFinite(
+                    data.player.health
+                )
+            ){
+                player.health=
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            data.player.health
+                        )
+                    );
+            }
+        }
+
+
+        if(
+            data.inventory &&
+            typeof data.inventory==="object"
+        ){
+
+            for(
+                const type of
+                [
+                    "dirt",
+                    "stone",
+                    "wood",
+                    "sand",
+                    "torch"
+                ]
+            ){
+
+                const amount=
+                    Number(
+                        data.inventory[type]
+                    );
+
+
+                if(
+                    Number.isFinite(amount)&&
+                    amount>=0
+                ){
+
+                    inventory[type]=
+                        Math.floor(amount);
+                }
+            }
+        }
+
+
+        if(
+            typeof data.selectedBlock==="string" &&
+            inventory[data.selectedBlock]!==undefined
+        ){
+
+            selectedBlock=
+                data.selectedBlock;
+        }
+
+
+        /*
+         * Jeżeli zapisany gracz
+         * znajduje się wewnątrz bloku,
+         * przenosimy go na spawn.
+         */
+
+        if(
+            playerCollides(
+                player.x,
+                player.y
+            )
+        ){
+
+            placePlayerAtSpawn();
+        }
+
 
         updateHotbar();
+        updateHealth();
+
 
         showMessage(
-            "📂 Wczytano świat!"
+            "📂 Wczytano zapis!"
         );
 
-    }catch(e){
-        console.log(e);
+
+        return true;
+
+    }catch(error){
+
+        console.error(
+            "Błąd wczytywania:",
+            error
+        );
+
+        return false;
     }
 }
 
-loadGame();
 
-/* =====================================================
-   MESSAGE
-===================================================== */
+document.getElementById(
+    "saveButton"
+).addEventListener(
+    "click",
+    saveGame
+);
 
-let messageTimer;
+
+/* =========================================================
+   AUTOMATYCZNY ZAPIS
+========================================================= */
+
+setInterval(
+    ()=>{
+        saveGameSilently();
+    },
+    30000
+);
+
+
+function saveGameSilently(){
+
+    try{
+
+        localStorage.setItem(
+            SAVE_KEY,
+            JSON.stringify({
+
+                version:3,
+
+                worldSeed,
+
+                world,
+
+                player:{
+                    x:player.x,
+                    y:player.y,
+                    health:player.health
+                },
+
+                inventory,
+
+                selectedBlock
+            })
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Automatyczny zapis nieudany."
+        );
+    }
+}
+
+
+/* =========================================================
+   WIADOMOŚCI
+========================================================= */
+
+let messageTimeout=null;
+
 
 function showMessage(text){
 
-    const m=
+    const element=
         document.getElementById(
             "message"
         );
 
-    m.textContent=text;
-    m.style.opacity=1;
 
-    clearTimeout(messageTimer);
+    element.textContent=text;
 
-    messageTimer=
-        setTimeout(()=>{
-            m.style.opacity=0;
-        },1800);
+    element.style.opacity="1";
+
+
+    clearTimeout(
+        messageTimeout
+    );
+
+
+    messageTimeout=
+        setTimeout(
+            ()=>{
+                element.style.opacity="0";
+            },
+            1800
+        );
 }
 
-/* =====================================================
-   GAME LOOP
-===================================================== */
 
-function loop(){
+/* =========================================================
+   START
+========================================================= */
 
-    update();
+loadGame();
+
+updateHotbar();
+
+updateHealth();
+
+
+/* =========================================================
+   GŁÓWNA PĘTLA
+========================================================= */
+
+function gameLoop(){
+
+    updatePlayer();
 
     drawWorld();
 
     drawPlayer();
 
-    requestAnimationFrame(loop);
+    requestAnimationFrame(
+        gameLoop
+    );
 }
 
-updateHotbar();
-updateHealth();
 
-loop();
+gameLoop();
 
 </script>
 
 </body>
 </html>
-```
