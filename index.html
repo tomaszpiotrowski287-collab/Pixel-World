@@ -1,129 +1,209 @@
+```html
 <!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Pixel World</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Pixel World 2.0</title>
 
 <style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    user-select: none;
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#70c9ff;
+    font-family:Arial,sans-serif;
+}
+canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    image-rendering:pixelated;
 }
 
-html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #78c8ff;
-    font-family: Arial, sans-serif;
+#ui{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
 }
 
-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
+#logo{
+    position:absolute;
+    top:12px;
+    left:50%;
+    transform:translateX(-50%);
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+    text-shadow:3px 3px #222;
 }
 
-#ui {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
+#health{
+    position:absolute;
+    top:15px;
+    left:15px;
+    width:180px;
+    height:24px;
+    border:3px solid #222;
+    background:#222;
 }
 
-#title {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-size: 22px;
-    font-weight: bold;
-    text-shadow: 2px 2px 0 #000;
+#healthBar{
+    width:100%;
+    height:100%;
+    background:#e53935;
 }
 
-#health {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    width: 180px;
-    height: 25px;
-    border: 3px solid #222;
-    background: #333;
+#healthText{
+    position:absolute;
+    left:0;
+    top:1px;
+    width:100%;
+    text-align:center;
+    color:white;
+    font-weight:bold;
+    font-size:14px;
+    text-shadow:1px 1px #000;
 }
 
-#healthBar {
-    width: 100%;
-    height: 100%;
-    background: #e33;
+#hotbar{
+    position:absolute;
+    bottom:15px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:5px;
+    pointer-events:auto;
 }
 
-#inventory {
-    position: absolute;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 5px;
-    pointer-events: auto;
+.slot{
+    width:58px;
+    height:58px;
+    border:3px solid #222;
+    background:rgba(55,55,55,.88);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    font-size:28px;
 }
 
-.slot {
-    width: 55px;
-    height: 55px;
-    border: 3px solid #222;
-    background: rgba(70,70,70,.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
+.slot.selected{
+    border-color:#fff;
+    box-shadow:0 0 0 2px #111;
 }
 
-.slot.selected {
-    border-color: white;
+.slot span{
+    position:absolute;
+    right:3px;
+    bottom:2px;
+    color:#fff;
+    font-size:13px;
+    font-weight:bold;
+    text-shadow:1px 1px #000;
 }
 
-#controls {
-    position: absolute;
-    left: 15px;
-    bottom: 15px;
-    display: flex;
-    gap: 10px;
-    pointer-events: auto;
+#controls{
+    position:absolute;
+    left:15px;
+    bottom:18px;
+    display:flex;
+    gap:8px;
+    pointer-events:auto;
 }
 
-.control {
-    width: 65px;
-    height: 65px;
-    border: 3px solid #222;
-    border-radius: 12px;
-    background: rgba(255,255,255,.55);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 30px;
-    font-weight: bold;
+.btn{
+    width:65px;
+    height:65px;
+    border:3px solid #222;
+    border-radius:12px;
+    background:rgba(255,255,255,.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    font-weight:bold;
+    touch-action:none;
 }
 
-#jump {
-    position: absolute;
-    right: 20px;
-    bottom: 20px;
-    pointer-events: auto;
+#jump{
+    position:absolute;
+    right:18px;
+    bottom:18px;
+    pointer-events:auto;
 }
 
-#help {
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    color: white;
-    text-shadow: 2px 2px #000;
-    font-size: 14px;
+#craft{
+    position:absolute;
+    top:52px;
+    right:15px;
+    pointer-events:auto;
+    padding:10px 15px;
+    border:3px solid #222;
+    border-radius:8px;
+    background:rgba(255,255,255,.75);
+    font-weight:bold;
+}
+
+#crafting{
+    display:none;
+    position:absolute;
+    top:100px;
+    right:15px;
+    width:260px;
+    background:rgba(25,25,25,.95);
+    border:3px solid #111;
+    padding:12px;
+    color:white;
+    pointer-events:auto;
+}
+
+.recipe{
+    background:#444;
+    margin-top:8px;
+    padding:10px;
+    border:2px solid #777;
+    cursor:pointer;
+}
+
+.recipe:hover{
+    background:#555;
+}
+
+#info{
+    position:absolute;
+    right:15px;
+    top:15px;
+    color:white;
+    text-align:right;
+    font-size:13px;
+    text-shadow:2px 2px #000;
+}
+
+#save{
+    position:absolute;
+    left:15px;
+    top:48px;
+    padding:7px 10px;
+    border:2px solid #222;
+    border-radius:6px;
+    background:rgba(255,255,255,.7);
+    pointer-events:auto;
+    font-weight:bold;
+}
+
+#message{
+    position:absolute;
+    left:50%;
+    top:75%;
+    transform:translateX(-50%);
+    color:white;
+    font-weight:bold;
+    font-size:18px;
+    text-shadow:2px 2px #000;
+    opacity:0;
+    transition:.2s;
 }
 </style>
 </head>
@@ -134,786 +214,587 @@ canvas {
 
 <div id="ui">
 
-    <div id="title">PIXEL WORLD</div>
+<div id="logo">PIXEL WORLD</div>
 
-    <div id="health">
-        <div id="healthBar"></div>
+<div id="health">
+    <div id="healthBar"></div>
+    <div id="healthText">100 / 100</div>
+</div>
+
+<button id="save">💾 ZAPISZ</button>
+<button id="craft">🔨 CRAFTING</button>
+
+<div id="crafting">
+    <b>CRAFTING</b>
+
+    <div class="recipe" data-recipe="wood">
+        🪵 4 Drewna → 8 Desek
     </div>
 
-    <div id="help">
-        A/D lub ←/→ — ruch<br>
-        W / ↑ / Spacja — skok<br>
-        LPM — niszczenie bloku<br>
-        PPM — stawianie bloku
+    <div class="recipe" data-recipe="torch">
+        🔥 1 Drewno + 1 Kamień → 4 Pochodnie
     </div>
 
-    <div id="controls">
-        <div class="control" id="left">←</div>
-        <div class="control" id="right">→</div>
+    <div class="recipe" data-recipe="pickaxe">
+        ⛏️ 5 Drewna + 3 Kamienie → Kilof
+    </div>
+</div>
+
+<div id="info">
+    A / D lub ← / → — ruch<br>
+    W / ↑ / SPACJA — skok<br>
+    LPM — kopanie<br>
+    PPM — stawianie
+</div>
+
+<div id="controls">
+    <div class="btn" id="left">←</div>
+    <div class="btn" id="right">→</div>
+</div>
+
+<div class="btn" id="jump">↑</div>
+
+<div id="hotbar">
+
+    <div class="slot selected" data-block="dirt">
+        🟫<span>0</span>
     </div>
 
-    <div id="jump" class="control">↑</div>
-
-    <div id="inventory">
-        <div class="slot selected" data-block="dirt">🟫</div>
-        <div class="slot" data-block="stone">⬛</div>
-        <div class="slot" data-block="wood">🟫</div>
-        <div class="slot" data-block="grass">🟩</div>
+    <div class="slot" data-block="stone">
+        🪨<span>0</span>
     </div>
+
+    <div class="slot" data-block="wood">
+        🪵<span>0</span>
+    </div>
+
+    <div class="slot" data-block="sand">
+        🟨<span>0</span>
+    </div>
+
+    <div class="slot" data-block="torch">
+        🔥<span>0</span>
+    </div>
+
+</div>
+
+<div id="message"></div>
 
 </div>
 
 <script>
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+/* =====================================================
+   PIXEL WORLD 2.0
+===================================================== */
 
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+    canvas.width=innerWidth;
+    canvas.height=innerHeight;
 }
-
 resize();
-window.addEventListener("resize", resize);
+addEventListener("resize",resize);
 
-const TILE = 32;
+const TILE=32;
+const WORLD_W=700;
+const WORLD_H=100;
 
-let worldWidth = 500;
-let worldHeight = 80;
-
-let world = [];
-
-const blocks = {
-    air: {
-        solid: false
-    },
-
-    grass: {
-        solid: true,
-        color: "#4caf32"
-    },
-
-    dirt: {
-        solid: true,
-        color: "#8b572a"
-    },
-
-    stone: {
-        solid: true,
-        color: "#777"
-    },
-
-    wood: {
-        solid: true,
-        color: "#9b5b28"
-    },
-
-    leaves: {
-        solid: false,
-        color: "#269b35"
-    },
-
-    sand: {
-        solid: true,
-        color: "#d9c276"
-    },
-
-    water: {
-        solid: false,
-        color: "#38a9e8"
-    }
+const blocks={
+    air:{solid:false,color:null},
+    grass:{solid:true,color:"#55a832"},
+    dirt:{solid:true,color:"#8a542b"},
+    stone:{solid:true,color:"#777"},
+    wood:{solid:true,color:"#92552a"},
+    leaves:{solid:false,color:"#2e9638"},
+    sand:{solid:true,color:"#dbc67d"},
+    water:{solid:false,color:"#35a9df"},
+    torch:{solid:false,color:"#ffb52e"}
 };
 
-function generateWorld() {
+let world=[];
+let seed=Math.random()*10000;
 
-    world = [];
+/* =====================================================
+   INVENTORY
+===================================================== */
 
-    for (let y = 0; y < worldHeight; y++) {
-        world[y] = [];
+let inventory={
+    dirt:20,
+    stone:10,
+    wood:10,
+    sand:10,
+    torch:4
+};
 
-        for (let x = 0; x < worldWidth; x++) {
+let selected="dirt";
 
-            let ground =
-                Math.floor(
-                    30 +
-                    Math.sin(x * 0.07) * 3 +
-                    Math.sin(x * 0.025) * 5
-                );
+function updateHotbar(){
 
-            if (y < ground) {
-                world[y][x] = "air";
+    document.querySelectorAll(".slot").forEach(slot=>{
+        const type=slot.dataset.block;
+        slot.querySelector("span").textContent=inventory[type]||0;
+
+        slot.classList.toggle(
+            "selected",
+            type===selected
+        );
+    });
+}
+
+document.querySelectorAll(".slot").forEach(slot=>{
+    slot.addEventListener("click",()=>{
+        selected=slot.dataset.block;
+        updateHotbar();
+    });
+});
+
+/* =====================================================
+   WORLD GENERATION
+===================================================== */
+
+function noise(x){
+    return Math.sin(x*.055+seed)*3+
+           Math.sin(x*.019+seed*.4)*6+
+           Math.sin(x*.009+seed*.2)*9;
+}
+
+function surface(x){
+    return Math.floor(31+noise(x));
+}
+
+function generateWorld(){
+
+    world=Array.from(
+        {length:WORLD_H},
+        ()=>Array(WORLD_W).fill("air")
+    );
+
+    for(let x=0;x<WORLD_W;x++){
+
+        let ground=surface(x);
+
+        for(let y=ground;y<WORLD_H;y++){
+
+            if(y===ground){
+                world[y][x]="grass";
             }
-            else if (y === ground) {
-                world[y][x] = "grass";
+            else if(y<ground+6){
+                world[y][x]="dirt";
             }
-            else if (y < ground + 5) {
-                world[y][x] = "dirt";
-            }
-            else {
-                world[y][x] = "stone";
+            else{
+                world[y][x]="stone";
             }
         }
     }
 
-    // Drzewa
-    for (let x = 8; x < worldWidth - 8; x++) {
+    /* jaskinie */
 
-        if (Math.random() < 0.045) {
+    for(let i=0;i<220;i++){
 
-            let ground = getGround(x);
+        let cx=Math.floor(
+            Math.random()*WORLD_W
+        );
 
-            for (let y = ground - 1; y >= ground - 5; y--) {
-                if (y >= 0) world[y][x] = "wood";
-            }
+        let cy=Math.floor(
+            42+Math.random()*40
+        );
 
-            for (let yy = ground - 7; yy <= ground - 3; yy++) {
+        let rx=2+Math.random()*6;
+        let ry=1+Math.random()*4;
 
-                for (let xx = x - 2; xx <= x + 2; xx++) {
+        for(let y=cy-ry;y<=cy+ry;y++){
+            for(let x=cx-rx;x<=cx+rx;x++){
 
-                    if (
-                        yy >= 0 &&
-                        xx >= 0 &&
-                        xx < worldWidth &&
-                        Math.abs(xx - x) + Math.abs(yy - (ground - 5)) < 4
-                    ) {
-                        world[yy][xx] = "leaves";
+                if(
+                    x>=0&&
+                    x<WORLD_W&&
+                    y>=0&&
+                    y<WORLD_H
+                ){
+
+                    let dx=(x-cx)/rx;
+                    let dy=(y-cy)/ry;
+
+                    if(dx*dx+dy*dy<1){
+                        world[y][x]="air";
                     }
                 }
             }
         }
     }
 
-    // Małe jeziora
-    for (let i = 0; i < 12; i++) {
+    /* drzewa */
 
-        let x = Math.floor(Math.random() * (worldWidth - 20)) + 10;
-        let ground = getGround(x);
+    for(let x=5;x<WORLD_W-5;x++){
 
-        for (let xx = x - 3; xx <= x + 3; xx++) {
+        if(Math.random()<.045){
 
-            if (xx < 0 || xx >= worldWidth) continue;
+            let g=surface(x);
 
-            let g = getGround(xx);
+            let h=4+Math.floor(
+                Math.random()*3
+            );
 
-            for (let yy = g; yy < g + 2; yy++) {
-                if (yy < worldHeight) {
-                    world[yy][xx] = "water";
+            for(let y=g-1;y>=g-h;y--){
+                if(y>=0)world[y][x]="wood";
+            }
+
+            for(let yy=g-h-2;yy<=g-h+1;yy++){
+
+                for(let xx=x-2;xx<=x+2;xx++){
+
+                    if(
+                        xx>=0&&
+                        xx<WORLD_W&&
+                        yy>=0&&
+                        yy<WORLD_H
+                    ){
+
+                        let d=
+                            Math.abs(xx-x)+
+                            Math.abs(yy-(g-h));
+
+                        if(d<4){
+                            world[yy][xx]="leaves";
+                        }
+                    }
                 }
             }
         }
     }
-}
 
-function getGround(x) {
+    /* jeziora */
 
-    for (let y = 0; y < worldHeight; y++) {
+    for(let i=0;i<18;i++){
 
-        if (
-            world[y] &&
-            world[y][x] !== "air" &&
-            world[y][x] !== "leaves"
-        ) {
-            return y;
+        let x=10+
+            Math.floor(
+                Math.random()*(WORLD_W-20)
+            );
+
+        let width=2+
+            Math.floor(Math.random()*4);
+
+        for(let xx=x-width;xx<=x+width;xx++){
+
+            if(xx<0||xx>=WORLD_W)continue;
+
+            let g=surface(xx);
+
+            world[g][xx]="water";
+
+            if(g+1<WORLD_H)
+                world[g+1][xx]="water";
         }
     }
-
-    return 30;
 }
 
 generateWorld();
 
+/* =====================================================
+   PLAYER
+===================================================== */
 
-// =========================
-// PLAYER
-// =========================
-
-const player = {
-
-    x: 10 * TILE,
-    y: 20 * TILE,
-
-    width: 22,
-    height: 42,
-
-    vx: 0,
-    vy: 0,
-
-    speed: 3.5,
-    jump: 10,
-
-    grounded: false,
-
-    direction: 1,
-
-    animation: 0
+const player={
+    x:10*TILE,
+    y:20*TILE,
+    w:22,
+    h:43,
+    vx:0,
+    vy:0,
+    speed:3.5,
+    jump:10,
+    grounded:false,
+    direction:1,
+    anim:0,
+    health:100,
+    maxHealth:100
 };
 
+/* =====================================================
+   CAMERA
+===================================================== */
 
-// =========================
-// CAMERA
-// =========================
-
-const camera = {
-    x: 0,
-    y: 0
+const camera={
+    x:0,
+    y:0
 };
 
+/* =====================================================
+   INPUT
+===================================================== */
 
-// =========================
-// INPUT
-// =========================
+const keys={};
 
-const keys = {};
+addEventListener("keydown",e=>{
 
-window.addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()]=true;
 
-    keys[e.key.toLowerCase()] = true;
-
-    if (
-        e.key === " " ||
-        e.key === "ArrowUp" ||
-        e.key.toLowerCase() === "w"
-    ) {
+    if(
+        e.key===" "||
+        e.key==="ArrowUp"||
+        e.key.toLowerCase()==="w"
+    ){
         jump();
     }
 });
 
-window.addEventListener("keyup", e => {
-    keys[e.key.toLowerCase()] = false;
+addEventListener("keyup",e=>{
+    keys[e.key.toLowerCase()]=false;
 });
 
+function jump(){
 
-function jump() {
-
-    if (player.grounded) {
-
-        player.vy = -player.jump;
-        player.grounded = false;
+    if(player.grounded){
+        player.vy=-player.jump;
+        player.grounded=false;
     }
 }
 
+/* =====================================================
+   MOBILE CONTROLS
+===================================================== */
 
-// =========================
-// TOUCH
-// =========================
+function holdButton(id,key){
 
-function buttonHold(id, key) {
+    const b=document.getElementById(id);
 
-    const el = document.getElementById(id);
+    b.addEventListener(
+        "touchstart",
+        e=>{
+            e.preventDefault();
+            keys[key]=true;
+        }
+    );
 
-    el.addEventListener("touchstart", e => {
-        e.preventDefault();
-        keys[key] = true;
-    });
+    b.addEventListener(
+        "touchend",
+        e=>{
+            e.preventDefault();
+            keys[key]=false;
+        }
+    );
 
-    el.addEventListener("touchend", e => {
-        e.preventDefault();
-        keys[key] = false;
-    });
+    b.addEventListener(
+        "mousedown",
+        ()=>{
+            keys[key]=true;
+        }
+    );
+
+    b.addEventListener(
+        "mouseup",
+        ()=>{
+            keys[key]=false;
+        }
+    );
 }
 
-buttonHold("left", "arrowleft");
-buttonHold("right", "arrowright");
+holdButton("left","arrowleft");
+holdButton("right","arrowright");
 
-document.getElementById("jump").addEventListener("touchstart", e => {
+document.getElementById("jump")
+.addEventListener("touchstart",e=>{
     e.preventDefault();
     jump();
 });
 
+document.getElementById("jump")
+.addEventListener("mousedown",jump);
 
-// =========================
-// COLLISION
-// =========================
+/* =====================================================
+   COLLISION
+===================================================== */
 
-function isSolidAt(x, y) {
+function solidAt(px,py){
 
-    let tx = Math.floor(x / TILE);
-    let ty = Math.floor(y / TILE);
+    const tx=Math.floor(px/TILE);
+    const ty=Math.floor(py/TILE);
 
-    if (
-        tx < 0 ||
-        tx >= worldWidth ||
-        ty < 0 ||
-        ty >= worldHeight
-    ) {
-        return true;
-    }
+    if(
+        tx<0||
+        tx>=WORLD_W||
+        ty<0||
+        ty>=WORLD_H
+    )return true;
 
-    let block = world[ty][tx];
-
-    return blocks[block] && blocks[block].solid;
+    return blocks[
+        world[ty][tx]
+    ]?.solid===true;
 }
 
+function collides(x,y){
 
-function collision(x, y) {
+    const p=2;
 
-    return (
-        isSolidAt(x, y) ||
-        isSolidAt(x + player.width, y) ||
-        isSolidAt(x, y + player.height) ||
-        isSolidAt(
-            x + player.width,
-            y + player.height
+    return(
+        solidAt(x+p,y+p)||
+        solidAt(x+player.w-p,y+p)||
+        solidAt(x+p,y+player.h-p)||
+        solidAt(
+            x+player.w-p,
+            y+player.h-p
         )
     );
 }
 
+/* =====================================================
+   UPDATE
+===================================================== */
 
-// =========================
-// UPDATE PLAYER
-// =========================
+function update(){
 
-function updatePlayer() {
+    let moving=false;
 
-    let moving = false;
-
-    if (
-        keys["a"] ||
+    if(
+        keys["a"]||
         keys["arrowleft"]
-    ) {
+    ){
 
-        player.vx = -player.speed;
-        player.direction = -1;
-        moving = true;
-
+        player.vx=-player.speed;
+        player.direction=-1;
+        moving=true;
     }
-    else if (
-        keys["d"] ||
+
+    else if(
+        keys["d"]||
         keys["arrowright"]
-    ) {
+    ){
 
-        player.vx = player.speed;
-        player.direction = 1;
-        moving = true;
-
-    }
-    else {
-
-        player.vx *= 0.75;
+        player.vx=player.speed;
+        player.direction=1;
+        moving=true;
     }
 
-    if (moving) {
-        player.animation += 0.2;
-    }
-    else {
-        player.animation *= 0.8;
+    else{
+        player.vx*=.75;
     }
 
-    // grawitacja
-    player.vy += 0.45;
-
-    if (player.vy > 12) {
-        player.vy = 12;
+    if(moving){
+        player.anim+=.22;
     }
 
-    // ruch X
-    let newX = player.x + player.vx;
+    player.vy+=.45;
 
-    if (!collision(newX, player.y)) {
-        player.x = newX;
-    }
-    else {
-        player.vx = 0;
-    }
+    if(player.vy>12)
+        player.vy=12;
 
-    // ruch Y
-    let newY = player.y + player.vy;
+    let nx=player.x+player.vx;
 
-    if (!collision(player.x, newY)) {
-
-        player.y = newY;
-        player.grounded = false;
-
-    }
-    else {
-
-        if (player.vy > 0) {
-            player.grounded = true;
-        }
-
-        player.vy = 0;
+    if(!collides(nx,player.y)){
+        player.x=nx;
+    }else{
+        player.vx=0;
     }
 
-    // kamera
+    let ny=player.y+player.vy;
 
-    camera.x +=
-        (
-            player.x -
-            camera.x -
-            canvas.width / 2
-        ) * 0.1;
+    if(!collides(player.x,ny)){
 
-    camera.y +=
-        (
-            player.y -
-            camera.y -
-            canvas.height / 2
-        ) * 0.1;
+        player.y=ny;
+        player.grounded=false;
 
-    camera.x = Math.max(
+    }else{
+
+        if(player.vy>0)
+            player.grounded=true;
+
+        player.vy=0;
+    }
+
+    /* kamera */
+
+    const targetX=
+        player.x-
+        canvas.width/2+
+        player.w/2;
+
+    const targetY=
+        player.y-
+        canvas.height/2+
+        player.h/2;
+
+    camera.x+=(targetX-camera.x)*.1;
+    camera.y+=(targetY-camera.y)*.1;
+
+    camera.x=Math.max(
         0,
         Math.min(
             camera.x,
-            worldWidth * TILE - canvas.width
+            WORLD_W*TILE-canvas.width
         )
     );
 
-    camera.y = Math.max(
+    camera.y=Math.max(
         0,
         Math.min(
             camera.y,
-            worldHeight * TILE - canvas.height
+            WORLD_H*TILE-canvas.height
         )
     );
-}
 
+    /* spadanie */
 
-// =========================
-// DRAW BLOCK
-// =========================
+    if(player.y>WORLD_H*TILE){
 
-function drawBlock(type, x, y) {
-
-    if (type === "air") return;
-
-    const px = x * TILE - camera.x;
-    const py = y * TILE - camera.y;
-
-    if (
-        px < -TILE ||
-        py < -TILE ||
-        px > canvas.width ||
-        py > canvas.height
-    ) return;
-
-    ctx.fillStyle = blocks[type].color;
-
-    ctx.fillRect(
-        px,
-        py,
-        TILE,
-        TILE
-    );
-
-    // pixelowe szczegóły
-
-    if (type === "grass") {
-
-        ctx.fillStyle = "#79d63b";
-
-        ctx.fillRect(
-            px,
-            py,
-            TILE,
-            6
-        );
-    }
-
-    if (type === "dirt") {
-
-        ctx.fillStyle = "#70431f";
-
-        ctx.fillRect(
-            px + 7,
-            py + 9,
-            4,
-            4
-        );
-
-        ctx.fillRect(
-            px + 21,
-            py + 20,
-            3,
-            3
-        );
-    }
-
-    if (type === "stone") {
-
-        ctx.fillStyle = "#666";
-
-        ctx.fillRect(
-            px + 5,
-            py + 8,
-            5,
-            5
-        );
-
-        ctx.fillRect(
-            px + 20,
-            py + 21,
-            4,
-            4
-        );
-    }
-
-    if (type === "wood") {
-
-        ctx.fillStyle = "#633914";
-
-        ctx.fillRect(
-            px + 13,
-            py,
-            5,
-            TILE
-        );
-    }
-
-    if (type === "leaves") {
-
-        ctx.fillStyle = "#1d7f2b";
-
-        ctx.fillRect(
-            px + 6,
-            py + 7,
-            7,
-            7
-        );
-
-        ctx.fillRect(
-            px + 20,
-            py + 16,
-            6,
-            6
-        );
-    }
-
-    if (type === "water") {
-
-        ctx.fillStyle = "#73d4ff";
-
-        let wave =
-            Math.sin(
-                Date.now() * 0.004 + x
-            ) * 2;
-
-        ctx.fillRect(
-            px,
-            py + 4 + wave,
-            TILE,
-            3
-        );
+        player.x=10*TILE;
+        player.y=20*TILE;
+        damage(20);
     }
 }
 
+/* =====================================================
+   DRAW WORLD
+===================================================== */
 
-// =========================
-// DRAW PLAYER
-// =========================
+let time=0;
 
-function drawPlayer() {
+function drawWorld(){
 
-    const x =
-        player.x -
-        camera.x;
+    time+=.001;
 
-    const y =
-        player.y -
-        camera.y;
+    let night=
+        (Math.sin(time)-.15)*.5;
 
-    let walk =
-        Math.sin(player.animation) * 4;
+    let skyR=80;
+    let skyG=190;
+    let skyB=250;
 
-    if (!player.grounded) {
-        walk = 0;
-    }
-
-    ctx.save();
-
-    if (player.direction === -1) {
-
-        ctx.translate(
-            x + player.width,
-            0
-        );
-
-        ctx.scale(-1, 1);
-
-        drawCharacter(
-            0,
-            y,
-            walk
-        );
-
-    }
-    else {
-
-        drawCharacter(
-            x,
-            y,
-            walk
-        );
-    }
-
-    ctx.restore();
-}
-
-
-function drawCharacter(x, y, walk) {
-
-    // nogi
-    ctx.fillStyle = "#303030";
+    ctx.fillStyle=
+        `rgb(${skyR},${skyG},${skyB})`;
 
     ctx.fillRect(
-        x + 4,
-        y + 28 + walk,
-        6,
-        14
-    );
-
-    ctx.fillRect(
-        x + 13,
-        y + 28 - walk,
-        6,
-        14
-    );
-
-    // ciało
-    ctx.fillStyle = "#3b82f6";
-
-    ctx.fillRect(
-        x + 3,
-        y + 14,
-        17,
-        18
-    );
-
-    // ręce
-    ctx.fillStyle = "#f1bd8b";
-
-    ctx.fillRect(
-        x - 2,
-        y + 16 - walk,
-        5,
-        15
-    );
-
-    ctx.fillRect(
-        x + 20,
-        y + 16 + walk,
-        5,
-        15
-    );
-
-    // głowa
-    ctx.fillStyle = "#f1bd8b";
-
-    ctx.fillRect(
-        x + 2,
-        y,
-        20,
-        17
-    );
-
-    // włosy
-    ctx.fillStyle = "#4a2b18";
-
-    ctx.fillRect(
-        x + 2,
-        y,
-        20,
-        5
-    );
-
-    ctx.fillRect(
-        x + 2,
-        y + 4,
-        4,
-        5
-    );
-
-    // oczy
-    ctx.fillStyle = "#111";
-
-    ctx.fillRect(
-        x + 7,
-        y + 8,
-        3,
-        3
-    );
-
-    ctx.fillRect(
-        x + 15,
-        y + 8,
-        3,
-        3
-    );
-
-}
-
-
-// =========================
-// DRAW WORLD
-// =========================
-
-function drawWorld() {
-
-    // niebo
-
-    let gradient =
-        ctx.createLinearGradient(
-            0,
-            0,
-            0,
-            canvas.height
-        );
-
-    gradient.addColorStop(
-        0,
-        "#66c7ff"
-    );
-
-    gradient.addColorStop(
-        1,
-        "#d6f3ff"
-    );
-
-    ctx.fillStyle = gradient;
-
-    ctx.fillRect(
-        0,
-        0,
+        0,0,
         canvas.width,
         canvas.height
     );
 
+    const sx=
+        Math.floor(camera.x/TILE)-1;
 
-    let startX =
-        Math.floor(camera.x / TILE) - 1;
-
-    let endX =
+    const ex=
         Math.ceil(
-            (camera.x + canvas.width) / TILE
-        ) + 1;
+            (camera.x+canvas.width)/TILE
+        )+1;
 
-    let startY =
-        Math.floor(camera.y / TILE) - 1;
+    const sy=
+        Math.floor(camera.y/TILE)-1;
 
-    let endY =
+    const ey=
         Math.ceil(
-            (camera.y + canvas.height) / TILE
-        ) + 1;
+            (camera.y+canvas.height)/TILE
+        )+1;
 
+    for(let y=sy;y<ey;y++){
 
-    for (
-        let y = startY;
-        y < endY;
-        y++
-    ) {
+        if(y<0||y>=WORLD_H)continue;
 
-        if (y < 0 || y >= worldHeight)
-            continue;
+        for(let x=sx;x<ex;x++){
 
-        for (
-            let x = startX;
-            x < endX;
-            x++
-        ) {
-
-            if (
-                x < 0 ||
-                x >= worldWidth
-            ) continue;
+            if(x<0||x>=WORLD_W)continue;
 
             drawBlock(
                 world[y][x],
@@ -922,116 +803,674 @@ function drawWorld() {
             );
         }
     }
+
+    /* słońce */
+
+    ctx.fillStyle="#ffe477";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        canvas.width*.82,
+        80,
+        32,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
 }
 
+function drawBlock(type,x,y){
 
-// =========================
-// MYSZKA
-// =========================
+    if(type==="air")return;
 
-canvas.addEventListener("contextmenu", e => {
-    e.preventDefault();
-});
+    const px=x*TILE-camera.x;
+    const py=y*TILE-camera.y;
 
-canvas.addEventListener("mousedown", e => {
+    if(
+        px<-TILE||
+        py<-TILE||
+        px>canvas.width||
+        py>canvas.height
+    )return;
 
-    const rect =
-        canvas.getBoundingClientRect();
+    if(type==="water"){
 
-    const worldX =
-        Math.floor(
-            (e.clientX + camera.x) / TILE
+        ctx.fillStyle="#319fd5";
+
+        ctx.fillRect(
+            px,py,
+            TILE,TILE
         );
 
-    const worldY =
-        Math.floor(
-            (e.clientY + camera.y) / TILE
+        ctx.fillStyle="#73d5fa";
+
+        ctx.fillRect(
+            px,
+            py+5+
+            Math.sin(
+                Date.now()*.004+x
+            )*2,
+            TILE,
+            3
         );
 
-    if (
-        worldX < 0 ||
-        worldX >= worldWidth ||
-        worldY < 0 ||
-        worldY >= worldHeight
-    ) return;
+        return;
+    }
 
+    if(type==="torch"){
 
-    // lewy przycisk = niszczenie
+        ctx.fillStyle="#70401d";
 
-    if (e.button === 0) {
+        ctx.fillRect(
+            px+14,
+            py+8,
+            4,
+            24
+        );
 
-        if (
-            world[worldY][worldX] !== "air"
-        ) {
+        ctx.fillStyle="#ff8c00";
 
-            world[worldY][worldX] = "air";
+        ctx.fillRect(
+            px+10,
+            py+3,
+            12,
+            12
+        );
+
+        ctx.fillStyle="#fff27a";
+
+        ctx.fillRect(
+            px+13,
+            py+5,
+            6,
+            8
+        );
+
+        return;
+    }
+
+    ctx.fillStyle=blocks[type].color;
+
+    ctx.fillRect(
+        px,py,
+        TILE,TILE
+    );
+
+    /* grass */
+
+    if(type==="grass"){
+
+        ctx.fillStyle="#75d63c";
+
+        ctx.fillRect(
+            px,py,
+            TILE,6
+        );
+    }
+
+    /* dirt */
+
+    if(type==="dirt"){
+
+        ctx.fillStyle="#70411f";
+
+        for(let i=0;i<3;i++){
+
+            ctx.fillRect(
+                px+
+                ((x*13+i*7)%25),
+                py+
+                ((y*9+i*11)%25),
+                4,4
+            );
         }
     }
 
+    /* stone */
 
-    // prawy przycisk = stawianie
+    if(type==="stone"){
 
-    if (e.button === 2) {
+        ctx.fillStyle="#606060";
 
-        if (
-            world[worldY][worldX] === "air"
-        ) {
+        ctx.fillRect(
+            px+5,py+7,6,5
+        );
 
-            let selected =
-                document.querySelector(
-                    ".slot.selected"
-                );
+        ctx.fillRect(
+            px+21,py+20,5,5
+        );
+    }
 
-            let type =
-                selected.dataset.block;
+    /* wood */
 
-            world[worldY][worldX] = type;
+    if(type==="wood"){
+
+        ctx.fillStyle="#633715";
+
+        ctx.fillRect(
+            px+13,py,
+            5,TILE
+        );
+    }
+
+    /* leaves */
+
+    if(type==="leaves"){
+
+        ctx.fillStyle="#1d7529";
+
+        ctx.fillRect(
+            px+5,py+7,
+            8,7
+        );
+
+        ctx.fillRect(
+            px+19,py+17,
+            7,6
+        );
+    }
+
+    /* sand */
+
+    if(type==="sand"){
+
+        ctx.fillStyle="#bca763";
+
+        ctx.fillRect(
+            px+6,py+10,3,3
+        );
+
+        ctx.fillRect(
+            px+22,py+21,3,3
+        );
+    }
+}
+
+/* =====================================================
+   PLAYER DRAW
+===================================================== */
+
+function drawPlayer(){
+
+    const x=
+        player.x-camera.x;
+
+    const y=
+        player.y-camera.y;
+
+    let leg=0;
+
+    if(player.grounded){
+        leg=
+            Math.sin(player.anim)*4;
+    }
+
+    ctx.save();
+
+    if(player.direction<0){
+
+        ctx.translate(
+            x+player.w,
+            0
+        );
+
+        ctx.scale(-1,1);
+
+        drawCharacter(
+            0,y,leg
+        );
+
+    }else{
+
+        drawCharacter(
+            x,y,leg
+        );
+    }
+
+    ctx.restore();
+}
+
+function drawCharacter(x,y,leg){
+
+    /* nogi */
+
+    ctx.fillStyle="#303030";
+
+    ctx.fillRect(
+        x+4,
+        y+29+leg,
+        6,
+        14
+    );
+
+    ctx.fillRect(
+        x+13,
+        y+29-leg,
+        6,
+        14
+    );
+
+    /* ciało */
+
+    ctx.fillStyle="#2775d8";
+
+    ctx.fillRect(
+        x+3,
+        y+14,
+        17,
+        18
+    );
+
+    /* ręce */
+
+    ctx.fillStyle="#f0b982";
+
+    ctx.fillRect(
+        x-2,
+        y+16-leg,
+        5,
+        15
+    );
+
+    ctx.fillRect(
+        x+20,
+        y+16+leg,
+        5,
+        15
+    );
+
+    /* głowa */
+
+    ctx.fillStyle="#f0b982";
+
+    ctx.fillRect(
+        x+2,
+        y,
+        20,
+        17
+    );
+
+    /* włosy */
+
+    ctx.fillStyle="#4b2b19";
+
+    ctx.fillRect(
+        x+2,y,
+        20,5
+    );
+
+    ctx.fillRect(
+        x+2,y+4,
+        4,6
+    );
+
+    /* oczy */
+
+    ctx.fillStyle="#111";
+
+    ctx.fillRect(
+        x+7,y+8,
+        3,3
+    );
+
+    ctx.fillRect(
+        x+15,y+8,
+        3,3
+    );
+}
+
+/* =====================================================
+   BLOCK INTERACTION
+===================================================== */
+
+canvas.addEventListener(
+    "contextmenu",
+    e=>e.preventDefault()
+);
+
+canvas.addEventListener(
+    "mousedown",
+    e=>{
+
+        const rect=
+            canvas.getBoundingClientRect();
+
+        const tx=Math.floor(
+            (e.clientX+camera.x)/TILE
+        );
+
+        const ty=Math.floor(
+            (e.clientY+camera.y)/TILE
+        );
+
+        if(
+            tx<0||
+            tx>=WORLD_W||
+            ty<0||
+            ty>=WORLD_H
+        )return;
+
+        const current=
+            world[ty][tx];
+
+        /* kopanie */
+
+        if(e.button===0){
+
+            if(
+                current!=="air"&&
+                current!=="water"&&
+                current!=="leaves"
+            ){
+
+                world[ty][tx]="air";
+
+                if(current==="grass"||
+                   current==="dirt")
+                    inventory.dirt++;
+
+                if(current==="stone")
+                    inventory.stone++;
+
+                if(current==="wood")
+                    inventory.wood++;
+
+                if(current==="sand")
+                    inventory.sand++;
+
+                updateHotbar();
+            }
+        }
+
+        /* stawianie */
+
+        if(e.button===2){
+
+            if(
+                current==="air"||
+                current==="water"||
+                current==="leaves"
+            ){
+
+                if(
+                    inventory[selected]>0
+                ){
+
+                    /* nie stawiaj na graczu */
+
+                    const bx=tx*TILE;
+                    const by=ty*TILE;
+
+                    const overlap=
+                        bx<player.x+player.w&&
+                        bx+TILE>player.x&&
+                        by<player.y+player.h&&
+                        by+TILE>player.y;
+
+                    if(!overlap){
+
+                        world[ty][tx]=selected;
+
+                        inventory[selected]--;
+
+                        updateHotbar();
+                    }
+                }
+            }
         }
     }
+);
+
+/* =====================================================
+   HEALTH
+===================================================== */
+
+function damage(amount){
+
+    player.health=
+        Math.max(
+            0,
+            player.health-amount
+        );
+
+    updateHealth();
+
+    if(player.health<=0){
+
+        player.health=100;
+
+        player.x=10*TILE;
+        player.y=20*TILE;
+
+        showMessage(
+            "💀 Odrodziłeś się!"
+        );
+    }
+}
+
+function updateHealth(){
+
+    const percent=
+        player.health/player.maxHealth*100;
+
+    document.getElementById(
+        "healthBar"
+    ).style.width=
+        percent+"%";
+
+    document.getElementById(
+        "healthText"
+    ).textContent=
+        player.health+
+        " / "+
+        player.maxHealth;
+}
+
+/* =====================================================
+   CRAFTING
+===================================================== */
+
+const crafting=
+    document.getElementById("crafting");
+
+document.getElementById("craft")
+.addEventListener("click",()=>{
+
+    crafting.style.display=
+        crafting.style.display==="block"
+        ?"none"
+        :"block";
 });
 
+document.querySelectorAll(".recipe")
+.forEach(recipe=>{
 
-// =========================
-// INVENTORY
-// =========================
+    recipe.addEventListener(
+        "click",
+        ()=>{
 
-document.querySelectorAll(".slot")
-.forEach(slot => {
+            const type=
+                recipe.dataset.recipe;
 
-    slot.addEventListener("click", () => {
+            if(type==="wood"){
 
-        document
-            .querySelectorAll(".slot")
-            .forEach(s =>
-                s.classList.remove("selected")
+                if(inventory.wood>=4){
+
+                    inventory.wood-=4;
+                    inventory.dirt+=8;
+
+                    showMessage(
+                        "Zrobiono 8 desek!"
+                    );
+                }
+                else{
+                    showMessage(
+                        "Brakuje drewna!"
+                    );
+                }
+            }
+
+            if(type==="torch"){
+
+                if(
+                    inventory.wood>=1&&
+                    inventory.stone>=1
+                ){
+
+                    inventory.wood--;
+                    inventory.stone--;
+                    inventory.torch+=4;
+
+                    showMessage(
+                        "Zrobiono 4 pochodnie!"
+                    );
+                }
+                else{
+                    showMessage(
+                        "Brakuje surowców!"
+                    );
+                }
+            }
+
+            if(type==="pickaxe"){
+
+                if(
+                    inventory.wood>=5&&
+                    inventory.stone>=3
+                ){
+
+                    inventory.wood-=5;
+                    inventory.stone-=3;
+
+                    showMessage(
+                        "⛏️ Stworzono kilof!"
+                    );
+                }
+                else{
+                    showMessage(
+                        "Brakuje surowców!"
+                    );
+                }
+            }
+
+            updateHotbar();
+        }
+    );
+});
+
+/* =====================================================
+   SAVE / LOAD
+===================================================== */
+
+document.getElementById("save")
+.addEventListener("click",()=>{
+
+    localStorage.setItem(
+        "pixelWorldSave",
+        JSON.stringify({
+            world,
+            player:{
+                x:player.x,
+                y:player.y
+            },
+            inventory
+        })
+    );
+
+    showMessage(
+        "💾 Świat zapisany!"
+    );
+});
+
+function loadGame(){
+
+    try{
+
+        const save=
+            JSON.parse(
+                localStorage.getItem(
+                    "pixelWorldSave"
+                )
             );
 
-        slot.classList.add("selected");
-    });
+        if(!save)return;
 
-});
+        if(save.world)
+            world=save.world;
 
+        if(save.player){
 
-// =========================
-// GAME LOOP
-// =========================
+            player.x=
+                save.player.x;
 
-function gameLoop() {
+            player.y=
+                save.player.y;
+        }
 
-    updatePlayer();
+        if(save.inventory)
+            inventory=save.inventory;
+
+        updateHotbar();
+
+        showMessage(
+            "📂 Wczytano świat!"
+        );
+
+    }catch(e){
+        console.log(e);
+    }
+}
+
+loadGame();
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+let messageTimer;
+
+function showMessage(text){
+
+    const m=
+        document.getElementById(
+            "message"
+        );
+
+    m.textContent=text;
+    m.style.opacity=1;
+
+    clearTimeout(messageTimer);
+
+    messageTimer=
+        setTimeout(()=>{
+            m.style.opacity=0;
+        },1800);
+}
+
+/* =====================================================
+   GAME LOOP
+===================================================== */
+
+function loop(){
+
+    update();
 
     drawWorld();
 
     drawPlayer();
 
-    requestAnimationFrame(
-        gameLoop
-    );
+    requestAnimationFrame(loop);
 }
 
-gameLoop();
+updateHotbar();
+updateHealth();
+
+loop();
 
 </script>
 
 </body>
 </html>
+```
