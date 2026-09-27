@@ -22,9 +22,7 @@ html,body{
     color:white;
 }
 
-body{
-    user-select:none;
-}
+body{user-select:none}
 
 canvas{
     position:absolute;
@@ -100,16 +98,14 @@ canvas{
     box-shadow:4px 4px #000;
 }
 
-.uiBtn:hover{
-    background:#3b4654;
-}
+.uiBtn:hover{background:#3b4654}
 
 #helpText{
     position:absolute;
     left:15px;
     top:52px;
     font-size:12px;
-    color:#fff;
+    color:white;
     text-shadow:2px 2px #000;
 }
 
@@ -203,6 +199,8 @@ canvas{
     display:none;
 }
 
+/* ================= SETTINGS ================= */
+
 #settingsOverlay{
     position:absolute;
     inset:0;
@@ -286,13 +284,8 @@ canvas{
     overflow-y:auto;
 }
 
-.settingsPage{
-    display:none;
-}
-
-.settingsPage.active{
-    display:block;
-}
+.settingsPage{display:none}
+.settingsPage.active{display:block}
 
 .settingsPage h3{
     margin-top:0;
@@ -311,13 +304,9 @@ canvas{
     gap:15px;
 }
 
-.optionText{
-    flex:1;
-}
+.optionText{flex:1}
 
-.optionTitle{
-    font-weight:bold;
-}
+.optionTitle{font-weight:bold}
 
 .optionDesc{
     font-size:11px;
@@ -334,9 +323,7 @@ select,
     font-weight:bold;
 }
 
-.settingButton{
-    cursor:pointer;
-}
+.settingButton{cursor:pointer}
 
 .switch{
     width:48px;
@@ -358,13 +345,9 @@ select,
     background:white;
 }
 
-.switch.on{
-    background:#29823b;
-}
+.switch.on{background:#29823b}
 
-.switch.on::after{
-    left:24px;
-}
+.switch.on::after{left:24px}
 
 .infoBox{
     background:#11161c;
@@ -383,21 +366,14 @@ select,
 }
 
 @media(max-width:700px){
-    #title{
-        font-size:18px;
-    }
 
-    #helpText{
-        display:none;
-    }
+    #title{font-size:18px}
 
-    #health{
-        width:145px;
-    }
+    #helpText{display:none}
 
-    #topButtons{
-        top:50px;
-    }
+    #health{width:145px}
+
+    #topButtons{top:50px}
 
     #topButtons .uiBtn:not(#settingsBtn){
         display:none;
@@ -408,17 +384,11 @@ select,
         display:flex;
     }
 
-    #settingsContent{
-        min-height:0;
-    }
+    #settingsContent{min-height:0}
 
-    #settingsTabs{
-        width:125px;
-    }
+    #settingsTabs{width:125px}
 
-    .tab{
-        font-size:11px;
-    }
+    .tab{font-size:11px}
 
     .option{
         flex-direction:column;
@@ -457,6 +427,7 @@ select,
     </div>
 
     <div id="hotbar">
+
         <div class="slot selected" data-block="dirt">
             <span class="slotNumber">1</span>
             <div class="slotIcon" style="background:#795548;border-top:7px solid #4caf50"></div>
@@ -480,6 +451,7 @@ select,
             <div class="slotIcon" style="background:#d9bd70"></div>
             <span class="slotCount" id="count-sand">10</span>
         </div>
+
     </div>
 
     <div id="message"></div>
@@ -490,10 +462,11 @@ select,
     </div>
 
     <button class="mobileBtn" id="jumpBtn">▲</button>
+
 </div>
 
 
-<!-- ================= USTAWIENIA ================= -->
+<!-- ================= SETTINGS ================= -->
 
 <div id="settingsOverlay">
 
@@ -508,39 +481,17 @@ select,
 
         <div id="settingsTabs">
 
-            <button class="tab active" data-page="gamePage">
-                🎮 Gra
-            </button>
-
-            <button class="tab" data-page="graphicsPage">
-                🎨 Grafika
-            </button>
-
-            <button class="tab" data-page="soundPage">
-                🔊 Dźwięk
-            </button>
-
-            <button class="tab" data-page="controlsPage">
-                ⌨ Sterowanie
-            </button>
-
-            <button class="tab" data-page="savePage">
-                💾 Zapis
-            </button>
-
-            <button class="tab" data-page="helpPage">
-                🆘 Pomoc
-            </button>
-
-            <button class="tab" data-page="infoPage">
-                ℹ Informacje
-            </button>
+            <button class="tab active" data-page="gamePage">🎮 Gra</button>
+            <button class="tab" data-page="graphicsPage">🎨 Grafika</button>
+            <button class="tab" data-page="soundPage">🔊 Dźwięk</button>
+            <button class="tab" data-page="controlsPage">⌨ Sterowanie</button>
+            <button class="tab" data-page="savePage">💾 Zapis</button>
+            <button class="tab" data-page="helpPage">🆘 Pomoc</button>
+            <button class="tab" data-page="infoPage">ℹ Informacje</button>
 
         </div>
 
         <div id="settingsPages">
-
-            <!-- GRA -->
 
             <div class="settingsPage active" id="gamePage">
 
@@ -550,7 +501,7 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Przyciski mobilne</div>
                         <div class="optionDesc">
-                            Pokazuje przyciski ruchu i skoku na telefonie.
+                            Pokazuje przyciski ruchu i skoku.
                         </div>
                     </div>
                     <div class="switch on" id="mobileSwitch"></div>
@@ -560,7 +511,7 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Animacje postaci</div>
                         <div class="optionDesc">
-                            Animacja chodzenia, rąk, nóg i mrugania.
+                            Chodzenie, ręce, nogi, skok i mruganie.
                         </div>
                     </div>
                     <div class="switch on" id="animationSwitch"></div>
@@ -570,7 +521,7 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Automatyczny zapis</div>
                         <div class="optionDesc">
-                            Gra zapisuje postęp co kilka minut.
+                            Automatyczny zapis świata co 2 minuty.
                         </div>
                     </div>
                     <div class="switch on" id="autoSaveSwitch"></div>
@@ -580,7 +531,7 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Pełny ekran</div>
                         <div class="optionDesc">
-                            Uruchamia grę w trybie pełnoekranowym.
+                            Uruchamia grę na pełnym ekranie.
                         </div>
                     </div>
                     <button class="settingButton" id="fullscreenBtn">
@@ -591,8 +542,6 @@ select,
             </div>
 
 
-            <!-- GRAFIKA -->
-
             <div class="settingsPage" id="graphicsPage">
 
                 <h3>🎨 Grafika</h3>
@@ -601,7 +550,7 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Jakość grafiki</div>
                         <div class="optionDesc">
-                            Wybierz jakość renderowania świata.
+                            Ustawia jakość renderowania świata.
                         </div>
                     </div>
 
@@ -616,10 +565,9 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Pixel Perfect</div>
                         <div class="optionDesc">
-                            Zachowuje ostre krawędzie pikseli.
+                            Zachowuje ostre piksele.
                         </div>
                     </div>
-
                     <div class="switch on" id="pixelSwitch"></div>
                 </div>
 
@@ -627,10 +575,9 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Animowana woda</div>
                         <div class="optionDesc">
-                            Woda delikatnie porusza się podczas gry.
+                            Dodaje ruch fal na powierzchni wody.
                         </div>
                     </div>
-
                     <div class="switch on" id="waterSwitch"></div>
                 </div>
 
@@ -638,7 +585,7 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Limit FPS</div>
                         <div class="optionDesc">
-                            Maksymalna liczba klatek na sekundę.
+                            Maksymalna liczba klatek.
                         </div>
                     </div>
 
@@ -654,8 +601,6 @@ select,
             </div>
 
 
-            <!-- DŹWIĘK -->
-
             <div class="settingsPage" id="soundPage">
 
                 <h3>🔊 Dźwięk</h3>
@@ -664,10 +609,9 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Efekty dźwiękowe</div>
                         <div class="optionDesc">
-                            Dźwięki kopania, stawiania bloków i interfejsu.
+                            Kopanie, stawianie, skakanie i przyciski.
                         </div>
                     </div>
-
                     <div class="switch on" id="soundSwitch"></div>
                 </div>
 
@@ -675,19 +619,15 @@ select,
                     <div class="optionText">
                         <div class="optionTitle">Muzyka</div>
                         <div class="optionDesc">
-                            Włącza lub wyłącza muzykę w grze.
+                            Muzyka w tle.
                         </div>
                     </div>
-
                     <div class="switch" id="musicSwitch"></div>
                 </div>
 
                 <div class="option">
                     <div class="optionText">
                         <div class="optionTitle">Głośność</div>
-                        <div class="optionDesc">
-                            Ustaw poziom głośności efektów.
-                        </div>
                     </div>
 
                     <select id="volumeSelect">
@@ -701,8 +641,6 @@ select,
             </div>
 
 
-            <!-- STEROWANIE -->
-
             <div class="settingsPage" id="controlsPage">
 
                 <h3>⌨ Sterowanie</h3>
@@ -710,9 +648,6 @@ select,
                 <div class="option">
                     <div class="optionText">
                         <div class="optionTitle">Lewo</div>
-                        <div class="optionDesc">
-                            Poruszanie postacią w lewo.
-                        </div>
                     </div>
                     <b>A / ←</b>
                 </div>
@@ -720,9 +655,6 @@ select,
                 <div class="option">
                     <div class="optionText">
                         <div class="optionTitle">Prawo</div>
-                        <div class="optionDesc">
-                            Poruszanie postacią w prawo.
-                        </div>
                     </div>
                     <b>D / →</b>
                 </div>
@@ -730,9 +662,6 @@ select,
                 <div class="option">
                     <div class="optionText">
                         <div class="optionTitle">Skok</div>
-                        <div class="optionDesc">
-                            Skakanie postacią.
-                        </div>
                     </div>
                     <b>W / ↑ / SPACJA</b>
                 </div>
@@ -740,9 +669,6 @@ select,
                 <div class="option">
                     <div class="optionText">
                         <div class="optionTitle">Kopanie</div>
-                        <div class="optionDesc">
-                            Niszczenie bloku.
-                        </div>
                     </div>
                     <b>LEWY PRZYCISK</b>
                 </div>
@@ -750,27 +676,19 @@ select,
                 <div class="option">
                     <div class="optionText">
                         <div class="optionTitle">Stawianie</div>
-                        <div class="optionDesc">
-                            Stawianie wybranego bloku.
-                        </div>
                     </div>
                     <b>PRAWY PRZYCISK</b>
                 </div>
 
                 <div class="option">
                     <div class="optionText">
-                        <div class="optionTitle">Ekwipunek</div>
-                        <div class="optionDesc">
-                            Wybieranie bloku z hotbara.
-                        </div>
+                        <div class="optionTitle">Hotbar</div>
                     </div>
                     <b>1 / 2 / 3 / 4</b>
                 </div>
 
             </div>
 
-
-            <!-- ZAPIS -->
 
             <div class="settingsPage" id="savePage">
 
@@ -784,11 +702,7 @@ select,
                 <div class="option">
                     <div class="optionText">
                         <div class="optionTitle">Zapisz teraz</div>
-                        <div class="optionDesc">
-                            Natychmiast zapisuje aktualny świat.
-                        </div>
                     </div>
-
                     <button class="settingButton" id="saveFromSettings">
                         💾 ZAPISZ
                     </button>
@@ -797,11 +711,7 @@ select,
                 <div class="option">
                     <div class="optionText">
                         <div class="optionTitle">Usuń zapis</div>
-                        <div class="optionDesc">
-                            Usuwa zapisany świat i tworzy nowy.
-                        </div>
                     </div>
-
                     <button class="settingButton" id="deleteSaveBtn">
                         🗑 USUŃ
                     </button>
@@ -810,46 +720,39 @@ select,
             </div>
 
 
-            <!-- POMOC -->
-
             <div class="settingsPage" id="helpPage">
 
                 <h3>🆘 Pomoc</h3>
 
                 <div class="infoBox">
 
-                    <b>🎮 Poruszanie się</b><br>
-                    Użyj A/D albo strzałek ←/→.<br><br>
+                    <b>🎮 Poruszanie</b><br>
+                    A/D albo ←/→.<br><br>
 
                     <b>⬆ Skakanie</b><br>
-                    Wciśnij W, ↑ albo SPACJĘ.<br><br>
+                    W, ↑ albo SPACJA.<br><br>
 
                     <b>⛏ Kopanie</b><br>
-                    Kliknij lewym przyciskiem myszy na blok znajdujący
-                    się niedaleko postaci.<br><br>
+                    Kliknij LPM na blok w zasięgu.<br><br>
 
-                    <b>🧱 Stawianie bloków</b><br>
-                    Wybierz blok na hotbarze i kliknij prawym przyciskiem
-                    myszy w odpowiednim miejscu.<br><br>
+                    <b>🧱 Stawianie</b><br>
+                    Wybierz blok i kliknij PPM.<br><br>
 
                     <b>📦 Hotbar</b><br>
-                    Klawisze 1–4 wybierają odpowiedni blok.<br><br>
+                    1–4 wybiera blok.<br><br>
 
                     <b>🌳 Świat</b><br>
-                    Eksploruj teren, drzewa, wodę, piasek, kamień
-                    i podziemne fragmenty świata.<br><br>
+                    Eksploruj teren, drzewa, wodę,
+                    piasek i podziemia.<br><br>
 
-                    <b>💾 Zapisywanie</b><br>
-                    Możesz ręcznie zapisać świat w dowolnym momencie.
-                    Przy włączonym automatycznym zapisie gra zapisuje
-                    go również sama.
+                    <b>💾 Zapis</b><br>
+                    Zapisuj świat ręcznie lub używaj
+                    automatycznego zapisu.
 
                 </div>
 
             </div>
 
-
-            <!-- INFORMACJE -->
 
             <div class="settingsPage" id="infoPage">
 
@@ -860,18 +763,18 @@ select,
                     <h2>PIXEL WORLD</h2>
 
                     <p>
-                        Pixel World to prosta pikselowa gra sandboxowa,
-                        w której możesz eksplorować własny generowany świat.
+                        Pixel World to pikselowa gra sandboxowa,
+                        w której możesz eksplorować i budować własny świat.
                     </p>
 
                     <p>
-                        Możesz chodzić, skakać, kopać bloki, stawiać
-                        własne bloki i budować swój świat.
+                        Możesz chodzić, skakać, kopać bloki,
+                        stawiać bloki i odkrywać teren.
                     </p>
 
                     <hr>
 
-                    <b>Wersja:</b> Stable V6 + Settings<br>
+                    <b>Wersja:</b> Stable V6 + Settings + Animations<br>
                     <b>Silnik:</b> HTML5 Canvas + JavaScript<br>
                     <b>Grafika:</b> Pixel Art<br>
                     <b>Tryb:</b> Singleplayer<br>
@@ -880,13 +783,6 @@ select,
 
                     <b>👤 Twórca:</b><br>
                     Projekt własny użytkownika.
-
-                    <hr>
-
-                    <b>📜 Informacja</b><br>
-                    Gra działa bezpośrednio w przeglądarce.
-                    Zapis świata jest przechowywany lokalnie
-                    w pamięci przeglądarki.
 
                 </div>
 
@@ -897,6 +793,7 @@ select,
     </div>
 
     <div id="settingsFooter">
+
         <button class="settingButton" id="resetSettings">
             ↻ Przywróć domyślne
         </button>
@@ -904,6 +801,7 @@ select,
         <button class="settingButton" id="closeSettingsBottom">
             ZAMKNIJ
         </button>
+
     </div>
 
 </div>
@@ -914,35 +812,36 @@ select,
 
 /* =========================================================
    PIXEL WORLD
-   STABLE V6 + SETTINGS
 ========================================================= */
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
-ctx.imageSmoothingEnabled = false;
+ctx.imageSmoothingEnabled=false;
 
-let W = innerWidth;
-let H = innerHeight;
+let W=innerWidth;
+let H=innerHeight;
 
 function resize(){
-    W = innerWidth;
-    H = innerHeight;
 
-    canvas.width = W;
-    canvas.height = H;
+    W=innerWidth;
+    H=innerHeight;
 
-    ctx.imageSmoothingEnabled = !settings.pixelPerfect;
+    canvas.width=W;
+    canvas.height=H;
+
+    ctx.imageSmoothingEnabled=!settings.pixelPerfect;
+
 }
 
-addEventListener("resize", resize);
+addEventListener("resize",resize);
 
 
 /* =========================================================
-   USTAWIENIA
+   SETTINGS
 ========================================================= */
 
-const defaultSettings = {
+const defaultSettings={
     mobile:true,
     animations:true,
     autoSave:true,
@@ -955,16 +854,18 @@ const defaultSettings = {
     volume:0.75
 };
 
-let settings = JSON.parse(
+let settings=JSON.parse(
     localStorage.getItem("PIXEL_WORLD_SETTINGS") ||
     JSON.stringify(defaultSettings)
 );
 
 function saveSettings(){
+
     localStorage.setItem(
         "PIXEL_WORLD_SETTINGS",
         JSON.stringify(settings)
     );
+
 }
 
 function applySettings(){
@@ -994,25 +895,26 @@ function applySettings(){
     document.getElementById("fpsSelect").value=settings.fps;
     document.getElementById("volumeSelect").value=settings.volume;
 
-    document.getElementById("mobileControls").style.display =
-        settings.mobile ? "flex" : "none";
+    document.getElementById("mobileControls").style.display=
+        settings.mobile?"flex":"none";
 
-    document.getElementById("jumpBtn").style.display =
-        settings.mobile ? "flex" : "none";
+    document.getElementById("jumpBtn").style.display=
+        settings.mobile?"flex":"none";
 
-    ctx.imageSmoothingEnabled = !settings.pixelPerfect;
+    ctx.imageSmoothingEnabled=!settings.pixelPerfect;
 
     saveSettings();
+
 }
 
 applySettings();
 
 
 /* =========================================================
-   USTAWIENIA — MENU
+   SETTINGS MENU
 ========================================================= */
 
-const settingsOverlay =
+const settingsOverlay=
     document.getElementById("settingsOverlay");
 
 function openSettings(){
@@ -1025,20 +927,18 @@ function closeSettings(){
 }
 
 document.getElementById("settingsBtn")
-    .addEventListener("click",openSettings);
+    .onclick=openSettings;
 
 document.getElementById("closeSettings")
-    .addEventListener("click",closeSettings);
+    .onclick=closeSettings;
 
 document.getElementById("closeSettingsBottom")
-    .addEventListener("click",closeSettings);
+    .onclick=closeSettings;
 
-
-/* TABY */
 
 document.querySelectorAll(".tab").forEach(tab=>{
 
-    tab.addEventListener("click",()=>{
+    tab.onclick=()=>{
 
         document.querySelectorAll(".tab")
             .forEach(t=>t.classList.remove("active"));
@@ -1048,25 +948,23 @@ document.querySelectorAll(".tab").forEach(tab=>{
 
         tab.classList.add("active");
 
-        document.getElementById(
-            tab.dataset.page
-        ).classList.add("active");
+        document.getElementById(tab.dataset.page)
+            .classList.add("active");
 
-    });
+    };
 
 });
 
 
-/* PRZEŁĄCZNIKI */
-
 function toggleSetting(name,id){
 
-    settings[name] = !settings[name];
+    settings[name]=!settings[name];
 
     document.getElementById(id)
         .classList.toggle("on",settings[name]);
 
     applySettings();
+
 }
 
 document.getElementById("mobileSwitch")
@@ -1091,63 +989,52 @@ document.getElementById("musicSwitch")
     .onclick=()=>toggleSetting("music","musicSwitch");
 
 
-/* SELECT */
+document.getElementById("qualitySelect").onchange=e=>{
+    settings.quality=e.target.value;
+    saveSettings();
+};
 
-document.getElementById("qualitySelect")
-    .onchange=e=>{
-        settings.quality=e.target.value;
-        saveSettings();
-    };
+document.getElementById("fpsSelect").onchange=e=>{
+    settings.fps=Number(e.target.value);
+    saveSettings();
+};
 
-document.getElementById("fpsSelect")
-    .onchange=e=>{
-        settings.fps=Number(e.target.value);
-        saveSettings();
-    };
-
-document.getElementById("volumeSelect")
-    .onchange=e=>{
-        settings.volume=Number(e.target.value);
-        saveSettings();
-    };
+document.getElementById("volumeSelect").onchange=e=>{
+    settings.volume=Number(e.target.value);
+    saveSettings();
+};
 
 
-/* RESET USTAWIEŃ */
+document.getElementById("resetSettings").onclick=()=>{
 
-document.getElementById("resetSettings")
-    .onclick=()=>{
+    settings=JSON.parse(
+        JSON.stringify(defaultSettings)
+    );
 
-        settings=JSON.parse(
-            JSON.stringify(defaultSettings)
-        );
+    applySettings();
 
-        applySettings();
+    showMessage("Ustawienia przywrócone!");
 
-        showMessage("Ustawienia przywrócone!");
-        playSound("click");
-    };
+};
 
 
-/* PEŁNY EKRAN */
+document.getElementById("fullscreenBtn").onclick=async()=>{
 
-document.getElementById("fullscreenBtn")
-    .onclick=async()=>{
+    try{
 
-        try{
+        if(!document.fullscreenElement){
+            await document.documentElement.requestFullscreen();
+        }else{
+            await document.exitFullscreen();
+        }
 
-            if(!document.fullscreenElement){
-                await document.documentElement.requestFullscreen();
-            }else{
-                await document.exitFullscreen();
-            }
+    }catch(e){}
 
-        }catch(e){}
-
-    };
+};
 
 
 /* =========================================================
-   DŹWIĘK
+   SOUND
 ========================================================= */
 
 let audioContext=null;
@@ -1159,9 +1046,11 @@ function playSound(type="click"){
     try{
 
         if(!audioContext){
-            audioContext =
-                new (window.AudioContext ||
+
+            audioContext=
+                new(window.AudioContext||
                 window.webkitAudioContext)();
+
         }
 
         const osc=audioContext.createOscillator();
@@ -1172,9 +1061,9 @@ function playSound(type="click"){
 
         let frequency=500;
 
-        if(type==="mine") frequency=180;
-        if(type==="place") frequency=300;
-        if(type==="jump") frequency=450;
+        if(type==="mine")frequency=180;
+        if(type==="place")frequency=300;
+        if(type==="jump")frequency=450;
 
         osc.frequency.value=frequency;
         osc.type="square";
@@ -1198,7 +1087,7 @@ function playSound(type="click"){
 
 
 /* =========================================================
-   ŚWIAT
+   WORLD
 ========================================================= */
 
 const TILE=32;
@@ -1229,6 +1118,7 @@ const blockNames={
 
 let world=[];
 
+
 function createWorld(){
 
     world=[];
@@ -1240,9 +1130,9 @@ function createWorld(){
         let h=
             22+
             Math.floor(
-                Math.sin(x*0.045)*3+
-                Math.sin(x*0.11)*2+
-                Math.sin(x*0.018)*4
+                Math.sin(x*.045)*3+
+                Math.sin(x*.11)*2+
+                Math.sin(x*.018)*4
             );
 
         h=Math.max(14,Math.min(30,h));
@@ -1250,6 +1140,7 @@ function createWorld(){
         heights[x]=h;
 
     }
+
 
     for(let y=0;y<WORLD_H;y++){
 
@@ -1259,36 +1150,36 @@ function createWorld(){
 
             const h=heights[x];
 
-            if(y<h){
+            if(y<h)
                 world[y][x]=BLOCK.air;
-            }
-            else if(y===h){
+            else if(y===h)
                 world[y][x]=BLOCK.grass;
-            }
-            else if(y<h+5){
+            else if(y<h+5)
                 world[y][x]=BLOCK.dirt;
-            }
-            else{
+            else
                 world[y][x]=BLOCK.stone;
-            }
 
         }
+
     }
 
 
-    /* drzewa */
+    /* DRZEWA */
 
-    for(let x=8;x<WORLD_W-8;x+=Math.floor(8+Math.random()*9)){
+    for(
+        let x=8;
+        x<WORLD_W-8;
+        x+=Math.floor(8+Math.random()*9)
+    ){
 
-        if(Math.random()<0.48) continue;
+        if(Math.random()<.48)continue;
 
         const ground=heights[x];
 
         for(let y=ground-1;y>=ground-4;y--){
 
-            if(y>=0){
+            if(y>=0)
                 world[y][x]=BLOCK.wood;
-            }
 
         }
 
@@ -1304,10 +1195,10 @@ function createWorld(){
                     const ty=top+yy;
 
                     if(
-                        tx>=0 &&
-                        tx<WORLD_W &&
-                        ty>=0 &&
-                        ty<WORLD_H &&
+                        tx>=0&&
+                        tx<WORLD_W&&
+                        ty>=0&&
+                        ty<WORLD_H&&
                         world[ty][tx]===BLOCK.air
                     ){
                         world[ty][tx]=BLOCK.leaves;
@@ -1322,30 +1213,32 @@ function createWorld(){
     }
 
 
-    /* małe zbiorniki wodne */
+    /* WODA */
 
     for(let i=0;i<12;i++){
 
-        const x=20+Math.floor(
-            Math.random()*(WORLD_W-40)
-        );
+        const x=20+
+            Math.floor(
+                Math.random()*(WORLD_W-40)
+            );
 
         const y=heights[x];
 
-        if(y<5 || y>=WORLD_H-3) continue;
+        if(y<5||y>=WORLD_H-3)continue;
 
-        const width=2+Math.floor(Math.random()*2);
+        const width=2+
+            Math.floor(Math.random()*2);
 
         for(let xx=-width;xx<=width;xx++){
 
             const tx=x+xx;
 
-            if(tx<1 || tx>=WORLD_W-1) continue;
+            if(tx<1||tx>=WORLD_W-1)continue;
 
             const surface=heights[tx];
 
             if(
-                Math.abs(surface-y)<=1 &&
+                Math.abs(surface-y)<=1&&
                 world[y][tx]===BLOCK.grass
             ){
 
@@ -1354,17 +1247,11 @@ function createWorld(){
                 if(y+1<WORLD_H)
                     world[y+1][tx]=BLOCK.water;
 
-                if(
-                    world[y][tx-1]===BLOCK.grass
-                ){
+                if(world[y][tx-1]===BLOCK.grass)
                     world[y][tx-1]=BLOCK.sand;
-                }
 
-                if(
-                    world[y][tx+1]===BLOCK.grass
-                ){
+                if(world[y][tx+1]===BLOCK.grass)
                     world[y][tx+1]=BLOCK.sand;
-                }
 
             }
 
@@ -1373,7 +1260,7 @@ function createWorld(){
     }
 
 
-    /* bezpieczny spawn */
+    /* BEZPIECZNY START */
 
     const sx=12;
 
@@ -1381,7 +1268,7 @@ function createWorld(){
 
         for(let x=sx-3;x<=sx+3;x++){
 
-            if(x>=0 && x<WORLD_W)
+            if(x>=0&&x<WORLD_W)
                 world[y][x]=BLOCK.air;
 
         }
@@ -1411,6 +1298,7 @@ const player={
     walkAnimation:0
 };
 
+
 function findSpawn(){
 
     for(let x=5;x<30;x++){
@@ -1418,14 +1306,16 @@ function findSpawn(){
         for(let y=0;y<WORLD_H-2;y++){
 
             if(
-                world[y][x]!==BLOCK.air &&
-                world[y-1]?.[x]===BLOCK.air &&
+                world[y][x]!==BLOCK.air&&
+                world[y-1]?.[x]===BLOCK.air&&
                 world[y-2]?.[x]===BLOCK.air
             ){
 
                 player.x=x*TILE+6;
                 player.y=(y-2)*TILE;
+
                 return;
+
             }
 
         }
@@ -1438,7 +1328,7 @@ findSpawn();
 
 
 /* =========================================================
-   KAMERA
+   CAMERA
 ========================================================= */
 
 const camera={
@@ -1448,21 +1338,22 @@ const camera={
 
 
 /* =========================================================
-   KOLIZJE
+   COLLISION
 ========================================================= */
 
 function solidBlock(id){
 
-    return (
-        id===BLOCK.grass ||
-        id===BLOCK.dirt ||
-        id===BLOCK.stone ||
-        id===BLOCK.wood ||
-        id===BLOCK.leaves ||
+    return(
+        id===BLOCK.grass||
+        id===BLOCK.dirt||
+        id===BLOCK.stone||
+        id===BLOCK.wood||
+        id===BLOCK.leaves||
         id===BLOCK.sand
     );
 
 }
+
 
 function solidAtPixel(px,py){
 
@@ -1470,17 +1361,17 @@ function solidAtPixel(px,py){
     const ty=Math.floor(py/TILE);
 
     if(
-        tx<0 ||
-        tx>=WORLD_W ||
-        ty<0 ||
+        tx<0||
+        tx>=WORLD_W||
+        ty<0||
         ty>=WORLD_H
-    ){
+    )
         return true;
-    }
 
     return solidBlock(world[ty][tx]);
 
 }
+
 
 function playerCollision(x,y){
 
@@ -1489,10 +1380,10 @@ function playerCollision(x,y){
     const top=y+2;
     const bottom=y+player.height-1;
 
-    return (
-        solidAtPixel(left,top) ||
-        solidAtPixel(right,top) ||
-        solidAtPixel(left,bottom) ||
+    return(
+        solidAtPixel(left,top)||
+        solidAtPixel(right,top)||
+        solidAtPixel(left,bottom)||
         solidAtPixel(right,bottom)
     );
 
@@ -1500,7 +1391,7 @@ function playerCollision(x,y){
 
 
 /* =========================================================
-   STEROWANIE
+   CONTROLS
 ========================================================= */
 
 const keys={};
@@ -1510,19 +1401,19 @@ addEventListener("keydown",e=>{
     keys[e.code]=true;
 
     if(
-        e.code==="Space" ||
-        e.code==="ArrowUp" ||
+        e.code==="Space"||
+        e.code==="ArrowUp"||
         e.code==="KeyW"
-    ){
+    )
         e.preventDefault();
-    }
 
-    if(e.code==="Digit1") selectBlock("dirt");
-    if(e.code==="Digit2") selectBlock("stone");
-    if(e.code==="Digit3") selectBlock("wood");
-    if(e.code==="Digit4") selectBlock("sand");
+    if(e.code==="Digit1")selectBlock("dirt");
+    if(e.code==="Digit2")selectBlock("stone");
+    if(e.code==="Digit3")selectBlock("wood");
+    if(e.code==="Digit4")selectBlock("sand");
 
 });
+
 
 addEventListener("keyup",e=>{
     keys[e.code]=false;
@@ -1530,19 +1421,21 @@ addEventListener("keyup",e=>{
 
 
 function leftPressed(){
-    return keys.KeyA || keys.ArrowLeft;
+    return keys.KeyA||keys.ArrowLeft;
 }
 
 function rightPressed(){
-    return keys.KeyD || keys.ArrowRight;
+    return keys.KeyD||keys.ArrowRight;
 }
 
 function jumpPressed(){
-    return (
-        keys.KeyW ||
-        keys.ArrowUp ||
+
+    return(
+        keys.KeyW||
+        keys.ArrowUp||
         keys.Space
     );
+
 }
 
 
@@ -1564,9 +1457,23 @@ function holdButton(id,key){
         keys[key]=false;
     };
 
-    el.addEventListener("touchstart",down,{passive:false});
-    el.addEventListener("touchend",up,{passive:false});
-    el.addEventListener("touchcancel",up,{passive:false});
+    el.addEventListener(
+        "touchstart",
+        down,
+        {passive:false}
+    );
+
+    el.addEventListener(
+        "touchend",
+        up,
+        {passive:false}
+    );
+
+    el.addEventListener(
+        "touchcancel",
+        up,
+        {passive:false}
+    );
 
     el.addEventListener("mousedown",down);
     el.addEventListener("mouseup",up);
@@ -1580,14 +1487,16 @@ holdButton("jumpBtn","Space");
 
 
 /* =========================================================
-   RUCH
+   PLAYER MOVEMENT
 ========================================================= */
 
 let jumpWasPressed=false;
 
+
 function updatePlayer(){
 
     let moving=false;
+
 
     if(leftPressed()){
 
@@ -1605,17 +1514,17 @@ function updatePlayer(){
     }
     else{
 
-        player.vx*=0.72;
+        player.vx*=.72;
 
-        if(Math.abs(player.vx)<0.05)
+        if(Math.abs(player.vx)<.05)
             player.vx=0;
 
     }
 
 
     if(
-        jumpPressed() &&
-        !jumpWasPressed &&
+        jumpPressed()&&
+        !jumpWasPressed&&
         player.grounded
     ){
 
@@ -1629,37 +1538,25 @@ function updatePlayer(){
     jumpWasPressed=jumpPressed();
 
 
-    if(moving && settings.animations){
-
-        player.walkAnimation+=0.16;
-
-    }
-    else{
-
-        player.walkAnimation*=0.8;
-
-    }
+    if(moving&&settings.animations)
+        player.walkAnimation+=.16;
+    else
+        player.walkAnimation*=.8;
 
 
-    /* ruch X */
+    /* X */
 
     let nextX=player.x+player.vx;
 
-    if(!playerCollision(nextX,player.y)){
-
+    if(!playerCollision(nextX,player.y))
         player.x=nextX;
-
-    }
-    else{
-
+    else
         player.vx=0;
 
-    }
 
+    /* GRAVITY */
 
-    /* grawitacja */
-
-    player.vy+=0.38;
+    player.vy+=.38;
 
     if(player.vy>9)
         player.vy=9;
@@ -1675,41 +1572,38 @@ function updatePlayer(){
     }
     else{
 
-        if(player.vy>0){
-
+        if(player.vy>0)
             player.grounded=true;
-
-        }
 
         player.vy=0;
 
     }
 
 
-    /* zabezpieczenie */
+    /* FALL PROTECTION */
 
     if(player.y>WORLD_H*TILE+300){
 
         findSpawn();
-
         player.vy=0;
 
     }
 
 
-    /* kamera */
+    /* CAMERA */
 
     const targetX=
-        player.x+player.width/2-W/2;
+        player.x+
+        player.width/2-
+        W/2;
 
     const targetY=
-        player.y+player.height/2-H/2;
+        player.y+
+        player.height/2-
+        H/2;
 
-    camera.x +=
-        (targetX-camera.x)*0.07;
-
-    camera.y +=
-        (targetY-camera.y)*0.07;
+    camera.x+=(targetX-camera.x)*.07;
+    camera.y+=(targetY-camera.y)*.07;
 
 
     camera.x=Math.max(
@@ -1732,7 +1626,7 @@ function updatePlayer(){
 
 
 /* =========================================================
-   RYSOWANIE BLOKÓW
+   BLOCK RENDERING
 ========================================================= */
 
 function drawBlock(id,x,y,time){
@@ -1741,11 +1635,12 @@ function drawBlock(id,x,y,time){
     const py=y*TILE-camera.y;
 
     if(
-        px<-TILE ||
-        py<-TILE ||
-        px>W+TILE ||
+        px<-TILE||
+        py<-TILE||
+        px>W+TILE||
         py>H+TILE
-    ) return;
+    )
+        return;
 
 
     if(id===BLOCK.grass){
@@ -1819,9 +1714,20 @@ function drawBlock(id,x,y,time){
         ctx.fillRect(px,py,TILE,TILE);
 
         ctx.fillStyle="#9b602d";
-        ctx.fillRect(px+7,py,4,TILE);
 
-        ctx.fillRect(px+20,py,3,TILE);
+        ctx.fillRect(
+            px+7,
+            py,
+            4,
+            TILE
+        );
+
+        ctx.fillRect(
+            px+20,
+            py,
+            3,
+            TILE
+        );
 
     }
 
@@ -1873,7 +1779,7 @@ function drawBlock(id,x,y,time){
         if(settings.water){
 
             const wave=
-                Math.sin(time*0.003+x)*3;
+                Math.sin(time*.003+x)*3;
 
             ctx.fillStyle="#65b7e9";
 
@@ -1899,160 +1805,454 @@ function drawBlock(id,x,y,time){
 
 
 /* =========================================================
-   PIXEL ART POSTACI
+   NOWA ANIMOWANA POSTAĆ
 ========================================================= */
-
-const sprites={
-
-idle:[
-"HHHHHHHHHH",
-"HHHHHHHHHH",
-"HHSSSSSSHH",
-"HSSEESSSH H".replace(" ",""),
-"HSSSSSSSSH",
-"HHBBBBBBHH",
-"HBBBBBBBBH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPKPPKPHH",
-"HHPKPPKPHH",
-"HHKKKKKKHH"
-],
-
-walk1:[
-"HHHHHHHHHH",
-"HHHHHHHHHH",
-"HHSSSSSSHH",
-"HSSEESSSHH",
-"HSSSSSSSHH",
-"HHBBBBBBHH",
-"HHBBBBBBBH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPKPPKHHH",
-"HHKPPKHHHH",
-"HHKKKKHHHH"
-],
-
-walk2:[
-"HHHHHHHHHH",
-"HHHHHHHHHH",
-"HHSSSSSSHH",
-"HSSEESSSHH",
-"HSSSSSSSHH",
-"HHBBBBBBHH",
-"HBBBBBBBBH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHBBBBBBHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPPPHH",
-"HHPPPPKPHH",
-"HHPPPPKPHH",
-"HHKKKKKKHH"
-]
-
-};
-
-
-const palette={
-    H:"#542f20",
-    S:"#f0bd91",
-    E:"#111",
-    B:"#3f73c9",
-    b:"#315aa0",
-    P:"#4d3b78",
-    K:"#25252b"
-};
-
 
 function drawPlayer(time){
 
     const moving=
-        Math.abs(player.vx)>0.1 &&
+        Math.abs(player.vx)>.1&&
         settings.animations;
 
-    let sprite=sprites.idle;
+    const jumping=
+        !player.grounded&&
+        player.vy<-.4;
 
-    if(moving){
+    const falling=
+        !player.grounded&&
+        player.vy>.4;
 
-        const frame=
-            Math.floor(player.walkAnimation)%2;
 
-        sprite=
-            frame===0
-            ?sprites.walk1
-            :sprites.walk2;
+    let bob=0;
+    let bodyTilt=0;
+    let armSwing=0;
+    let legSwing=0;
+    let bodyStretch=1;
+
+
+    /*
+        STANIE
+    */
+
+    if(!moving&&player.grounded){
+
+        bob=
+            Math.sin(time*.01*.8)*.5;
+
+        bodyStretch=
+            1+
+            Math.sin(time*.01*.8)*.008;
 
     }
 
 
+    /*
+        CHODZENIE
+    */
+
+    if(moving){
+
+        const walk=time*.22;
+
+        bob=
+            Math.abs(Math.sin(walk))*1.25;
+
+        armSwing=
+            Math.sin(walk)*3.2;
+
+        legSwing=
+            Math.sin(walk)*3.8;
+
+        bodyTilt=
+            Math.sin(walk)*.025;
+
+        bodyStretch=
+            1+
+            Math.abs(Math.sin(walk))*.018;
+
+    }
+
+
+    /*
+        SKOK
+    */
+
+    if(jumping){
+
+        bob=-1.5;
+
+        bodyTilt=
+            player.direction*.035;
+
+        armSwing=-4;
+        legSwing=3;
+        bodyStretch=.96;
+
+    }
+
+
+    /*
+        SPADANIE
+    */
+
+    if(falling){
+
+        bob=1;
+
+        bodyTilt=
+            player.direction*.02;
+
+        armSwing=3;
+        legSwing=-2;
+        bodyStretch=1.02;
+
+    }
+
+
+    /*
+        MRUGANIE
+    */
+
     const blink=
-        settings.animations &&
+        settings.animations&&
         Math.floor(time/100)%80===0;
 
 
-    const scale=2;
-
-    const baseX=
-        Math.round(
-            player.x-camera.x
-        );
+    const centerX=
+        player.x-
+        camera.x+
+        player.width/2;
 
     const baseY=
-        Math.round(
-            player.y-camera.y
+        player.y-
+        camera.y+
+        bob;
+
+
+    ctx.save();
+
+    /*
+        Przechylenie całej postaci.
+    */
+
+    ctx.translate(
+        Math.round(centerX),
+        Math.round(baseY)
+    );
+
+    ctx.rotate(
+        bodyTilt*
+        player.direction
+    );
+
+    ctx.scale(
+        player.direction,
+        1
+    );
+
+    ctx.scale(
+        bodyStretch,
+        1
+    );
+
+    ctx.translate(
+        -10*2,
+        0
+    );
+
+
+    const s=2;
+
+
+    /*
+        NOGI
+    */
+
+    ctx.fillStyle="#382d5d";
+
+    ctx.fillRect(
+        Math.round(2*s-legSwing*.15),
+        Math.round((12+legSwing*.35)*s),
+        6*s,
+        7*s
+    );
+
+    ctx.fillStyle="#202026";
+
+    ctx.fillRect(
+        Math.round(1*s-legSwing*.28),
+        18*s,
+        7*s,
+        2*s
+    );
+
+
+    ctx.fillStyle="#4d3b78";
+
+    ctx.fillRect(
+        Math.round(4*s+legSwing*.15),
+        Math.round((12-legSwing*.35)*s),
+        6*s,
+        7*s
+    );
+
+    ctx.fillStyle="#25252b";
+
+    ctx.fillRect(
+        Math.round(3*s+legSwing*.28),
+        18*s,
+        7*s,
+        2*s
+    );
+
+
+    /*
+        TUŁÓW
+    */
+
+    ctx.fillStyle="#315aa0";
+
+    ctx.fillRect(
+        1*s,
+        5*s,
+        8*s,
+        8*s
+    );
+
+    ctx.fillStyle="#3f73c9";
+
+    ctx.fillRect(
+        2*s,
+        5*s,
+        6*s,
+        7*s
+    );
+
+    ctx.fillStyle="#5790df";
+
+    ctx.fillRect(
+        3*s,
+        6*s,
+        2*s,
+        2*s
+    );
+
+
+    /*
+        TYLNA RĘKA
+    */
+
+    ctx.fillStyle="#d49c78";
+
+    ctx.fillRect(
+        Math.round(-1*s-armSwing*.25),
+        Math.round(6*s+armSwing*.15),
+        2*s,
+        6*s
+    );
+
+
+    ctx.fillStyle="#f0bd91";
+
+    ctx.fillRect(
+        Math.round(-1*s-armSwing*.25),
+        Math.round(12*s+armSwing*.15),
+        2*s,
+        2*s
+    );
+
+
+    /*
+        PRZEDNIA RĘKA
+    */
+
+    ctx.fillStyle="#f0bd91";
+
+    ctx.fillRect(
+        Math.round(9*s+armSwing*.25),
+        Math.round(6*s-armSwing*.15),
+        2*s,
+        6*s
+    );
+
+    ctx.fillRect(
+        Math.round(9*s+armSwing*.25),
+        Math.round(12*s-armSwing*.15),
+        2*s,
+        2*s
+    );
+
+
+    /*
+        SZYJA
+    */
+
+    ctx.fillRect(
+        4*s,
+        3*s,
+        2*s,
+        3*s
+    );
+
+
+    /*
+        TWARZ
+    */
+
+    ctx.fillStyle="#f0bd91";
+
+    ctx.fillRect(
+        2*s,
+        1*s,
+        6*s,
+        5*s
+    );
+
+
+    /*
+        USZY
+    */
+
+    ctx.fillRect(
+        1*s,
+        3*s,
+        1*s,
+        2*s
+    );
+
+    ctx.fillRect(
+        8*s,
+        3*s,
+        1*s,
+        2*s
+    );
+
+
+    /*
+        WŁOSY
+    */
+
+    ctx.fillStyle="#542f20";
+
+    ctx.fillRect(
+        2*s,
+        0,
+        6*s,
+        2*s
+    );
+
+    ctx.fillRect(
+        1*s,
+        1*s,
+        2*s,
+        2*s
+    );
+
+    ctx.fillRect(
+        7*s,
+        1*s,
+        2*s,
+        2*s
+    );
+
+    ctx.fillRect(
+        3*s,
+        1*s,
+        2*s,
+        2*s
+    );
+
+    ctx.fillRect(
+        6*s,
+        1*s,
+        1*s,
+        2*s
+    );
+
+
+    /*
+        OCZY
+    */
+
+    ctx.fillStyle="#111";
+
+    if(blink){
+
+        ctx.fillRect(
+            3*s,
+            3*s,
+            2*s,
+            1*s
         );
 
+        ctx.fillRect(
+            6*s,
+            3*s,
+            2*s,
+            1*s
+        );
 
-    for(let y=0;y<sprite.length;y++){
+    }
+    else{
 
-        for(let x=0;x<sprite[y].length;x++){
+        ctx.fillRect(
+            3*s,
+            3*s,
+            1*s,
+            1*s
+        );
 
-            let ch=sprite[y][x];
+        ctx.fillRect(
+            6*s,
+            3*s,
+            1*s,
+            1*s
+        );
 
-            if(blink && ch==="E")
-                ch="S";
+    }
 
-            if(!palette[ch]) continue;
 
-            let drawX=x;
+    /*
+        NOS
+    */
 
-            if(player.direction<0){
-                drawX=sprite[y].length-1-x;
-            }
+    ctx.fillStyle="#d89f7a";
 
-            ctx.fillStyle=palette[ch];
+    ctx.fillRect(
+        5*s,
+        4*s,
+        1*s,
+        1*s
+    );
 
-            ctx.fillRect(
-                baseX+drawX*scale,
-                baseY+y*scale,
-                scale,
-                scale
-            );
 
-        }
+    ctx.restore();
+
+
+    /*
+        CIEŃ
+    */
+
+    if(player.grounded){
+
+        ctx.fillStyle="rgba(0,0,0,.16)";
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            centerX,
+            player.y-camera.y+
+            player.height+2,
+            moving
+                ? 9+Math.abs(Math.sin(time*.22))*2
+                : 9,
+            2,
+            0,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
 
     }
 
@@ -2060,36 +2260,54 @@ function drawPlayer(time){
 
 
 /* =========================================================
-   RYSOWANIE TŁA
+   BACKGROUND
 ========================================================= */
 
 function drawBackground(){
 
-    const gradient=ctx.createLinearGradient(
-        0,0,0,H
+    const gradient=
+        ctx.createLinearGradient(
+            0,0,0,H
+        );
+
+    gradient.addColorStop(
+        0,
+        "#63c6f2"
     );
 
-    gradient.addColorStop(0,"#63c6f2");
-    gradient.addColorStop(1,"#d8f2ff");
+    gradient.addColorStop(
+        1,
+        "#d8f2ff"
+    );
 
     ctx.fillStyle=gradient;
     ctx.fillRect(0,0,W,H);
 
-
-    /* chmury */
 
     ctx.fillStyle="rgba(255,255,255,.75)";
 
     for(let i=0;i<8;i++){
 
         const x=
-            ((i*550-camera.x*0.2)%(W+250))-120;
+            ((i*550-camera.x*.2)%
+            (W+250))-120;
 
         const y=
             70+(i%4)*55;
 
-        ctx.fillRect(x,y,80,20);
-        ctx.fillRect(x+20,y-10,50,30);
+        ctx.fillRect(
+            x,
+            y,
+            80,
+            20
+        );
+
+        ctx.fillRect(
+            x+20,
+            y-10,
+            50,
+            30
+        );
 
     }
 
@@ -2106,29 +2324,26 @@ function render(time){
 
     drawBackground();
 
-    const startX=
-        Math.max(
-            0,
-            Math.floor(camera.x/TILE)-2
-        );
 
-    const endX=
-        Math.min(
-            WORLD_W,
-            Math.ceil((camera.x+W)/TILE)+2
-        );
+    const startX=Math.max(
+        0,
+        Math.floor(camera.x/TILE)-2
+    );
 
-    const startY=
-        Math.max(
-            0,
-            Math.floor(camera.y/TILE)-2
-        );
+    const endX=Math.min(
+        WORLD_W,
+        Math.ceil((camera.x+W)/TILE)+2
+    );
 
-    const endY=
-        Math.min(
-            WORLD_H,
-            Math.ceil((camera.y+H)/TILE)+2
-        );
+    const startY=Math.max(
+        0,
+        Math.floor(camera.y/TILE)-2
+    );
+
+    const endY=Math.min(
+        WORLD_H,
+        Math.ceil((camera.y+H)/TILE)+2
+    );
 
 
     for(let y=startY;y<endY;y++){
@@ -2137,9 +2352,8 @@ function render(time){
 
             const id=world[y][x];
 
-            if(id!==BLOCK.air){
+            if(id!==BLOCK.air)
                 drawBlock(id,x,y,time);
-            }
 
         }
 
@@ -2152,15 +2366,15 @@ function render(time){
 
 
 /* =========================================================
-   GŁÓWNA PĘTLA
+   GAME LOOP
 ========================================================= */
 
 function gameLoop(time){
 
-    const frameInterval=
+    const interval=
         1000/settings.fps;
 
-    if(time-lastFrame>=frameInterval){
+    if(time-lastFrame>=interval){
 
         lastFrame=time;
 
@@ -2189,6 +2403,7 @@ let inventory={
 
 let selectedBlock="dirt";
 
+
 function updateInventory(){
 
     document.getElementById("count-dirt")
@@ -2205,39 +2420,43 @@ function updateInventory(){
 
 }
 
+
 function selectBlock(block){
 
     selectedBlock=block;
 
     document.querySelectorAll(".slot")
         .forEach(slot=>{
+
             slot.classList.toggle(
                 "selected",
                 slot.dataset.block===block
             );
+
         });
 
     playSound("click");
 
 }
 
+
 document.querySelectorAll(".slot")
     .forEach(slot=>{
 
-        slot.addEventListener("click",()=>{
+        slot.onclick=()=>{
             selectBlock(slot.dataset.block);
-        });
+        };
 
     });
 
 
 /* =========================================================
-   KOPANIE / STAWIANIE
+   MINING / PLACING
 ========================================================= */
 
 function screenToWorld(clientX,clientY){
 
-    return {
+    return{
         x:Math.floor(
             (clientX+camera.x)/TILE
         ),
@@ -2248,41 +2467,51 @@ function screenToWorld(clientX,clientY){
 
 }
 
+
 function canReach(tx,ty){
 
     const px=
-        player.x+player.width/2;
+        player.x+
+        player.width/2;
 
     const py=
-        player.y+player.height/2;
+        player.y+
+        player.height/2;
 
     const bx=
-        tx*TILE+TILE/2;
+        tx*TILE+
+        TILE/2;
 
     const by=
-        ty*TILE+TILE/2;
+        ty*TILE+
+        TILE/2;
 
     const dx=bx-px;
     const dy=by-py;
 
-    return Math.sqrt(dx*dx+dy*dy)
-        <=TILE*5;
+    return Math.sqrt(dx*dx+dy*dy)<=TILE*5;
 
 }
+
 
 function mineAt(clientX,clientY){
 
     const pos=
-        screenToWorld(clientX,clientY);
+        screenToWorld(
+            clientX,
+            clientY
+        );
 
-    const {x,y}=pos;
+    const x=pos.x;
+    const y=pos.y;
 
     if(
-        x<0 ||
-        x>=WORLD_W ||
-        y<0 ||
+        x<0||
+        x>=WORLD_W||
+        y<0||
         y>=WORLD_H
-    ) return;
+    )
+        return;
 
     if(!canReach(x,y)){
 
@@ -2292,31 +2521,34 @@ function mineAt(clientX,clientY){
 
     }
 
+
     const id=world[y][x];
 
     if(
-        id===BLOCK.air ||
+        id===BLOCK.air||
         id===BLOCK.water
-    ) return;
+    )
+        return;
 
 
     const name=blockNames[id];
 
+
     if(
-        name==="grass" ||
+        name==="grass"||
         name==="dirt"
-    ){
+    )
         inventory.dirt++;
-    }
-    else if(name==="stone"){
+
+    else if(name==="stone")
         inventory.stone++;
-    }
-    else if(name==="wood"){
+
+    else if(name==="wood")
         inventory.wood++;
-    }
-    else if(name==="sand"){
+
+    else if(name==="sand")
         inventory.sand++;
-    }
+
 
     world[y][x]=BLOCK.air;
 
@@ -2332,16 +2564,23 @@ function mineAt(clientX,clientY){
 function placeAt(clientX,clientY){
 
     const pos=
-        screenToWorld(clientX,clientY);
+        screenToWorld(
+            clientX,
+            clientY
+        );
 
-    const {x,y}=pos;
+    const x=pos.x;
+    const y=pos.y;
+
 
     if(
-        x<0 ||
-        x>=WORLD_W ||
-        y<0 ||
+        x<0||
+        x>=WORLD_W||
+        y<0||
         y>=WORLD_H
-    ) return;
+    )
+        return;
+
 
     if(!canReach(x,y)){
 
@@ -2351,8 +2590,10 @@ function placeAt(clientX,clientY){
 
     }
 
+
     if(world[y][x]!==BLOCK.air)
         return;
+
 
     if(inventory[selectedBlock]<=0){
 
@@ -2363,22 +2604,19 @@ function placeAt(clientX,clientY){
     }
 
 
-    const id=
-        BLOCK[
-            selectedBlock
-        ];
+    const id=BLOCK[selectedBlock];
 
     const testX=x*TILE;
     const testY=y*TILE;
 
+
     if(
-        testX+TILE>player.x &&
-        testX<player.x+player.width &&
-        testY+TILE>player.y &&
+        testX+TILE>player.x&&
+        testX<player.x+player.width&&
+        testY+TILE>player.y&&
         testY<player.y+player.height
-    ){
+    )
         return;
-    }
 
 
     world[y][x]=id;
@@ -2394,39 +2632,52 @@ function placeAt(clientX,clientY){
 }
 
 
-/* MYSZ */
+/* =========================================================
+   MOUSE
+========================================================= */
 
 canvas.addEventListener("mousedown",e=>{
 
     if(settingsOverlay.style.display==="flex")
         return;
 
-    if(e.button===0){
+    if(e.button===0)
         mineAt(e.clientX,e.clientY);
-    }
 
     if(e.button===2){
+
         e.preventDefault();
-        placeAt(e.clientX,e.clientY);
+
+        placeAt(
+            e.clientX,
+            e.clientY
+        );
+
     }
 
 });
 
-canvas.addEventListener("contextmenu",e=>{
-    e.preventDefault();
-});
+
+canvas.addEventListener(
+    "contextmenu",
+    e=>e.preventDefault()
+);
 
 
-/* TOUCH */
+/* =========================================================
+   TOUCH
+========================================================= */
 
 let touchStart=null;
 let touchTimer=null;
+
 
 canvas.addEventListener(
     "touchstart",
     e=>{
 
-        if(!e.touches[0]) return;
+        if(!e.touches[0])
+            return;
 
         const t=e.touches[0];
 
@@ -2435,6 +2686,7 @@ canvas.addEventListener(
             y:t.clientY,
             time:Date.now()
         };
+
 
         touchTimer=setTimeout(()=>{
 
@@ -2460,7 +2712,8 @@ canvas.addEventListener(
 
         e.preventDefault();
 
-        if(!touchStart) return;
+        if(!touchStart)
+            return;
 
         clearTimeout(touchTimer);
 
@@ -2468,13 +2721,12 @@ canvas.addEventListener(
         const y=touchStart.y;
 
         const duration=
-            Date.now()-touchStart.time;
+            Date.now()-
+            touchStart.time;
 
-        if(duration<350){
 
+        if(duration<350)
             mineAt(x,y);
-
-        }
 
         touchStart=null;
 
@@ -2487,20 +2739,26 @@ canvas.addEventListener(
    SAVE / LOAD
 ========================================================= */
 
-const SAVE_KEY="PIXEL_WORLD_STABLE_V6";
+const SAVE_KEY=
+    "PIXEL_WORLD_STABLE_V6";
+
 
 function saveGame(){
 
     try{
 
         const data={
-            world,
+            world:world,
+
             player:{
                 x:player.x,
                 y:player.y
             },
-            inventory,
-            selectedBlock
+
+            inventory:inventory,
+
+            selectedBlock:selectedBlock
+
         };
 
         localStorage.setItem(
@@ -2518,32 +2776,40 @@ function loadGame(){
     try{
 
         const raw=
-            localStorage.getItem(SAVE_KEY);
+            localStorage.getItem(
+                SAVE_KEY
+            );
 
         if(!raw)
             return false;
 
+
         const data=
             JSON.parse(raw);
 
+
         if(
-            !Array.isArray(data.world) ||
+            !Array.isArray(data.world)||
             data.world.length!==WORLD_H
-        ){
+        )
             return false;
-        }
+
 
         world=data.world;
+
 
         if(data.player){
 
             player.x=
-                Number(data.player.x)||player.x;
+                Number(data.player.x)||
+                player.x;
 
             player.y=
-                Number(data.player.y)||player.y;
+                Number(data.player.y)||
+                player.y;
 
         }
+
 
         if(data.inventory){
 
@@ -2554,9 +2820,10 @@ function loadGame(){
 
         }
 
-        if(data.selectedBlock){
+
+        if(data.selectedBlock)
             selectedBlock=data.selectedBlock;
-        }
+
 
         updateInventory();
         selectBlock(selectedBlock);
@@ -2581,17 +2848,59 @@ if(!loadGame()){
 
 
 /* =========================================================
-   SAVE BUTTONS
+   RESET
 ========================================================= */
+
+function resetWorld(){
+
+    const ok=
+        confirm(
+            "Czy na pewno chcesz stworzyć nowy świat?"
+        );
+
+    if(!ok)
+        return;
+
+
+    createWorld();
+    findSpawn();
+
+
+    inventory={
+        dirt:20,
+        stone:10,
+        wood:10,
+        sand:10
+    };
+
+
+    selectedBlock="dirt";
+
+
+    updateInventory();
+    selectBlock("dirt");
+
+    saveGame();
+
+    showMessage(
+        "Nowy świat został utworzony!"
+    );
+
+}
+
+
+document.getElementById("resetBtn")
+    .onclick=resetWorld;
+
 
 document.getElementById("saveBtn")
     .onclick=()=>{
 
         saveGame();
 
-        showMessage("Gra została zapisana!");
-
-        playSound("click");
+        showMessage(
+            "Gra została zapisana!"
+        );
 
     };
 
@@ -2601,15 +2910,11 @@ document.getElementById("saveFromSettings")
 
         saveGame();
 
-        showMessage("Gra została zapisana!");
-
-        playSound("click");
+        showMessage(
+            "Gra została zapisana!"
+        );
 
     };
-
-
-document.getElementById("resetBtn")
-    .onclick=resetWorld;
 
 
 document.getElementById("deleteSaveBtn")
@@ -2620,12 +2925,18 @@ document.getElementById("deleteSaveBtn")
                 "Czy na pewno chcesz usunąć zapis?"
             );
 
-        if(!ok) return;
+        if(!ok)
+            return;
 
-        localStorage.removeItem(SAVE_KEY);
+
+        localStorage.removeItem(
+            SAVE_KEY
+        );
+
 
         createWorld();
         findSpawn();
+
 
         inventory={
             dirt:20,
@@ -2634,45 +2945,19 @@ document.getElementById("deleteSaveBtn")
             sand:10
         };
 
+
         selectedBlock="dirt";
+
 
         updateInventory();
         selectBlock("dirt");
 
-        showMessage("Zapis usunięty.");
 
-    };
-
-
-function resetWorld(){
-
-    const ok=
-        confirm(
-            "Czy na pewno chcesz stworzyć nowy świat?"
+        showMessage(
+            "Zapis usunięty."
         );
 
-    if(!ok) return;
-
-    createWorld();
-    findSpawn();
-
-    inventory={
-        dirt:20,
-        stone:10,
-        wood:10,
-        sand:10
     };
-
-    selectedBlock="dirt";
-
-    updateInventory();
-    selectBlock("dirt");
-
-    saveGame();
-
-    showMessage("Nowy świat został utworzony!");
-
-}
 
 
 /* =========================================================
@@ -2681,18 +2966,18 @@ function resetWorld(){
 
 setInterval(()=>{
 
-    if(settings.autoSave){
+    if(settings.autoSave)
         saveGame();
-    }
 
 },120000);
 
 
 /* =========================================================
-   WIADOMOŚCI
+   MESSAGE
 ========================================================= */
 
 let messageTimer=null;
+
 
 function showMessage(text){
 
@@ -2702,7 +2987,9 @@ function showMessage(text){
     el.textContent=text;
     el.style.opacity="1";
 
+
     clearTimeout(messageTimer);
+
 
     messageTimer=setTimeout(()=>{
 
@@ -2717,10 +3004,13 @@ function showMessage(text){
    START
 ========================================================= */
 
+resize();
 updateInventory();
 applySettings();
 
-showMessage("Witaj w Pixel World!");
+showMessage(
+    "Witaj w Pixel World!"
+);
 
 </script>
 
