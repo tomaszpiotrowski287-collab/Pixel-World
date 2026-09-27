@@ -3,376 +3,459 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Pixel World</title>
 
 <style>
-*{
- box-sizing:border-box;
- -webkit-tap-highlight-color:transparent;
-}
-
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{
- margin:0;
- width:100%;
- height:100%;
- overflow:hidden;
- background:#62c5f0;
- font-family:Arial,sans-serif;
+ margin:0;width:100%;height:100%;overflow:hidden;
+ background:#071d58;font-family:Arial,sans-serif;
+ user-select:none
 }
-
-body{
- user-select:none;
-}
-
 canvas{
- position:fixed;
- inset:0;
- width:100%;
- height:100%;
- image-rendering:pixelated;
- image-rendering:crisp-edges;
- display:block;
- touch-action:none;
+ position:fixed;inset:0;width:100%;height:100%;
+ image-rendering:pixelated;touch-action:none
 }
 
-#ui{
- position:fixed;
- inset:0;
- pointer-events:none;
+/* ================= MENU ================= */
+
+#mainMenu{
+ position:fixed;inset:0;z-index:100;
+ overflow:hidden;
+ background:
+  radial-gradient(circle at 50% 25%,#1c70bd 0,#0b367d 35%,#06164c 100%);
+ color:white
 }
 
-#topbar{
+#mainMenu:before{
+ content:"";
+ position:absolute;inset:0;
+ background-image:
+  radial-gradient(circle,#fff 0 1px,transparent 1.5px),
+  radial-gradient(circle,rgba(255,255,255,.7) 0 1px,transparent 1.5px);
+ background-size:83px 71px,137px 103px;
+ opacity:.55
+}
+
+.wave{
  position:absolute;
- top:12px;
- left:12px;
- right:12px;
+ left:-10%;width:120%;height:150px;
+ border-radius:50%;
+ background:rgba(0,20,75,.3);
+ transform:rotate(-7deg)
+}
+.wave1{top:22%}
+.wave2{top:38%;opacity:.55}
+.wave3{top:54%;opacity:.35}
+
+#menuContent{
+ position:relative;
+ z-index:2;
+ width:min(900px,100%);
+ height:100%;
+ margin:auto;
  display:flex;
- justify-content:space-between;
- align-items:flex-start;
- gap:10px;
+ flex-direction:column;
+ align-items:center
+}
+
+#menuTop{
+ display:flex;
+ justify-content:center;
+ gap:30px;
+ padding-top:18px
+}
+
+.menuIcon{
+ width:75px;
+ text-align:center;
+ color:#fff49a;
+ font-size:11px;
+ font-weight:bold;
+ text-shadow:2px 2px #06102e
+}
+
+.menuCircle{
+ width:58px;height:58px;
+ margin:auto auto 5px;
+ border:3px solid #70e8ff;
+ border-radius:50%;
+ background:radial-gradient(circle,#4c9bb0,#174d76);
+ display:flex;align-items:center;justify-content:center;
+ font-size:27px;
+ box-shadow:0 0 0 4px rgba(0,0,0,.18)
+}
+
+#menuTitle{
+ margin-top:8px;
+ font-size:23px;
+ font-weight:900;
+ text-shadow:3px 3px #170c3c
+}
+
+#worldName{
+ width:280px;height:40px;
+ margin-top:8px;
+ border:3px solid #91a800;
+ border-radius:7px;
+ background:#fff;
+ color:#222;
+ text-align:center;
+ font-weight:bold;
+ font-size:16px;
+ outline:none
+}
+
+#newWorld{
+ margin-top:7px;
+ color:#d8ff70;
+ font-size:12px;
+ font-weight:bold;
+ text-shadow:2px 2px #16440d
+}
+
+#enterWorld{
+ margin-top:5px;
+ min-width:145px;height:40px;
+ border:3px solid #ffd638;
+ border-radius:9px;
+ background:linear-gradient(#ffc13b,#ef8508);
+ color:white;
+ font-size:16px;
+ font-weight:900;
+ text-shadow:2px 2px #9c4d00;
+ box-shadow:0 4px #9c4d00;
+ cursor:pointer
+}
+
+#enterWorld:active{
+ transform:translateY(3px);
+ box-shadow:0 1px #9c4d00
+}
+
+/* PIXEL POSTAĆ W MENU */
+
+#menuCharacter{
+ position:absolute;
+ right:35px;
+ bottom:75px;
+ width:210px;
+ height:235px;
+ image-rendering:pixelated;
+ filter:drop-shadow(0 10px 7px rgba(0,0,0,.3))
+}
+
+#menuHelp{
+ position:absolute;
+ right:5px;
+ bottom:150px;
+ padding:8px 12px;
+ background:#5aa5d4;
+ border:3px solid #9cecff;
+ border-radius:7px;
+ font-size:11px;
+ font-weight:bold
+}
+
+#menuBottom{
+ position:absolute;
+ left:0;right:0;bottom:0;
+ height:68px;
+ display:flex;
+ background:linear-gradient(#91df00,#5aac00);
+ border-top:3px solid #d8ff57
+}
+
+.menuButton{
+ flex:1;
+ max-width:180px;
+ border:1px solid #b5ed20;
+ background:linear-gradient(#91e000,#62b600);
+ color:#294900;
+ font-weight:900;
+ font-size:10px;
+ cursor:pointer
+}
+
+.menuButton span{
+ display:block;
+ font-size:22px;
+ margin-bottom:2px
+}
+
+.menuButton.active{
+ background:linear-gradient(#b8ff2c,#78ce00)
+}
+
+/* ================= GAME UI ================= */
+
+#gameUI{
+ position:fixed;inset:0;z-index:10;pointer-events:none
+}
+
+#topUI{
+ position:absolute;
+ left:12px;right:12px;top:12px;
+ display:flex;justify-content:space-between
 }
 
 .panel{
  background:rgba(20,25,35,.82);
- border:3px solid rgba(255,255,255,.18);
- border-radius:12px;
- box-shadow:0 5px 18px rgba(0,0,0,.25);
+ border:3px solid rgba(255,255,255,.2);
+ border-radius:10px;
  color:white;
+ padding:8px 11px;
+ box-shadow:0 4px 15px rgba(0,0,0,.25)
 }
 
-#info{
- padding:9px 12px;
- font-size:14px;
- line-height:1.45;
+#gameButtons{
+ display:flex;gap:6px;pointer-events:auto
 }
 
-#buttons{
- display:flex;
- gap:7px;
- pointer-events:auto;
-}
-
-button{
- border:0;
+.uiButton{
+ border:2px solid white;
+ border-radius:8px;
+ background:#303a49;
  color:white;
- background:#303846;
- border-radius:9px;
- padding:9px 12px;
+ padding:8px 11px;
  font-weight:bold;
- cursor:pointer;
- box-shadow:0 3px 0 #1c222b;
+ cursor:pointer
 }
 
-button:active{
- transform:translateY(2px);
- box-shadow:0 1px 0 #1c222b;
-}
-
-#inventory{
+#hotbar{
  position:absolute;
- bottom:15px;
+ bottom:10px;
  left:50%;
  transform:translateX(-50%);
  display:flex;
- gap:6px;
- pointer-events:auto;
+ gap:5px;
+ pointer-events:auto
 }
 
 .slot{
- width:58px;
- height:58px;
- background:rgba(25,30,40,.88);
- border:3px solid rgba(255,255,255,.18);
- border-radius:10px;
+ width:55px;height:55px;
+ background:#20262e;
+ border:3px solid #555;
  position:relative;
  display:flex;
  align-items:center;
  justify-content:center;
- cursor:pointer;
+ cursor:pointer
 }
 
 .slot.selected{
  border-color:#ffe66d;
- box-shadow:0 0 0 2px rgba(255,230,109,.25);
+ transform:translateY(-4px)
 }
 
-.slot .block{
- width:27px;
- height:27px;
- image-rendering:pixelated;
+.blockIcon{
+ width:29px;height:29px
 }
 
-.slot span{
- position:absolute;
- right:5px;
- bottom:3px;
- color:white;
- font-size:12px;
- font-weight:bold;
- text-shadow:1px 1px #000;
-}
-
-.dirt{background:#8b5a32;border-top:5px solid #55a83e}
+.dirt{background:#8b5a32;border-top:6px solid #53aa3f}
 .stone{background:#777}
-.wood{background:#9b6335}
+.wood{background:#9a6232}
 .sand{background:#d8bd70}
 
-#mobileControls{
+.count{
  position:absolute;
- left:14px;
- right:14px;
- bottom:92px;
- display:flex;
- justify-content:space-between;
- pointer-events:none;
-}
-
-.moveButtons{
- display:flex;
- gap:10px;
-}
-
-.control{
- width:68px;
- height:68px;
- border-radius:14px;
- background:rgba(30,35,45,.72);
- border:3px solid rgba(255,255,255,.18);
- color:white;
- font-size:28px;
- display:flex;
- align-items:center;
- justify-content:center;
- pointer-events:auto;
- touch-action:none;
-}
-
-#jumpBtn{
- pointer-events:auto;
+ right:4px;bottom:2px;
+ font-size:12px;font-weight:bold
 }
 
 #message{
  position:absolute;
- top:75px;
- left:50%;
+ left:50%;bottom:78px;
  transform:translateX(-50%);
- background:rgba(15,20,25,.88);
- color:white;
- padding:10px 18px;
- border-radius:10px;
+ background:rgba(0,0,0,.75);
+ color:white;padding:8px 15px;
+ border-radius:8px;
  opacity:0;
- transition:opacity .2s;
- font-weight:bold;
+ transition:.2s
 }
 
-/* SETTINGS */
-
-#settingsOverlay{
- position:fixed;
- inset:0;
- background:rgba(0,0,0,.62);
+#mobileControls{
+ position:absolute;
+ left:12px;bottom:78px;
  display:none;
+ gap:8px;
+ pointer-events:auto
+}
+
+.mobileButton{
+ width:62px;height:62px;
+ border:3px solid white;
+ border-radius:12px;
+ background:rgba(20,25,35,.8);
+ color:white;
+ display:flex;
  align-items:center;
  justify-content:center;
- z-index:50;
- pointer-events:auto;
+ font-size:25px;
+ font-weight:bold
+}
+
+#jumpButton{
+ position:absolute;
+ right:12px;bottom:78px;
+ display:none;
+ pointer-events:auto
+}
+
+/* ================= SETTINGS ================= */
+
+#settingsOverlay{
+ position:fixed;inset:0;z-index:200;
+ display:none;
+ align-items:center;justify-content:center;
+ background:rgba(0,0,0,.75);
+ pointer-events:auto
 }
 
 #settings{
- width:min(920px,94vw);
+ width:min(850px,95vw);
  height:min(650px,90vh);
- background:#202631;
- color:white;
- border:3px solid #566071;
- border-radius:16px;
- box-shadow:0 20px 60px rgba(0,0,0,.55);
- display:flex;
- overflow:hidden;
-}
-
-#settingsSide{
- width:190px;
- background:#171c24;
- padding:12px;
+ background:#202731;
+ border:3px solid white;
+ border-radius:12px;
+ box-shadow:10px 10px #000;
  display:flex;
  flex-direction:column;
- gap:7px;
+ color:white
 }
 
-.settingsTab{
- text-align:left;
- background:#252c38;
- padding:11px;
+#settingsHeader{
+ padding:12px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ background:#2b3441;
+ border-bottom:2px solid #555
 }
 
-.settingsTab.active{
- background:#3b4658;
- border-left:4px solid #ffe66d;
+#settingsHeader h2{margin:0}
+
+#closeSettings{
+ width:40px;height:40px;
+ background:#9d2525;
+ color:white;
+ border:2px solid white;
+ font-weight:bold;
+ cursor:pointer
 }
 
-#settingsContent{
+#settingsBody{
  flex:1;
- padding:20px;
- overflow:auto;
+ min-height:0;
+ display:flex
 }
 
-.settingsPage{
- display:none;
+#tabs{
+ width:180px;
+ padding:8px;
+ background:#151a21;
+ border-right:2px solid #555;
+ overflow:auto
 }
 
-.settingsPage.active{
- display:block;
+.tab{
+ width:100%;
+ padding:10px 7px;
+ margin-bottom:5px;
+ background:#242c36;
+ color:white;
+ border:2px solid #4e5966;
+ text-align:left;
+ cursor:pointer;
+ font-weight:bold
 }
 
-.settingsPage h2{
- margin-top:0;
+.tab.active{
+ background:#414d5d;
+ border-color:white
 }
+
+#pages{
+ flex:1;
+ padding:15px;
+ overflow:auto
+}
+
+.page{display:none}
+.page.active{display:block}
 
 .option{
- background:#29313d;
- padding:12px;
- border-radius:10px;
+ background:#29323e;
+ border:2px solid #424d5b;
+ border-radius:8px;
+ padding:11px;
  margin:8px 0;
  display:flex;
  justify-content:space-between;
  align-items:center;
- gap:15px;
+ gap:10px
 }
 
 .option small{
  display:block;
- color:#aeb7c5;
- margin-top:4px;
+ color:#aeb8c5;
+ margin-top:3px
 }
 
 .switch{
- width:48px;
- height:27px;
+ width:48px;height:26px;
  background:#555;
- border-radius:20px;
+ border:2px solid white;
  position:relative;
  cursor:pointer;
- flex:none;
+ flex:none
 }
 
 .switch:after{
  content:"";
  position:absolute;
- width:21px;
- height:21px;
- top:3px;
- left:3px;
- border-radius:50%;
- background:white;
- transition:.2s;
+ width:18px;height:18px;
+ left:2px;top:2px;
+ background:white
 }
 
-.switch.on{
- background:#4caf50;
-}
-
-.switch.on:after{
- left:24px;
-}
+.switch.on{background:#299043}
+.switch.on:after{left:24px}
 
 select,input[type=range]{
- accent-color:#ffe66d;
+ accent-color:#ffe66d
 }
 
 select{
- background:#171c24;
+ background:#151a21;
  color:white;
- border:1px solid #555;
- padding:7px;
- border-radius:7px;
+ border:2px solid white;
+ padding:6px
 }
 
 .helpBox{
- background:#29313d;
- padding:14px;
- border-radius:10px;
- line-height:1.6;
- margin-bottom:10px;
-}
-
-#settingsBottom{
- margin-top:18px;
- display:flex;
- gap:8px;
- flex-wrap:wrap;
+ background:#151a21;
+ border:2px solid #465260;
+ padding:12px;
+ line-height:1.55;
+ margin-bottom:8px
 }
 
 @media(max-width:650px){
- #settings{
-  width:96vw;
-  height:92vh;
- }
-
- #settingsSide{
-  width:145px;
- }
-
- .settingsTab{
-  font-size:12px;
-  padding:9px;
- }
-
- #inventory{
-  bottom:8px;
- }
-
- .slot{
-  width:49px;
-  height:49px;
- }
-
- #mobileControls{
-  bottom:70px;
- }
-
- .control{
-  width:60px;
-  height:60px;
- }
-}
-
-@media(max-width:480px){
- #settingsSide{
-  width:115px;
- }
-
- #settingsSide .settingsTab{
-  font-size:10px;
- }
-
- #info{
-  font-size:11px;
- }
-
- #buttons button{
-  padding:7px 8px;
- }
+ #menuTop{gap:4px}
+ .menuIcon{width:62px;font-size:8px}
+ .menuCircle{width:48px;height:48px;font-size:21px}
+ #menuTitle{font-size:19px}
+ #menuCharacter{right:-38px;bottom:70px;transform:scale(.72);transform-origin:bottom right}
+ #menuHelp{right:4px;bottom:120px;transform:scale(.8);transform-origin:right bottom}
+ #menuBottom{height:61px}
+ .menuButton{font-size:8px}
+ #mobileControls{display:flex}
+ #jumpButton{display:flex}
+ #tabs{width:125px}
+ .tab{font-size:10px}
+ .option{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
@@ -381,353 +464,333 @@ select{
 
 <canvas id="game"></canvas>
 
-<div id="ui">
+<!-- ================= MENU ================= -->
 
- <div id="topbar">
+<div id="mainMenu">
 
-  <div id="info" class="panel">
+ <div class="wave wave1"></div>
+ <div class="wave wave2"></div>
+ <div class="wave wave3"></div>
+
+ <div id="menuContent">
+
+  <div id="menuTop">
+
+   <div class="menuIcon">
+    <div class="menuCircle">👥</div>
+    AKTYWNE ŚWIATY
+   </div>
+
+   <div class="menuIcon">
+    <div class="menuCircle">◷</div>
+    OSTATNIO
+   </div>
+
+   <div class="menuIcon">
+    <div class="menuCircle">🍀</div>
+    BONUS DNIA
+   </div>
+
+   <div class="menuIcon">
+    <div class="menuCircle">♛</div>
+    ŚWIAT TYGODNIA
+   </div>
+
+   <div class="menuIcon">
+    <div class="menuCircle">♥</div>
+    ULUBIONE
+   </div>
+
+  </div>
+
+  <div id="menuTitle">NAZWA ŚWIATA:</div>
+
+  <input
+   id="worldName"
+   value="Uptodown"
+   maxlength="20"
+  >
+
+  <div id="newWorld">Nowy świat.</div>
+
+  <button id="enterWorld">WEJDŹ</button>
+
+  <canvas id="menuCharacter"></canvas>
+
+  <div id="menuHelp">HELP</div>
+
+  <div id="menuBottom">
+
+   <button class="menuButton">
+    <span>◉</span>NEWS
+   </button>
+
+   <button class="menuButton">
+    <span>♟</span>ACCOUNT
+   </button>
+
+   <button class="menuButton active">
+    <span>🪐</span>WORLDS
+   </button>
+
+   <button class="menuButton">
+    <span>▶</span>SOCIAL
+   </button>
+
+   <button class="menuButton">
+    <span>◆</span>SHOP
+   </button>
+
+  </div>
+
+ </div>
+</div>
+
+
+<!-- ================= GAME UI ================= -->
+
+<div id="gameUI">
+
+ <div id="topUI">
+
+  <div class="panel">
    🌍 Pixel World<br>
    <span id="coords">X: 0 | Y: 0</span>
   </div>
 
-  <div id="buttons">
-   <button id="saveBtn">💾</button>
-   <button id="settingsBtn">⚙️</button>
+  <div id="gameButtons">
+   <button class="uiButton" id="saveButton">💾</button>
+   <button class="uiButton" id="settingsButton">⚙️</button>
   </div>
 
  </div>
 
  <div id="message"></div>
 
- <div id="inventory">
+ <div id="hotbar">
 
   <div class="slot selected" data-block="dirt">
-   <div class="block dirt"></div>
-   <span id="count-dirt">20</span>
+   <div class="blockIcon dirt"></div>
+   <span class="count" id="count-dirt">20</span>
   </div>
 
   <div class="slot" data-block="stone">
-   <div class="block stone"></div>
-   <span id="count-stone">10</span>
+   <div class="blockIcon stone"></div>
+   <span class="count" id="count-stone">10</span>
   </div>
 
   <div class="slot" data-block="wood">
-   <div class="block wood"></div>
-   <span id="count-wood">10</span>
+   <div class="blockIcon wood"></div>
+   <span class="count" id="count-wood">10</span>
   </div>
 
   <div class="slot" data-block="sand">
-   <div class="block sand"></div>
-   <span id="count-sand">10</span>
+   <div class="blockIcon sand"></div>
+   <span class="count" id="count-sand">10</span>
   </div>
 
  </div>
 
  <div id="mobileControls">
-
-  <div class="moveButtons">
-   <div class="control" id="leftBtn">◀</div>
-   <div class="control" id="rightBtn">▶</div>
-  </div>
-
-  <div class="control" id="jumpBtn">▲</div>
-
+  <div class="mobileButton" id="leftButton">◀</div>
+  <div class="mobileButton" id="rightButton">▶</div>
  </div>
+
+ <div class="mobileButton" id="jumpButton">▲</div>
 
 </div>
 
 
-<!-- SETTINGS -->
+<!-- ================= SETTINGS ================= -->
 
 <div id="settingsOverlay">
 
  <div id="settings">
 
-  <div id="settingsSide">
-
-   <button class="settingsTab active" data-page="gamePage">🎮 Gra</button>
-   <button class="settingsTab" data-page="graphicsPage">🎨 Grafika</button>
-   <button class="settingsTab" data-page="animationsPage">✨ Animacje</button>
-   <button class="settingsTab" data-page="soundPage">🔊 Dźwięk</button>
-   <button class="settingsTab" data-page="controlsPage">⌨ Sterowanie</button>
-   <button class="settingsTab" data-page="savePage">💾 Zapis</button>
-   <button class="settingsTab" data-page="helpPage">🆘 Pomoc</button>
-   <button class="settingsTab" data-page="infoPage">ℹ Informacje</button>
-
+  <div id="settingsHeader">
+   <h2>⚙ USTAWIENIA PIXEL WORLD</h2>
+   <button id="closeSettings">✕</button>
   </div>
 
-  <div id="settingsContent">
+  <div id="settingsBody">
 
-   <div class="settingsPage active" id="gamePage">
+   <div id="tabs">
 
-    <h2>🎮 Gra</h2>
-
-    <div class="option">
-     <div>
-      Automatyczny zapis
-      <small>Automatycznie zapisuje świat co 2 minuty.</small>
-     </div>
-     <div class="switch" id="autoSaveSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>
-      Sterowanie mobilne
-      <small>Pokaż przyciski ruchu na ekranie.</small>
-     </div>
-     <div class="switch" id="mobileSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>
-      Animacje
-      <small>Włącza animacje postaci i świata.</small>
-     </div>
-     <div class="switch" id="animationsSwitch"></div>
-    </div>
+    <button class="tab active" data-page="gamePage">🎮 Gra</button>
+    <button class="tab" data-page="graphicsPage">🎨 Grafika</button>
+    <button class="tab" data-page="animationPage">✨ Animacje</button>
+    <button class="tab" data-page="soundPage">🔊 Dźwięk</button>
+    <button class="tab" data-page="controlsPage">⌨ Sterowanie</button>
+    <button class="tab" data-page="savePage">💾 Zapis</button>
+    <button class="tab" data-page="helpPage">🆘 Pomoc</button>
+    <button class="tab" data-page="infoPage">ℹ Informacje</button>
 
    </div>
 
+   <div id="pages">
 
-   <div class="settingsPage" id="graphicsPage">
+    <div class="page active" id="gamePage">
+     <h3>🎮 Gra</h3>
 
-    <h2>🎨 Grafika</h2>
-
-    <div class="option">
-     <div>
-      Jakość grafiki
-      <small>Wpływa na wydajność gry.</small>
+     <div class="option">
+      <div>Automatyczny zapis
+       <small>Zapis co 2 minuty.</small>
+      </div>
+      <div class="switch" id="autoSaveSwitch"></div>
      </div>
 
-     <select id="qualitySelect">
-      <option value="low">Niska</option>
-      <option value="medium">Średnia</option>
-      <option value="high">Wysoka</option>
-     </select>
-    </div>
-
-    <div class="option">
-     <div>
-      Pixel Perfect
-      <small>Zachowuje ostry pixel-art.</small>
+     <div class="option">
+      <div>Przyciski mobilne
+       <small>Pokaż sterowanie na ekranie.</small>
+      </div>
+      <div class="switch" id="mobileSwitch"></div>
      </div>
-     <div class="switch" id="pixelPerfectSwitch"></div>
     </div>
 
-    <div class="option">
-     <div>
-      Animowana woda
-      <small>Delikatne ruchy powierzchni wody.</small>
-     </div>
-     <div class="switch" id="waterSwitch"></div>
-    </div>
+    <div class="page" id="graphicsPage">
+     <h3>🎨 Grafika</h3>
 
-    <div class="option">
-     <div>
-      Limit FPS
-      <small>Maksymalna liczba klatek na sekundę.</small>
+     <div class="option">
+      <div>Pixel Perfect</div>
+      <div class="switch on" id="pixelSwitch"></div>
      </div>
 
-     <select id="fpsSelect">
-      <option value="30">30 FPS</option>
-      <option value="60">60 FPS</option>
-      <option value="90">90 FPS</option>
-      <option value="120">120 FPS</option>
-     </select>
-    </div>
-
-   </div>
-
-
-   <div class="settingsPage" id="animationsPage">
-
-    <h2>✨ Animacje postaci</h2>
-
-    <div class="option">
-     <div>Animacja chodzenia</div>
-     <div class="switch" id="walkAnimSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>Animacja bezczynności</div>
-     <div class="switch" id="idleAnimSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>Mruganie oczami</div>
-     <div class="switch" id="blinkAnimSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>Animacja skoku</div>
-     <div class="switch" id="jumpAnimSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>Animacja lądowania</div>
-     <div class="switch" id="landAnimSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>Ruch włosów</div>
-     <div class="switch" id="hairAnimSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>Pył podczas chodzenia</div>
-     <div class="switch" id="dustAnimSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>Cień postaci</div>
-     <div class="switch" id="shadowAnimSwitch"></div>
-    </div>
-
-    <div class="option">
-     <div>
-      Prędkość animacji
+     <div class="option">
+      <div>Animowana woda</div>
+      <div class="switch on" id="waterSwitch"></div>
      </div>
 
-     <input
-      id="animationSpeedRange"
-      type="range"
-      min=".5"
-      max="2"
-      step=".1"
-     >
+     <div class="option">
+      <div>Limit FPS</div>
+      <select id="fpsSelect">
+       <option value="30">30 FPS</option>
+       <option value="60" selected>60 FPS</option>
+       <option value="90">90 FPS</option>
+       <option value="120">120 FPS</option>
+      </select>
+     </div>
     </div>
 
-   </div>
+    <div class="page" id="animationPage">
+     <h3>✨ Animacje postaci</h3>
 
+     <div class="option">
+      <div>Chodzenie</div>
+      <div class="switch on" id="walkSwitch"></div>
+     </div>
 
-   <div class="settingsPage" id="soundPage">
+     <div class="option">
+      <div>Animacja bezczynności</div>
+      <div class="switch on" id="idleSwitch"></div>
+     </div>
 
-    <h2>🔊 Dźwięk</h2>
+     <div class="option">
+      <div>Mruganie</div>
+      <div class="switch on" id="blinkSwitch"></div>
+     </div>
 
-    <div class="option">
-     <div>Dźwięki</div>
-     <div class="switch" id="soundSwitch"></div>
+     <div class="option">
+      <div>Skok i lądowanie</div>
+      <div class="switch on" id="jumpSwitch"></div>
+     </div>
+
+     <div class="option">
+      <div>Ruch włosów</div>
+      <div class="switch on" id="hairSwitch"></div>
+     </div>
+
+     <div class="option">
+      <div>Pył podczas chodzenia</div>
+      <div class="switch on" id="dustSwitch"></div>
+     </div>
+
+     <div class="option">
+      <div>Cień</div>
+      <div class="switch on" id="shadowSwitch"></div>
+     </div>
+
+     <div class="option">
+      <div>Prędkość animacji</div>
+      <input id="animationSpeed" type="range" min=".5" max="2" step=".1" value="1">
+     </div>
     </div>
 
-    <div class="option">
-     <div>Muzyka</div>
-     <div class="switch" id="musicSwitch"></div>
+    <div class="page" id="soundPage">
+     <h3>🔊 Dźwięk</h3>
+
+     <div class="option">
+      <div>Dźwięki</div>
+      <div class="switch on" id="soundSwitch"></div>
+     </div>
+
+     <div class="option">
+      <div>Głośność</div>
+      <input id="volume" type="range" min="0" max="1" step=".05" value=".75">
+     </div>
     </div>
 
-    <div class="option">
-     <div>Głośność</div>
+    <div class="page" id="controlsPage">
+     <h3>⌨ Sterowanie</h3>
 
-     <input
-      id="volumeRange"
-      type="range"
-      min="0"
-      max="1"
-      step=".05"
-     >
+     <div class="helpBox">
+      <b>A / ←</b> — lewo<br>
+      <b>D / →</b> — prawo<br>
+      <b>W / ↑ / Spacja</b> — skok<br>
+      <b>LPM</b> — kopanie<br>
+      <b>PPM</b> — stawianie bloku<br>
+      <b>ESC</b> — zamknięcie ustawień
+     </div>
     </div>
 
-   </div>
+    <div class="page" id="savePage">
+     <h3>💾 Zapis</h3>
 
+     <div class="helpBox">
+      Świat zapisuje się w pamięci przeglądarki.
+     </div>
 
-   <div class="settingsPage" id="controlsPage">
-
-    <h2>⌨ Sterowanie</h2>
-
-    <div class="helpBox">
-     <b>A / ←</b> — ruch w lewo<br>
-     <b>D / →</b> — ruch w prawo<br>
-     <b>W / ↑ / Spacja</b> — skok<br>
-     <b>Lewy przycisk myszy</b> — kopanie<br>
-     <b>Prawy przycisk myszy</b> — stawianie bloku<br>
-     <b>ESC</b> — zamknięcie ustawień
+     <button class="uiButton" id="saveNow">💾 Zapisz teraz</button>
+     <button class="uiButton" id="newWorld">🌍 Nowy świat</button>
+     <button class="uiButton" id="deleteSave">🗑 Usuń zapis</button>
     </div>
 
-   </div>
+    <div class="page" id="helpPage">
+     <h3>🆘 Pomoc</h3>
 
+     <div class="helpBox">
+      <b>⛏ Kopanie:</b> kliknij lewym przyciskiem myszy na blok.
+     </div>
 
-   <div class="settingsPage" id="savePage">
+     <div class="helpBox">
+      <b>🧱 Budowanie:</b> kliknij prawym przyciskiem myszy.
+     </div>
 
-    <h2>💾 Zapis gry</h2>
+     <div class="helpBox">
+      <b>📱 Telefon:</b> używaj przycisków na ekranie.
+     </div>
 
-    <div class="helpBox">
-     Twój świat jest zapisywany w pamięci przeglądarki.
-     Nie usuwaj danych strony, jeśli chcesz zachować zapis.
+     <div class="helpBox">
+      Możesz wybrać blok na pasku znajdującym się na dole ekranu.
+     </div>
     </div>
 
-    <div id="settingsBottom">
+    <div class="page" id="infoPage">
+     <h3>ℹ Informacje</h3>
 
-     <button id="saveFromSettings">
-      💾 Zapisz teraz
-     </button>
-
-     <button id="resetBtn">
-      🌍 Nowy świat
-     </button>
-
-     <button id="deleteSaveBtn">
-      🗑 Usuń zapis
-     </button>
-
+     <div class="helpBox">
+      <b>PIXEL WORLD</b><br><br>
+      Pixel-artowa gra sandboxowa 2D.
+      <br><br>
+      🌳 drzewa<br>
+      🌊 woda<br>
+      🏜 piasek<br>
+      🪨 kamień<br>
+      🌱 trawa<br>
+      ✨ animowana postać<br>
+      ☁️ chmury
+     </div>
     </div>
 
-   </div>
-
-
-   <div class="settingsPage" id="helpPage">
-
-    <h2>🆘 Pomoc</h2>
-
-    <div class="helpBox">
-     <b>🌍 Świat</b><br>
-     Poruszaj się po świecie, skacz i odkrywaj teren.
-    </div>
-
-    <div class="helpBox">
-     <b>⛏ Kopanie</b><br>
-     Kliknij lewym przyciskiem myszy na blok,
-     aby go wykopać.
-    </div>
-
-    <div class="helpBox">
-     <b>🧱 Budowanie</b><br>
-     Kliknij prawym przyciskiem myszy,
-     aby postawić wybrany blok.
-    </div>
-
-    <div class="helpBox">
-     <b>📱 Telefon</b><br>
-     Na telefonie możesz używać przycisków
-     znajdujących się na ekranie.
-    </div>
-
-   </div>
-
-
-   <div class="settingsPage" id="infoPage">
-
-    <h2>ℹ Informacje</h2>
-
-    <div class="helpBox">
-     <b>Pixel World</b><br><br>
-     Mała pixel-artowa gra sandboxowa
-     inspirowana klasycznymi grami 2D.
-    </div>
-
-    <div class="helpBox">
-     W grze znajdziesz między innymi:
-     <br>🌳 drzewa
-     <br>🌊 wodę
-     <br>🏜 piasek
-     <br>🪨 kamień
-     <br>🌱 trawę
-     <br>✨ animowaną postać
-     <br>☁️ chmury
-    </div>
-
-   </div>
-
-   <div id="settingsBottom">
-    <button id="closeSettingsBottom">✕ Zamknij</button>
    </div>
 
   </div>
@@ -740,86 +803,283 @@ select{
 <script>
 
 /* =====================================================
-   USTAWIENIA
-===================================================== */
-
-const defaultSettings={
- mobile:true,
- animations:true,
- autoSave:true,
- quality:"medium",
- pixelPerfect:true,
- water:true,
- fps:60,
- sound:true,
- music:false,
- volume:.75,
-
- walkAnim:true,
- idleAnim:true,
- blinkAnim:true,
- jumpAnim:true,
- landAnim:true,
- hairAnim:true,
- dustAnim:true,
- shadowAnim:true,
-
- animationSpeed:1
-};
-
-let settings={
- ...defaultSettings
-};
-
-
-/* =====================================================
    CANVAS
 ===================================================== */
 
-const canvas=
- document.getElementById("game");
-
-const ctx=
- canvas.getContext("2d");
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
 let W=innerWidth;
 let H=innerHeight;
 
 function resize(){
-
  W=innerWidth;
  H=innerHeight;
 
- const dpr=
-  Math.min(
-   devicePixelRatio||1,
-   2
-  );
+ const dpr=Math.min(devicePixelRatio||1,2);
 
- canvas.width=
-  Math.floor(W*dpr);
-
- canvas.height=
-  Math.floor(H*dpr);
-
+ canvas.width=W*dpr;
+ canvas.height=H*dpr;
  canvas.style.width=W+"px";
  canvas.style.height=H+"px";
 
- ctx.setTransform(
-  dpr,0,0,dpr,0,0
- );
-
+ ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 
 addEventListener("resize",resize);
 
 
 /* =====================================================
-   ŚWIAT
+   SETTINGS
+===================================================== */
+
+const settings={
+ autoSave:true,
+ mobile:true,
+ pixelPerfect:true,
+ water:true,
+ fps:60,
+ walk:true,
+ idle:true,
+ blink:true,
+ jump:true,
+ hair:true,
+ dust:true,
+ shadow:true,
+ animationSpeed:1,
+ sound:true,
+ volume:.75
+};
+
+function saveSettings(){
+ localStorage.setItem(
+  "PIXEL_WORLD_SETTINGS",
+  JSON.stringify(settings)
+ );
+}
+
+function loadSettings(){
+ try{
+  const data=JSON.parse(
+   localStorage.getItem("PIXEL_WORLD_SETTINGS")
+  );
+
+  if(data)
+   Object.assign(settings,data);
+
+ }catch{}
+}
+
+loadSettings();
+
+
+/* =====================================================
+   MENU
+===================================================== */
+
+const mainMenu=
+ document.getElementById("mainMenu");
+
+const menuCharacter=
+ document.getElementById("menuCharacter");
+
+const menuCtx=
+ menuCharacter.getContext("2d");
+
+let menuTime=0;
+
+function resizeMenuCanvas(){
+
+ const dpr=Math.min(devicePixelRatio||1,2);
+
+ menuCharacter.width=210*dpr;
+ menuCharacter.height=235*dpr;
+
+ menuCtx.setTransform(
+  dpr,0,0,dpr,0,0
+ );
+
+}
+
+function drawMenuCharacter(){
+
+ const c=menuCtx;
+ c.clearRect(0,0,210,235);
+
+ const bob=
+  Math.sin(menuTime*.003)*3;
+
+ const walk=
+  Math.sin(menuTime*.006)*7;
+
+ c.save();
+
+ c.translate(105,205+bob);
+
+ /* cień */
+
+ c.fillStyle="rgba(0,0,0,.25)";
+ c.fillRect(-60,5,120,8);
+
+ /* nogi */
+
+ c.fillStyle="#284c88";
+
+ c.fillRect(
+  -42+walk,
+  -75,
+  25,
+  70
+ );
+
+ c.fillRect(
+  17-walk,
+  -75,
+  25,
+  70
+ );
+
+ /* buty */
+
+ c.fillStyle="#e8e8e8";
+
+ c.fillRect(
+  -47+walk,
+  -12,
+  35,
+  12
+ );
+
+ c.fillRect(
+  12-walk,
+  -12,
+  35,
+  12
+ );
+
+ c.fillStyle="#b33b25";
+
+ c.fillRect(
+  -48+walk,
+  -5,
+  38,
+  8
+ );
+
+ c.fillRect(
+  10-walk,
+  -5,
+  38,
+  8
+ );
+
+ /* ciało */
+
+ c.fillStyle="#1d2631";
+ c.fillRect(-43,-145,86,72);
+
+ /* kurtka */
+
+ c.fillStyle="#3776bd";
+
+ c.fillRect(-55,-145,18,72);
+ c.fillRect(37,-145,18,72);
+
+ /* spodnie */
+
+ c.fillStyle="#214c8e";
+ c.fillRect(-43,-75,86,18);
+
+ /* głowa */
+
+ c.fillStyle="#e9ad7c";
+ c.fillRect(-53,-200,106,62);
+
+ /* włosy */
+
+ c.fillStyle="#75421c";
+ c.fillRect(-55,-211,110,25);
+ c.fillRect(-40,-224,80,18);
+
+ /* twarz */
+
+ c.fillStyle="#f1bc88";
+ c.fillRect(-45,-190,90,45);
+
+ /* oczy */
+
+ c.fillStyle="#fff";
+
+ c.fillRect(-35,-180,28,25);
+ c.fillRect(7,-180,28,25);
+
+ c.fillStyle="#0874c9";
+
+ c.fillRect(-29,-173,15,15);
+ c.fillRect(13,-173,15,15);
+
+ /* nos */
+
+ c.fillStyle="#d88f62";
+ c.fillRect(-3,-163,8,9);
+
+ /* uśmiech */
+
+ c.fillStyle="#222";
+ c.fillRect(-25,-148,50,8);
+
+ c.fillStyle="#f34b29";
+ c.fillRect(-5,-147,15,6);
+
+ /* ręce */
+
+ c.fillStyle="#e8ad7c";
+
+ c.save();
+ c.translate(-56,-135);
+ c.rotate(walk*.025);
+ c.fillRect(-12,0,24,55);
+ c.restore();
+
+ c.save();
+ c.translate(56,-135);
+ c.rotate(-walk*.025);
+ c.fillRect(-12,0,24,55);
+ c.restore();
+
+ /* blok trzymany przez postać */
+
+ c.fillStyle="#8b5a32";
+ c.fillRect(-95,-150,50,55);
+
+ c.fillStyle="#55ad3d";
+ c.fillRect(-95,-150,50,14);
+
+ c.fillStyle="#a36b38";
+ c.fillRect(-82,-135,7,7);
+ c.fillRect(-57,-120,6,7);
+
+ c.restore();
+}
+
+resizeMenuCanvas();
+
+
+/* zapis nazwy świata */
+
+const worldNameInput=
+ document.getElementById("worldName");
+
+worldNameInput.value=
+ localStorage.getItem("PIXEL_WORLD_NAME")||
+ "Uptodown";
+
+
+/* =====================================================
+   WORLD
 ===================================================== */
 
 const TILE=32;
-
 const WORLD_W=400;
 const WORLD_H=70;
 
@@ -837,21 +1097,12 @@ const BLOCK={
 let world=[];
 
 
-/* =====================================================
-   GENEROWANIE ŚWIATA
-===================================================== */
-
 function createWorld(){
 
- world=
-  Array.from(
-   {length:WORLD_H},
-   ()=>Array(
-    WORLD_W
-   ).fill(
-    BLOCK.air
-   )
-  );
+ world=Array.from(
+  {length:WORLD_H},
+  ()=>Array(WORLD_W).fill(BLOCK.air)
+ );
 
  const heights=[];
 
@@ -859,18 +1110,8 @@ function createWorld(){
 
  for(let x=0;x<WORLD_W;x++){
 
-  h+=
-   Math.floor(
-    Math.random()*3
-   )-1;
-
-  h=Math.max(
-   18,
-   Math.min(
-    32,
-    h
-   )
-  );
+  h+=Math.floor(Math.random()*3)-1;
+  h=Math.max(18,Math.min(31,h));
 
   heights[x]=h;
 
@@ -878,54 +1119,41 @@ function createWorld(){
 
    if(y===h)
     world[y][x]=BLOCK.grass;
-
    else if(y<h+4)
     world[y][x]=BLOCK.dirt;
-
    else
     world[y][x]=BLOCK.stone;
 
   }
-
  }
 
 
  /* piasek */
 
- for(let i=0;i<7;i++){
+ for(let i=0;i<8;i++){
 
   const x=
-   15+
+   10+
    Math.floor(
-    Math.random()*
-    (WORLD_W-30)
+    Math.random()*(WORLD_W-20)
    );
 
-  const width=
-   4+
-   Math.floor(
-    Math.random()*6
-   );
+  const size=
+   3+
+   Math.floor(Math.random()*5);
 
-  for(let dx=0;dx<width;dx++){
+  for(let dx=0;dx<size;dx++){
 
    const tx=x+dx;
 
-   if(
-    tx<0||
-    tx>=WORLD_W
-   )
+   if(tx>=WORLD_W)
     continue;
 
    const top=heights[tx];
 
    world[top][tx]=BLOCK.sand;
 
-   if(top+1<WORLD_H)
-    world[top+1][tx]=BLOCK.sand;
-
   }
-
  }
 
 
@@ -936,18 +1164,12 @@ function createWorld(){
   const cx=
    20+
    Math.floor(
-    Math.random()*
-    (WORLD_W-40)
+    Math.random()*(WORLD_W-40)
    );
 
   const width=
    3+
-   Math.floor(
-    Math.random()*3
-   );
-
-  const top=
-   heights[cx];
+   Math.floor(Math.random()*3);
 
   for(
    let dx=-Math.floor(width/2);
@@ -957,93 +1179,57 @@ function createWorld(){
 
    const x=cx+dx;
 
-   if(
-    x<1||
-    x>=WORLD_W-1
-   )
+   if(x<1||x>=WORLD_W-1)
     continue;
 
-   const ground=
-    heights[x];
+   const ground=heights[x];
 
-   if(
-    Math.abs(
-     ground-top
-    )<=2
-   ){
+   world[ground][x]=BLOCK.water;
 
-    world[ground][x]=BLOCK.water;
+   if(ground+1<WORLD_H)
+    world[ground+1][x]=BLOCK.water;
 
-    if(
-     ground+1<WORLD_H
-    )
-     world[ground+1][x]=BLOCK.water;
-
-    if(ground>0)
-     world[ground-1][x]=BLOCK.sand;
-
-   }
+   if(ground>0)
+    world[ground-1][x]=BLOCK.sand;
 
   }
-
  }
 
 
  /* drzewa */
 
- for(let i=0;i<45;i++){
+ for(let i=0;i<42;i++){
 
   const x=
    5+
    Math.floor(
-    Math.random()*
-    (WORLD_W-10)
+    Math.random()*(WORLD_W-10)
    );
 
   const base=heights[x];
 
-  if(
-   world[base][x]!==BLOCK.grass
-  )
+  if(world[base][x]!==BLOCK.grass)
    continue;
 
-  const treeH=
+  const height=
    3+
-   Math.floor(
-    Math.random()*3
-   );
+   Math.floor(Math.random()*3);
 
-  for(
-   let y=1;
-   y<=treeH;
-   y++
-  ){
+  for(let y=1;y<=height;y++){
 
-   if(
-    base-y>=0
-   )
+   if(base-y>=0)
     world[base-y][x]=BLOCK.wood;
 
   }
 
-  const top=
-   base-treeH;
+  const top=base-height;
 
-  for(
-   let yy=-2;
-   yy<=2;
-   yy++
-  ){
+  for(let yy=-2;yy<=2;yy++){
 
-   for(
-    let xx=-2;
-    xx<=2;
-    xx++
-   ){
+   for(let xx=-2;xx<=2;xx++){
 
     if(
-     Math.abs(xx)+
-     Math.abs(yy)<=3
+     Math.abs(xx)+Math.abs(yy)<=3
     ){
 
      const tx=x+xx;
@@ -1059,14 +1245,32 @@ function createWorld(){
       world[ty][tx]=BLOCK.leaves;
 
     }
-
    }
-
   }
-
  }
-
 }
+
+
+/* =====================================================
+   PLAYER
+===================================================== */
+
+const player={
+ x:12*TILE,
+ y:0,
+ width:20,
+ height:40,
+ vx:0,
+ vy:0,
+ speed:1.85,
+ jump:8.2,
+ grounded:false,
+ direction:1,
+ anim:0,
+ land:0,
+ idle:0,
+ step:0
+};
 
 
 /* =====================================================
@@ -1079,23 +1283,16 @@ function findSpawn(){
 
  for(let y=0;y<WORLD_H;y++){
 
-  if(
-   world[y][x]!==BLOCK.air
-  ){
+  if(world[y][x]!==BLOCK.air){
 
-   player.x=
-    x*TILE+
-    6;
+   player.x=x*TILE+6;
 
    player.y=
     y*TILE-
-    player.height-
-    2;
+    player.height;
 
    return;
-
   }
-
  }
 
  player.x=12*TILE;
@@ -1104,110 +1301,42 @@ function findSpawn(){
 
 
 /* =====================================================
-   GRACZ
-===================================================== */
-
-const player={
- x:12*TILE,
- y:0,
-
- width:20,
- height:40,
-
- vx:0,
- vy:0,
-
- speed:1.85,
- jump:8.2,
-
- grounded:false,
- wasGrounded:false,
-
- direction:1,
-
- anim:0,
- landTimer:0,
- stepTimer:0,
- idleTime:0,
-
- blinkTime:0,
- blinkDuration:0,
-
- lookX:0,
- lookTarget:0
-};
-
-
-/* =====================================================
-   FIZYKA
+   PHYSICS
 ===================================================== */
 
 const gravity=.38;
-const friction=.78;
 
-
-/* =====================================================
-   KOLIZJA
-===================================================== */
-
-function solidAt(tx,ty){
+function solidAt(x,y){
 
  if(
-  tx<0||
-  tx>=WORLD_W||
-  ty<0||
-  ty>=WORLD_H
+  x<0||
+  x>=WORLD_W||
+  y<0||
+  y>=WORLD_H
  )
   return true;
 
- const id=
-  world[ty][tx];
+ const id=world[y][x];
 
- return(
-  id!==BLOCK.air&&
-  id!==BLOCK.water
- );
-
+ return id!==BLOCK.air&&id!==BLOCK.water;
 }
 
 
-function rectCollides(x,y,w,h){
+function collide(x,y,w,h){
 
- const left=
-  Math.floor(x/TILE);
+ const left=Math.floor(x/TILE);
+ const right=Math.floor((x+w-.01)/TILE);
+ const top=Math.floor(y/TILE);
+ const bottom=Math.floor((y+h-.01)/TILE);
 
- const right=
-  Math.floor(
-   (x+w-.001)/TILE
-  );
+ for(let yy=top;yy<=bottom;yy++){
 
- const top=
-  Math.floor(y/TILE);
+  for(let xx=left;xx<=right;xx++){
 
- const bottom=
-  Math.floor(
-   (y+h-.001)/TILE
-  );
-
- for(
-  let ty=top;
-  ty<=bottom;
-  ty++
- ){
-
-  for(
-   let tx=left;
-   tx<=right;
-   tx++
-  ){
-
-   if(
-    solidAt(tx,ty)
-   )
+   if(solidAt(xx,yy))
     return true;
 
   }
-
  }
 
  return false;
@@ -1215,198 +1344,141 @@ function rectCollides(x,y,w,h){
 
 
 /* =====================================================
-   RUCH GRACZA
+   CONTROLS
 ===================================================== */
 
 const keys={};
 
-addEventListener(
- "keydown",
- e=>{
+addEventListener("keydown",e=>{
 
-  keys[e.code]=true;
+ keys[e.code]=true;
 
-  if(
-   e.code==="Space"||
-   e.code==="ArrowUp"||
-   e.code==="KeyW"
-  )
-   e.preventDefault();
+ if(
+  e.code==="Space"||
+  e.code==="ArrowUp"
+ )
+  e.preventDefault();
 
- }
-);
+});
 
-addEventListener(
- "keyup",
- e=>{
-  keys[e.code]=false;
- }
-);
+addEventListener("keyup",e=>{
+ keys[e.code]=false;
+});
 
 
-let mobileLeft=false;
-let mobileRight=false;
-let mobileJump=false;
+let leftHeld=false;
+let rightHeld=false;
+let jumpHeld=false;
 
+function holdButton(id,setter){
 
-function bindHold(id,setter){
+ const el=document.getElementById(id);
 
- const el=
-  document.getElementById(id);
-
- const down=e=>{
+ el.addEventListener("pointerdown",e=>{
   e.preventDefault();
   setter(true);
- };
+ });
 
- const up=e=>{
-  e.preventDefault();
-  setter(false);
- };
-
- el.addEventListener(
-  "pointerdown",
-  down
- );
-
- el.addEventListener(
-  "pointerup",
-  up
- );
-
- el.addEventListener(
-  "pointercancel",
-  up
- );
-
- el.addEventListener(
-  "pointerleave",
-  up
- );
-
+ ["pointerup","pointercancel","pointerleave"]
+ .forEach(type=>{
+  el.addEventListener(type,e=>{
+   e.preventDefault();
+   setter(false);
+  });
+ });
 }
 
-bindHold(
- "leftBtn",
- v=>mobileLeft=v
+holdButton(
+ "leftButton",
+ v=>leftHeld=v
 );
 
-bindHold(
- "rightBtn",
- v=>mobileRight=v
+holdButton(
+ "rightButton",
+ v=>rightHeld=v
 );
 
-bindHold(
- "jumpBtn",
- v=>mobileJump=v
+holdButton(
+ "jumpButton",
+ v=>jumpHeld=v
 );
 
 
 /* =====================================================
-   UPDATE
+   UPDATE PLAYER
 ===================================================== */
 
 function updatePlayer(){
 
  const left=
-  keys.ArrowLeft||
   keys.KeyA||
-  mobileLeft;
+  keys.ArrowLeft||
+  leftHeld;
 
  const right=
-  keys.ArrowRight||
   keys.KeyD||
-  mobileRight;
+  keys.ArrowRight||
+  rightHeld;
 
  const jump=
-  keys.Space||
-  keys.ArrowUp||
   keys.KeyW||
-  mobileJump;
+  keys.ArrowUp||
+  keys.Space||
+  jumpHeld;
 
 
  if(left){
 
-  player.vx=
-   -player.speed;
-
+  player.vx=-player.speed;
   player.direction=-1;
 
  }
-
  else if(right){
 
-  player.vx=
-   player.speed;
-
+  player.vx=player.speed;
   player.direction=1;
 
  }
-
  else{
 
-  player.vx*=friction;
+  player.vx*=.78;
 
  }
 
 
- if(
-  jump&&
-  player.grounded
- ){
+ if(jump&&player.grounded){
 
-  player.vy=
-   -player.jump;
-
+  player.vy=-player.jump;
   player.grounded=false;
-
-  sound("jump");
-
+  playSound(430);
  }
 
 
  player.vy+=gravity;
 
- if(
-  player.vy>10
- )
+ if(player.vy>10)
   player.vy=10;
 
 
- /* poziomy */
-
- let nx=
-  player.x+
-  player.vx;
+ let nx=player.x+player.vx;
 
  if(
-  !rectCollides(
+  !collide(
    nx,
    player.y,
    player.width,
    player.height
   )
- ){
-
+ )
   player.x=nx;
-
- }
-
- else{
-
+ else
   player.vx=0;
 
- }
 
-
- /* pionowy */
-
- let ny=
-  player.y+
-  player.vy;
+ let ny=player.y+player.vy;
 
  if(
-  !rectCollides(
+  !collide(
    player.x,
    ny,
    player.width,
@@ -1418,50 +1490,27 @@ function updatePlayer(){
   player.grounded=false;
 
  }
-
  else{
 
   if(player.vy>0){
 
    player.y=
     Math.floor(
-     (player.y+
-      player.height)/
-     TILE
-    )*
-    TILE-
+     (player.y+player.height)/TILE
+    )*TILE-
     player.height;
 
-   if(
-    !player.grounded
-   ){
-
-    player.landTimer=.18;
-
-    spawnDust(
-     player.x+
-     player.width/2,
-     player.y+
-     player.height,
-     3
-    );
-
-   }
+   if(!player.grounded)
+    player.land=.2;
 
    player.grounded=true;
 
   }
-
   else{
 
    player.y=
-    Math.floor(
-     player.y/TILE
-    )*
-    TILE+
+    Math.floor(player.y/TILE)*TILE+
     TILE;
-
-   player.vy=0;
 
   }
 
@@ -1470,90 +1519,51 @@ function updatePlayer(){
  }
 
 
- if(
-  player.grounded
- ){
+ if(player.grounded){
 
-  if(
-   Math.abs(
-    player.vx
-   )>.15
-  ){
+  if(Math.abs(player.vx)>.15){
 
    player.anim+=
-    .18*
-    settings.animationSpeed;
+    .18*settings.animationSpeed;
 
-   player.stepTimer+=
-    Math.abs(player.vx);
+   player.step+=Math.abs(player.vx);
 
    if(
-    settings.dustAnim&&
-    settings.animations&&
-    player.stepTimer>25
+    settings.dust&&
+    player.step>28
    ){
 
     spawnDust(
-     player.x+
-     player.width/2,
-     player.y+
-     player.height,
-     1
+     player.x+player.width/2,
+     player.y+player.height,
+     2
     );
 
-    player.stepTimer=0;
-
+    player.step=0;
    }
 
   }
   else{
 
-   player.anim*=.85;
-   player.idleTime+=.016;
+   player.idle+=.016;
 
   }
 
  }
- else{
-
-  player.anim+=
-   .05*
-   settings.animationSpeed;
-
- }
 
 
- if(
-  player.landTimer>0
- )
-  player.landTimer-=.016;
+ if(player.land>0)
+  player.land-=.016;
 
 
- player.wasGrounded=
-  player.grounded;
-
-
- /* granice świata */
-
- player.x=
-  Math.max(
-   0,
-   Math.min(
-    WORLD_W*TILE-
-    player.width,
-    player.x
-   )
-  );
-
-
- player.y=
+ player.x=Math.max(
+  0,
   Math.min(
-   WORLD_H*TILE,
-   player.y
-  );
+   WORLD_W*TILE-player.width,
+   player.x
+  )
+ );
 
-
- /* kamera */
 
  camera.x=
   player.x+
@@ -1565,48 +1575,35 @@ function updatePlayer(){
   player.height/2-
   H/2;
 
- camera.x=
-  Math.max(
-   0,
-   Math.min(
-    Math.max(
-     0,
-     WORLD_W*TILE-W
-    ),
-    camera.x
-   )
-  );
 
- camera.y=
-  Math.max(
-   0,
-   Math.min(
-    Math.max(
-     0,
-     WORLD_H*TILE-H
-    ),
-    camera.y
-   )
-  );
+ camera.x=Math.max(
+  0,
+  Math.min(
+   Math.max(0,WORLD_W*TILE-W),
+   camera.x
+  )
+ );
+
+ camera.y=Math.max(
+  0,
+  Math.min(
+   Math.max(0,WORLD_H*TILE-H),
+   camera.y
+  )
+ );
 
 
- document.getElementById(
-  "coords"
- ).textContent=
+ document.getElementById("coords").textContent=
   "X: "+
-  Math.floor(
-   player.x/TILE
-  )+
+  Math.floor(player.x/TILE)+
   " | Y: "+
-  Math.floor(
-   player.y/TILE
-  );
+  Math.floor(player.y/TILE);
 
 }
 
 
 /* =====================================================
-   KAMERA
+   CAMERA
 ===================================================== */
 
 const camera={
@@ -1616,52 +1613,30 @@ const camera={
 
 
 /* =====================================================
-   CZĄSTECZKI
+   PARTICLES
 ===================================================== */
 
 let particles=[];
 
-
 function spawnDust(x,y,count){
 
- if(
-  !settings.dustAnim||
-  !settings.animations
- )
-  return;
-
- for(
-  let i=0;
-  i<count;
-  i++
- ){
+ for(let i=0;i<count;i++){
 
   particles.push({
-
-   x,
-   y,
-
-   vx:
-    (Math.random()-.5)*
-    1.2,
-
-   vy:
-    -Math.random()*
-    1.2,
-
-   life:.35+
-    Math.random()*.3
-
+   x:x,
+   y:y,
+   vx:(Math.random()-.5)*1.2,
+   vy:-Math.random()*1.2,
+   life:.4
   });
 
  }
-
 }
 
 
 function drawParticles(){
 
- ctx.save();
+ ctx.fillStyle="#b48d62";
 
  for(
   let i=particles.length-1;
@@ -1669,35 +1644,22 @@ function drawParticles(){
   i--
  ){
 
-  const p=
-   particles[i];
+  const p=particles[i];
 
   p.x+=p.vx;
   p.y+=p.vy;
   p.vy+=.05;
   p.life-=.016;
 
-  if(
-   p.life<=0
-  ){
+  if(p.life<=0){
 
-   particles.splice(
-    i,
-    1
-   );
-
+   particles.splice(i,1);
    continue;
 
   }
 
   ctx.globalAlpha=
-   Math.max(
-    0,
-    p.life*2
-   );
-
-  ctx.fillStyle=
-   "#b99669";
+   Math.max(0,p.life*2);
 
   ctx.fillRect(
    p.x-camera.x,
@@ -1708,433 +1670,214 @@ function drawParticles(){
 
  }
 
- ctx.restore();
+ ctx.globalAlpha=1;
 
 }
 
 
 /* =====================================================
-   BLOKI
+   DRAW BLOCK
 ===================================================== */
 
-function drawBlock(
- id,
- x,
- y,
- time
-){
+function drawBlock(id,x,y,time){
 
- const px=
-  x*TILE-camera.x;
-
- const py=
-  y*TILE-camera.y;
-
+ const px=x*TILE-camera.x;
+ const py=y*TILE-camera.y;
 
  if(id===BLOCK.grass){
 
-  ctx.fillStyle="#7a4e2c";
-  ctx.fillRect(
-   px,
-   py,
-   TILE,
-   TILE
-  );
+  ctx.fillStyle="#82532e";
+  ctx.fillRect(px,py,TILE,TILE);
 
-  ctx.fillStyle="#4fae42";
-  ctx.fillRect(
-   px,
-   py,
-   TILE,
-   8
-  );
+  ctx.fillStyle="#4cab3e";
+  ctx.fillRect(px,py,TILE,8);
 
-  ctx.fillStyle="#69c44e";
+  ctx.fillStyle="#6bc94f";
 
-  for(
-   let i=0;
-   i<4;
-   i++
-  ){
-
-   const gx=
-    px+
-    ((i*9+x*3)%TILE);
-
+  for(let i=0;i<4;i++)
    ctx.fillRect(
-    gx,
+    px+(i*9+x*3)%29,
     py-3,
     3,
     7
    );
 
-  }
-
  }
-
-
  else if(id===BLOCK.dirt){
 
   ctx.fillStyle="#80512d";
+  ctx.fillRect(px,py,TILE,TILE);
 
-  ctx.fillRect(
-   px,
-   py,
-   TILE,
-   TILE
-  );
+  ctx.fillStyle="#a26738";
 
-  ctx.fillStyle="#9a6337";
-
-  for(
-   let i=0;
-   i<4;
-   i++
-  ){
-
+  for(let i=0;i<4;i++)
    ctx.fillRect(
-    px+
-    ((i*11+x*5)%27),
-    py+
-    ((i*7+y*3)%27),
-    4,
-    4
+    px+(i*11+x*5)%27,
+    py+(i*7+y*3)%27,
+    4,4
    );
 
-  }
-
  }
-
-
  else if(id===BLOCK.stone){
 
   ctx.fillStyle="#70757b";
+  ctx.fillRect(px,py,TILE,TILE);
 
-  ctx.fillRect(
-   px,
-   py,
-   TILE,
-   TILE
-  );
+  ctx.fillStyle="#888d92";
 
-  ctx.fillStyle="#858a90";
-
-  for(
-   let i=0;
-   i<5;
-   i++
-  ){
-
+  for(let i=0;i<5;i++)
    ctx.fillRect(
-    px+
-    ((i*13+x*3)%28),
-    py+
-    ((i*9+y*5)%28),
-    4,
-    3
+    px+(i*13+x*3)%28,
+    py+(i*9+y*5)%28,
+    4,3
    );
 
-  }
-
  }
-
-
  else if(id===BLOCK.wood){
 
-  ctx.fillStyle="#86552d";
+  ctx.fillStyle="#87552d";
+  ctx.fillRect(px,py,TILE,TILE);
 
-  ctx.fillRect(
-   px,
-   py,
-   TILE,
-   TILE
-  );
+  ctx.fillStyle="#ae7038";
 
-  ctx.fillStyle="#a76a37";
-
-  ctx.fillRect(
-   px+7,
-   py,
-   5,
-   TILE
-  );
-
-  ctx.fillRect(
-   px+20,
-   py,
-   4,
-   TILE
-  );
+  ctx.fillRect(px+7,py,5,TILE);
+  ctx.fillRect(px+21,py,4,TILE);
 
  }
-
-
  else if(id===BLOCK.leaves){
 
-  ctx.fillStyle="#3d9b45";
+  ctx.fillStyle="#3f9e45";
+  ctx.fillRect(px,py,TILE,TILE);
 
-  ctx.fillRect(
-   px,
-   py,
-   TILE,
-   TILE
-  );
+  ctx.fillStyle="#5abc50";
 
-  ctx.fillStyle="#56b44e";
-
-  ctx.fillRect(
-   px+5,
-   py+5,
-   8,
-   7
-  );
-
-  ctx.fillRect(
-   px+20,
-   py+16,
-   7,
-   6
-  );
+  ctx.fillRect(px+5,py+5,8,7);
+  ctx.fillRect(px+20,py+17,7,6);
 
  }
-
-
  else if(id===BLOCK.sand){
 
   ctx.fillStyle="#d8bd70";
+  ctx.fillRect(px,py,TILE,TILE);
 
-  ctx.fillRect(
-   px,
-   py,
-   TILE,
-   TILE
-  );
+  ctx.fillStyle="#efd58c";
 
-  ctx.fillStyle="#ead28a";
-
-  for(
-   let i=0;
-   i<4;
-   i++
-  ){
-
+  for(let i=0;i<4;i++)
    ctx.fillRect(
-    px+
-    ((i*10+x*2)%27),
-    py+
-    ((i*7+y*2)%27),
-    3,
-    3
+    px+(i*10+x*2)%27,
+    py+(i*7+y*2)%27,
+    3,3
    );
 
-  }
-
  }
-
-
  else if(id===BLOCK.water){
 
-  ctx.fillStyle="#3c9ed0";
+  ctx.fillStyle="#3d9ed1";
+  ctx.fillRect(px,py,TILE,TILE);
 
-  ctx.fillRect(
-   px,
-   py,
-   TILE,
-   TILE
-  );
-
-  if(
-   settings.water&&
-   settings.animations
-  ){
+  if(settings.water){
 
    const wave=
-    Math.sin(
-     time*.004+x*.8
-    )*2;
+    Math.sin(time*.004+x*.8)*2;
 
-   ctx.fillStyle=
-    "rgba(255,255,255,.35)";
+   ctx.fillStyle="rgba(255,255,255,.35)";
 
    ctx.fillRect(
     px,
-    py+
-    5+
-    wave,
+    py+5+wave,
     TILE,
     3
    );
 
   }
-
  }
-
 }
 
 
 /* =====================================================
-   POSTAĆ — PIXEL ART + ANIMACJE
+   DRAW PLAYER
 ===================================================== */
 
 function drawPlayer(time){
 
  const moving=
-  Math.abs(
-   player.vx
-  )>.15;
-
- const speed=
-  settings.animationSpeed;
+  Math.abs(player.vx)>.15;
 
  let walk=
-  player.anim*speed;
-
- if(!settings.walkAnim)
-  walk=0;
+  settings.walk?
+  player.anim:
+  0;
 
  let bob=0;
- let tilt=0;
  let crouch=0;
 
+ if(settings.idle&&!moving&&player.grounded)
+  bob=Math.sin(time*.003)*.8;
+
  if(
-  settings.animations
- ){
-
-  if(
-   player.grounded&&
-   moving
-  ){
-
-   bob=
-    Math.abs(
-     Math.sin(walk)
-    )*2;
-
-   tilt=
-    Math.sin(walk)*
-    .025;
-
-  }
-
-  else if(
-   player.grounded&&
-   settings.idleAnim
-  ){
-
-   bob=
-    Math.sin(
-     time*.003
-    )*.7;
-
-  }
-
-  if(
-   !player.grounded&&
-   settings.jumpAnim
-  ){
-
-   if(player.vy<0)
-    tilt=-.035;
-
-   else
-    tilt=.025;
-
-  }
-
-  if(
-   player.landTimer>0&&
-   settings.landAnim
-  ){
-
-   crouch=
-    Math.sin(
-     player.landTimer/
-     .18*
-     Math.PI
-    )*3;
-
-  }
-
- }
+  settings.jump&&
+  player.land>0
+ )
+  crouch=3;
 
 
  const px=
-  player.x-
-  camera.x+
-  player.width/2;
+  player.x+
+  player.width/2-
+  camera.x;
 
  const py=
-  player.y-
-  camera.y+
-  player.height;
+  player.y+
+  player.height-
+  camera.y-
+  bob;
 
 
  ctx.save();
 
- ctx.translate(
-  px,
-  py-bob
- );
+ ctx.translate(px,py);
+ ctx.scale(player.direction,1);
 
- ctx.scale(
-  player.direction,
-  1
- );
-
- ctx.rotate(tilt);
-
-
- const s=4;
 
  /* cień */
 
- if(
-  settings.shadowAnim&&
-  settings.animations
- ){
-
-  ctx.save();
+ if(settings.shadow){
 
   ctx.globalAlpha=
-   player.grounded
-   ? .22
-   : .1;
+   player.grounded?.22:.08;
 
-  ctx.fillStyle="#17202a";
+  ctx.fillStyle="#111";
 
-  ctx.fillRect(
-   -13,
-   1,
-   26,
-   4
-  );
+  ctx.fillRect(-14,2,28,4);
 
-  ctx.restore();
-
+  ctx.globalAlpha=1;
  }
+
+
+ const leg=
+  moving&&player.grounded?
+  Math.sin(walk)*4:
+  0;
+
+ const arm=
+  moving&&player.grounded?
+  Math.sin(walk+Math.PI)*5:
+  0;
 
 
  /* nogi */
 
- const legSwing=
-  moving&&
-  player.grounded&&
-  settings.walkAnim
-   ?Math.sin(walk)*3
-   :0;
-
-
  ctx.fillStyle="#315b91";
 
  ctx.fillRect(
-  -8+legSwing,
+  -8+leg,
   -17+crouch,
   6,
   17
  );
 
  ctx.fillRect(
-  2-legSwing,
+  2-leg,
   -17+crouch,
   6,
   17
@@ -2143,17 +1886,17 @@ function drawPlayer(time){
 
  /* buty */
 
- ctx.fillStyle="#20252c";
+ ctx.fillStyle="#24272c";
 
  ctx.fillRect(
-  -10+legSwing,
+  -10+leg,
   -3+crouch,
   9,
   4
  );
 
  ctx.fillRect(
-  1-legSwing,
+  1-leg,
   -3+crouch,
   9,
   4
@@ -2162,7 +1905,7 @@ function drawPlayer(time){
 
  /* ciało */
 
- ctx.fillStyle="#e45b4c";
+ ctx.fillStyle="#e15b4c";
 
  ctx.fillRect(
   -9,
@@ -2171,8 +1914,7 @@ function drawPlayer(time){
   23
  );
 
-
- ctx.fillStyle="#f4c34f";
+ ctx.fillStyle="#f2c64f";
 
  ctx.fillRect(
   -9,
@@ -2184,55 +1926,18 @@ function drawPlayer(time){
 
  /* ręce */
 
- const armSwing=
-  moving&&
-  player.grounded&&
-  settings.walkAnim
-   ?Math.sin(walk+Math.PI)*5
-   :0;
-
-
  ctx.fillStyle="#e8ad82";
 
  ctx.save();
-
- ctx.translate(
-  -10,
-  -34+crouch
- );
-
- ctx.rotate(
-  armSwing*.055
- );
-
- ctx.fillRect(
-  -3,
-  0,
-  5,
-  17
- );
-
+ ctx.translate(-10,-34+crouch);
+ ctx.rotate(arm*.055);
+ ctx.fillRect(-3,0,5,17);
  ctx.restore();
 
-
  ctx.save();
-
- ctx.translate(
-  10,
-  -34+crouch
- );
-
- ctx.rotate(
-  -armSwing*.055
- );
-
- ctx.fillRect(
-  -2,
-  0,
-  5,
-  17
- );
-
+ ctx.translate(10,-34+crouch);
+ ctx.rotate(-arm*.055);
+ ctx.fillRect(-2,0,5,17);
  ctx.restore();
 
 
@@ -2268,22 +1973,17 @@ function drawPlayer(time){
 
 
  if(
-  settings.hairAnim&&
-  settings.animations
+  settings.hair
  ){
 
   const hair=
    Math.round(
-    Math.sin(
-     time*.006
-    )
+    Math.sin(time*.006)
    );
 
   ctx.fillRect(
    8,
-   -58+
-   hair+
-   crouch,
+   -58+hair+crouch,
    4,
    9
   );
@@ -2291,40 +1991,28 @@ function drawPlayer(time){
  }
 
 
- /* oczy */
+ /* mruganie */
 
- let blinking=false;
+ const blink=
+  settings.blink&&
+  time%5000>4650&&
+  time%5000<4800;
 
- if(
-  settings.blinkAnim&&
-  settings.animations
- ){
-
-  const blinkCycle=
-   time%5000;
-
-  blinking=
-   blinkCycle>4650&&
-   blinkCycle<4800;
-
- }
 
  ctx.fillStyle="#111";
 
- if(blinking){
+ if(blink){
 
   ctx.fillRect(
    -7,
    -52+crouch,
-   5,
-   2
+   5,2
   );
 
   ctx.fillRect(
    2,
    -52+crouch,
-   5,
-   2
+   5,2
   );
 
  }
@@ -2333,15 +2021,13 @@ function drawPlayer(time){
   ctx.fillRect(
    -7,
    -53+crouch,
-   3,
-   4
+   3,4
   );
 
   ctx.fillRect(
    3,
    -53+crouch,
-   3,
-   4
+   3,4
   );
 
  }
@@ -2354,28 +2040,20 @@ function drawPlayer(time){
  ctx.fillRect(
   -1,
   -49+crouch,
-  3,
-  3
+  3,3
  );
 
 
  /* uśmiech */
 
- if(
-  player.grounded||
-  moving
- ){
+ ctx.fillStyle="#bd695c";
 
-  ctx.fillStyle="#b9695c";
+ ctx.fillRect(
+  -1,
+  -45+crouch,
+  6,2
+ );
 
-  ctx.fillRect(
-   -1,
-   -45+crouch,
-   6,
-   2
-  );
-
- }
 
  ctx.restore();
 
@@ -2383,76 +2061,32 @@ function drawPlayer(time){
 
 
 /* =====================================================
-   TŁO
+   BACKGROUND
 ===================================================== */
 
 function drawBackground(){
 
  const gradient=
-  ctx.createLinearGradient(
-   0,
-   0,
-   0,
-   H
-  );
+  ctx.createLinearGradient(0,0,0,H);
 
- gradient.addColorStop(
-  0,
-  "#62c5f0"
- );
-
- gradient.addColorStop(
-  1,
-  "#d9f3ff"
- );
+ gradient.addColorStop(0,"#5fc4ef");
+ gradient.addColorStop(1,"#d8f3ff");
 
  ctx.fillStyle=gradient;
-
- ctx.fillRect(
-  0,
-  0,
-  W,
-  H
- );
+ ctx.fillRect(0,0,W,H);
 
 
- /* chmury */
+ ctx.fillStyle="rgba(255,255,255,.7)";
 
- ctx.fillStyle=
-  "rgba(255,255,255,.72)";
-
- for(
-  let i=0;
-  i<8;
-  i++
- ){
+ for(let i=0;i<8;i++){
 
   const x=
-   (
-    (
-     i*570-
-     camera.x*.18
-    )%
-    (W+250)
-   )-120;
+   ((i*570-camera.x*.18)%(W+250))-120;
 
-  const y=
-   70+
-   (i%4)*60;
+  const y=70+(i%4)*60;
 
-  ctx.fillRect(
-   x,
-   y,
-   80,
-   20
-  );
-
-  ctx.fillRect(
-   x+20,
-   y-10,
-   50,
-   30
-  );
+  ctx.fillRect(x,y,80,20);
+  ctx.fillRect(x+20,y-10,50,30);
 
  }
 
@@ -2470,73 +2104,841 @@ function render(time){
  const sx=
   Math.max(
    0,
-   Math.floor(
-    camera.x/TILE
-   )-2
+   Math.floor(camera.x/TILE)-2
   );
 
  const ex=
   Math.min(
    WORLD_W,
-   Math.ceil(
-    (camera.x+W)/
-    TILE
-   )+2
+   Math.ceil((camera.x+W)/TILE)+2
   );
 
  const sy=
   Math.max(
    0,
-   Math.floor(
-    camera.y/TILE
-   )-2
+   Math.floor(camera.y/TILE)-2
   );
 
  const ey=
   Math.min(
    WORLD_H,
-   Math.ceil(
-    (camera.y+H)/
-    TILE
-   )+2
+   Math.ceil((camera.y+H)/TILE)+2
   );
 
 
- for(
-  let y=sy;
-  y<ey;
-  y++
- ){
+ for(let y=sy;y<ey;y++){
 
-  for(
-   let x=sx;
-   x<ex;
-   x++
-  ){
+  for(let x=sx;x<ex;x++){
 
-   const id=
-    world[y][x];
-
-   if(
-    id!==BLOCK.air
-   )
+   if(world[y][x]!==BLOCK.air)
     drawBlock(
-     id,
-     x,
-     y,
-     time
+     world[y][x],
+     x,y,time
     );
 
   }
-
  }
 
 
  drawParticles();
-
  drawPlayer(time);
 
 }
+
+
+/* =====================================================
+   MINE / PLACE
+===================================================== */
+
+let inventory={
+ dirt:20,
+ stone:10,
+ wood:10,
+ sand:10
+};
+
+let selectedBlock="dirt";
+
+
+function updateInventory(){
+
+ for(const b of
+  ["dirt","stone","wood","sand"]
+ ){
+
+  document.getElementById(
+   "count-"+b
+  ).textContent=inventory[b];
+
+ }
+}
+
+
+function selectBlock(block){
+
+ if(!inventory.hasOwnProperty(block))
+  return;
+
+ selectedBlock=block;
+
+ document.querySelectorAll(".slot")
+ .forEach(s=>{
+  s.classList.toggle(
+   "selected",
+   s.dataset.block===block
+  );
+ });
+
+ playSound(520);
+
+}
+
+
+document.querySelectorAll(".slot")
+.forEach(slot=>{
+
+ slot.onclick=()=>{
+  selectBlock(slot.dataset.block);
+ };
+
+});
+
+
+function worldPosition(x,y){
+
+ return{
+  x:Math.floor((x+camera.x)/TILE),
+  y:Math.floor((y+camera.y)/TILE)
+ };
+
+}
+
+
+function reachable(x,y){
+
+ const px=player.x+player.width/2;
+ const py=player.y+player.height/2;
+
+ const bx=x*TILE+TILE/2;
+ const by=y*TILE+TILE/2;
+
+ return Math.hypot(
+  bx-px,
+  by-py
+ )<=TILE*5;
+}
+
+
+function mine(x,y){
+
+ const p=worldPosition(x,y);
+
+ if(
+  p.x<0||
+  p.x>=WORLD_W||
+  p.y<0||
+  p.y>=WORLD_H||
+  !reachable(p.x,p.y)
+ )
+  return;
+
+ const id=world[p.y][p.x];
+
+ if(
+  id===BLOCK.air||
+  id===BLOCK.water
+ )
+  return;
+
+
+ if(
+  id===BLOCK.grass||
+  id===BLOCK.dirt
+ )
+  inventory.dirt++;
+
+ if(id===BLOCK.stone)
+  inventory.stone++;
+
+ if(id===BLOCK.wood)
+  inventory.wood++;
+
+ if(id===BLOCK.sand)
+  inventory.sand++;
+
+
+ world[p.y][p.x]=BLOCK.air;
+
+ updateInventory();
+
+ spawnDust(
+  p.x*TILE+16,
+  p.y*TILE+16,
+  5
+ );
+
+ playSound(180);
+
+}
+
+
+function place(x,y){
+
+ const p=worldPosition(x,y);
+
+ if(
+  p.x<0||
+  p.x>=WORLD_W||
+  p.y<0||
+  p.y>=WORLD_H||
+  !reachable(p.x,p.y)
+ )
+  return;
+
+ if(world[p.y][p.x]!==BLOCK.air)
+  return;
+
+ if(inventory[selectedBlock]<=0){
+
+  showMessage("Brak bloków!");
+  return;
+
+ }
+
+
+ const bx=p.x*TILE;
+ const by=p.y*TILE;
+
+ if(
+  bx+TILE>player.x&&
+  bx<player.x+player.width&&
+  by+TILE>player.y&&
+  by<player.y+player.height
+ )
+  return;
+
+
+ world[p.y][p.x]=
+  BLOCK[selectedBlock];
+
+ inventory[selectedBlock]--;
+
+ updateInventory();
+
+ playSound(320);
+
+}
+
+
+/* =====================================================
+   MOUSE
+===================================================== */
+
+canvas.addEventListener(
+ "mousedown",
+ e=>{
+
+  if(paused)
+   return;
+
+  if(e.button===0)
+   mine(e.clientX,e.clientY);
+
+  if(e.button===2){
+
+   e.preventDefault();
+
+   place(e.clientX,e.clientY);
+
+  }
+
+ }
+);
+
+canvas.addEventListener(
+ "contextmenu",
+ e=>e.preventDefault()
+);
+
+
+/* =====================================================
+   TOUCH
+===================================================== */
+
+let touchStart=null;
+let touchTimer=null;
+
+canvas.addEventListener(
+ "touchstart",
+ e=>{
+
+  if(paused||!e.touches[0])
+   return;
+
+  const t=e.touches[0];
+
+  touchStart={
+   x:t.clientX,
+   y:t.clientY,
+   time:Date.now()
+  };
+
+  touchTimer=setTimeout(()=>{
+
+   if(touchStart)
+    place(
+     touchStart.x,
+     touchStart.y
+    );
+
+  },400);
+
+ },
+ {passive:false}
+);
+
+
+canvas.addEventListener(
+ "touchend",
+ e=>{
+
+  e.preventDefault();
+
+  if(!touchStart)
+   return;
+
+  clearTimeout(touchTimer);
+
+  if(
+   Date.now()-touchStart.time<400
+  )
+   mine(
+    touchStart.x,
+    touchStart.y
+   );
+
+  touchStart=null;
+
+ },
+ {passive:false}
+);
+
+
+/* =====================================================
+   SOUND
+===================================================== */
+
+let audio=null;
+
+function playSound(freq){
+
+ if(!settings.sound)
+  return;
+
+ try{
+
+  if(!audio)
+   audio=new AudioContext();
+
+  const osc=
+   audio.createOscillator();
+
+  const gain=
+   audio.createGain();
+
+  osc.type="square";
+  osc.frequency.value=freq;
+
+  gain.gain.value=
+   .035*settings.volume;
+
+  osc.connect(gain);
+  gain.connect(audio.destination);
+
+  osc.start();
+
+  gain.gain.exponentialRampToValueAtTime(
+   .0001,
+   audio.currentTime+.08
+  );
+
+  osc.stop(
+   audio.currentTime+.09
+  );
+
+ }catch{}
+
+}
+
+
+/* =====================================================
+   SAVE
+===================================================== */
+
+const SAVE_KEY="PIXEL_WORLD_FINAL_V10";
+
+
+function saveGame(){
+
+ try{
+
+  localStorage.setItem(
+   SAVE_KEY,
+   JSON.stringify({
+    world,
+    player:{
+     x:player.x,
+     y:player.y
+    },
+    inventory,
+    selectedBlock
+   })
+  );
+
+ }catch{}
+
+}
+
+
+function loadGame(){
+
+ try{
+
+  const raw=
+   localStorage.getItem(SAVE_KEY);
+
+  if(!raw)
+   return false;
+
+  const data=
+   JSON.parse(raw);
+
+  if(
+   !data||
+   !Array.isArray(data.world)||
+   data.world.length!==WORLD_H
+  )
+   return false;
+
+  const valid=
+   new Set([
+    0,1,2,3,4,5,6,7
+   ]);
+
+  for(let y=0;y<WORLD_H;y++){
+
+   if(
+    !Array.isArray(data.world[y])||
+    data.world[y].length!==WORLD_W
+   )
+    return false;
+
+   for(let x=0;x<WORLD_W;x++){
+
+    if(
+     !valid.has(
+      Number(data.world[y][x])
+     )
+    )
+     return false;
+
+   }
+  }
+
+  world=
+   data.world.map(
+    row=>row.map(Number)
+   );
+
+  if(data.player){
+
+   player.x=
+    Number(data.player.x)||player.x;
+
+   player.y=
+    Number(data.player.y)||player.y;
+
+  }
+
+  if(data.inventory){
+
+   for(const b of
+    ["dirt","stone","wood","sand"]
+   ){
+
+    const n=
+     Number(data.inventory[b]);
+
+    if(Number.isFinite(n))
+     inventory[b]=
+      Math.max(0,Math.floor(n));
+
+   }
+  }
+
+  if(
+   typeof data.selectedBlock==="string"&&
+   inventory.hasOwnProperty(data.selectedBlock)
+  )
+   selectedBlock=data.selectedBlock;
+
+  return true;
+
+ }catch{
+
+  return false;
+
+ }
+
+}
+
+
+/* =====================================================
+   SETTINGS
+===================================================== */
+
+const overlay=
+ document.getElementById("settingsOverlay");
+
+let paused=true;
+
+
+function openSettings(){
+
+ overlay.style.display="flex";
+ paused=true;
+
+}
+
+
+function closeSettings(){
+
+ overlay.style.display="none";
+ paused=false;
+
+}
+
+
+document.getElementById(
+ "settingsButton"
+).onclick=openSettings;
+
+
+document.getElementById(
+ "closeSettings"
+).onclick=closeSettings;
+
+
+addEventListener("keydown",e=>{
+
+ if(
+  e.code==="Escape"&&
+  overlay.style.display!=="none"
+ )
+  closeSettings();
+
+});
+
+
+/* tabs */
+
+document.querySelectorAll(".tab")
+.forEach(tab=>{
+
+ tab.onclick=()=>{
+
+  document.querySelectorAll(".tab")
+  .forEach(t=>
+   t.classList.remove("active")
+  );
+
+  document.querySelectorAll(".page")
+  .forEach(p=>
+   p.classList.remove("active")
+  );
+
+  tab.classList.add("active");
+
+  document.getElementById(
+   tab.dataset.page
+  ).classList.add("active");
+
+ };
+
+});
+
+
+/* switches */
+
+function bindSwitch(id,key){
+
+ const el=document.getElementById(id);
+
+ el.classList.toggle(
+  "on",
+  !!settings[key]
+ );
+
+ el.onclick=()=>{
+
+  settings[key]=!settings[key];
+
+  el.classList.toggle(
+   "on",
+   !!settings[key]
+  );
+
+  applySettings();
+
+  saveSettings();
+
+ };
+
+}
+
+
+bindSwitch("autoSaveSwitch","autoSave");
+bindSwitch("mobileSwitch","mobile");
+bindSwitch("pixelSwitch","pixelPerfect");
+bindSwitch("waterSwitch","water");
+bindSwitch("walkSwitch","walk");
+bindSwitch("idleSwitch","idle");
+bindSwitch("blinkSwitch","blink");
+bindSwitch("jumpSwitch","jump");
+bindSwitch("hairSwitch","hair");
+bindSwitch("dustSwitch","dust");
+bindSwitch("shadowSwitch","shadow");
+bindSwitch("soundSwitch","sound");
+
+
+document.getElementById(
+ "fpsSelect"
+).onchange=e=>{
+
+ settings.fps=
+  Number(e.target.value);
+
+ saveSettings();
+
+};
+
+
+document.getElementById(
+ "animationSpeed"
+).oninput=e=>{
+
+ settings.animationSpeed=
+  Number(e.target.value);
+
+ saveSettings();
+
+};
+
+
+document.getElementById(
+ "volume"
+).oninput=e=>{
+
+ settings.volume=
+  Number(e.target.value);
+
+ saveSettings();
+
+};
+
+
+function applySettings(){
+
+ document.getElementById(
+  "mobileControls"
+ ).style.display=
+  settings.mobile?"flex":"none";
+
+ document.getElementById(
+  "jumpButton"
+ ).style.display=
+  settings.mobile?"flex":"none";
+
+ canvas.style.imageRendering=
+  settings.pixelPerfect?
+  "pixelated":
+  "auto";
+
+}
+
+
+/* =====================================================
+   SETTINGS BUTTONS
+===================================================== */
+
+document.getElementById(
+ "saveNow"
+).onclick=()=>{
+
+ saveGame();
+
+ showMessage("Gra została zapisana!");
+
+};
+
+
+document.getElementById(
+ "deleteSave"
+).onclick=()=>{
+
+ if(
+  !confirm("Usunąć zapis gry?")
+ )
+  return;
+
+ localStorage.removeItem(SAVE_KEY);
+
+ createWorld();
+ findSpawn();
+
+ inventory={
+  dirt:20,
+  stone:10,
+  wood:10,
+  sand:10
+ };
+
+ selectedBlock="dirt";
+
+ updateInventory();
+ selectBlock("dirt");
+
+ saveGame();
+
+ showMessage("Zapis został usunięty.");
+
+};
+
+
+document.getElementById(
+ "newWorld"
+).onclick=()=>{
+
+ if(
+  !confirm("Stworzyć nowy świat?")
+ )
+  return;
+
+ createWorld();
+ findSpawn();
+
+ inventory={
+  dirt:20,
+  stone:10,
+  wood:10,
+  sand:10
+ };
+
+ selectedBlock="dirt";
+
+ updateInventory();
+ selectBlock("dirt");
+
+ saveGame();
+
+ showMessage("Stworzono nowy świat.");
+
+};
+
+
+/* =====================================================
+   AUTO SAVE
+===================================================== */
+
+setInterval(()=>{
+
+ if(
+  settings.autoSave&&
+  !paused
+ )
+  saveGame();
+
+},120000);
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+let messageTimer;
+
+function showMessage(text){
+
+ const el=
+  document.getElementById("message");
+
+ el.textContent=text;
+ el.style.opacity="1";
+
+ clearTimeout(messageTimer);
+
+ messageTimer=
+  setTimeout(()=>{
+   el.style.opacity="0";
+  },1800);
+
+}
+
+
+/* =====================================================
+   ENTER WORLD
+===================================================== */
+
+document.getElementById(
+ "enterWorld"
+).onclick=()=>{
+
+ const name=
+  worldNameInput.value.trim()||
+  "Pixel World";
+
+ localStorage.setItem(
+  "PIXEL_WORLD_NAME",
+  name
+ );
+
+ if(!loadGame()){
+
+  localStorage.removeItem(SAVE_KEY);
+
+  createWorld();
+  findSpawn();
+
+  saveGame();
+
+ }
+
+ mainMenu.style.display="none";
+
+ paused=false;
+
+ showMessage(
+  "Witaj w świecie: "+name
+ );
+
+};
+
+
+/* ================= MENU BUTTONS ================= */
+
+document.querySelectorAll(".menuButton")
+.forEach(button=>{
+
+ button.onclick=()=>{
+
+  document.querySelectorAll(".menuButton")
+  .forEach(b=>b.classList.remove("active"));
+
+  button.classList.add("active");
+
+ };
+
+});
 
 
 /* =====================================================
@@ -2546,6 +2948,16 @@ function render(time){
 let lastFrame=0;
 
 function loop(time){
+
+ menuTime=time;
+
+ if(
+  mainMenu.style.display!=="none"
+ ){
+
+  drawMenuCharacter();
+
+ }
 
  if(!paused){
 
@@ -2563,1266 +2975,15 @@ function loop(time){
    lastFrame=time;
 
    updatePlayer();
-
    render(time);
 
   }
 
  }
 
- requestAnimationFrame(
-  loop
- );
+ requestAnimationFrame(loop);
 
 }
-
-
-/* =====================================================
-   INVENTORY
-===================================================== */
-
-let inventory={
- dirt:20,
- stone:10,
- wood:10,
- sand:10
-};
-
-let selectedBlock="dirt";
-
-
-function updateInventory(){
-
- for(
-  const block of
-  [
-   "dirt",
-   "stone",
-   "wood",
-   "sand"
-  ]
- ){
-
-  document.getElementById(
-   "count-"+block
-  ).textContent=
-   inventory[block];
-
- }
-
-}
-
-
-function selectBlock(block){
-
- if(
-  !Object.prototype.hasOwnProperty.call(
-   inventory,
-   block
-  )
- )
-  return;
-
- selectedBlock=block;
-
- document.querySelectorAll(
-  ".slot"
- )
- .forEach(slot=>{
-
-  slot.classList.toggle(
-   "selected",
-   slot.dataset.block===block
-  );
-
- });
-
- sound("click");
-
-}
-
-
-document.querySelectorAll(
- ".slot"
-)
-.forEach(slot=>{
-
- slot.onclick=()=>{
-
-  selectBlock(
-   slot.dataset.block
-  );
-
- };
-
-});
-
-
-/* =====================================================
-   KOPANIE / STAWIANIE
-===================================================== */
-
-function worldPosition(
- clientX,
- clientY
-){
-
- return{
-
-  x:Math.floor(
-   (clientX+camera.x)/
-   TILE
-  ),
-
-  y:Math.floor(
-   (clientY+camera.y)/
-   TILE
-  )
-
- };
-
-}
-
-
-function reachable(x,y){
-
- const px=
-  player.x+
-  player.width/2;
-
- const py=
-  player.y+
-  player.height/2;
-
- const bx=
-  x*TILE+
-  TILE/2;
-
- const by=
-  y*TILE+
-  TILE/2;
-
- return Math.hypot(
-  bx-px,
-  by-py
- )<=TILE*5;
-
-}
-
-
-function mine(
- clientX,
- clientY
-){
-
- const p=
-  worldPosition(
-   clientX,
-   clientY
-  );
-
- const x=p.x;
- const y=p.y;
-
- if(
-  x<0||
-  x>=WORLD_W||
-  y<0||
-  y>=WORLD_H
- )
-  return;
-
- if(
-  !reachable(x,y)
- ){
-
-  showMessage(
-   "Za daleko!"
-  );
-
-  return;
-
- }
-
- const id=
-  world[y][x];
-
- if(
-  id===BLOCK.air||
-  id===BLOCK.water
- )
-  return;
-
-
- if(
-  id===BLOCK.grass||
-  id===BLOCK.dirt
- )
-  inventory.dirt++;
-
- else if(
-  id===BLOCK.stone
- )
-  inventory.stone++;
-
- else if(
-  id===BLOCK.wood
- )
-  inventory.wood++;
-
- else if(
-  id===BLOCK.sand
- )
-  inventory.sand++;
-
-
- world[y][x]=
-  BLOCK.air;
-
- updateInventory();
-
- sound("mine");
-
- spawnDust(
-  x*TILE+TILE/2,
-  y*TILE+TILE/2,
-  5
- );
-
-}
-
-
-function place(
- clientX,
- clientY
-){
-
- const p=
-  worldPosition(
-   clientX,
-   clientY
-  );
-
- const x=p.x;
- const y=p.y;
-
- if(
-  x<0||
-  x>=WORLD_W||
-  y<0||
-  y>=WORLD_H
- )
-  return;
-
- if(
-  !reachable(x,y)
- ){
-
-  showMessage(
-   "Za daleko!"
-  );
-
-  return;
-
- }
-
- if(
-  world[y][x]!==BLOCK.air
- )
-  return;
-
- if(
-  inventory[selectedBlock]<=0
- ){
-
-  showMessage(
-   "Brak bloków!"
-  );
-
-  return;
-
- }
-
-
- const bx=x*TILE;
- const by=y*TILE;
-
-
- if(
-  bx+TILE>player.x&&
-  bx<player.x+player.width&&
-  by+TILE>player.y&&
-  by<player.y+player.height
- )
-  return;
-
-
- world[y][x]=
-  BLOCK[selectedBlock];
-
- inventory[selectedBlock]--;
-
- updateInventory();
-
- sound("place");
-
-}
-
-
-/* =====================================================
-   MYSZ
-===================================================== */
-
-canvas.addEventListener(
- "mousedown",
- e=>{
-
-  if(paused)
-   return;
-
-  if(e.button===0)
-   mine(
-    e.clientX,
-    e.clientY
-   );
-
-  if(e.button===2){
-
-   e.preventDefault();
-
-   place(
-    e.clientX,
-    e.clientY
-   );
-
-  }
-
- }
-);
-
-
-canvas.addEventListener(
- "contextmenu",
- e=>e.preventDefault()
-);
-
-
-/* =====================================================
-   DOTYK
-===================================================== */
-
-let touchData=null;
-let touchTimer=null;
-
-
-canvas.addEventListener(
- "touchstart",
- e=>{
-
-  if(
-   paused||
-   !e.touches[0]
-  )
-   return;
-
-  const t=
-   e.touches[0];
-
-  touchData={
-   x:t.clientX,
-   y:t.clientY,
-   time:Date.now()
-  };
-
-  touchTimer=
-   setTimeout(()=>{
-
-    if(touchData){
-
-     place(
-      touchData.x,
-      touchData.y
-     );
-
-    }
-
-   },400);
-
- },
- {passive:false}
-);
-
-
-canvas.addEventListener(
- "touchend",
- e=>{
-
-  e.preventDefault();
-
-  if(!touchData)
-   return;
-
-  clearTimeout(
-   touchTimer
-  );
-
-  if(
-   Date.now()-
-   touchData.time<
-   400
-  ){
-
-   mine(
-    touchData.x,
-    touchData.y
-   );
-
-  }
-
-  touchData=null;
-
- },
- {passive:false}
-);
-
-
-/* =====================================================
-   DŹWIĘK
-===================================================== */
-
-let audioContext=null;
-
-
-function sound(type){
-
- if(
-  !settings.sound
- )
-  return;
-
- try{
-
-  if(!audioContext){
-
-   audioContext=
-    new (
-     window.AudioContext||
-     window.webkitAudioContext
-    )();
-
-  }
-
-  if(
-   audioContext.state==="suspended"
-  )
-   audioContext.resume();
-
-  const osc=
-   audioContext.createOscillator();
-
-  const gain=
-   audioContext.createGain();
-
-  osc.type="square";
-
-  const freq={
-   click:520,
-   mine:180,
-   place:320,
-   jump:420
-  }[type]||300;
-
-  osc.frequency.value=
-   freq;
-
-  gain.gain.setValueAtTime(
-   .0001,
-   audioContext.currentTime
-  );
-
-  gain.gain.exponentialRampToValueAtTime(
-   .05*settings.volume,
-   audioContext.currentTime+.01
-  );
-
-  gain.gain.exponentialRampToValueAtTime(
-   .0001,
-   audioContext.currentTime+.08
-  );
-
-  osc.connect(gain);
-  gain.connect(
-   audioContext.destination
-  );
-
-  osc.start();
-
-  osc.stop(
-   audioContext.currentTime+.09
-  );
-
- }catch{}
-
-}
-
-
-/* =====================================================
-   SETTINGS UI
-===================================================== */
-
-const overlay=
- document.getElementById(
-  "settingsOverlay"
-);
-
-let paused=false;
-
-
-function openSettings(){
-
- overlay.style.display=
-  "flex";
-
- paused=true;
-
-}
-
-
-function closeSettings(){
-
- overlay.style.display=
-  "none";
-
- paused=false;
-
-}
-
-
-document.getElementById(
- "settingsBtn"
-).onclick=openSettings;
-
-
-document.getElementById(
- "closeSettingsBottom"
-).onclick=
- closeSettings;
-
-
-addEventListener(
- "keydown",
- e=>{
-
-  if(
-   e.code==="Escape"&&
-   overlay.style.display!=="none"
-  ){
-
-   closeSettings();
-
-  }
-
- }
-);
-
-
-/* tabs */
-
-document.querySelectorAll(
- ".settingsTab"
-)
-.forEach(tab=>{
-
- tab.onclick=()=>{
-
-  document.querySelectorAll(
-   ".settingsTab"
-  )
-  .forEach(t=>
-   t.classList.remove(
-    "active"
-   )
-  );
-
-  document.querySelectorAll(
-   ".settingsPage"
-  )
-  .forEach(p=>
-   p.classList.remove(
-    "active"
-   )
-  );
-
-  tab.classList.add(
-   "active"
-  );
-
-  document.getElementById(
-   tab.dataset.page
-  ).classList.add(
-   "active"
-  );
-
- };
-
-});
-
-
-/* =====================================================
-   SETTINGS HELPERS
-===================================================== */
-
-function switchSetting(
- id,
- key
-){
-
- const el=
-  document.getElementById(id);
-
- function refresh(){
-
-  el.classList.toggle(
-   "on",
-   !!settings[key]
-  );
-
- }
-
- el.onclick=()=>{
-
-  settings[key]=
-   !settings[key];
-
-  refresh();
-
-  applySettings();
-
- };
-
- refresh();
-
-}
-
-
-function applySettings(){
-
- document.getElementById(
-  "mobileControls"
- ).style.display=
-  settings.mobile
-   ?"flex"
-   :"none";
-
-
- canvas.style.imageRendering=
-  settings.pixelPerfect
-   ?"pixelated"
-   :"auto";
-
-}
-
-
-switchSetting(
- "mobileSwitch",
- "mobile"
-);
-
-switchSetting(
- "animationsSwitch",
- "animations"
-);
-
-switchSetting(
- "autoSaveSwitch",
- "autoSave"
-);
-
-switchSetting(
- "pixelPerfectSwitch",
- "pixelPerfect"
-);
-
-switchSetting(
- "waterSwitch",
- "water"
-);
-
-switchSetting(
- "walkAnimSwitch",
- "walkAnim"
-);
-
-switchSetting(
- "idleAnimSwitch",
- "idleAnim"
-);
-
-switchSetting(
- "blinkAnimSwitch",
- "blinkAnim"
-);
-
-switchSetting(
- "jumpAnimSwitch",
- "jumpAnim"
-);
-
-switchSetting(
- "landAnimSwitch",
- "landAnim"
-);
-
-switchSetting(
- "hairAnimSwitch",
- "hairAnim"
-);
-
-switchSetting(
- "dustAnimSwitch",
- "dustAnim"
-);
-
-switchSetting(
- "shadowAnimSwitch",
- "shadowAnim"
-);
-
-switchSetting(
- "soundSwitch",
- "sound"
-);
-
-switchSetting(
- "musicSwitch",
- "music"
-);
-
-
-/* quality */
-
-document.getElementById(
- "qualitySelect"
-).onchange=e=>{
-
- settings.quality=
-  e.target.value;
-
-};
-
-
-/* FPS */
-
-document.getElementById(
- "fpsSelect"
-).onchange=e=>{
-
- settings.fps=
-  Number(
-   e.target.value
-  );
-
-};
-
-
-/* animation speed */
-
-document.getElementById(
- "animationSpeedRange"
-).oninput=e=>{
-
- settings.animationSpeed=
-  Number(
-   e.target.value
-  );
-
-};
-
-
-/* volume */
-
-document.getElementById(
- "volumeRange"
-).oninput=e=>{
-
- settings.volume=
-  Number(
-   e.target.value
-  );
-
-};
-
-
-/* =====================================================
-   SAVE
-===================================================== */
-
-const SAVE_KEY=
- "PIXEL_WORLD_STABLE_V9";
-
-
-function saveGame(){
-
- try{
-
-  localStorage.setItem(
-   SAVE_KEY,
-   JSON.stringify({
-
-    version:9,
-
-    world:world,
-
-    player:{
-     x:player.x,
-     y:player.y
-    },
-
-    inventory:inventory,
-
-    selectedBlock:
-     selectedBlock,
-
-    settings:settings
-
-   })
-  );
-
- }catch{
-
-  showMessage(
-   "Nie udało się zapisać."
-  );
-
- }
-
-}
-
-
-function loadGame(){
-
- try{
-
-  const raw=
-   localStorage.getItem(
-    SAVE_KEY
-   );
-
-  if(!raw)
-   return false;
-
-  const data=
-   JSON.parse(raw);
-
-  if(
-   !data||
-   !Array.isArray(
-    data.world
-   )||
-   data.world.length!==WORLD_H
-  )
-   return false;
-
-
-  const validBlocks=
-   new Set([
-    BLOCK.air,
-    BLOCK.grass,
-    BLOCK.dirt,
-    BLOCK.stone,
-    BLOCK.wood,
-    BLOCK.leaves,
-    BLOCK.sand,
-    BLOCK.water
-   ]);
-
-
-  for(
-   let y=0;
-   y<WORLD_H;
-   y++
-  ){
-
-   if(
-    !Array.isArray(
-     data.world[y]
-    )||
-    data.world[y].length!==WORLD_W
-   )
-    return false;
-
-
-   for(
-    let x=0;
-    x<WORLD_W;
-    x++
-   ){
-
-    const id=
-     Number(
-      data.world[y][x]
-     );
-
-    if(
-     !validBlocks.has(id)
-    )
-     return false;
-
-   }
-
-  }
-
-
-  world=
-   data.world.map(
-    row=>
-     row.map(Number)
-   );
-
-
-  if(data.player){
-
-   if(
-    Number.isFinite(
-     data.player.x
-    )
-   )
-    player.x=
-     data.player.x;
-
-   if(
-    Number.isFinite(
-     data.player.y
-    )
-   )
-    player.y=
-     data.player.y;
-
-  }
-
-
-  if(data.inventory){
-
-   for(
-    const b of
-    [
-     "dirt",
-     "stone",
-     "wood",
-     "sand"
-    ]
-   ){
-
-    const n=
-     Number(
-      data.inventory[b]
-     );
-
-    if(
-     Number.isFinite(n)
-    )
-     inventory[b]=
-      Math.max(
-       0,
-       Math.floor(n)
-      );
-
-   }
-
-  }
-
-
-  if(
-   typeof data.selectedBlock===
-   "string"&&
-   Object.prototype.hasOwnProperty.call(
-    inventory,
-    data.selectedBlock
-   )
-  )
-   selectedBlock=
-    data.selectedBlock;
-
-
-  if(data.settings){
-
-   settings={
-    ...defaultSettings,
-    ...data.settings
-   };
-
-  }
-
-
-  if(
-   !Number.isFinite(
-    player.x
-   )||
-   !Number.isFinite(
-    player.y
-   )||
-   player.x<0||
-   player.x>
-    WORLD_W*TILE||
-   player.y<0||
-   player.y>
-    WORLD_H*TILE
-  ){
-
-   findSpawn();
-
-  }
-
-
-  player.vx=0;
-  player.vy=0;
-  player.grounded=false;
-
-
-  return true;
-
- }catch{
-
-  return false;
-
- }
-
-}
-
-
-/* =====================================================
-   RESET WORLD
-===================================================== */
-
-function resetWorld(){
-
- if(
-  !confirm(
-   "Czy na pewno stworzyć nowy świat?"
-  )
- )
-  return;
-
-
- createWorld();
-
- findSpawn();
-
-
- inventory={
-  dirt:20,
-  stone:10,
-  wood:10,
-  sand:10
- };
-
-
- selectedBlock=
-  "dirt";
-
-
- updateInventory();
-
- selectBlock(
-  "dirt"
- );
-
- saveGame();
-
- showMessage(
-  "Utworzono nowy świat."
- );
-
-}
-
-
-document.getElementById(
- "resetBtn"
-).onclick=
- resetWorld;
-
-
-document.getElementById(
- "saveBtn"
-).onclick=()=>{
-
- saveGame();
-
- showMessage(
-  "Gra została zapisana!"
- );
-
-};
-
-
-document.getElementById(
- "saveFromSettings"
-).onclick=()=>{
-
- saveGame();
-
- showMessage(
-  "Gra została zapisana!"
- );
-
-};
-
-
-document.getElementById(
- "deleteSaveBtn"
-).onclick=()=>{
-
- if(
-  !confirm(
-   "Usunąć zapis gry?"
-  )
- )
-  return;
-
-
- localStorage.removeItem(
-  SAVE_KEY
- );
-
-
- createWorld();
-
- findSpawn();
-
-
- inventory={
-  dirt:20,
-  stone:10,
-  wood:10,
-  sand:10
- };
-
-
- selectedBlock=
-  "dirt";
-
-
- updateInventory();
-
- selectBlock(
-  "dirt"
- );
-
-
- saveGame();
-
- showMessage(
-  "Zapis został usunięty."
- );
-
-};
-
-
-/* =====================================================
-   AUTO SAVE
-===================================================== */
-
-setInterval(
- ()=>{
-
-  if(
-   settings.autoSave&&
-   !paused
-  )
-   saveGame();
-
- },
- 120000
-);
-
-
-/* =====================================================
-   WIADOMOŚĆ
-===================================================== */
-
-let messageTimeout;
-
-
-function showMessage(text){
-
- const el=
-  document.getElementById(
-   "message"
-  );
-
- el.textContent=text;
-
- el.style.opacity="1";
-
- clearTimeout(
-  messageTimeout
- );
-
- messageTimeout=
-  setTimeout(
-   ()=>{
-
-    el.style.opacity="0";
-
-   },
-   1800
-  );
-
-}
-
-
-/* =====================================================
-   BŁĘDY
-===================================================== */
-
-window.addEventListener(
- "error",
- e=>{
-
-  const msg=
-   e&&e.message
-    ?e.message
-    :"Nieznany błąd JavaScript.";
-
-  console.error(
-   e.error||e
-  );
-
-  try{
-
-   showMessage(
-    "Błąd gry: "+msg
-   );
-
-  }catch{}
-
- }
-);
-
-
-window.addEventListener(
- "unhandledrejection",
- e=>{
-
-  const msg=
-   e&&e.reason
-    ?String(e.reason)
-    :"Nieobsłużony błąd.";
-
-  console.error(
-   e.reason
-  );
-
-  try{
-
-   showMessage(
-    "Błąd gry: "+msg
-   );
-
-  }catch{}
-
- }
-);
 
 
 /* =====================================================
@@ -3830,60 +2991,11 @@ window.addEventListener(
 ===================================================== */
 
 resize();
-
-
-if(!loadGame()){
-
- localStorage.removeItem(
-  SAVE_KEY
- );
-
- createWorld();
-
- findSpawn();
-
-}
-
-
+resizeMenuCanvas();
+applySettings();
 updateInventory();
 
-applySettings();
-
-
-document.getElementById(
- "qualitySelect"
-).value=
- settings.quality;
-
-document.getElementById(
- "fpsSelect"
-).value=
- settings.fps;
-
-document.getElementById(
- "animationSpeedRange"
-).value=
- settings.animationSpeed;
-
-document.getElementById(
- "volumeRange"
-).value=
- settings.volume;
-
-
-selectBlock(
- selectedBlock
-);
-
-
-showMessage(
- "Witaj w Pixel World!"
-);
-
-
-requestAnimationFrame(
- loop
-);
+requestAnimationFrame(loop);
 
 </script>
 
