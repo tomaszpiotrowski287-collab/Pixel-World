@@ -1,9 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>PIXEL WORLD — COMPLETE EDITION</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<title>PIXEL WORLD — MULTIPLAYER</title>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
 <style>
 *{
@@ -16,30 +19,51 @@ html,body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#111;
-    font-family:Arial,Helvetica,sans-serif;
+    background:#070b10;
+    color:#fff;
+    font-family:monospace;
 }
 
 body{
-    user-select:none;
-}
-
-canvas{
-    display:block;
-    width:100%;
-    height:100%;
     image-rendering:pixelated;
 }
 
-button{
+button,input,select{
     font:inherit;
-    border:0;
+}
+
+button{
     cursor:pointer;
-    user-select:none;
+    color:#fff;
+    background:#182633;
+    border:2px solid #456477;
+    padding:10px 14px;
+    font-weight:900;
+}
+
+button:hover{
+    background:#244052;
+}
+
+button:active{
+    transform:translateY(2px);
 }
 
 .hidden{
     display:none!important;
+}
+
+/* =========================
+   CANVAS
+========================= */
+
+#game{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    image-rendering:pixelated;
+    background:#111;
 }
 
 /* =========================
@@ -49,182 +73,165 @@ button{
 #menu{
     position:fixed;
     inset:0;
-    z-index:100;
+    z-index:20;
+
     display:flex;
     align-items:center;
     justify-content:center;
-    overflow:hidden;
+
     background:
-        radial-gradient(circle at 50% 35%,rgba(67,190,255,.15),transparent 30%),
-        linear-gradient(#07111c,#0c1724 55%,#101010);
+        linear-gradient(
+            #071421,
+            #0d1720
+        );
+
+    overflow:auto;
 }
 
-.menuGrid{
-    position:absolute;
-    inset:0;
-    opacity:.12;
-    background-image:
-        linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
-    background-size:32px 32px;
-}
-
-.menuBox{
-    position:relative;
-    z-index:2;
-    width:min(430px,92vw);
-    padding:30px;
+.menu{
+    width:min(460px,94vw);
+    padding:26px;
     text-align:center;
 }
 
 .logo{
-    color:white;
-    font-size:clamp(38px,8vw,70px);
+    font-size:clamp(34px,8vw,66px);
     font-weight:900;
     letter-spacing:4px;
+
     text-shadow:
-        5px 5px 0 #000,
-        0 0 20px #00d9ff;
+        4px 4px #000,
+        0 0 14px #00d9ff;
 }
 
-.subtitle{
-    color:#9bdff0;
-    margin-top:6px;
-    margin-bottom:25px;
-    font-weight:bold;
-}
-
-.menuCharacter{
-    width:70px;
-    height:70px;
-    margin:0 auto 25px;
-    position:relative;
-    animation:menuFloat 2s ease-in-out infinite;
-}
-
-.menuCharacter .head{
-    position:absolute;
-    width:44px;
-    height:44px;
-    left:13px;
-    top:3px;
-    background:#ffd19a;
-    border:4px solid #111;
-}
-
-.menuCharacter .hair{
-    position:absolute;
-    width:44px;
-    height:16px;
-    left:13px;
-    top:3px;
-    background:#35200f;
-    border:4px solid #111;
-    z-index:2;
-}
-
-.menuCharacter .body{
-    position:absolute;
-    width:34px;
-    height:26px;
-    left:18px;
-    top:44px;
-    background:#38a8ff;
-    border:4px solid #111;
-}
-
-.menuCharacter .leg1,
-.menuCharacter .leg2{
-    position:absolute;
-    width:10px;
-    height:14px;
-    top:66px;
-    background:#222;
-    border:3px solid #111;
-}
-
-.menuCharacter .leg1{left:20px}
-.menuCharacter .leg2{left:40px}
-
-@keyframes menuFloat{
-    0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-6px)}
-}
-
-.menuButtons{
-    display:grid;
-    gap:10px;
-}
-
-.menuBtn{
-    width:100%;
-    padding:15px;
-    color:white;
-    background:#182838;
-    border:2px solid #34536b;
-    box-shadow:0 5px 0 #071018;
+.sub{
+    color:#9ce8ff;
+    margin:7px 0 22px;
     font-weight:900;
-    letter-spacing:1px;
-    transition:.12s;
 }
 
-.menuBtn:hover{
-    transform:translateY(-2px);
-    background:#203b51;
-    border-color:#55cfff;
+.menuArt{
+    width:96px;
+    height:96px;
+
+    margin:0 auto 18px;
+
+    background:#122330;
+    border:4px solid #35576a;
+
+    position:relative;
 }
 
-.menuBtn:active{
-    transform:translateY(3px);
-    box-shadow:0 2px 0 #071018;
+.menuArt:before{
+    content:"";
+
+    position:absolute;
+
+    left:28px;
+    top:18px;
+
+    width:40px;
+    height:38px;
+
+    background:#f2b77d;
+
+    box-shadow:
+        0 38px 0 #2688d8;
 }
 
-.playBtn{
-    background:#0b9ad1;
-    border-color:#55ddff;
+.menuArt:after{
+    content:"";
+
+    position:absolute;
+
+    left:28px;
+    top:18px;
+
+    width:40px;
+    height:9px;
+
+    background:#321c10;
 }
 
-.playBtn:hover{
-    background:#10b7ed;
+.menuBtns{
+    display:grid;
+    gap:9px;
+}
+
+.play{
+    background:#087fae;
+    border-color:#55dfff;
 }
 
 /* =========================
-   MODAL
+   PANELS
 ========================= */
 
-.modalLayer{
+.panel{
     position:fixed;
     inset:0;
-    z-index:200;
+
+    z-index:30;
+
     display:flex;
-    justify-content:center;
     align-items:center;
-    padding:20px;
-    background:rgba(0,0,0,.72);
+    justify-content:center;
+
+    padding:15px;
+
+    background:rgba(0,0,0,.76);
 }
 
-.modal{
-    width:min(600px,94vw);
+.box{
+    width:min(650px,95vw);
     max-height:90vh;
+
     overflow:auto;
-    padding:25px;
-    color:white;
-    background:#111c27;
-    border:2px solid #3e6079;
-    box-shadow:0 20px 70px rgba(0,0,0,.6);
+
+    background:#101b25;
+
+    border:3px solid #456477;
+
+    padding:20px;
+
+    box-shadow:
+        8px 8px #000;
 }
 
-.modal h2{
-    margin-top:0;
-    color:#5edcff;
+.box h2{
+    margin:0 0 14px;
+    color:#62dcff;
 }
 
-.closeBtn{
+.close{
     float:right;
-    background:#7c2630;
-    color:white;
-    padding:7px 12px;
-    font-weight:bold;
+
+    background:#742a32;
+
+    padding:6px 10px;
+}
+
+.row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    margin:10px 0;
+}
+
+.row>*:last-child{
+    margin-left:auto;
+}
+
+input,
+select{
+    background:#0b1219;
+    color:#fff;
+
+    border:2px solid #456477;
+
+    padding:9px;
+
+    min-width:0;
 }
 
 /* =========================
@@ -234,76 +241,94 @@ button{
 #gameUI{
     position:fixed;
     inset:0;
-    z-index:20;
+
+    z-index:10;
+
     pointer-events:none;
 }
 
-.topBar{
+.top{
     position:absolute;
-    left:12px;
-    right:12px;
-    top:12px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
 
-.gameTitle{
-    color:white;
-    font-weight:900;
+    left:10px;
+    right:10px;
+    top:10px;
+
+    display:flex;
+    gap:8px;
+
+    align-items:center;
+
     text-shadow:2px 2px #000;
 }
 
-.health{
-    width:170px;
-    height:20px;
-    border:2px solid #111;
-    background:#333;
+.hp{
+    width:145px;
+    height:18px;
+
+    background:#222;
+
+    border:2px solid #000;
+
     position:relative;
 }
 
-.healthFill{
+.hp i{
+    display:block;
+
     width:100%;
     height:100%;
-    background:#36d85c;
+
+    background:#36cf59;
 }
 
-.healthText{
+.hp span{
     position:absolute;
+
     inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:white;
-    font-size:12px;
-    font-weight:bold;
-    text-shadow:1px 1px #000;
+
+    text-align:center;
+
+    font-size:11px;
+
+    line-height:14px;
 }
 
-.help{
-    position:absolute;
-    left:12px;
-    bottom:110px;
-    color:white;
-    font-size:12px;
-    text-shadow:2px 2px #000;
-    opacity:.9;
-}
+.topRight{
+    margin-left:auto;
 
-.actionButtons{
-    position:absolute;
-    top:42px;
-    right:12px;
     display:flex;
-    gap:6px;
+    gap:5px;
+
     pointer-events:auto;
 }
 
-.smallBtn{
-    color:white;
-    background:rgba(15,25,35,.85);
-    border:1px solid #587186;
-    padding:7px 10px;
+.small{
+    padding:6px 9px;
+}
+
+#netStatus{
+    position:absolute;
+
+    top:40px;
+    left:10px;
+
+    font-size:11px;
+
+    color:#8fe7ff;
+
+    text-shadow:2px 2px #000;
+}
+
+#help{
+    position:absolute;
+
+    left:10px;
+    bottom:75px;
+
+    font-size:11px;
+
+    text-shadow:2px 2px #000;
 }
 
 /* =========================
@@ -312,60 +337,79 @@ button{
 
 #hotbar{
     position:absolute;
+
     left:50%;
-    bottom:12px;
+    bottom:10px;
+
     transform:translateX(-50%);
+
     display:flex;
-    gap:5px;
-    padding:5px;
-    background:rgba(10,15,20,.82);
-    border:2px solid #384d5c;
+
+    gap:4px;
+
+    padding:4px;
+
+    background:rgba(5,9,13,.86);
+
+    border:2px solid #456477;
+
     pointer-events:auto;
 }
 
 .slot{
-    width:54px;
-    height:54px;
+    width:48px;
+    height:48px;
+
+    background:#18232c;
+
+    border:2px solid #5d7180;
+
     position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#1d2932;
-    border:2px solid #596c79;
+
+    display:grid;
+    place-items:center;
 }
 
-.slot.selected{
+.slot.sel{
     border-color:#fff;
-    box-shadow:0 0 0 2px #00d9ff;
+
+    box-shadow:
+        0 0 0 2px #00d9ff;
 }
 
-.slotIcon{
-    width:28px;
-    height:28px;
-    image-rendering:pixelated;
+.icon{
+    width:25px;
+    height:25px;
+
+    border:2px solid #111;
 }
 
-.slotCount{
+.count{
     position:absolute;
-    right:3px;
-    bottom:1px;
-    color:white;
+
+    right:2px;
+    bottom:0;
+
     font-size:12px;
-    font-weight:bold;
+
     text-shadow:2px 2px #000;
 }
 
 /* =========================
-   MOBILE CONTROLS
+   MOBILE
 ========================= */
 
-.mobileControls{
+.mobile{
     display:none;
+
     position:absolute;
-    left:12px;
-    right:12px;
-    bottom:90px;
+
+    left:10px;
+    right:10px;
+    bottom:70px;
+
     justify-content:space-between;
+
     pointer-events:none;
 }
 
@@ -374,257 +418,192 @@ button{
     gap:8px;
 }
 
-.mobileBtn{
-    width:65px;
-    height:65px;
-    border-radius:12px;
-    color:white;
-    background:rgba(20,30,40,.7);
-    border:2px solid rgba(255,255,255,.4);
-    font-size:25px;
+.mob{
+    width:60px;
+    height:60px;
+
+    background:rgba(15,28,38,.72);
+
+    border:2px solid #78909f;
+
     pointer-events:auto;
+
     touch-action:none;
-}
 
-@media(max-width:700px){
-    .mobileControls{
-        display:flex;
-    }
-
-    .help{
-        display:none;
-    }
-
-    .slot{
-        width:45px;
-        height:45px;
-    }
-
-    .slotIcon{
-        width:24px;
-        height:24px;
-    }
-
-    .health{
-        width:120px;
-    }
+    font-size:22px;
 }
 
 /* =========================
    PAUSE
 ========================= */
 
-#pauseOverlay{
+#pause{
     position:fixed;
+
     inset:0;
-    z-index:50;
+
+    z-index:25;
+
     display:none;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,.55);
+
+    place-items:center;
+
+    background:rgba(0,0,0,.52);
 }
 
 .pauseBox{
-    padding:30px;
-    background:#111c27;
-    border:2px solid #57748a;
-    color:white;
+    background:#101b25;
+
+    border:3px solid #456477;
+
+    padding:24px;
+
     text-align:center;
 }
 
-.pauseBox h2{
-    margin-top:0;
-}
+@media(max-width:700px){
 
-.pauseActions{
-    display:grid;
-    gap:10px;
-}
+    .mobile{
+        display:flex;
+    }
 
-/* =========================
-   CRAFTING
-========================= */
+    #help{
+        display:none;
+    }
 
-.recipe{
-    display:flex;
-    align-items:center;
-    gap:15px;
-    padding:12px;
-    margin:8px 0;
-    background:#182735;
-    border:1px solid #355165;
-}
+    .slot{
+        width:43px;
+        height:43px;
+    }
 
-.recipe button{
-    margin-left:auto;
-    padding:9px 14px;
-    background:#1689b9;
-    color:white;
-    font-weight:bold;
-}
-
-/* =========================
-   SETTINGS
-========================= */
-
-.settingsTabs{
-    display:flex;
-    flex-wrap:wrap;
-    gap:5px;
-    margin-bottom:15px;
-}
-
-.settingsTab{
-    padding:8px 12px;
-    background:#1c2b38;
-    color:white;
-    border:1px solid #405769;
-}
-
-.settingsTab.active{
-    background:#0d91c4;
-}
-
-.settingPage{
-    display:none;
-}
-
-.settingPage.active{
-    display:block;
-}
-
-.settingRow{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    padding:10px 0;
-    border-bottom:1px solid #283c4c;
-}
-
-.settingRow input,
-.settingRow select{
-    padding:6px;
-}
-
-.danger{
-    background:#8e2732;
-    color:white;
-    padding:10px 15px;
-}
-
-/* =========================
-   MESSAGE
-========================= */
-
-#message{
-    position:fixed;
-    z-index:300;
-    left:50%;
-    top:90px;
-    transform:translateX(-50%);
-    color:white;
-    background:rgba(0,0,0,.8);
-    border:1px solid #5d7483;
-    padding:10px 18px;
-    opacity:0;
-    pointer-events:none;
-    transition:.2s;
-}
-
-#message.show{
-    opacity:1;
-}
-
-/* =========================
-   PAUSE BUTTON
-========================= */
-
-.pauseMini{
-    pointer-events:auto;
-}
-
-/* =========================
-   SCROLLBAR
-========================= */
-
-::-webkit-scrollbar{
-    width:8px;
-}
-
-::-webkit-scrollbar-thumb{
-    background:#405667;
+    .icon{
+        width:22px;
+        height:22px;
+    }
 }
 </style>
 </head>
 
 <body>
 
+<canvas id="game"></canvas>
+
 <!-- =========================
-     MAIN MENU
+     MENU
 ========================= -->
 
 <div id="menu">
-    <div class="menuGrid"></div>
 
-    <div class="menuBox">
+    <div class="menu">
 
-        <div class="logo">PIXEL WORLD</div>
-        <div class="subtitle">MINI PIXEL SANDBOX</div>
-
-        <div class="menuCharacter">
-            <div class="head"></div>
-            <div class="hair"></div>
-            <div class="body"></div>
-            <div class="leg1"></div>
-            <div class="leg2"></div>
+        <div class="logo">
+            PIXEL WORLD
         </div>
 
-        <div class="menuButtons">
+        <div class="sub">
+            MINI PIXEL SANDBOX • MULTIPLAYER
+        </div>
 
-            <button class="menuBtn playBtn" id="playBtn">
+        <div class="menuArt"></div>
+
+        <div class="menuBtns">
+
+            <button class="play" id="play">
                 ▶ GRAJ
             </button>
 
-            <button class="menuBtn" id="newsBtn">
+            <button id="multi">
+                👥 MULTIPLAYER
+            </button>
+
+            <button id="news">
                 📰 NEWS
             </button>
 
-            <button class="menuBtn" id="shopBtn">
-                🛒 SHOP
-            </button>
-
-            <button class="menuBtn" id="accountBtn">
-                👤 ACCOUNT
-            </button>
-
-            <button class="menuBtn" id="socialBtn">
-                👥 SOCIAL
-            </button>
-
-            <button class="menuBtn" id="settingsBtn">
+            <button id="settings">
                 ⚙ USTAWIENIA
             </button>
 
         </div>
+
     </div>
+
 </div>
 
 <!-- =========================
-     INFORMATION MODAL
+     INFO
 ========================= -->
 
-<div id="infoModal" class="modalLayer hidden">
+<div id="info" class="panel hidden">
 
-    <div class="modal">
+    <div class="box">
 
-        <button class="closeBtn" id="closeInfo">X</button>
+        <button class="close" data-close="info">
+            X
+        </button>
 
-        <h2 id="infoTitle">PIXEL WORLD</h2>
+        <h2 id="infoTitle"></h2>
 
-        <div id="infoContent">
-            Witaj w Pixel World!
+        <div id="infoText"></div>
+
+    </div>
+
+</div>
+
+<!-- =========================
+     MULTIPLAYER
+========================= -->
+
+<div id="multiPanel" class="panel hidden">
+
+    <div class="box">
+
+        <button class="close" data-close="multiPanel">
+            X
+        </button>
+
+        <h2>
+            👥 MULTIPLAYER
+        </h2>
+
+        <p>
+            Host tworzy pokój i podaje swój kod drugiej osobie.
+        </p>
+
+        <div class="row">
+
+            <button id="hostBtn">
+                UTWÓRZ POKÓJ
+            </button>
+
+            <input
+                id="myId"
+                readonly
+                placeholder="Twój kod"
+            >
+
         </div>
+
+        <div class="row">
+
+            <input
+                id="joinId"
+                placeholder="Kod pokoju"
+            >
+
+            <button id="joinBtn">
+                DOŁĄCZ
+            </button>
+
+        </div>
+
+        <p id="multiMsg">
+            Offline
+        </p>
+
+        <button id="multiBack">
+            WRÓĆ
+        </button>
 
     </div>
 
@@ -634,269 +613,102 @@ button{
      SETTINGS
 ========================= -->
 
-<div id="settingsModal" class="modalLayer hidden">
+<div id="settingsPanel" class="panel hidden">
 
-    <div class="modal">
+    <div class="box">
 
-        <button class="closeBtn" id="closeSettings">X</button>
+        <button class="close" data-close="settingsPanel">
+            X
+        </button>
 
-        <h2>⚙ USTAWIENIA</h2>
+        <h2>
+            ⚙ USTAWIENIA
+        </h2>
 
-        <div class="settingsTabs">
-
-            <button class="settingsTab active" data-page="gameSettings">
-                Gra
-            </button>
-
-            <button class="settingsTab" data-page="graphicsSettings">
-                Grafika
-            </button>
-
-            <button class="settingsTab" data-page="animationSettings">
-                Animacje
-            </button>
-
-            <button class="settingsTab" data-page="soundSettings">
-                Dźwięk
-            </button>
-
-            <button class="settingsTab" data-page="controlSettings">
-                Sterowanie
-            </button>
-
-            <button class="settingsTab" data-page="saveSettings">
-                Zapis
-            </button>
-
-            <button class="settingsTab" data-page="helpSettings">
-                Pomoc
-            </button>
-
-            <button class="settingsTab" data-page="infoSettings">
-                Informacje
-            </button>
-
+        <div class="row">
+            <span>Pixel Perfect</span>
+            <input id="pixel" type="checkbox" checked>
         </div>
 
-        <div id="gameSettings" class="settingPage active">
-
-            <div class="settingRow">
-                <span>Mobilne przyciski</span>
-                <input id="mobileSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Autozapis</span>
-                <input id="autosaveSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Dzień / noc</span>
-                <input id="dayNightSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Cząsteczki</span>
-                <input id="particlesSwitch" type="checkbox" checked>
-            </div>
-
+        <div class="row">
+            <span>Dzień / noc</span>
+            <input id="dn" type="checkbox" checked>
         </div>
 
-        <div id="graphicsSettings" class="settingPage">
-
-            <div class="settingRow">
-                <span>Jakość</span>
-                <select id="qualitySelect">
-                    <option value="low">Niska</option>
-                    <option value="medium" selected>Średnia</option>
-                    <option value="high">Wysoka</option>
-                </select>
-            </div>
-
-            <div class="settingRow">
-                <span>Pixel Perfect</span>
-                <input id="pixelPerfectSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Animowana woda</span>
-                <input id="waterSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Pokaż FPS</span>
-                <input id="fpsSwitch" type="checkbox">
-            </div>
-
+        <div class="row">
+            <span>Cząsteczki</span>
+            <input id="parts" type="checkbox" checked>
         </div>
 
-        <div id="animationSettings" class="settingPage">
-
-            <div class="settingRow">
-                <span>Wszystkie animacje</span>
-                <input id="animationsSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Animacja chodzenia</span>
-                <input id="walkingSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Idle</span>
-                <input id="idleSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Mruganie</span>
-                <input id="blinkSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Skok / lądowanie</span>
-                <input id="jumpAnimSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Włosy</span>
-                <input id="hairSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Szybkość animacji</span>
-                <select id="animationSpeedSelect">
-                    <option value=".7">Wolna</option>
-                    <option value="1" selected>Normalna</option>
-                    <option value="1.3">Szybka</option>
-                </select>
-            </div>
-
+        <div class="row">
+            <span>Dźwięki</span>
+            <input id="snd" type="checkbox" checked>
         </div>
 
-        <div id="soundSettings" class="settingPage">
-
-            <div class="settingRow">
-                <span>Efekty dźwiękowe</span>
-                <input id="soundSwitch" type="checkbox" checked>
-            </div>
-
-            <div class="settingRow">
-                <span>Muzyka</span>
-                <input id="musicSwitch" type="checkbox">
-            </div>
-
-            <div class="settingRow">
-                <span>Głośność</span>
-                <input id="volumeRange" type="range" min="0" max="1" step=".05" value=".5">
-            </div>
-
+        <div class="row">
+            <span>Głośność</span>
+            <input
+                id="vol"
+                type="range"
+                min="0"
+                max="1"
+                step=".05"
+                value=".5"
+            >
         </div>
 
-        <div id="controlSettings" class="settingPage">
-
-            <p><b>Klawiatura:</b></p>
-            <p>A / D lub ← / → — ruch</p>
-            <p>W / ↑ / SPACJA — skok</p>
-            <p>LPM — kopanie</p>
-            <p>PPM — stawianie bloku</p>
-            <p>E — crafting</p>
-            <p>ESC — pauza</p>
-
-        </div>
-
-        <div id="saveSettings" class="settingPage">
-
-            <button id="saveBtn2" class="smallBtn">
-                💾 ZAPISZ GRĘ
-            </button>
-
-            <button id="resetSaveBtn" class="danger">
-                🗑 USUŃ ZAPIS
-            </button>
-
-        </div>
-
-        <div id="helpSettings" class="settingPage">
-
-            <p>
-                W Pixel World możesz chodzić, skakać, kopać,
-                stawiać bloki i tworzyć nowe materiały.
-            </p>
-
-            <p>
-                Zasięg kopania i budowania wynosi około 5 bloków.
-            </p>
-
-        </div>
-
-        <div id="infoSettings" class="settingPage">
-
-            <p><b>PIXEL WORLD</b></p>
-            <p>Mini Pixel Sandbox</p>
-            <p>Complete Edition</p>
-            <p>Single HTML Game</p>
-
+        <div class="row">
+            <span>Autozapis</span>
+            <input id="auto" type="checkbox" checked>
         </div>
 
     </div>
+
 </div>
 
 <!-- =========================
      CRAFTING
 ========================= -->
 
-<div id="craftModal" class="modalLayer hidden">
+<div id="craft" class="panel hidden">
 
-    <div class="modal">
+    <div class="box">
 
-        <button class="closeBtn" id="closeCraft">X</button>
+        <button class="close" data-close="craft">
+            X
+        </button>
 
-        <h2>🔨 CRAFTING</h2>
+        <h2>
+            🔨 CRAFTING
+        </h2>
 
-        <div class="recipe">
+        <div class="row">
 
-            <div>
-                🟨 🟨 → 🟦
-            </div>
+            <span>
+                2 × piasek → 1 × szkło
+            </span>
 
-            <div>
-                2 × PIACH
-                <br>
-                = 1 × SZKŁO
-            </div>
-
-            <button id="craftGlass">
+            <button id="glassCraft">
                 STWÓRZ
             </button>
 
         </div>
 
-        <div class="recipe">
+        <div class="row">
 
-            <div>
-                ⬜ ⬜ → 🧱
-            </div>
+            <span>
+                2 × kamień → 1 × cegła
+            </span>
 
-            <div>
-                2 × KAMIEŃ
-                <br>
-                = 1 × CEGŁA
-            </div>
-
-            <button id="craftBrick">
+            <button id="brickCraft">
                 STWÓRZ
             </button>
 
         </div>
 
     </div>
+
 </div>
-
-<!-- =========================
-     CANVAS
-========================= -->
-
-<canvas id="game"></canvas>
 
 <!-- =========================
      GAME UI
@@ -904,71 +716,67 @@ button{
 
 <div id="gameUI">
 
-    <div class="topBar">
+    <div class="top">
 
-        <div class="gameTitle">
+        <b>
             PIXEL WORLD
-        </div>
+        </b>
 
-        <div class="health">
+        <div class="hp">
 
-            <div class="healthFill" id="healthFill"></div>
+            <i id="hpFill"></i>
 
-            <div class="healthText" id="healthText">
+            <span id="hpText">
                 100 / 100
-            </div>
+            </span>
+
+        </div>
+
+        <div class="topRight">
+
+            <button class="small" id="save">
+                💾
+            </button>
+
+            <button class="small" id="craftBtn">
+                🔨
+            </button>
+
+            <button class="small" id="pauseBtn">
+                Ⅱ
+            </button>
 
         </div>
 
     </div>
 
-    <div class="actionButtons">
-
-        <button class="smallBtn pauseMini" id="pauseBtn">
-            ⏸
-        </button>
-
-        <button class="smallBtn" id="saveBtn">
-            💾
-        </button>
-
-        <button class="smallBtn" id="openCraft">
-            🔨
-        </button>
-
-        <button class="smallBtn" id="openGameSettings">
-            ⚙
-        </button>
-
+    <div id="netStatus">
+        Offline
     </div>
 
-    <div class="help">
-        A/D lub ←/→ ruch • W/↑/SPACJA skok • LPM kop • PPM postaw • E crafting • ESC pauza
+    <div id="help">
+        A/D lub ←/→ • W/↑/SPACJA • LPM kop • PPM buduj • E crafting • ESC pauza
     </div>
 
     <div id="hotbar"></div>
 
-    <div class="mobileControls" id="mobileControls">
+    <div class="mobile">
 
         <div class="mobileGroup">
 
-            <button class="mobileBtn" id="leftBtn">
+            <button class="mob" id="left">
                 ◀
             </button>
 
-            <button class="mobileBtn" id="rightBtn">
+            <button class="mob" id="right">
                 ▶
             </button>
 
         </div>
 
-        <div class="mobileGroup">
-
-            <button class="mobileBtn" id="jumpBtn">
-                ▲
-            </button>
-
-        </div>
+        <button class="mob" id="jump">
+            ▲
+        </button>
 
     </div>
 
@@ -978,232 +786,375 @@ button{
      PAUSE
 ========================= -->
 
-<div id="pauseOverlay">
+<div id="pause">
 
     <div class="pauseBox">
 
-        <h2>⏸ GRA WSTRZYMANA</h2>
+        <h2>
+            Ⅱ PAUZA
+        </h2>
 
-        <div class="pauseActions">
+        <button id="resume">
+            ▶ WRÓĆ
+        </button>
 
-            <button class="menuBtn" id="resumeBtn">
-                ▶ WRÓĆ DO GRY
-            </button>
-
-            <button class="menuBtn" id="pauseCraftBtn">
-                🔨 CRAFTING
-            </button>
-
-            <button class="menuBtn" id="pauseSettingsBtn">
-                ⚙ USTAWIENIA
-            </button>
-
-            <button class="menuBtn" id="backMenuBtn">
-                🏠 MENU
-            </button>
-
-        </div>
+        <button id="menuBack">
+            🏠 MENU
+        </button>
 
     </div>
 
 </div>
 
-<div id="message"></div>
-
 <script>
-/* =========================================================
-   PIXEL WORLD — COMPLETE EDITION
-========================================================= */
-
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-let W = innerWidth;
-let H = innerHeight;
-
-canvas.width = W;
-canvas.height = H;
+"use strict";
 
 /* =========================================================
-   DAY / NIGHT
+   CORE
 ========================================================= */
 
-/*
-   Pełny cykl = 5 minut.
-   2,5 minuty dzień
-   2,5 minuty noc
-*/
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+const VW = 480;
+const VH = 270;
+
+const T = 16;
+
+const WORLD_W = 420;
+const WORLD_H = 90;
 
 const DAY_LENGTH = 300000;
 
+let cssW = innerWidth;
+let cssH = innerHeight;
+
+let world = [];
+
+let particles = [];
+
+let keys = {};
+
+let jumpRequest = false;
+
+let leftHeld = false;
+let rightHeld = false;
+
+let mouse = {
+    x:0,
+    y:0
+};
+
+let mineHeld = false;
+let placeHeld = false;
+
+let selected = 0;
+
+let paused = true;
+
+let gameStarted = false;
+
 let dayTime = 0;
 
-function getNightAmount(){
+let last =
+    performance.now();
 
-    if(!settings.dayNight) return 0;
+let autoSaveTimer = 0;
 
-    const cycle = (dayTime % DAY_LENGTH) / DAY_LENGTH;
-
-    const sun =
-        Math.sin(
-            cycle * Math.PI * 2 - Math.PI / 2
-        );
-
-    return Math.max(
-        0,
-        Math.min(
-            1,
-            (1 - sun) / 2
-        )
-    );
-}
+let audio = null;
 
 /* =========================================================
    SETTINGS
 ========================================================= */
 
-const settings = {
+const S = {
 
-    mobile:true,
-    autosave:true,
+    pixel:true,
+
     dayNight:true,
-    particles:true,
 
-    quality:"medium",
-    pixelPerfect:true,
-    water:true,
-    showFPS:false,
-
-    animations:true,
-    walking:true,
-    idle:true,
-    blink:true,
-    jumpAnim:true,
-    hair:true,
-    animationSpeed:1,
+    parts:true,
 
     sound:true,
-    music:false,
-    volume:.5
+
+    volume:.5,
+
+    auto:true
+
 };
 
 /* =========================================================
-   WORLD
+   BLOCKS
 ========================================================= */
 
-const TILE = 32;
-
-const WORLD_W = 420;
-const WORLD_H = 90;
-
-const BLOCK = {
+const B = {
 
     air:0,
+
     grass:1,
+
     dirt:2,
+
     stone:3,
+
     wood:4,
+
     leaves:5,
+
     sand:6,
+
     water:7,
+
     glass:8,
+
     brick:9
+
 };
 
-const blockNames = [
+const items = [
 
-    "air",
-    "grass",
     "dirt",
     "stone",
     "wood",
-    "leaves",
     "sand",
-    "water",
     "glass",
     "brick"
 
 ];
 
-let world = [];
+const slots = [
 
-function createEmptyWorld(){
+    B.dirt,
+    B.stone,
+    B.wood,
+    B.sand,
+    B.glass,
+    B.brick
 
-    world = [];
+];
 
-    for(let y=0;y<WORLD_H;y++){
+let inv = {
 
-        world[y] = new Array(WORLD_W).fill(BLOCK.air);
+    dirt:20,
+    stone:10,
+    wood:10,
+    sand:10,
+    glass:0,
+    brick:0
+
+};
+
+/* =========================================================
+   PLAYER
+========================================================= */
+
+const me = {
+
+    x:0,
+    y:0,
+
+    w:11,
+    h:22,
+
+    vx:0,
+    vy:0,
+
+    ground:false,
+
+    dir:1,
+
+    walk:0,
+
+    mine:0,
+
+    blink:0,
+
+    hp:100
+
+};
+
+/* =========================================================
+   REMOTE PLAYERS
+========================================================= */
+
+const remotes =
+    new Map();
+
+/* =========================================================
+   MULTIPLAYER
+========================================================= */
+
+const multiplayer = {
+
+    peer:null,
+
+    host:false,
+
+    connected:false,
+
+    conns:new Set(),
+
+    hostConn:null,
+
+    id:""
+
+};
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+function resize(){
+
+    cssW =
+        innerWidth;
+
+    cssH =
+        innerHeight;
+
+    canvas.width =
+        VW;
+
+    canvas.height =
+        VH;
+
+    canvas.style.width =
+        cssW+"px";
+
+    canvas.style.height =
+        cssH+"px";
+
+    ctx.imageSmoothingEnabled =
+        false;
+
+}
+
+addEventListener(
+    "resize",
+    resize
+);
+
+resize();
+
+/* =========================================================
+   WORLD
+========================================================= */
+
+function emptyWorld(){
+
+    world =
+        Array.from(
+            {
+                length:WORLD_H
+            },
+            () =>
+                new Uint8Array(WORLD_W)
+        );
+
+}
+
+function getB(x,y){
+
+    if(
+        x<0 ||
+        y<0 ||
+        x>=WORLD_W ||
+        y>=WORLD_H
+    ){
+
+        return B.stone;
 
     }
-}
-
-function getBlock(x,y){
-
-    if(x<0 || y<0 || x>=WORLD_W || y>=WORLD_H)
-        return BLOCK.stone;
 
     return world[y][x];
+
 }
 
-function setBlock(x,y,type){
+function setB(x,y,v){
 
-    if(x<0 || y<0 || x>=WORLD_W || y>=WORLD_H)
-        return;
+    if(
+        x>=0 &&
+        y>=0 &&
+        x<WORLD_W &&
+        y<WORLD_H
+    ){
 
-    world[y][x] = type;
+        world[y][x] = v;
+
+    }
+
 }
 
 /* =========================================================
    WORLD GENERATION
 ========================================================= */
 
-function generateWorld(){
+function generate(){
 
-    createEmptyWorld();
+    emptyWorld();
 
-    for(let x=0;x<WORLD_W;x++){
+    for(
+        let x=0;
+        x<WORLD_W;
+        x++
+    ){
 
-        let height =
-            34 +
-            Math.sin(x*.055)*5 +
-            Math.sin(x*.017)*7 +
-            Math.sin(x*.11)*2;
+        const h =
+            Math.floor(
+                34 +
+                Math.sin(x*.055)*4 +
+                Math.sin(x*.017)*6 +
+                Math.sin(x*.12)*1.5
+            );
 
-        height = Math.floor(height);
+        for(
+            let y=h;
+            y<WORLD_H;
+            y++
+        ){
 
-        for(let y=height;y<WORLD_H;y++){
-
-            if(y===height){
-
-                setBlock(x,y,BLOCK.grass);
-
-            }else if(y<height+5){
-
-                setBlock(x,y,BLOCK.dirt);
-
-            }else{
-
-                setBlock(x,y,BLOCK.stone);
-
-            }
+            setB(
+                x,
+                y,
+                y===h
+                    ? B.grass
+                    : y<h+5
+                        ? B.dirt
+                        : B.stone
+            );
 
         }
+
     }
 
     /* CAVES */
 
-    for(let x=4;x<WORLD_W-4;x++){
+    for(
+        let x=4;
+        x<WORLD_W-4;
+        x++
+    ){
 
-        for(let y=40;y<WORLD_H-5;y++){
+        for(
+            let y=40;
+            y<WORLD_H-4;
+            y++
+        ){
 
-            const cave =
+            if(
                 Math.sin(x*.18+y*.12) +
-                Math.sin(x*.06-y*.16);
+                Math.sin(x*.06-y*.16)
+                >1.38
+            ){
 
-            if(cave>1.35){
-
-                setBlock(x,y,BLOCK.air);
+                setB(
+                    x,
+                    y,
+                    B.air
+                );
 
             }
 
@@ -1213,13 +1164,23 @@ function generateWorld(){
 
     /* TREES */
 
-    for(let x=5;x<WORLD_W-5;x+=7+Math.floor(Math.random()*5)){
+    for(
+        let x=8;
+        x<WORLD_W-8;
+        x+=8+Math.floor(Math.random()*5)
+    ){
 
         let ground=-1;
 
-        for(let y=0;y<WORLD_H;y++){
+        for(
+            let y=4;
+            y<50;
+            y++
+        ){
 
-            if(getBlock(x,y)===BLOCK.grass){
+            if(
+                getB(x,y)===B.grass
+            ){
 
                 ground=y;
                 break;
@@ -1228,33 +1189,59 @@ function generateWorld(){
 
         }
 
-        if(ground>5 && Math.random()>.35){
+        if(
+            ground>5 &&
+            Math.random()>.35
+        ){
 
-            const treeHeight =
-                4 + Math.floor(Math.random()*3);
+            const h =
+                4+
+                Math.floor(
+                    Math.random()*3
+                );
 
-            for(let t=1;t<=treeHeight;t++){
+            for(
+                let i=1;
+                i<=h;
+                i++
+            ){
 
-                if(ground-t>=0)
-                    setBlock(x,ground-t,BLOCK.wood);
+                setB(
+                    x,
+                    ground-i,
+                    B.wood
+                );
 
             }
 
-            const top = ground-treeHeight;
+            const top =
+                ground-h;
 
-            for(let yy=-2;yy<=2;yy++){
+            for(
+                let yy=-2;
+                yy<=2;
+                yy++
+            ){
 
-                for(let xx=-2;xx<=2;xx++){
+                for(
+                    let xx=-2;
+                    xx<=2;
+                    xx++
+                ){
 
                     if(
-                        Math.abs(xx)+Math.abs(yy)<=3 &&
-                        getBlock(x+xx,top+yy)===BLOCK.air
+                        Math.abs(xx)+
+                        Math.abs(yy)<=3 &&
+                        getB(
+                            x+xx,
+                            top+yy
+                        )===B.air
                     ){
 
-                        setBlock(
+                        setB(
                             x+xx,
                             top+yy,
-                            BLOCK.leaves
+                            B.leaves
                         );
 
                     }
@@ -1272,18 +1259,27 @@ function generateWorld(){
     let ponds=0;
 
     for(
-        let x=10;
-        x<WORLD_W-10 && ponds<3;
-        x+=Math.floor(15+Math.random()*25)
+        let x=12;
+        x<WORLD_W-12 &&
+        ponds<3;
+        x+=Math.floor(
+            18+Math.random()*25
+        )
     ){
 
-        if(Math.random()<.45){
+        if(Math.random()<.55){
 
             let ground=-1;
 
-            for(let y=0;y<50;y++){
+            for(
+                let y=4;
+                y<48;
+                y++
+            ){
 
-                if(getBlock(x,y)===BLOCK.grass){
+                if(
+                    getB(x,y)===B.grass
+                ){
 
                     ground=y;
                     break;
@@ -1294,25 +1290,23 @@ function generateWorld(){
 
             if(ground>2){
 
-                for(let xx=-3;xx<=3;xx++){
+                for(
+                    let xx=-3;
+                    xx<=3;
+                    xx++
+                ){
 
-                    for(let yy=0;yy<2;yy++){
+                    for(
+                        let yy=0;
+                        yy<2;
+                        yy++
+                    ){
 
-                        const bx=x+xx;
-                        const by=ground+yy;
-
-                        if(
-                            Math.abs(xx)<=3 &&
-                            getBlock(bx,by)!==BLOCK.stone
-                        ){
-
-                            setBlock(
-                                bx,
-                                by,
-                                BLOCK.water
-                            );
-
-                        }
+                        setB(
+                            x+xx,
+                            ground+yy,
+                            B.water
+                        );
 
                     }
 
@@ -1332,21 +1326,32 @@ function generateWorld(){
    SPAWN
 ========================================================= */
 
-function findSpawn(){
+function spawn(){
 
-    for(let x=10;x<WORLD_W-10;x++){
+    for(
+        let x=10;
+        x<WORLD_W-10;
+        x++
+    ){
 
-        for(let y=5;y<WORLD_H-5;y++){
+        for(
+            let y=4;
+            y<45;
+            y++
+        ){
 
             if(
-                getBlock(x,y)===BLOCK.grass &&
-                getBlock(x,y-1)===BLOCK.air &&
-                getBlock(x,y-2)===BLOCK.air
+                getB(x,y)===B.grass &&
+                getB(x,y-1)===B.air &&
+                getB(x,y-2)===B.air
             ){
 
                 return {
-                    x:x*TILE+6,
-                    y:(y-2)*TILE
+
+                    x:x*T+2,
+
+                    y:(y-2)*T
+
                 };
 
             }
@@ -1356,1852 +1361,12 @@ function findSpawn(){
     }
 
     return {
-        x:20*TILE,
-        y:20*TILE
-    };
-}
 
-/* =========================================================
-   PLAYER
-========================================================= */
+        x:20*T,
 
-const player = {
-
-    x:0,
-    y:0,
-
-    w:20,
-    h:40,
-
-    vx:0,
-    vy:0,
-
-    speed:185,
-    jump:440,
-
-    grounded:false,
-
-    dir:1,
-
-    anim:0,
-    blinkTimer:0,
-    blink:false,
-
-    mining:false,
-    mineTimer:0,
-
-    landing:0
-};
-
-function resetPlayer(){
-
-    const spawn=findSpawn();
-
-    player.x=spawn.x;
-    player.y=spawn.y;
-
-    player.vx=0;
-    player.vy=0;
-
-    player.grounded=false;
-    player.dir=1;
-    player.anim=0;
-    player.mining=false;
-    player.mineTimer=0;
-    player.landing=0;
-
-}
-
-/* =========================================================
-   CAMERA
-========================================================= */
-
-const camera = {
-
-    x:0,
-    y:0
-};
-
-function updateCamera(){
-
-    camera.x =
-        player.x +
-        player.w/2 -
-        W/2;
-
-    camera.y =
-        player.y +
-        player.h/2 -
-        H/2;
-
-    camera.x=Math.max(
-        0,
-        Math.min(
-            WORLD_W*TILE-W,
-            camera.x
-        )
-    );
-
-    camera.y=Math.max(
-        0,
-        Math.min(
-            WORLD_H*TILE-H,
-            camera.y
-        )
-    );
-
-}
-
-/* =========================================================
-   INPUT
-========================================================= */
-
-const keys={};
-
-let jumpRequested=false;
-
-let leftMobile=false;
-let rightMobile=false;
-
-window.addEventListener("keydown",e=>{
-
-    if(
-        e.code==="ArrowLeft" ||
-        e.code==="ArrowRight" ||
-        e.code==="Space" ||
-        e.code==="ArrowUp"
-    ){
-
-        e.preventDefault();
-
-    }
-
-    if(!e.repeat){
-
-        if(
-            e.code==="Space" ||
-            e.code==="ArrowUp" ||
-            e.code==="KeyW"
-        ){
-
-            jumpRequested=true;
-
-        }
-
-    }
-
-    keys[e.code]=true;
-
-    if(e.code==="Escape"){
-
-        togglePause();
-
-    }
-
-    if(e.code==="KeyE"){
-
-        if(!gamePaused)
-            openCrafting();
-
-    }
-
-    if(e.code>="Digit1" && e.code<="Digit6"){
-
-        const n =
-            Number(e.code.substring(5))-1;
-
-        if(n>=0 && n<6){
-
-            selected=n;
-            updateHotbar();
-
-        }
-
-    }
-
-});
-
-window.addEventListener("keyup",e=>{
-
-    keys[e.code]=false;
-
-});
-
-/* =========================================================
-   MOBILE INPUT
-========================================================= */
-
-function setupHoldButton(id,down,up){
-
-    const el=document.getElementById(id);
-
-    el.addEventListener("pointerdown",e=>{
-
-        e.preventDefault();
-        down();
-
-    });
-
-    ["pointerup","pointercancel","pointerleave"].forEach(type=>{
-
-        el.addEventListener(type,e=>{
-
-            e.preventDefault();
-            up();
-
-        });
-
-    });
-
-}
-
-setupHoldButton(
-    "leftBtn",
-    ()=>leftMobile=true,
-    ()=>leftMobile=false
-);
-
-setupHoldButton(
-    "rightBtn",
-    ()=>rightMobile=true,
-    ()=>rightMobile=false
-);
-
-document.getElementById("jumpBtn")
-.addEventListener("pointerdown",e=>{
-
-    e.preventDefault();
-
-    jumpRequested=true;
-
-});
-
-/* =========================================================
-   MOVEMENT
-========================================================= */
-
-function isSolid(type){
-
-    return (
-        type!==BLOCK.air &&
-        type!==BLOCK.water &&
-        type!==BLOCK.leaves
-    );
-
-}
-
-function rectCollides(x,y,w,h){
-
-    const left=Math.floor(x/TILE);
-    const right=Math.floor((x+w-1)/TILE);
-
-    const top=Math.floor(y/TILE);
-    const bottom=Math.floor((y+h-1)/TILE);
-
-    for(let yy=top;yy<=bottom;yy++){
-
-        for(let xx=left;xx<=right;xx++){
-
-            if(isSolid(getBlock(xx,yy)))
-                return true;
-
-        }
-
-    }
-
-    return false;
-
-}
-
-function movePlayer(dx,dy){
-
-    if(dx!==0){
-
-        let nx=player.x+dx;
-
-        if(!rectCollides(
-            nx,
-            player.y,
-            player.w,
-            player.h
-        )){
-
-            player.x=nx;
-
-        }else{
-
-            const sign=Math.sign(dx);
-
-            while(
-                Math.abs(dx)>0.5 &&
-                !rectCollides(
-                    player.x+sign,
-                    player.y,
-                    player.w,
-                    player.h
-                )
-            ){
-
-                player.x+=sign;
-                dx-=sign;
-
-            }
-
-            player.vx=0;
-
-        }
-
-    }
-
-    if(dy!==0){
-
-        let ny=player.y+dy;
-
-        if(!rectCollides(
-            player.x,
-            ny,
-            player.w,
-            player.h
-        )){
-
-            player.y=ny;
-            player.grounded=false;
-
-        }else{
-
-            if(dy>0){
-
-                player.grounded=true;
-                player.landing=.15;
-
-            }
-
-            player.vy=0;
-
-        }
-
-    }
-
-}
-
-function updatePlayer(dt){
-
-    const left =
-        keys["KeyA"] ||
-        keys["ArrowLeft"] ||
-        leftMobile;
-
-    const right =
-        keys["KeyD"] ||
-        keys["ArrowRight"] ||
-        rightMobile;
-
-    let dir=0;
-
-    if(left) dir--;
-
-    if(right) dir++;
-
-    if(dir!==0){
-
-        player.vx +=
-            (dir*player.speed-player.vx)
-            *Math.min(1,dt*12);
-
-        player.dir=dir;
-
-    }else{
-
-        player.vx *= Math.pow(.0001,dt);
-
-    }
-
-    /* JUMP — tylko po jednorazowym żądaniu */
-
-    if(
-        jumpRequested &&
-        player.grounded
-    ){
-
-        player.vy=-player.jump;
-        player.grounded=false;
-
-        playSound("jump");
-
-    }
-
-    /* WAŻNE:
-       kasujemy żądanie po każdym ticku,
-       żeby postać nie skakała sama.
-    */
-
-    jumpRequested=false;
-
-    player.vy += 1150*dt;
-
-    movePlayer(
-        player.vx*dt,
-        player.vy*dt
-    );
-
-    if(Math.abs(player.vx)>20 && player.grounded){
-
-        player.anim +=
-            dt*8*settings.animationSpeed;
-
-    }
-
-    if(player.landing>0){
-
-        player.landing-=dt;
-
-    }
-
-    /* zapobiega wypadnięciu poza świat */
-
-    if(player.y>WORLD_H*TILE){
-
-        const spawn=findSpawn();
-
-        player.x=spawn.x;
-        player.y=spawn.y;
-
-        player.vx=0;
-        player.vy=0;
-
-    }
-
-}
-
-/* =========================================================
-   INVENTORY
-========================================================= */
-
-let inventory={
-
-    dirt:20,
-    stone:10,
-    wood:10,
-    sand:10,
-    glass:0,
-    brick:0
-
-};
-
-let selected=0;
-
-const hotbarBlocks=[
-
-    BLOCK.dirt,
-    BLOCK.stone,
-    BLOCK.wood,
-    BLOCK.sand,
-    BLOCK.glass,
-    BLOCK.brick
-
-];
-
-const inventoryKeys=[
-
-    "dirt",
-    "stone",
-    "wood",
-    "sand",
-    "glass",
-    "brick"
-
-];
-
-function updateHotbar(){
-
-    const hotbar=document.getElementById("hotbar");
-
-    hotbar.innerHTML="";
-
-    for(let i=0;i<6;i++){
-
-        const slot=document.createElement("div");
-
-        slot.className=
-            "slot"+
-            (i===selected?" selected":"");
-
-        slot.innerHTML=`
-
-            <div
-                class="slotIcon"
-                style="
-                    background:${blockColor(hotbarBlocks[i])};
-                    border:2px solid rgba(0,0,0,.4);
-                "
-            ></div>
-
-            <div class="slotCount">
-                ${inventory[inventoryKeys[i]]}
-            </div>
-
-        `;
-
-        slot.addEventListener("pointerdown",()=>{
-
-            selected=i;
-            updateHotbar();
-
-        });
-
-        hotbar.appendChild(slot);
-
-    }
-
-}
-
-/* =========================================================
-   BLOCK COLORS
-========================================================= */
-
-function blockColor(type){
-
-    switch(type){
-
-        case BLOCK.grass:
-            return "#55a83e";
-
-        case BLOCK.dirt:
-            return "#85502c";
-
-        case BLOCK.stone:
-            return "#7d858a";
-
-        case BLOCK.wood:
-            return "#754421";
-
-        case BLOCK.leaves:
-            return "#3f9137";
-
-        case BLOCK.sand:
-            return "#d8c276";
-
-        case BLOCK.water:
-            return "#329bd1";
-
-        case BLOCK.glass:
-            return "rgba(130,220,255,.65)";
-
-        case BLOCK.brick:
-            return "#a64d3b";
-
-        default:
-            return "transparent";
-
-    }
-
-}
-
-/* =========================================================
-   MINING / PLACING
-========================================================= */
-
-let mouseX=0;
-let mouseY=0;
-
-let miningMouse=false;
-let placingMouse=false;
-
-function screenToWorld(){
-
-    return {
-
-        x:
-            mouseX+
-            camera.x,
-
-        y:
-            mouseY+
-            camera.y
+        y:20*T
 
     };
-
-}
-
-function distanceToPlayer(wx,wy){
-
-    const px=
-        player.x+
-        player.w/2;
-
-    const py=
-        player.y+
-        player.h/2;
-
-    return Math.hypot(
-        wx-px,
-        wy-py
-    )/TILE;
-
-}
-
-function mineBlock(){
-
-    const p=screenToWorld();
-
-    const bx=Math.floor(p.x/TILE);
-    const by=Math.floor(p.y/TILE);
-
-    const type=getBlock(bx,by);
-
-    if(type===BLOCK.air)
-        return;
-
-    if(
-        distanceToPlayer(
-            bx*TILE+TILE/2,
-            by*TILE+TILE/2
-        )>5.2
-    ){
-
-        showMessage("Za daleko!");
-
-        return;
-
-    }
-
-    let item=null;
-
-    if(
-        type===BLOCK.grass ||
-        type===BLOCK.dirt
-    ){
-
-        item="dirt";
-
-    }else if(type===BLOCK.stone){
-
-        item="stone";
-
-    }else if(type===BLOCK.wood){
-
-        item="wood";
-
-    }else if(type===BLOCK.sand){
-
-        item="sand";
-
-    }else if(type===BLOCK.glass){
-
-        item="glass";
-
-    }else if(type===BLOCK.brick){
-
-        item="brick";
-
-    }
-
-    setBlock(bx,by,BLOCK.air);
-
-    if(item){
-
-        inventory[item]++;
-
-    }
-
-    player.mining=true;
-    player.mineTimer=.18;
-
-    playSound("mine");
-
-    if(settings.particles){
-
-        for(let i=0;i<7;i++){
-
-            particles.push({
-
-                x:bx*TILE+TILE/2,
-                y:by*TILE+TILE/2,
-
-                vx:(Math.random()-.5)*90,
-                vy:-Math.random()*100,
-
-                life:.5,
-                max:.5,
-
-                type:"dust",
-                color:blockColor(type)
-
-            });
-
-        }
-
-    }
-
-    updateHotbar();
-
-}
-
-function placeBlock(){
-
-    const p=screenToWorld();
-
-    const bx=Math.floor(p.x/TILE);
-    const by=Math.floor(p.y/TILE);
-
-    if(getBlock(bx,by)!==BLOCK.air)
-        return;
-
-    if(
-        distanceToPlayer(
-            bx*TILE+TILE/2,
-            by*TILE+TILE/2
-        )>5.2
-    ){
-
-        showMessage("Za daleko!");
-        return;
-
-    }
-
-    const item=inventoryKeys[selected];
-
-    if(inventory[item]<=0){
-
-        showMessage("Brak tego bloku!");
-        return;
-
-    }
-
-    const nx=bx*TILE;
-    const ny=by*TILE;
-
-    if(
-        nx<player.x+player.w &&
-        nx+TILE>player.x &&
-        ny<player.y+player.h &&
-        ny+TILE>player.y
-    ){
-
-        return;
-
-    }
-
-    setBlock(
-        bx,
-        by,
-        hotbarBlocks[selected]
-    );
-
-    inventory[item]--;
-
-    playSound("place");
-
-    updateHotbar();
-
-}
-
-/* =========================================================
-   MOUSE
-========================================================= */
-
-canvas.addEventListener("pointermove",e=>{
-
-    mouseX=e.clientX;
-    mouseY=e.clientY;
-
-});
-
-canvas.addEventListener("pointerdown",e=>{
-
-    mouseX=e.clientX;
-    mouseY=e.clientY;
-
-    if(e.button===0){
-
-        miningMouse=true;
-        mineBlock();
-
-    }
-
-    if(e.button===2){
-
-        placingMouse=true;
-        placeBlock();
-
-    }
-
-});
-
-window.addEventListener("pointerup",e=>{
-
-    if(e.button===0)
-        miningMouse=false;
-
-    if(e.button===2)
-        placingMouse=false;
-
-});
-
-canvas.addEventListener("contextmenu",e=>{
-
-    e.preventDefault();
-
-});
-
-/* =========================================================
-   TOUCH
-========================================================= */
-
-let touchTimer=null;
-
-canvas.addEventListener("touchstart",e=>{
-
-    if(e.touches.length!==1)
-        return;
-
-    const t=e.touches[0];
-
-    mouseX=t.clientX;
-    mouseY=t.clientY;
-
-    touchTimer=setTimeout(()=>{
-
-        placeBlock();
-
-    },400);
-
-    mineBlock();
-
-},{passive:true});
-
-canvas.addEventListener("touchend",()=>{
-
-    if(touchTimer){
-
-        clearTimeout(touchTimer);
-        touchTimer=null;
-
-    }
-
-});
-
-/* =========================================================
-   PARTICLES
-========================================================= */
-
-const particles=[];
-
-function updateParticles(dt){
-
-    for(let i=particles.length-1;i>=0;i--){
-
-        const p=particles[i];
-
-        p.life-=dt;
-
-        p.x+=p.vx*dt;
-        p.y+=p.vy*dt;
-
-        p.vy+=220*dt;
-
-        if(p.life<=0)
-            particles.splice(i,1);
-
-    }
-
-}
-
-function drawParticles(){
-
-    if(!settings.particles)
-        return;
-
-    for(const p of particles){
-
-        ctx.globalAlpha=
-            Math.max(0,p.life/p.max);
-
-        ctx.fillStyle=p.color;
-
-        ctx.fillRect(
-
-            p.x-camera.x,
-            p.y-camera.y,
-
-            4,
-            4
-
-        );
-
-    }
-
-    ctx.globalAlpha=1;
-
-}
-
-/* =========================================================
-   AUDIO
-========================================================= */
-
-let audioCtx=null;
-
-function getAudio(){
-
-    if(!audioCtx){
-
-        try{
-
-            audioCtx=
-                new(
-                    window.AudioContext ||
-                    window.webkitAudioContext
-                )();
-
-        }catch(e){
-
-            return null;
-
-        }
-
-    }
-
-    return audioCtx;
-
-}
-
-function playSound(type){
-
-    if(!settings.sound)
-        return;
-
-    const ac=getAudio();
-
-    if(!ac)
-        return;
-
-    const osc=ac.createOscillator();
-    const gain=ac.createGain();
-
-    osc.connect(gain);
-    gain.connect(ac.destination);
-
-    const now=ac.currentTime;
-
-    let freq=300;
-    let duration=.08;
-    let wave="square";
-
-    if(type==="mine"){
-
-        freq=130;
-        duration=.09;
-        wave="square";
-
-    }
-
-    if(type==="place"){
-
-        freq=220;
-        duration=.08;
-        wave="triangle";
-
-    }
-
-    if(type==="jump"){
-
-        freq=500;
-        duration=.12;
-        wave="square";
-
-    }
-
-    if(type==="land"){
-
-        freq=100;
-        duration=.08;
-        wave="triangle";
-
-    }
-
-    if(type==="step"){
-
-        freq=100;
-        duration=.04;
-        wave="square";
-
-    }
-
-    if(type==="craft"){
-
-        freq=700;
-        duration=.15;
-        wave="triangle";
-
-    }
-
-    osc.type=wave;
-    osc.frequency.setValueAtTime(freq,now);
-
-    gain.gain.setValueAtTime(
-        .0001,
-        now
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        .06*settings.volume,
-        now+.01
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        .0001,
-        now+duration
-    );
-
-    osc.start(now);
-    osc.stop(now+duration);
-
-}
-
-/* =========================================================
-   PLAYER ANIMATION
-========================================================= */
-
-function drawPlayer(time){
-
-    const x=
-        player.x-camera.x;
-
-    const y=
-        player.y-camera.y;
-
-    let bob=0;
-
-    /*
-       USUNIĘTE:
-       wcześniejszy idle bob powodował,
-       że postać wyglądała jakby sama skakała.
-    */
-
-    if(
-        settings.animations &&
-        settings.idle &&
-        player.grounded &&
-        Math.abs(player.vx)<10
-    ){
-
-        bob=0;
-
-    }
-
-    let walk=0;
-
-    if(
-        settings.animations &&
-        settings.walking &&
-        player.grounded &&
-        Math.abs(player.vx)>15
-    ){
-
-        walk=
-            Math.sin(player.anim*1.4)*3;
-
-    }
-
-    let jumpOffset=0;
-
-    if(
-        settings.animations &&
-        settings.jumpAnim &&
-        !player.grounded
-    ){
-
-        jumpOffset=2;
-
-    }
-
-    /* cień */
-
-    ctx.fillStyle="rgba(0,0,0,.25)";
-
-    ctx.fillRect(
-        x-4,
-        y+player.h-2,
-        player.w+8,
-        5
-    );
-
-    /* nogi */
-
-    ctx.fillStyle="#222";
-
-    ctx.fillRect(
-        x+3,
-        y+29+bob+walk,
-        6,
-        11
-    );
-
-    ctx.fillRect(
-        x+11,
-        y+29+bob-walk,
-        6,
-        11
-    );
-
-    /* ciało */
-
-    ctx.fillStyle="#2589dc";
-
-    ctx.fillRect(
-        x+2,
-        y+16+bob-jumpOffset,
-        16,
-        17
-    );
-
-    /* ręce */
-
-    ctx.fillStyle="#e9b27a";
-
-    ctx.fillRect(
-        x-2,
-        y+17+bob-walk,
-        4,
-        13
-    );
-
-    ctx.fillRect(
-        x+18,
-        y+17+bob+walk,
-        4,
-        13
-    );
-
-    /* głowa */
-
-    ctx.fillStyle="#f2bd83";
-
-    ctx.fillRect(
-        x+1,
-        y+1+bob-jumpOffset,
-        18,
-        17
-    );
-
-    /* włosy */
-
-    if(settings.hair){
-
-        ctx.fillStyle="#35200f";
-
-        ctx.fillRect(
-            x+1,
-            y+1+bob-jumpOffset,
-            18,
-            6
-        );
-
-        ctx.fillRect(
-            x+1,
-            y+5+bob-jumpOffset,
-            4,
-            7
-        );
-
-    }
-
-    /* oczy */
-
-    let blink=false;
-
-    if(
-        settings.blink &&
-        settings.animations
-    ){
-
-        player.blinkTimer+=
-            1/60;
-
-        if(
-            player.blinkTimer>3.2
-        ){
-
-            player.blinkTimer=0;
-
-        }
-
-        blink=
-            player.blinkTimer>3.05;
-
-    }
-
-    ctx.fillStyle="#111";
-
-    if(!blink){
-
-        ctx.fillRect(
-            x+5,
-            y+10+bob-jumpOffset,
-            2,
-            2
-        );
-
-        ctx.fillRect(
-            x+13,
-            y+10+bob-jumpOffset,
-            2,
-            2
-        );
-
-    }else{
-
-        ctx.fillRect(
-            x+5,
-            y+11+bob-jumpOffset,
-            3,
-            1
-        );
-
-        ctx.fillRect(
-            x+13,
-            y+11+bob-jumpOffset,
-            3,
-            1
-        );
-
-    }
-
-    /* mining animation */
-
-    if(player.mining){
-
-        ctx.save();
-
-        ctx.translate(
-            x+player.w/2,
-            y+22
-        );
-
-        ctx.rotate(
-            -0.9 +
-            Math.sin(player.mineTimer*35)*.5
-        );
-
-        ctx.fillStyle="#8b5a2b";
-
-        ctx.fillRect(
-            8,-3,
-            15,
-            3
-        );
-
-        ctx.fillStyle="#aaa";
-
-        ctx.fillRect(
-            20,-6,
-            7,
-            5
-        );
-
-        ctx.restore();
-
-    }
-
-}
-
-/* =========================================================
-   SKY
-========================================================= */
-
-function mixColor(a,b,t){
-
-    return {
-
-        r:Math.round(
-            a.r+(b.r-a.r)*t
-        ),
-
-        g:Math.round(
-            a.g+(b.g-a.g)*t
-        ),
-
-        b:Math.round(
-            a.b+(b.b-a.b)*t
-        )
-
-    };
-
-}
-
-function rgb(c){
-
-    return `rgb(${c.r},${c.g},${c.b})`;
-
-}
-
-function drawSky(){
-
-    const night=getNightAmount();
-
-    const dayTop={
-        r:70,
-        g:180,
-        b:245
-    };
-
-    const dayBottom={
-        r:190,
-        g:230,
-        b:255
-    };
-
-    const nightTop={
-        r:8,
-        g:14,
-        b:35
-    };
-
-    const nightBottom={
-        r:25,
-        g:32,
-        b:58
-    };
-
-    const top=mixColor(
-        dayTop,
-        nightTop,
-        night
-    );
-
-    const bottom=mixColor(
-        dayBottom,
-        nightBottom,
-        night
-    );
-
-    const gradient=
-        ctx.createLinearGradient(
-            0,0,
-            0,H
-        );
-
-    gradient.addColorStop(
-        0,
-        rgb(top)
-    );
-
-    gradient.addColorStop(
-        1,
-        rgb(bottom)
-    );
-
-    ctx.fillStyle=gradient;
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-
-    /* słońce */
-
-    if(night<.75){
-
-        const cycle=
-            (dayTime%DAY_LENGTH)/DAY_LENGTH;
-
-        const angle=
-            cycle*Math.PI*2-Math.PI/2;
-
-        const sunX=
-            W/2+
-            Math.cos(angle)*(W*.42);
-
-        const sunY=
-            H*.62+
-            Math.sin(angle)*(H*.55);
-
-        if(sunY>-50 && sunY<H+50){
-
-            ctx.globalAlpha=
-                Math.max(
-                    0,
-                    1-night*1.3
-                );
-
-            ctx.fillStyle="#ffe88a";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                sunX,
-                sunY,
-                28,
-                0,
-                Math.PI*2
-            );
-
-            ctx.fill();
-
-            ctx.globalAlpha=1;
-
-        }
-
-    }
-
-    /* księżyc */
-
-    if(night>.35){
-
-        const cycle=
-            (dayTime%DAY_LENGTH)/DAY_LENGTH;
-
-        const angle=
-            cycle*Math.PI*2-Math.PI/2;
-
-        const moonX=
-            W/2-
-            Math.cos(angle)*(W*.42);
-
-        const moonY=
-            H*.62-
-            Math.sin(angle)*(H*.55);
-
-        if(moonY>-50 && moonY<H+50){
-
-            ctx.globalAlpha=
-                Math.min(
-                    1,
-                    (night-.35)*2
-                );
-
-            ctx.fillStyle="#e9f3ff";
-
-            ctx.beginPath();
-
-            ctx.arc(
-                moonX,
-                moonY,
-                20,
-                0,
-                Math.PI*2
-            );
-
-            ctx.fill();
-
-            ctx.globalAlpha=1;
-
-        }
-
-    }
-
-}
-
-/* =========================================================
-   WORLD DRAW
-========================================================= */
-
-function drawWorld(){
-
-    const startX=
-        Math.floor(camera.x/TILE)-1;
-
-    const endX=
-        Math.ceil((camera.x+W)/TILE)+1;
-
-    const startY=
-        Math.floor(camera.y/TILE)-1;
-
-    const endY=
-        Math.ceil((camera.y+H)/TILE)+1;
-
-    for(
-        let y=Math.max(0,startY);
-        y<Math.min(WORLD_H,endY);
-        y++
-    ){
-
-        for(
-            let x=Math.max(0,startX);
-            x<Math.min(WORLD_W,endX);
-            x++
-        ){
-
-            const type=getBlock(x,y);
-
-            if(type===BLOCK.air)
-                continue;
-
-            const sx=x*TILE-camera.x;
-            const sy=y*TILE-camera.y;
-
-            if(type===BLOCK.water){
-
-                ctx.fillStyle=
-                    settings.water
-                    ? "#349bd1"
-                    : "#2d8fbe";
-
-                ctx.fillRect(
-                    sx,
-                    sy,
-                    TILE,
-                    TILE
-                );
-
-                if(settings.water){
-
-                    ctx.fillStyle=
-                        "rgba(255,255,255,.18)";
-
-                    const wave=
-                        Math.sin(
-                            (x+y+performance.now()*.003)
-                        )*3;
-
-                    ctx.fillRect(
-                        sx+4,
-                        sy+6+wave,
-                        TILE-8,
-                        2
-                    );
-
-                }
-
-                continue;
-
-            }
-
-            ctx.fillStyle=
-                blockColor(type);
-
-            ctx.fillRect(
-                sx,
-                sy,
-                TILE,
-                TILE
-            );
-
-            /* tekstury */
-
-            if(type===BLOCK.grass){
-
-                ctx.fillStyle="#76d255";
-
-                ctx.fillRect(
-                    sx,
-                    sy,
-                    TILE,
-                    5
-                );
-
-            }
-
-            if(type===BLOCK.stone){
-
-                ctx.fillStyle=
-                    "rgba(255,255,255,.08)";
-
-                ctx.fillRect(
-                    sx+5,
-                    sy+5,
-                    5,
-                    5
-                );
-
-                ctx.fillRect(
-                    sx+20,
-                    sy+15,
-                    4,
-                    4
-                );
-
-            }
-
-            if(type===BLOCK.wood){
-
-                ctx.fillStyle=
-                    "rgba(35,15,5,.25)";
-
-                ctx.fillRect(
-                    sx+9,
-                    sy,
-                    4,
-                    TILE
-                );
-
-            }
-
-            if(type===BLOCK.glass){
-
-                ctx.strokeStyle=
-                    "rgba(255,255,255,.6)";
-
-                ctx.strokeRect(
-                    sx+2,
-                    sy+2,
-                    TILE-4,
-                    TILE-4
-                );
-
-            }
-
-            if(type===BLOCK.brick){
-
-                ctx.strokeStyle=
-                    "rgba(40,20,15,.35)";
-
-                ctx.beginPath();
-
-                ctx.moveTo(
-                    sx,
-                    sy+16
-                );
-
-                ctx.lineTo(
-                    sx+TILE,
-                    sy+16
-                );
-
-                ctx.moveTo(
-                    sx+16,
-                    sy
-                );
-
-                ctx.lineTo(
-                    sx+16,
-                    sy+16
-                );
-
-                ctx.moveTo(
-                    sx+8,
-                    sy+16
-                );
-
-                ctx.lineTo(
-                    sx+8,
-                    sy+TILE
-                );
-
-                ctx.moveTo(
-                    sx+24,
-                    sy+16
-                );
-
-                ctx.lineTo(
-                    sx+24,
-                    sy+TILE
-                );
-
-                ctx.stroke();
-
-            }
-
-        }
-
-    }
-
-}
-
-/* =========================================================
-   MAIN RENDER
-========================================================= */
-
-function render(time){
-
-    drawSky();
-
-    drawWorld();
-
-    drawParticles();
-
-    drawPlayer(time);
-
-    const night=getNightAmount();
-
-    if(night>0){
-
-        ctx.fillStyle=
-            `rgba(5,8,25,${night*.48})`;
-
-        ctx.fillRect(
-            0,
-            0,
-            W,
-            H
-        );
-
-    }
-
-}
-
-/* =========================================================
-   GAME STATE
-========================================================= */
-
-let gamePaused=true;
-
-function togglePause(){
-
-    if(
-        document.getElementById("menu").style.display!=="none"
-    ){
-
-        return;
-
-    }
-
-    gamePaused=!gamePaused;
-
-    document.getElementById(
-        "pauseOverlay"
-    ).style.display=
-        gamePaused
-        ? "flex"
-        : "none";
-
-}
-
-function setPause(value){
-
-    gamePaused=value;
-
-    document.getElementById(
-        "pauseOverlay"
-    ).style.display=
-        value
-        ? "flex"
-        : "none";
-
-}
-
-/* =========================================================
-   MESSAGE
-========================================================= */
-
-let messageTimer=null;
-
-function showMessage(text){
-
-    const el=
-        document.getElementById("message");
-
-    el.textContent=text;
-
-    el.classList.add("show");
-
-    clearTimeout(messageTimer);
-
-    messageTimer=setTimeout(()=>{
-
-        el.classList.remove("show");
-
-    },1500);
-
-}
-
-/* =========================================================
-   SAVE
-========================================================= */
-
-const SAVE_KEY="PIXEL_WORLD_COMPLETE_V4";
-
-function saveGame(){
-
-    const data={
-
-        world,
-
-        player:{
-            x:player.x,
-            y:player.y
-        },
-
-        inventory,
-
-        selected,
-
-        settings,
-
-        dayTime
-
-    };
-
-    try{
-
-        localStorage.setItem(
-            SAVE_KEY,
-            JSON.stringify(data)
-        );
-
-        showMessage("💾 Gra zapisana!");
-
-    }catch(e){
-
-        showMessage("Nie udało się zapisać gry.");
-
-    }
-
-}
-
-function loadGame(){
-
-    try{
-
-        const raw=
-            localStorage.getItem(SAVE_KEY);
-
-        if(!raw)
-            return false;
-
-        const data=
-            JSON.parse(raw);
-
-        if(
-            !data.world ||
-            data.world.length!==WORLD_H
-        ){
-
-            return false;
-
-        }
-
-        world=data.world;
-
-        player.x=
-            Number(data.player?.x) || 0;
-
-        player.y=
-            Number(data.player?.y) || 0;
-
-        inventory={
-            ...inventory,
-            ...(data.inventory||{})
-        };
-
-        selected=
-            Number(data.selected)||0;
-
-        if(data.settings){
-
-            Object.assign(
-                settings,
-                data.settings
-            );
-
-        }
-
-        dayTime=
-            Number(data.dayTime)||0;
-
-        updateHotbar();
-
-        applySettings();
-
-        return true;
-
-    }catch(e){
-
-        return false;
-
-    }
 
 }
 
@@ -3211,13 +1376,39 @@ function loadGame(){
 
 function newWorld(){
 
-    generateWorld();
+    generate();
 
-    resetPlayer();
+    const p =
+        spawn();
 
-    dayTime=0;
+    Object.assign(
+        me,
+        {
 
-    inventory={
+            x:p.x,
+
+            y:p.y,
+
+            vx:0,
+
+            vy:0,
+
+            ground:false,
+
+            dir:1,
+
+            walk:0,
+
+            mine:0,
+
+            blink:0,
+
+            hp:100
+
+        }
+    );
+
+    inv = {
 
         dirt:20,
         stone:10,
@@ -3230,786 +1421,2970 @@ function newWorld(){
 
     selected=0;
 
+    dayTime=0;
+
+    remotes.clear();
+
     updateHotbar();
 
 }
 
 /* =========================================================
-   DELETE SAVE
+   COLLISION
 ========================================================= */
 
-function deleteSave(){
+function solid(v){
 
-    if(
-        confirm(
-            "Czy na pewno chcesz usunąć zapis?"
-        )
-    ){
+    return (
+        v!==B.air &&
+        v!==B.water &&
+        v!==B.leaves
+    );
 
-        localStorage.removeItem(
-            SAVE_KEY
+}
+
+function collide(
+    x,
+    y,
+    w,
+    h
+){
+
+    const l =
+        Math.floor(x/T);
+
+    const r =
+        Math.floor(
+            (x+w-.01)/T
         );
 
-        newWorld();
+    const t =
+        Math.floor(y/T);
 
-        showMessage(
-            "Zapis usunięty. Nowy świat utworzony."
+    const b =
+        Math.floor(
+            (y+h-.01)/T
+        );
+
+    for(
+        let yy=t;
+        yy<=b;
+        yy++
+    ){
+
+        for(
+            let xx=l;
+            xx<=r;
+            xx++
+        ){
+
+            if(
+                solid(
+                    getB(xx,yy)
+                )
+            ){
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+    return false;
+
+}
+
+/* =========================================================
+   PHYSICS
+========================================================= */
+
+function moveBody(
+    p,
+    dx,
+    dy
+){
+
+    if(dx){
+
+        const step =
+            Math.sign(dx);
+
+        let left =
+            Math.abs(dx);
+
+        while(left>0){
+
+            const d =
+                Math.min(
+                    .75,
+                    left
+                )*step;
+
+            if(
+                !collide(
+                    p.x+d,
+                    p.y,
+                    p.w,
+                    p.h
+                )
+            ){
+
+                p.x+=d;
+
+            }else{
+
+                p.vx=0;
+
+                break;
+
+            }
+
+            left-=Math.abs(d);
+
+        }
+
+    }
+
+    if(dy){
+
+        const step =
+            Math.sign(dy);
+
+        let left =
+            Math.abs(dy);
+
+        while(left>0){
+
+            const d =
+                Math.min(
+                    .75,
+                    left
+                )*step;
+
+            if(
+                !collide(
+                    p.x,
+                    p.y+d,
+                    p.w,
+                    p.h
+                )
+            ){
+
+                p.y+=d;
+
+                p.ground=false;
+
+            }else{
+
+                if(step>0){
+
+                    p.ground=true;
+
+                }
+
+                p.vy=0;
+
+                break;
+
+            }
+
+            left-=Math.abs(d);
+
+        }
+
+    }
+
+}
+
+/* =========================================================
+   UPDATE PLAYER
+========================================================= */
+
+function updateMe(dt){
+
+    const left =
+        keys.KeyA ||
+        keys.ArrowLeft ||
+        leftHeld;
+
+    const right =
+        keys.KeyD ||
+        keys.ArrowRight ||
+        rightHeld;
+
+    const d =
+        (right?1:0) -
+        (left?1:0);
+
+    me.vx +=
+        (
+            d*125 -
+            me.vx
+        )*
+        Math.min(
+            1,
+            dt*12
+        );
+
+    if(!d){
+
+        me.vx *=
+            Math.pow(
+                .001,
+                dt
+            );
+
+    }
+
+    /*
+       JEDNORAZOWY SKOK
+    */
+
+    if(
+        jumpRequest &&
+        me.ground
+    ){
+
+        me.vy=-275;
+
+        me.ground=false;
+
+        sound("jump");
+
+    }
+
+    jumpRequest=false;
+
+    me.vy +=
+        800*dt;
+
+    moveBody(
+        me,
+        me.vx*dt,
+        me.vy*dt
+    );
+
+    if(d){
+
+        me.dir=d;
+
+    }
+
+    if(
+        me.ground &&
+        Math.abs(me.vx)>10
+    ){
+
+        me.walk +=
+            dt*10;
+
+    }
+
+    if(me.mine>0){
+
+        me.mine-=dt;
+
+    }
+
+    if(
+        me.y >
+        WORLD_H*T
+    ){
+
+        const p =
+            spawn();
+
+        me.x=p.x;
+        me.y=p.y;
+
+        me.vx=0;
+        me.vy=0;
+
+    }
+
+}
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+let cam={
+    x:0,
+    y:0
+};
+
+function camera(){
+
+    cam.x =
+        Math.max(
+            0,
+            Math.min(
+                WORLD_W*T-VW,
+                me.x+
+                me.w/2-
+                VW/2
+            )
+        );
+
+    cam.y =
+        Math.max(
+            0,
+            Math.min(
+                WORLD_H*T-VH,
+                me.y+
+                me.h/2-
+                VH/2
+            )
+        );
+
+}
+
+/* =========================================================
+   DAY / NIGHT
+========================================================= */
+
+function nightAmount(){
+
+    if(!S.dayNight)
+        return 0;
+
+    const cycle =
+        (
+            dayTime%
+            DAY_LENGTH
+        )/
+        DAY_LENGTH;
+
+    const sun =
+        Math.sin(
+            cycle*Math.PI*2 -
+            Math.PI/2
+        );
+
+    return Math.max(
+        0,
+        Math.min(
+            1,
+            (1-sun)/2
+        )
+    );
+
+}
+
+/* =========================================================
+   SKY
+========================================================= */
+
+function sky(){
+
+    const n =
+        nightAmount();
+
+    const dayTop =
+        [70,180,245];
+
+    const dayBottom =
+        [190,230,255];
+
+    const nightTop =
+        [7,13,32];
+
+    const nightBottom =
+        [25,31,54];
+
+    const top =
+        dayTop.map(
+            (v,i)=>
+                Math.round(
+                    v+
+                    (
+                        nightTop[i]-v
+                    )*n
+                )
+        );
+
+    const bottom =
+        dayBottom.map(
+            (v,i)=>
+                Math.round(
+                    v+
+                    (
+                        nightBottom[i]-v
+                    )*n
+                )
+        );
+
+    const g =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            VH
+        );
+
+    g.addColorStop(
+        0,
+        `rgb(${top})`
+    );
+
+    g.addColorStop(
+        1,
+        `rgb(${bottom})`
+    );
+
+    ctx.fillStyle=g;
+
+    ctx.fillRect(
+        0,
+        0,
+        VW,
+        VH
+    );
+
+    const cycle =
+        (
+            dayTime%
+            DAY_LENGTH
+        )/
+        DAY_LENGTH;
+
+    const angle =
+        cycle*Math.PI*2 -
+        Math.PI/2;
+
+    if(n<.8){
+
+        ctx.globalAlpha=
+            1-n;
+
+        ctx.fillStyle="#ffe98a";
+
+        ctx.fillRect(
+            Math.floor(
+                VW/2+
+                Math.cos(angle)*190
+            ),
+            Math.floor(
+                125+
+                Math.sin(angle)*115
+            ),
+            12,
+            12
+        );
+
+    }
+
+    if(n>.3){
+
+        ctx.globalAlpha=
+            Math.min(
+                1,
+                (n-.3)*2
+            );
+
+        ctx.fillStyle="#eef6ff";
+
+        ctx.fillRect(
+            Math.floor(
+                VW/2-
+                Math.cos(angle)*190
+            ),
+            Math.floor(
+                125-
+                Math.sin(angle)*115
+            ),
+            9,
+            9
+        );
+
+    }
+
+    ctx.globalAlpha=1;
+
+}
+
+/* =========================================================
+   COLORS
+========================================================= */
+
+function color(t){
+
+    return [
+
+        null,
+
+        "#4fa63b",
+
+        "#85502d",
+
+        "#737c83",
+
+        "#70401e",
+
+        "#3d8d37",
+
+        "#d4bd70",
+
+        "#318fc7",
+
+        "#9ce9ff",
+
+        "#a84e3c"
+
+    ][t] || "#fff";
+
+}
+
+/* =========================================================
+   WORLD DRAW
+========================================================= */
+
+function drawWorld(){
+
+    const sx =
+        Math.floor(
+            cam.x/T
+        )-1;
+
+    const ex =
+        Math.ceil(
+            (cam.x+VW)/T
+        )+1;
+
+    const sy =
+        Math.floor(
+            cam.y/T
+        )-1;
+
+    const ey =
+        Math.ceil(
+            (cam.y+VH)/T
+        )+1;
+
+    for(
+        let y=Math.max(0,sy);
+        y<Math.min(
+            WORLD_H,
+            ey
+        );
+        y++
+    ){
+
+        for(
+            let x=Math.max(0,sx);
+            x<Math.min(
+                WORLD_W,
+                ex
+            );
+            x++
+        ){
+
+            const t =
+                getB(x,y);
+
+            if(
+                t===B.air
+            ){
+
+                continue;
+
+            }
+
+            const px =
+                x*T-cam.x;
+
+            const py =
+                y*T-cam.y;
+
+            ctx.fillStyle =
+                color(t);
+
+            ctx.fillRect(
+                px,
+                py,
+                T,
+                T
+            );
+
+            if(
+                t===B.grass
+            ){
+
+                ctx.fillStyle =
+                    "#72d255";
+
+                ctx.fillRect(
+                    px,
+                    py,
+                    T,
+                    3
+                );
+
+            }
+
+            if(
+                t===B.stone
+            ){
+
+                ctx.fillStyle =
+                    "#9aa1a5";
+
+                ctx.fillRect(
+                    px+3,
+                    py+5,
+                    2,
+                    2
+                );
+
+                ctx.fillRect(
+                    px+10,
+                    py+11,
+                    2,
+                    2
+                );
+
+            }
+
+            if(
+                t===B.wood
+            ){
+
+                ctx.fillStyle =
+                    "#40240f";
+
+                ctx.fillRect(
+                    px+6,
+                    py,
+                    2,
+                    T
+                );
+
+            }
+
+            if(
+                t===B.glass
+            ){
+
+                ctx.strokeStyle =
+                    "#dfffff";
+
+                ctx.strokeRect(
+                    px+2,
+                    py+2,
+                    T-4,
+                    T-4
+                );
+
+            }
+
+            if(
+                t===B.brick
+            ){
+
+                ctx.strokeStyle =
+                    "#56281f";
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    px,
+                    py+8
+                );
+
+                ctx.lineTo(
+                    px+T,
+                    py+8
+                );
+
+                ctx.moveTo(
+                    px+8,
+                    py
+                );
+
+                ctx.lineTo(
+                    px+8,
+                    py+8
+                );
+
+                ctx.moveTo(
+                    px+4,
+                    py+8
+                );
+
+                ctx.lineTo(
+                    px+4,
+                    py+T
+                );
+
+                ctx.moveTo(
+                    px+12,
+                    py+8
+                );
+
+                ctx.lineTo(
+                    px+12,
+                    py+T
+                );
+
+                ctx.stroke();
+
+            }
+
+            if(
+                t===B.water &&
+                S.parts
+            ){
+
+                ctx.fillStyle =
+                    "rgba(255,255,255,.18)";
+
+                ctx.fillRect(
+                    px+2,
+                    py+
+                    3+
+                    Math.floor(
+                        Math.sin(
+                            performance.now()*.004+x
+                        )
+                    ),
+                    T-4,
+                    1
+                );
+
+            }
+
+        }
+
+    }
+
+}
+
+/* =========================================================
+   PLAYER PIXEL SPRITE
+========================================================= */
+
+function drawSprite(
+    p,
+    local=false
+){
+
+    const x =
+        Math.round(
+            p.x-cam.x
+        );
+
+    const y =
+        Math.round(
+            p.y-cam.y
+        );
+
+    const walk =
+        (
+            p.ground &&
+            Math.abs(p.vx)>8
+        )
+        ? Math.sin(p.walk)*1.5
+        : 0;
+
+    /* shadow */
+
+    ctx.fillStyle =
+        "rgba(0,0,0,.25)";
+
+    ctx.fillRect(
+        x-2,
+        y+p.h-1,
+        15,
+        3
+    );
+
+    /* legs */
+
+    ctx.fillStyle="#222";
+
+    ctx.fillRect(
+        x+2,
+        y+15+walk,
+        3,
+        7
+    );
+
+    ctx.fillRect(
+        x+7,
+        y+15-walk,
+        3,
+        7
+    );
+
+    /* body */
+
+    ctx.fillStyle =
+        local
+        ? "#238ce0"
+        : "#d34c66";
+
+    ctx.fillRect(
+        x+1,
+        y+8,
+        9,
+        8
+    );
+
+    /* arms */
+
+    ctx.fillStyle="#efb77b";
+
+    ctx.fillRect(
+        x,
+        y+8+walk,
+        2,
+        7
+    );
+
+    ctx.fillRect(
+        x+10,
+        y+8-walk,
+        2,
+        7
+    );
+
+    /* head */
+
+    ctx.fillRect(
+        x,
+        y,
+        11,
+        9
+    );
+
+    /* hair */
+
+    ctx.fillStyle="#351d0e";
+
+    ctx.fillRect(
+        x,
+        y,
+        11,
+        3
+    );
+
+    ctx.fillRect(
+        x,
+        y+2,
+        2,
+        3
+    );
+
+    /* eyes */
+
+    ctx.fillStyle="#111";
+
+    ctx.fillRect(
+        x+3,
+        y+5,
+        1,
+        1
+    );
+
+    ctx.fillRect(
+        x+7,
+        y+5,
+        1,
+        1
+    );
+
+    /* mining */
+
+    if(
+        p.mine>0
+    ){
+
+        ctx.fillStyle="#85562a";
+
+        ctx.fillRect(
+            x+10,
+            y+8,
+            6,
+            2
+        );
+
+        ctx.fillStyle="#aaa";
+
+        ctx.fillRect(
+            x+15,
+            y+6,
+            3,
+            5
         );
 
     }
 
 }
+
+/* =========================================================
+   REMOTE PLAYERS
+========================================================= */
+
+function drawRemote(){
+
+    for(
+        const p
+        of remotes.values()
+    ){
+
+        drawSprite(
+            p,
+            false
+        );
+
+    }
+
+}
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+function dust(
+    x,
+    y,
+    c
+){
+
+    if(!S.parts)
+        return;
+
+    for(
+        let i=0;
+        i<5;
+        i++
+    ){
+
+        particles.push({
+
+            x,
+            y,
+
+            vx:
+                (
+                    Math.random()-.5
+                )*35,
+
+            vy:
+                -Math.random()*35,
+
+            life:.35,
+
+            max:.35,
+
+            c
+
+        });
+
+    }
+
+}
+
+function updateParticles(dt){
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ){
+
+        const p =
+            particles[i];
+
+        p.life-=dt;
+
+        p.x+=
+            p.vx*dt;
+
+        p.y+=
+            p.vy*dt;
+
+        p.vy+=
+            80*dt;
+
+        if(
+            p.life<=0
+        ){
+
+            particles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+function drawParticles(){
+
+    if(!S.parts)
+        return;
+
+    for(
+        const p
+        of particles
+    ){
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                p.life/p.max
+            );
+
+        ctx.fillStyle=p.c;
+
+        ctx.fillRect(
+            Math.round(
+                p.x-cam.x
+            ),
+            Math.round(
+                p.y-cam.y
+            ),
+            2,
+            2
+        );
+
+    }
+
+    ctx.globalAlpha=1;
+
+}
+
+/* =========================================================
+   SOUND
+========================================================= */
+
+function sound(type){
+
+    if(!S.sound)
+        return;
+
+    if(!audio){
+
+        try{
+
+            audio =
+                new AudioContext();
+
+        }catch{
+
+            return;
+
+        }
+
+    }
+
+    const o =
+        audio.createOscillator();
+
+    const g =
+        audio.createGain();
+
+    const now =
+        audio.currentTime;
+
+    const frequencies={
+
+        mine:120,
+
+        place:230,
+
+        jump:520,
+
+        craft:700,
+
+        step:100
+
+    };
+
+    const f =
+        frequencies[type] ||
+        300;
+
+    o.type =
+        type==="craft"
+        ? "triangle"
+        : "square";
+
+    o.frequency.value=f;
+
+    o.connect(g);
+
+    g.connect(
+        audio.destination
+    );
+
+    g.gain.setValueAtTime(
+        .0001,
+        now
+    );
+
+    g.gain.exponentialRampToValueAtTime(
+        .05*S.volume,
+        now+.01
+    );
+
+    g.gain.exponentialRampToValueAtTime(
+        .0001,
+        now+.1
+    );
+
+    o.start(now);
+
+    o.stop(
+        now+.11
+    );
+
+}
+
+/* =========================================================
+   HOTBAR
+========================================================= */
+
+function updateHotbar(){
+
+    const h =
+        document.getElementById(
+            "hotbar"
+        );
+
+    h.innerHTML="";
+
+    items.forEach(
+        (it,i)=>{
+
+            const s =
+                document.createElement(
+                    "div"
+                );
+
+            s.className =
+                "slot"+
+                (
+                    i===selected
+                    ? " sel"
+                    : ""
+                );
+
+            s.innerHTML=`
+
+                <div
+                    class="icon"
+                    style="
+                        background:${color(slots[i])}
+                    "
+                ></div>
+
+                <div class="count">
+                    ${inv[it]}
+                </div>
+
+            `;
+
+            s.onclick=()=>{
+
+                selected=i;
+
+                updateHotbar();
+
+            };
+
+            h.appendChild(s);
+
+        }
+    );
+
+}
+
+/* =========================================================
+   TARGET
+========================================================= */
+
+function target(){
+
+    return {
+
+        x:
+            mouse.x+
+            cam.x,
+
+        y:
+            mouse.y+
+            cam.y
+
+    };
+
+}
+
+function inRange(
+    bx,
+    by
+){
+
+    return Math.hypot(
+
+        bx*T+
+        T/2-
+        (
+            me.x+
+            me.w/2
+        ),
+
+        by*T+
+        T/2-
+        (
+            me.y+
+            me.h/2
+        )
+
+    ) < T*5.2;
+
+}
+
+/* =========================================================
+   MINE
+========================================================= */
+
+function mine(){
+
+    const q =
+        target();
+
+    const bx =
+        Math.floor(
+            q.x/T
+        );
+
+    const by =
+        Math.floor(
+            q.y/T
+        );
+
+    const t =
+        getB(
+            bx,
+            by
+        );
+
+    if(
+        !t ||
+        !inRange(
+            bx,
+            by
+        )
+    ){
+
+        return;
+
+    }
+
+    const item =
+        t===B.grass ||
+        t===B.dirt
+        ? "dirt"
+
+        : t===B.stone
+        ? "stone"
+
+        : t===B.wood
+        ? "wood"
+
+        : t===B.sand
+        ? "sand"
+
+        : t===B.glass
+        ? "glass"
+
+        : t===B.brick
+        ? "brick"
+
+        : null;
+
+    /*
+       KLIENT MULTIPLAYER
+    */
+
+    if(
+        multiplayer.connected &&
+        !multiplayer.host
+    ){
+
+        setB(
+            bx,
+            by,
+            B.air
+        );
+
+        if(item){
+
+            inv[item]++;
+
+        }
+
+        me.mine=.16;
+
+        sound("mine");
+
+        dust(
+            bx*T+8,
+            by*T+8,
+            color(t)
+        );
+
+        updateHotbar();
+
+        send({
+
+            type:"action",
+
+            action:"mine",
+
+            x:bx,
+
+            y:by
+
+        });
+
+        return;
+
+    }
+
+    /*
+       HOST / SINGLE PLAYER
+    */
+
+    setB(
+        bx,
+        by,
+        B.air
+    );
+
+    if(item){
+
+        inv[item]++;
+
+    }
+
+    me.mine=.16;
+
+    sound("mine");
+
+    dust(
+        bx*T+8,
+        by*T+8,
+        color(t)
+    );
+
+    updateHotbar();
+
+    broadcast({
+
+        type:"block",
+
+        x:bx,
+
+        y:by,
+
+        v:B.air
+
+    });
+
+    saveMaybe();
+
+}
+
+/* =========================================================
+   PLACE
+========================================================= */
+
+function place(){
+
+    const q =
+        target();
+
+    const bx =
+        Math.floor(
+            q.x/T
+        );
+
+    const by =
+        Math.floor(
+            q.y/T
+        );
+
+    if(
+        getB(bx,by)!==
+        B.air
+    ){
+
+        return;
+
+    }
+
+    if(
+        !inRange(
+            bx,
+            by
+        )
+    ){
+
+        return;
+
+    }
+
+    const item =
+        items[selected];
+
+    if(
+        inv[item]<=0
+    ){
+
+        return;
+
+    }
+
+    if(
+
+        bx*T <
+            me.x+me.w &&
+
+        bx*T+T >
+            me.x &&
+
+        by*T <
+            me.y+me.h &&
+
+        by*T+T >
+            me.y
+
+    ){
+
+        return;
+
+    }
+
+    /*
+       KLIENT MULTIPLAYER
+    */
+
+    if(
+        multiplayer.connected &&
+        !multiplayer.host
+    ){
+
+        setB(
+            bx,
+            by,
+            slots[selected]
+        );
+
+        inv[item]--;
+
+        sound("place");
+
+        updateHotbar();
+
+        send({
+
+            type:"action",
+
+            action:"place",
+
+            x:bx,
+
+            y:by,
+
+            v:slots[selected]
+
+        });
+
+        return;
+
+    }
+
+    /*
+       HOST / SINGLE
+    */
+
+    setB(
+        bx,
+        by,
+        slots[selected]
+    );
+
+    inv[item]--;
+
+    sound("place");
+
+    updateHotbar();
+
+    broadcast({
+
+        type:"block",
+
+        x:bx,
+
+        y:by,
+
+        v:slots[selected]
+
+    });
+
+    saveMaybe();
+
+}
+
+/* =========================================================
+   HOST ACTIONS
+========================================================= */
+
+function hostAction(m){
+
+    if(
+        m.action==="mine"
+    ){
+
+        const t =
+            getB(
+                m.x,
+                m.y
+            );
+
+        if(
+            t!==B.air
+        ){
+
+            setB(
+                m.x,
+                m.y,
+                B.air
+            );
+
+            broadcast({
+
+                type:"block",
+
+                x:m.x,
+
+                y:m.y,
+
+                v:B.air
+
+            });
+
+        }
+
+    }
+
+    if(
+        m.action==="place"
+    ){
+
+        if(
+            getB(
+                m.x,
+                m.y
+            )===B.air
+        ){
+
+            setB(
+                m.x,
+                m.y,
+                m.v
+            );
+
+            broadcast({
+
+                type:"block",
+
+                x:m.x,
+
+                y:m.y,
+
+                v:m.v
+
+            });
+
+        }
+
+    }
+
+}
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+addEventListener(
+    "keydown",
+    e=>{
+
+        keys[e.code]=true;
+
+        if(
+            [
+                "Space",
+                "ArrowUp",
+                "ArrowLeft",
+                "ArrowRight"
+            ].includes(
+                e.code
+            )
+        ){
+
+            e.preventDefault();
+
+        }
+
+        if(
+            !e.repeat &&
+            (
+                e.code==="Space" ||
+                e.code==="ArrowUp" ||
+                e.code==="KeyW"
+            )
+        ){
+
+            jumpRequest=true;
+
+        }
+
+        if(
+            !e.repeat &&
+            e.code==="KeyE" &&
+            !paused
+        ){
+
+            open("craft");
+
+        }
+
+        if(
+            !e.repeat &&
+            e.code==="Escape"
+        ){
+
+            togglePause();
+
+        }
+
+        if(
+            e.code.startsWith(
+                "Digit"
+            )
+        ){
+
+            const n =
+                +e.code.slice(5)-1;
+
+            if(
+                n>=0 &&
+                n<6
+            ){
+
+                selected=n;
+
+                updateHotbar();
+
+            }
+
+        }
+
+    }
+);
+
+addEventListener(
+    "keyup",
+    e=>{
+        keys[e.code]=false;
+    }
+);
+
+/* =========================================================
+   MOUSE
+========================================================= */
+
+canvas.addEventListener(
+    "pointermove",
+    e=>{
+
+        mouse.x =
+            e.clientX/
+            cssW*
+            VW;
+
+        mouse.y =
+            e.clientY/
+            cssH*
+            VH;
+
+    }
+);
+
+canvas.addEventListener(
+    "pointerdown",
+    e=>{
+
+        mouse.x =
+            e.clientX/
+            cssW*
+            VW;
+
+        mouse.y =
+            e.clientY/
+            cssH*
+            VH;
+
+        if(
+            e.button===0
+        ){
+
+            mineHeld=true;
+
+            mine();
+
+        }
+
+        if(
+            e.button===2
+        ){
+
+            placeHeld=true;
+
+            place();
+
+        }
+
+    }
+);
+
+addEventListener(
+    "pointerup",
+    e=>{
+
+        if(
+            e.button===0
+        ){
+
+            mineHeld=false;
+
+        }
+
+        if(
+            e.button===2
+        ){
+
+            placeHeld=false;
+
+        }
+
+    }
+);
+
+canvas.oncontextmenu =
+    e=>e.preventDefault();
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+function hold(
+    id,
+    on,
+    off
+){
+
+    const e =
+        document.getElementById(
+            id
+        );
+
+    e.onpointerdown =
+        x=>{
+
+            x.preventDefault();
+
+            on();
+
+        };
+
+    [
+        "pointerup",
+        "pointercancel",
+        "pointerleave"
+    ].forEach(
+        t=>{
+
+            e.addEventListener(
+                t,
+                x=>{
+
+                    x.preventDefault();
+
+                    off();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+hold(
+    "left",
+    ()=>leftHeld=true,
+    ()=>leftHeld=false
+);
+
+hold(
+    "right",
+    ()=>rightHeld=true,
+    ()=>rightHeld=false
+);
+
+document
+.getElementById("jump")
+.onpointerdown=e=>{
+
+    e.preventDefault();
+
+    jumpRequest=true;
+
+};
+
+/* =========================================================
+   UI
+========================================================= */
+
+function open(id){
+
+    document
+        .getElementById(id)
+        .classList
+        .remove("hidden");
+
+}
+
+function close(id){
+
+    document
+        .getElementById(id)
+        .classList
+        .add("hidden");
+
+}
+
+document
+.querySelectorAll(
+    "[data-close]"
+)
+.forEach(
+    b=>{
+
+        b.onclick =
+            ()=>close(
+                b.dataset.close
+            );
+
+    }
+);
+
+document
+.getElementById("news")
+.onclick=()=>{
+
+    document
+    .getElementById(
+        "infoTitle"
+    )
+    .textContent =
+        "📰 NEWS";
+
+    document
+    .getElementById(
+        "infoText"
+    )
+    .innerHTML = `
+
+        <p>
+            PIXEL WORLD został przebudowany
+            pod pixel-art i multiplayer.
+        </p>
+
+        <p>
+            Dodano synchronizację świata,
+            graczy, bloków oraz dłuższy
+            cykl dnia i nocy.
+        </p>
+
+    `;
+
+    open("info");
+
+};
+
+document
+.getElementById("settings")
+.onclick =
+    ()=>open(
+        "settingsPanel"
+    );
+
+document
+.getElementById("multi")
+.onclick =
+    ()=>open(
+        "multiPanel"
+    );
+
+document
+.getElementById("craftBtn")
+.onclick =
+    ()=>open(
+        "craft"
+    );
+
+document
+.getElementById("pauseBtn")
+.onclick =
+    togglePause;
+
+document
+.getElementById("resume")
+.onclick =
+    ()=>setPause(false);
+
+document
+.getElementById("menuBack")
+.onclick =
+    ()=>{
+
+        setPause(true);
+
+        document
+        .getElementById(
+            "menu"
+        )
+        .style.display="flex";
+
+    };
 
 /* =========================================================
    CRAFTING
 ========================================================= */
 
-function openCrafting(){
-
-    setPause(true);
-
-    document
-        .getElementById("craftModal")
-        .classList.remove("hidden");
-
-}
-
-function closeCrafting(){
-
-    document
-        .getElementById("craftModal")
-        .classList.add("hidden");
-
-}
-
 document
-.getElementById("craftGlass")
-.addEventListener("click",()=>{
+.getElementById(
+    "glassCraft"
+)
+.onclick=()=>{
 
-    if(inventory.sand>=2){
+    if(
+        inv.sand>=2
+    ){
 
-        inventory.sand-=2;
-        inventory.glass++;
+        inv.sand-=2;
 
-        playSound("craft");
+        inv.glass++;
+
+        sound("craft");
 
         updateHotbar();
 
-        showMessage(
-            "Stworzono szkło!"
-        );
-
-    }else{
-
-        showMessage(
-            "Potrzebujesz 2 piasku."
-        );
-
     }
 
-});
+};
 
 document
-.getElementById("craftBrick")
-.addEventListener("click",()=>{
+.getElementById(
+    "brickCraft"
+)
+.onclick=()=>{
 
-    if(inventory.stone>=2){
+    if(
+        inv.stone>=2
+    ){
 
-        inventory.stone-=2;
-        inventory.brick++;
+        inv.stone-=2;
 
-        playSound("craft");
+        inv.brick++;
+
+        sound("craft");
 
         updateHotbar();
 
-        showMessage(
-            "Stworzono cegłę!"
-        );
-
-    }else{
-
-        showMessage(
-            "Potrzebujesz 2 kamienia."
-        );
-
     }
 
-});
+};
 
-document
-.getElementById("closeCraft")
-.addEventListener("click",()=>{
+/* =========================================================
+   PAUSE
+========================================================= */
 
-    closeCrafting();
+function togglePause(){
 
-    setPause(false);
+    if(!gameStarted)
+        return;
 
-});
+    setPause(
+        !paused
+    );
+
+}
+
+function setPause(v){
+
+    paused=v;
+
+    document
+    .getElementById(
+        "pause"
+    )
+    .style.display =
+        v
+        ? "grid"
+        : "none";
+
+}
 
 /* =========================================================
    SETTINGS
 ========================================================= */
 
-function applySettings(){
+document
+.getElementById("pixel")
+.onchange=e=>{
 
-    document.getElementById(
-        "mobileControls"
-    ).style.display=
-        settings.mobile
-        ? ""
-        : "none";
+    S.pixel=
+        e.target.checked;
 
-    canvas.style.imageRendering=
-        settings.pixelPerfect
-        ? "pixelated"
-        : "auto";
-
-}
+};
 
 document
-.getElementById("mobileSwitch")
-.addEventListener("change",e=>{
+.getElementById("dn")
+.onchange=e=>{
 
-    settings.mobile=e.target.checked;
-    applySettings();
+    S.dayNight=
+        e.target.checked;
 
-});
-
-document
-.getElementById("autosaveSwitch")
-.addEventListener("change",e=>{
-
-    settings.autosave=e.target.checked;
-
-});
+};
 
 document
-.getElementById("dayNightSwitch")
-.addEventListener("change",e=>{
+.getElementById("parts")
+.onchange=e=>{
 
-    settings.dayNight=e.target.checked;
+    S.parts=
+        e.target.checked;
 
-});
-
-document
-.getElementById("particlesSwitch")
-.addEventListener("change",e=>{
-
-    settings.particles=e.target.checked;
-
-});
+};
 
 document
-.getElementById("pixelPerfectSwitch")
-.addEventListener("change",e=>{
+.getElementById("snd")
+.onchange=e=>{
 
-    settings.pixelPerfect=e.target.checked;
-    applySettings();
+    S.sound=
+        e.target.checked;
 
-});
-
-document
-.getElementById("waterSwitch")
-.addEventListener("change",e=>{
-
-    settings.water=e.target.checked;
-
-});
+};
 
 document
-.getElementById("fpsSwitch")
-.addEventListener("change",e=>{
+.getElementById("vol")
+.oninput=e=>{
 
-    settings.showFPS=e.target.checked;
+    S.volume=
+        +e.target.value;
 
-});
-
-document
-.getElementById("animationsSwitch")
-.addEventListener("change",e=>{
-
-    settings.animations=e.target.checked;
-
-});
+};
 
 document
-.getElementById("walkingSwitch")
-.addEventListener("change",e=>{
+.getElementById("auto")
+.onchange=e=>{
 
-    settings.walking=e.target.checked;
+    S.auto=
+        e.target.checked;
 
-});
-
-document
-.getElementById("idleSwitch")
-.addEventListener("change",e=>{
-
-    settings.idle=e.target.checked;
-
-});
-
-document
-.getElementById("blinkSwitch")
-.addEventListener("change",e=>{
-
-    settings.blink=e.target.checked;
-
-});
-
-document
-.getElementById("jumpAnimSwitch")
-.addEventListener("change",e=>{
-
-    settings.jumpAnim=e.target.checked;
-
-});
-
-document
-.getElementById("hairSwitch")
-.addEventListener("change",e=>{
-
-    settings.hair=e.target.checked;
-
-});
-
-document
-.getElementById("animationSpeedSelect")
-.addEventListener("change",e=>{
-
-    settings.animationSpeed=
-        Number(e.target.value);
-
-});
-
-document
-.getElementById("soundSwitch")
-.addEventListener("change",e=>{
-
-    settings.sound=e.target.checked;
-
-});
-
-document
-.getElementById("musicSwitch")
-.addEventListener("change",e=>{
-
-    settings.music=e.target.checked;
-
-});
-
-document
-.getElementById("volumeRange")
-.addEventListener("input",e=>{
-
-    settings.volume=
-        Number(e.target.value);
-
-});
+};
 
 /* =========================================================
-   SETTINGS TABS
+   SAVE
 ========================================================= */
 
-document
-.querySelectorAll(".settingsTab")
-.forEach(tab=>{
-
-    tab.addEventListener("click",()=>{
-
-        document
-        .querySelectorAll(".settingsTab")
-        .forEach(x=>
-            x.classList.remove("active")
-        );
-
-        document
-        .querySelectorAll(".settingPage")
-        .forEach(x=>
-            x.classList.remove("active")
-        );
-
-        tab.classList.add("active");
-
-        document
-        .getElementById(
-            tab.dataset.page
-        )
-        .classList.add("active");
-
-    });
-
-});
-
-/* =========================================================
-   INFO MENU
-========================================================= */
-
-function openInfo(title,content){
-
-    document.getElementById(
-        "infoTitle"
-    ).textContent=title;
-
-    document.getElementById(
-        "infoContent"
-    ).innerHTML=content;
-
-    document
-        .getElementById("infoModal")
-        .classList.remove("hidden");
-
-}
-
-document
-.getElementById("newsBtn")
-.addEventListener("click",()=>{
-
-    openInfo(
-        "📰 NEWS",
-        `
-        <p><b>PIXEL WORLD COMPLETE EDITION</b></p>
-        <p>Nowa wersja zawiera:</p>
-        <ul>
-            <li>dłuższy cykl dnia i nocy</li>
-            <li>płynne przejście dzień/noc</li>
-            <li>poprawione skakanie postaci</li>
-            <li>animację kopania</li>
-            <li>dźwięki kopania i stawiania</li>
-            <li>crafting</li>
-            <li>mobilne sterowanie</li>
-            <li>zapis świata</li>
-        </ul>
-        `
-    );
-
-});
-
-document
-.getElementById("shopBtn")
-.addEventListener("click",()=>{
-
-    openInfo(
-        "🛒 SHOP",
-        `
-        <p>Sklep jest obecnie w wersji demonstracyjnej.</p>
-        <p>W przyszłości możesz tutaj dodać skiny, przedmioty i inne elementy.</p>
-        `
-    );
-
-});
-
-document
-.getElementById("accountBtn")
-.addEventListener("click",()=>{
-
-    openInfo(
-        "👤 ACCOUNT",
-        `
-        <p>Konto lokalne.</p>
-        <p>Postęp jest przechowywany w pamięci przeglądarki.</p>
-        `
-    );
-
-});
-
-document
-.getElementById("socialBtn")
-.addEventListener("click",()=>{
-
-    openInfo(
-        "👥 SOCIAL",
-        `
-        <p>Tryb społecznościowy może zostać dodany w kolejnej wersji.</p>
-        `
-    );
-
-});
-
-document
-.getElementById("closeInfo")
-.addEventListener("click",()=>{
-
-    document
-        .getElementById("infoModal")
-        .classList.add("hidden");
-
-});
-
-/* =========================================================
-   SETTINGS OPEN
-========================================================= */
-
-function openSettings(){
-
-    setPause(true);
-
-    document
-        .getElementById("settingsModal")
-        .classList.remove("hidden");
-
-    syncSettingsUI();
-
-}
-
-function closeSettings(){
-
-    document
-        .getElementById("settingsModal")
-        .classList.add("hidden");
-
-}
-
-function syncSettingsUI(){
-
-    document.getElementById(
-        "mobileSwitch"
-    ).checked=settings.mobile;
-
-    document.getElementById(
-        "autosaveSwitch"
-    ).checked=settings.autosave;
-
-    document.getElementById(
-        "dayNightSwitch"
-    ).checked=settings.dayNight;
-
-    document.getElementById(
-        "particlesSwitch"
-    ).checked=settings.particles;
-
-    document.getElementById(
-        "pixelPerfectSwitch"
-    ).checked=settings.pixelPerfect;
-
-    document.getElementById(
-        "waterSwitch"
-    ).checked=settings.water;
-
-    document.getElementById(
-        "fpsSwitch"
-    ).checked=settings.showFPS;
-
-    document.getElementById(
-        "animationsSwitch"
-    ).checked=settings.animations;
-
-    document.getElementById(
-        "walkingSwitch"
-    ).checked=settings.walking;
-
-    document.getElementById(
-        "idleSwitch"
-    ).checked=settings.idle;
-
-    document.getElementById(
-        "blinkSwitch"
-    ).checked=settings.blink;
-
-    document.getElementById(
-        "jumpAnimSwitch"
-    ).checked=settings.jumpAnim;
-
-    document.getElementById(
-        "hairSwitch"
-    ).checked=settings.hair;
-
-    document.getElementById(
-        "animationSpeedSelect"
-    ).value=settings.animationSpeed;
-
-    document.getElementById(
-        "soundSwitch"
-    ).checked=settings.sound;
-
-    document.getElementById(
-        "musicSwitch"
-    ).checked=settings.music;
-
-    document.getElementById(
-        "volumeRange"
-    ).value=settings.volume;
-
-}
-
-/* =========================================================
-   MENU BUTTONS
-========================================================= */
-
-document
-.getElementById("settingsBtn")
-.addEventListener("click",()=>{
-
-    openSettings();
-
-});
-
-document
-.getElementById("openGameSettings")
-.addEventListener("click",()=>{
-
-    openSettings();
-
-});
-
-document
-.getElementById("closeSettings")
-.addEventListener("click",()=>{
-
-    closeSettings();
+const SAVE =
+    "PIXEL_WORLD_MP_V2";
+
+function save(){
+
+    /*
+       Zapis hosta / singleplayer.
+       W multiplayerze klient nie nadpisuje świata hosta.
+    */
 
     if(
-        document.getElementById("menu")
-        .style.display!=="none"
+        multiplayer.connected &&
+        !multiplayer.host
     ){
 
-        setPause(true);
-
-    }else{
-
-        setPause(false);
+        return;
 
     }
 
-});
+    localStorage.setItem(
+        SAVE,
+        JSON.stringify({
 
-document
-.getElementById("saveBtn")
-.addEventListener("click",saveGame);
+            world:
+                Array.from(
+                    world,
+                    y=>
+                        Array.from(y)
+                ),
 
-document
-.getElementById("saveBtn2")
-.addEventListener("click",saveGame);
+            x:me.x,
 
-document
-.getElementById("resetSaveBtn")
-.addEventListener("click",deleteSave);
+            y:me.y,
 
-document
-.getElementById("openCraft")
-.addEventListener("click",openCrafting);
+            inv,
 
-document
-.getElementById("pauseBtn")
-.addEventListener("click",togglePause);
+            selected,
 
-document
-.getElementById("resumeBtn")
-.addEventListener("click",()=>{
+            dayTime,
 
-    setPause(false);
+            S
 
-});
-
-document
-.getElementById("pauseCraftBtn")
-.addEventListener("click",openCrafting);
-
-document
-.getElementById("pauseSettingsBtn")
-.addEventListener("click",openSettings);
-
-document
-.getElementById("backMenuBtn")
-.addEventListener("click",()=>{
-
-    saveGame();
-
-    setPause(true);
-
-    document.getElementById(
-        "menu"
-    ).style.display="flex";
-
-});
-
-/* =========================================================
-   PLAY
-========================================================= */
-
-document
-.getElementById("playBtn")
-.addEventListener("click",()=>{
-
-    document.getElementById(
-        "menu"
-    ).style.display="none";
-
-    closeSettings();
-    closeCrafting();
-
-    setPause(false);
-
-    const ac=getAudio();
-
-    if(ac && ac.state==="suspended"){
-
-        ac.resume();
-
-    }
-
-});
-
-/* =========================================================
-   RESIZE
-========================================================= */
-
-function resize(){
-
-    W=innerWidth;
-    H=innerHeight;
-
-    const dpr=
-        Math.min(
-            window.devicePixelRatio||1,
-            2
-        );
-
-    canvas.width=
-        Math.floor(W*dpr);
-
-    canvas.height=
-        Math.floor(H*dpr);
-
-    canvas.style.width=
-        W+"px";
-
-    canvas.style.height=
-        H+"px";
-
-    ctx.setTransform(
-        dpr,
-        0,
-        0,
-        dpr,
-        0,
-        0
+        })
     );
-
-    ctx.imageSmoothingEnabled=
-        !settings.pixelPerfect;
 
 }
 
-window.addEventListener(
-    "resize",
-    resize
+function load(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                SAVE
+            );
+
+        if(!raw)
+            return false;
+
+        const d =
+            JSON.parse(raw);
+
+        if(
+            !d.world ||
+            d.world.length!==WORLD_H
+        ){
+
+            return false;
+
+        }
+
+        world =
+            d.world.map(
+                a=>
+                    Uint8Array.from(a)
+            );
+
+        me.x =
+            Number(d.x)||0;
+
+        me.y =
+            Number(d.y)||0;
+
+        inv =
+            {
+                ...inv,
+                ...(d.inv||{})
+            };
+
+        selected =
+            Number(
+                d.selected
+            )||0;
+
+        dayTime =
+            Number(
+                d.dayTime
+            )||0;
+
+        Object.assign(
+            S,
+            d.S||{}
+        );
+
+        updateHotbar();
+
+        return true;
+
+    }catch{
+
+        return false;
+
+    }
+
+}
+
+function saveMaybe(){
+
+    if(
+        S.auto &&
+        !multiplayer.connected
+    ){
+
+        save();
+
+    }
+
+}
+
+/* =========================================================
+   MULTIPLAYER STATUS
+========================================================= */
+
+function setNet(text){
+
+    document
+    .getElementById(
+        "netStatus"
+    )
+    .textContent=text;
+
+    document
+    .getElementById(
+        "multiMsg"
+    )
+    .textContent=text;
+
+}
+
+/* =========================================================
+   MULTIPLAYER SEND
+========================================================= */
+
+function broadcast(m){
+
+    for(
+        const c
+        of multiplayer.conns
+    ){
+
+        if(c.open){
+
+            c.send(m);
+
+        }
+
+    }
+
+}
+
+function send(m){
+
+    if(
+        multiplayer.host
+    ){
+
+        broadcast(m);
+
+    }else if(
+        multiplayer.hostConn &&
+        multiplayer.hostConn.open
+    ){
+
+        multiplayer
+            .hostConn
+            .send(m);
+
+    }
+
+}
+
+/* =========================================================
+   MULTIPLAYER CONNECTION
+========================================================= */
+
+function setupConn(c){
+
+    c.on(
+        "open",
+        ()=>{
+
+            multiplayer.connected=true;
+
+            if(
+                multiplayer.host
+            ){
+
+                multiplayer
+                    .conns
+                    .add(c);
+
+                c.send({
+
+                    type:"init",
+
+                    world:
+                        Array.from(
+                            world,
+                            y=>
+                                Array.from(y)
+                        ),
+
+                    dayTime,
+
+                    inv,
+
+                    players:
+                        [
+                            ...remotes.entries()
+                        ]
+
+                });
+
+                setNet(
+                    "MULTIPLAYER • HOST • "+
+                    multiplayer.conns.size+
+                    " graczy"
+                );
+
+            }else{
+
+                multiplayer.hostConn=c;
+
+                setNet(
+                    "MULTIPLAYER • POŁĄCZONO"
+                );
+
+            }
+
+        }
+    );
+
+    c.on(
+        "data",
+        m=>
+            receive(
+                m,
+                c
+            )
+    );
+
+    c.on(
+        "close",
+        ()=>{
+
+            multiplayer
+                .conns
+                .delete(c);
+
+            if(
+                c===
+                multiplayer.hostConn
+            ){
+
+                multiplayer.hostConn=
+                    null;
+
+            }
+
+            setNet(
+                multiplayer.host
+                ? "MULTIPLAYER • HOST"
+                : "MULTIPLAYER • ROZŁĄCZONO"
+            );
+
+        }
+    );
+
+    c.on(
+        "error",
+        ()=>{
+
+            setNet(
+                "Błąd połączenia"
+            );
+
+        }
+    );
+
+}
+
+/* =========================================================
+   MULTIPLAYER RECEIVE
+========================================================= */
+
+function receive(
+    m,
+    c
+){
+
+    /* INIT */
+
+    if(
+        m.type==="init" &&
+        !multiplayer.host
+    ){
+
+        world =
+            m.world.map(
+                a=>
+                    Uint8Array.from(a)
+            );
+
+        dayTime =
+            m.dayTime||0;
+
+        inv =
+            {
+                ...inv,
+                ...(m.inv||{})
+            };
+
+        updateHotbar();
+
+        for(
+            const [
+                id,
+                p
+            ]
+            of
+            m.players||[]
+        ){
+
+            remotes.set(
+                id,
+                p
+            );
+
+        }
+
+        c.send({
+
+            type:"hello",
+
+            x:me.x,
+
+            y:me.y
+
+        });
+
+    }
+
+    /* HELLO */
+
+    if(
+        m.type==="hello" &&
+        multiplayer.host
+    ){
+
+        remotes.set(
+            c.peer,
+            {
+
+                x:m.x,
+
+                y:m.y,
+
+                w:11,
+
+                h:22,
+
+                vx:0,
+
+                vy:0,
+
+                ground:false,
+
+                walk:0,
+
+                mine:0
+
+            }
+        );
+
+        broadcast({
+
+            type:"players",
+
+            players:
+                [
+                    ...remotes.entries()
+                ]
+
+        });
+
+    }
+
+    /* CLIENT PLAYER STATE */
+
+    if(
+        m.type==="state" &&
+        multiplayer.host
+    ){
+
+        const p =
+            remotes.get(
+                c.peer
+            );
+
+        if(p){
+
+            Object.assign(
+                p,
+                m.p
+            );
+
+            broadcast({
+
+                type:"remote",
+
+                id:c.peer,
+
+                p
+
+            });
+
+        }
+
+    }
+
+    /* REMOTE PLAYER */
+
+    if(
+        m.type==="remote" &&
+        !multiplayer.host
+    ){
+
+        remotes.set(
+            m.id,
+            m.p
+        );
+
+    }
+
+    /* PLAYERS LIST */
+
+    if(
+        m.type==="players" &&
+        !multiplayer.host
+    ){
+
+        for(
+            const [
+                id,
+                p
+            ]
+            of
+            m.players
+        ){
+
+            remotes.set(
+                id,
+                p
+            );
+
+        }
+
+    }
+
+    /* HOST TIME */
+
+    if(
+        m.type==="worldtime" &&
+        !multiplayer.host
+    ){
+
+        dayTime =
+            m.dayTime||
+            dayTime;
+
+    }
+
+    /* BLOCK */
+
+    if(
+        m.type==="block"
+    ){
+
+        setB(
+            m.x,
+            m.y,
+            m.v
+        );
+
+    }
+
+    /* ACTION */
+
+    if(
+        m.type==="action" &&
+        multiplayer.host
+    ){
+
+        hostAction(m);
+
+    }
+
+}
+
+/* =========================================================
+   CREATE HOST
+========================================================= */
+
+document
+.getElementById(
+    "hostBtn"
+)
+.onclick=()=>{
+
+    if(
+        multiplayer.peer
+    ){
+
+        return;
+
+    }
+
+    multiplayer.host=true;
+
+    multiplayer.peer =
+        new Peer();
+
+    multiplayer.peer.on(
+        "open",
+        id=>{
+
+            multiplayer.id=id;
+
+            document
+            .getElementById(
+                "myId"
+            )
+            .value=id;
+
+            setNet(
+                "POKÓJ GOTOWY • PODAJ KOD"
+            );
+
+        }
+    );
+
+    multiplayer.peer.on(
+        "connection",
+        c=>
+            setupConn(c)
+    );
+
+    multiplayer.peer.on(
+        "error",
+        e=>{
+
+            setNet(
+                "Błąd: "+
+                e.type
+            );
+
+        }
+    );
+
+};
+
+/* =========================================================
+   JOIN
+========================================================= */
+
+document
+.getElementById(
+    "joinBtn"
+)
+.onclick=()=>{
+
+    const id =
+        document
+        .getElementById(
+            "joinId"
+        )
+        .value
+        .trim();
+
+    if(!id)
+        return;
+
+    if(
+        multiplayer.peer
+    ){
+
+        multiplayer.peer.destroy();
+
+    }
+
+    multiplayer.host=false;
+
+    multiplayer.peer =
+        new Peer();
+
+    multiplayer.peer.on(
+        "open",
+        ()=>{
+
+            setupConn(
+
+                multiplayer
+                .peer
+                .connect(
+                    id,
+                    {
+
+                        reliable:true,
+
+                        serialization:
+                            "json"
+
+                    }
+                )
+
+            );
+
+        }
+    );
+
+    multiplayer.peer.on(
+        "error",
+        e=>{
+
+            setNet(
+                "Błąd: "+
+                e.type
+            );
+
+        }
+    );
+
+};
+
+/* =========================================================
+   MULTIPLAYER SYNC
+========================================================= */
+
+setInterval(
+    ()=>{
+
+        if(
+            !gameStarted ||
+            !multiplayer.connected
+        ){
+
+            return;
+
+        }
+
+        if(
+            multiplayer.host
+        ){
+
+            /*
+               Synchronizacja czasu.
+            */
+
+            broadcast({
+
+                type:"worldtime",
+
+                dayTime
+
+            });
+
+            /*
+               Pozycja hosta.
+            */
+
+            broadcast({
+
+                type:"remote",
+
+                id:"HOST",
+
+                p:{
+
+                    x:me.x,
+
+                    y:me.y,
+
+                    vx:me.vx,
+
+                    vy:me.vy,
+
+                    ground:me.ground,
+
+                    dir:me.dir,
+
+                    walk:me.walk,
+
+                    mine:me.mine,
+
+                    w:11,
+
+                    h:22
+
+                }
+
+            });
+
+        }else{
+
+            /*
+               Pozycja klienta.
+            */
+
+            send({
+
+                type:"state",
+
+                p:{
+
+                    x:me.x,
+
+                    y:me.y,
+
+                    vx:me.vx,
+
+                    vy:me.vy,
+
+                    ground:me.ground,
+
+                    dir:me.dir,
+
+                    walk:me.walk,
+
+                    mine:me.mine,
+
+                    w:11,
+
+                    h:22
+
+                }
+
+            });
+
+        }
+
+    },
+    100
 );
 
 /* =========================================================
-   FPS
+   MAIN RENDER
 ========================================================= */
 
-let fps=60;
-let fpsCounter=0;
-let fpsTime=0;
+function render(){
+
+    sky();
+
+    drawWorld();
+
+    drawRemote();
+
+    drawParticles();
+
+    drawSprite(
+        me,
+        true
+    );
+
+    const n =
+        nightAmount();
+
+    if(n){
+
+        ctx.fillStyle =
+            `rgba(3,6,20,${n*.45})`;
+
+        ctx.fillRect(
+            0,
+            0,
+            VW,
+            VH
+        );
+
+    }
+
+}
 
 /* =========================================================
    GAME LOOP
 ========================================================= */
 
-let lastTime=performance.now();
+function loop(now){
 
-function gameLoop(now){
+    const dt =
+        Math.min(
+            .033,
+            (now-last)/1000
+        );
 
-    let dt=
-        (now-lastTime)/1000;
+    last=now;
 
-    lastTime=now;
+    if(!paused){
 
-    dt=Math.min(
-        dt,
-        .033
-    );
+        dayTime +=
+            dt*1000;
 
-    if(!gamePaused){
-
-        dayTime+=dt*1000;
-
-        updatePlayer(dt);
+        updateMe(dt);
 
         updateParticles(dt);
 
-        updateCamera();
+        camera();
 
         if(
-            miningMouse
+            mineHeld &&
+            Math.random()<.12
         ){
 
-            if(
-                Math.random()<.15
-            ){
-
-                mineBlock();
-
-            }
+            mine();
 
         }
 
         if(
-            placingMouse
+            placeHeld &&
+            Math.random()<.06
         ){
 
-            if(
-                Math.random()<.08
-            ){
-
-                placeBlock();
-
-            }
+            place();
 
         }
 
-        if(
-            player.mineTimer>0
-        ){
-
-            player.mineTimer-=dt;
-
-        }else{
-
-            player.mining=false;
-
-        }
+        autoSaveTimer+=dt;
 
         if(
-            settings.autosave &&
-            dayTime%120000<100
+            S.auto &&
+            !multiplayer.connected &&
+            autoSaveTimer>20
         ){
 
-            saveGame();
+            autoSaveTimer=0;
+
+            save();
 
         }
 
     }
 
-    render(now);
+    render();
 
-    fpsCounter++;
-
-    fpsTime+=dt;
-
-    if(fpsTime>=1){
-
-        fps=fpsCounter;
-        fpsCounter=0;
-        fpsTime=0;
-
-    }
-
-    if(settings.showFPS){
-
-        ctx.fillStyle="white";
-        ctx.font="14px Arial";
-
-        ctx.fillText(
-            "FPS: "+fps,
-            W-70,
-            25
-        );
-
-    }
-
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(
+        loop
+    );
 
 }
 
@@ -4017,23 +4392,46 @@ function gameLoop(now){
    START
 ========================================================= */
 
-if(!loadGame()){
+if(
+    !load()
+){
 
     newWorld();
 
-}else{
-
-    updateHotbar();
-
 }
 
-applySettings();
+updateHotbar();
 
-resize();
+document
+.getElementById(
+    "play"
+)
+.onclick=()=>{
 
-setPause(true);
+    gameStarted=true;
 
-requestAnimationFrame(gameLoop);
+    document
+    .getElementById(
+        "menu"
+    )
+    .style.display="none";
+
+    setPause(false);
+
+    if(
+        audio &&
+        audio.state==="suspended"
+    ){
+
+        audio.resume();
+
+    }
+
+};
+
+requestAnimationFrame(
+    loop
+);
 
 </script>
 
