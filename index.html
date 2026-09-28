@@ -2,4621 +2,4038 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PIXEL WORLD</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>PIXEL WORLD — COMPLETE EDITION</title>
 
 <style>
 *{
-  box-sizing:border-box;
-  user-select:none;
-  -webkit-user-select:none;
-  -webkit-tap-highlight-color:transparent;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#101820;
-  font-family:Arial,sans-serif;
-  color:white;
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#111;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    user-select:none;
 }
 
 canvas{
-  position:fixed;
-  inset:0;
-  width:100%;
-  height:100%;
-  image-rendering:pixelated;
-  touch-action:none;
+    display:block;
+    width:100%;
+    height:100%;
+    image-rendering:pixelated;
 }
 
-/* ================= MENU ================= */
+button{
+    font:inherit;
+    border:0;
+    cursor:pointer;
+    user-select:none;
+}
 
-#mainMenu{
-  position:fixed;
-  inset:0;
-  z-index:1000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:
-    linear-gradient(
-      #61c9ff 0%,
-      #a8e8ff 54%,
-      #65b94e 54%,
-      #75c85b 100%
-    );
+.hidden{
+    display:none!important;
+}
+
+/* =========================
+   MAIN MENU
+========================= */
+
+#menu{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 50% 35%,rgba(67,190,255,.15),transparent 30%),
+        linear-gradient(#07111c,#0c1724 55%,#101010);
+}
+
+.menuGrid{
+    position:absolute;
+    inset:0;
+    opacity:.12;
+    background-image:
+        linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
+    background-size:32px 32px;
 }
 
 .menuBox{
-  width:min(560px,92vw);
-  max-height:95vh;
-  overflow:auto;
-  padding:25px;
-  text-align:center;
-  background:rgba(8,20,40,.95);
-  border:5px solid white;
-  box-shadow:
-    7px 7px 0 #000,
-    0 0 0 5px #263d5e;
+    position:relative;
+    z-index:2;
+    width:min(430px,92vw);
+    padding:30px;
+    text-align:center;
 }
 
 .logo{
-  margin:0;
-  color:#fff35a;
-  font-size:clamp(38px,8vw,66px);
-  font-weight:1000;
-  letter-spacing:4px;
-  text-shadow:
-    5px 5px #315080,
-    8px 8px #000;
+    color:white;
+    font-size:clamp(38px,8vw,70px);
+    font-weight:900;
+    letter-spacing:4px;
+    text-shadow:
+        5px 5px 0 #000,
+        0 0 20px #00d9ff;
 }
 
 .subtitle{
-  margin:5px 0 18px;
-  font-weight:bold;
+    color:#9bdff0;
+    margin-top:6px;
+    margin-bottom:25px;
+    font-weight:bold;
 }
 
 .menuCharacter{
-  width:80px;
-  height:110px;
-  margin:0 auto 18px;
-  position:relative;
-  animation:menuBob 1.2s steps(4) infinite;
+    width:70px;
+    height:70px;
+    margin:0 auto 25px;
+    position:relative;
+    animation:menuFloat 2s ease-in-out infinite;
 }
 
-@keyframes menuBob{
-  50%{transform:translateY(-5px)}
+.menuCharacter .head{
+    position:absolute;
+    width:44px;
+    height:44px;
+    left:13px;
+    top:3px;
+    background:#ffd19a;
+    border:4px solid #111;
 }
 
-.menuCharacter div{
-  position:absolute;
+.menuCharacter .hair{
+    position:absolute;
+    width:44px;
+    height:16px;
+    left:13px;
+    top:3px;
+    background:#35200f;
+    border:4px solid #111;
+    z-index:2;
 }
 
-.mcHead{
-  left:22px;
-  top:5px;
-  width:36px;
-  height:35px;
-  background:#efbd91;
-  border:4px solid #542f20;
+.menuCharacter .body{
+    position:absolute;
+    width:34px;
+    height:26px;
+    left:18px;
+    top:44px;
+    background:#38a8ff;
+    border:4px solid #111;
 }
 
-.mcHair{
-  left:18px;
-  top:1px;
-  width:44px;
-  height:18px;
-  background:#542f20;
-  box-shadow:
-    8px 9px #542f20,
-    25px 8px #542f20;
+.menuCharacter .leg1,
+.menuCharacter .leg2{
+    position:absolute;
+    width:10px;
+    height:14px;
+    top:66px;
+    background:#222;
+    border:3px solid #111;
 }
 
-.mcEye1,.mcEye2{
-  top:23px;
-  width:5px;
-  height:5px;
-  background:#111;
+.menuCharacter .leg1{left:20px}
+.menuCharacter .leg2{left:40px}
+
+@keyframes menuFloat{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-6px)}
 }
-
-.mcEye1{left:31px}
-.mcEye2{left:47px}
-
-.mcBody{
-  left:20px;
-  top:43px;
-  width:40px;
-  height:40px;
-  background:#3976ca;
-  border:4px solid #224b86;
-}
-
-.mcArm{
-  top:46px;
-  width:10px;
-  height:32px;
-  background:#efbd91;
-  border:3px solid #bd765f;
-}
-
-.mcArm1{left:9px}
-.mcArm2{right:9px}
-
-.mcLeg{
-  top:80px;
-  width:12px;
-  height:29px;
-  background:#4b3b79;
-}
-
-.mcLeg1{left:23px}
-.mcLeg2{right:23px}
 
 .menuButtons{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
+    display:grid;
+    gap:10px;
 }
 
-.menuButton{
-  min-height:48px;
-  border:3px solid white;
-  background:linear-gradient(#348bd4,#17549a);
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:4px 4px #000;
-  font-size:15px;
+.menuBtn{
+    width:100%;
+    padding:15px;
+    color:white;
+    background:#182838;
+    border:2px solid #34536b;
+    box-shadow:0 5px 0 #071018;
+    font-weight:900;
+    letter-spacing:1px;
+    transition:.12s;
 }
 
-.menuButton:hover{
-  filter:brightness(1.2);
+.menuBtn:hover{
+    transform:translateY(-2px);
+    background:#203b51;
+    border-color:#55cfff;
 }
 
-.menuButton:active{
-  transform:translate(3px,3px);
-  box-shadow:1px 1px #000;
+.menuBtn:active{
+    transform:translateY(3px);
+    box-shadow:0 2px 0 #071018;
 }
 
-.playButton{
-  grid-column:1/-1;
-  background:linear-gradient(#5fe568,#258c39);
-  font-size:20px;
+.playBtn{
+    background:#0b9ad1;
+    border-color:#55ddff;
 }
 
-#menuMessage{
-  margin-top:15px;
-  min-height:20px;
-  color:#fff35a;
-  font-weight:bold;
+.playBtn:hover{
+    background:#10b7ed;
 }
 
-/* ================= MODALS ================= */
+/* =========================
+   MODAL
+========================= */
+
+.modalLayer{
+    position:fixed;
+    inset:0;
+    z-index:200;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    background:rgba(0,0,0,.72);
+}
 
 .modal{
-  position:fixed;
-  inset:0;
-  z-index:2000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.75);
-  padding:15px;
+    width:min(600px,94vw);
+    max-height:90vh;
+    overflow:auto;
+    padding:25px;
+    color:white;
+    background:#111c27;
+    border:2px solid #3e6079;
+    box-shadow:0 20px 70px rgba(0,0,0,.6);
 }
 
-.modalBox{
-  width:min(550px,94vw);
-  max-height:90vh;
-  overflow:auto;
-  background:#09254a;
-  border:4px solid white;
-  box-shadow:7px 7px #000;
-  padding:22px;
-  text-align:center;
+.modal h2{
+    margin-top:0;
+    color:#5edcff;
 }
 
-.modalBox h2{
-  margin-top:0;
-  color:#fff35a;
+.closeBtn{
+    float:right;
+    background:#7c2630;
+    color:white;
+    padding:7px 12px;
+    font-weight:bold;
 }
 
-.modalBox p{
-  line-height:1.6;
-  white-space:pre-line;
+/* =========================
+   GAME UI
+========================= */
+
+#gameUI{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    pointer-events:none;
 }
 
-.modalButton{
-  padding:10px 20px;
-  border:3px solid white;
-  background:#2878c5;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
+.topBar{
+    position:absolute;
+    left:12px;
+    right:12px;
+    top:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
-/* ================= UI ================= */
-
-#ui{
-  position:fixed;
-  inset:0;
-  z-index:100;
-  pointer-events:none;
+.gameTitle{
+    color:white;
+    font-weight:900;
+    text-shadow:2px 2px #000;
 }
 
-#gameTitle{
-  position:absolute;
-  top:10px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:21px;
-  font-weight:bold;
-  letter-spacing:3px;
-  text-shadow:3px 3px #000;
+.health{
+    width:170px;
+    height:20px;
+    border:2px solid #111;
+    background:#333;
+    position:relative;
 }
 
-#health{
-  position:absolute;
-  top:14px;
-  left:14px;
-  width:190px;
-  height:27px;
-  border:3px solid white;
-  background:#171717;
+.healthFill{
+    width:100%;
+    height:100%;
+    background:#36d85c;
 }
 
-#healthFill{
-  height:100%;
-  width:100%;
-  background:#e33;
+.healthText{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    text-shadow:1px 1px #000;
 }
 
-#healthText{
-  position:absolute;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:12px;
-  font-weight:bold;
-  text-shadow:2px 2px #000;
+.help{
+    position:absolute;
+    left:12px;
+    bottom:110px;
+    color:white;
+    font-size:12px;
+    text-shadow:2px 2px #000;
+    opacity:.9;
 }
 
-#help{
-  position:absolute;
-  left:15px;
-  top:49px;
-  font-size:12px;
-  text-shadow:2px 2px #000;
+.actionButtons{
+    position:absolute;
+    top:42px;
+    right:12px;
+    display:flex;
+    gap:6px;
+    pointer-events:auto;
 }
 
-#topButtons{
-  position:absolute;
-  right:14px;
-  top:14px;
-  display:flex;
-  gap:7px;
-  pointer-events:auto;
+.smallBtn{
+    color:white;
+    background:rgba(15,25,35,.85);
+    border:1px solid #587186;
+    padding:7px 10px;
 }
 
-.uiButton{
-  padding:8px 11px;
-  border:3px solid white;
-  background:#252d38;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:4px 4px #000;
-}
+/* =========================
+   HOTBAR
+========================= */
 
 #hotbar{
-  position:absolute;
-  bottom:12px;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:5px;
-  pointer-events:auto;
+    position:absolute;
+    left:50%;
+    bottom:12px;
+    transform:translateX(-50%);
+    display:flex;
+    gap:5px;
+    padding:5px;
+    background:rgba(10,15,20,.82);
+    border:2px solid #384d5c;
+    pointer-events:auto;
 }
 
 .slot{
-  width:57px;
-  height:57px;
-  background:#20252c;
-  border:3px solid #555;
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
+    width:54px;
+    height:54px;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#1d2932;
+    border:2px solid #596c79;
 }
 
 .slot.selected{
-  border-color:white;
-  transform:translateY(-4px);
+    border-color:#fff;
+    box-shadow:0 0 0 2px #00d9ff;
 }
 
 .slotIcon{
-  width:30px;
-  height:30px;
-}
-
-.slotNumber{
-  position:absolute;
-  left:4px;
-  top:2px;
-  font-size:11px;
+    width:28px;
+    height:28px;
+    image-rendering:pixelated;
 }
 
 .slotCount{
-  position:absolute;
-  right:4px;
-  bottom:2px;
-  font-size:12px;
-  font-weight:bold;
+    position:absolute;
+    right:3px;
+    bottom:1px;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    text-shadow:2px 2px #000;
 }
 
-#message{
-  position:absolute;
-  left:50%;
-  bottom:82px;
-  transform:translateX(-50%);
-  background:rgba(0,0,0,.75);
-  padding:8px 15px;
-  opacity:0;
-  transition:.15s;
+/* =========================
+   MOBILE CONTROLS
+========================= */
+
+.mobileControls{
+    display:none;
+    position:absolute;
+    left:12px;
+    right:12px;
+    bottom:90px;
+    justify-content:space-between;
+    pointer-events:none;
 }
 
-/* ================= MOBILE ================= */
-
-#mobileControls{
-  position:absolute;
-  left:15px;
-  bottom:85px;
-  display:none;
-  gap:8px;
-  pointer-events:auto;
+.mobileGroup{
+    display:flex;
+    gap:8px;
 }
 
-.mobileButton{
-  width:60px;
-  height:60px;
-  border:3px solid white;
-  background:rgba(20,30,45,.85);
-  color:white;
-  font-size:25px;
-  font-weight:bold;
-  box-shadow:4px 4px #000;
-  touch-action:none;
+.mobileBtn{
+    width:65px;
+    height:65px;
+    border-radius:12px;
+    color:white;
+    background:rgba(20,30,40,.7);
+    border:2px solid rgba(255,255,255,.4);
+    font-size:25px;
+    pointer-events:auto;
+    touch-action:none;
 }
 
-#jumpButton{
-  position:absolute;
-  right:15px;
-  bottom:85px;
-  display:none;
-  pointer-events:auto;
+@media(max-width:700px){
+    .mobileControls{
+        display:flex;
+    }
+
+    .help{
+        display:none;
+    }
+
+    .slot{
+        width:45px;
+        height:45px;
+    }
+
+    .slotIcon{
+        width:24px;
+        height:24px;
+    }
+
+    .health{
+        width:120px;
+    }
 }
 
-/* ================= PAUSE ================= */
+/* =========================
+   PAUSE
+========================= */
 
-#pause{
-  position:fixed;
-  inset:0;
-  z-index:700;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.55);
+#pauseOverlay{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.55);
 }
 
 .pauseBox{
-  background:#142238;
-  border:4px solid white;
-  box-shadow:7px 7px #000;
-  padding:25px;
-  text-align:center;
+    padding:30px;
+    background:#111c27;
+    border:2px solid #57748a;
+    color:white;
+    text-align:center;
 }
 
 .pauseBox h2{
-  color:#fff35a;
+    margin-top:0;
 }
 
-.pauseButton{
-  padding:10px 20px;
-  margin:5px;
-  border:3px solid white;
-  background:#2878c5;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
+.pauseActions{
+    display:grid;
+    gap:10px;
 }
 
-/* ================= SETTINGS ================= */
+/* =========================
+   CRAFTING
+========================= */
 
-#settings{
-  position:fixed;
-  inset:0;
-  z-index:1500;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.78);
-  padding:12px;
+.recipe{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:12px;
+    margin:8px 0;
+    background:#182735;
+    border:1px solid #355165;
 }
 
-.settingsBox{
-  width:min(900px,96vw);
-  height:min(700px,94vh);
-  background:#18202a;
-  border:4px solid white;
-  box-shadow:8px 8px #000;
-  display:flex;
-  flex-direction:column;
+.recipe button{
+    margin-left:auto;
+    padding:9px 14px;
+    background:#1689b9;
+    color:white;
+    font-weight:bold;
 }
 
-.settingsHeader{
-  height:58px;
-  flex-shrink:0;
-  padding:0 12px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  border-bottom:3px solid #555;
+/* =========================
+   SETTINGS
+========================= */
+
+.settingsTabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-bottom:15px;
 }
 
-.settingsBody{
-  display:flex;
-  flex:1;
-  min-height:0;
+.settingsTab{
+    padding:8px 12px;
+    background:#1c2b38;
+    color:white;
+    border:1px solid #405769;
 }
 
-.tabs{
-  width:175px;
-  background:#11171e;
-  border-right:3px solid #555;
-  overflow:auto;
+.settingsTab.active{
+    background:#0d91c4;
 }
 
-.tab{
-  width:100%;
-  padding:12px 9px;
-  border:0;
-  border-bottom:1px solid #343c45;
-  background:#171e26;
-  color:white;
-  text-align:left;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.tab.active{
-  background:#315f93;
-}
-
-.pages{
-  flex:1;
-  overflow:auto;
-  padding:16px;
-}
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
-
-.option{
-  margin-bottom:10px;
-  padding:12px;
-  background:#252d38;
-  border:2px solid #414b58;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-}
-
-.option small{
-  display:block;
-  color:#aaa;
-  margin-top:4px;
-}
-
-.switch{
-  width:48px;
-  height:26px;
-  border:2px solid white;
-  background:#555;
-  position:relative;
-  cursor:pointer;
-  flex-shrink:0;
-}
-
-.switch:after{
-  content:"";
-  position:absolute;
-  top:2px;
-  left:2px;
-  width:18px;
-  height:18px;
-  background:white;
-}
-
-.switch.on{
-  background:#29823b;
-}
-
-.switch.on:after{
-  left:24px;
-}
-
-select,
-input[type=range],
-.settingButton{
-  background:#151a21;
-  color:white;
-  border:2px solid white;
-  padding:7px;
-  cursor:pointer;
-}
-
-.info{
-  background:#11161c;
-  border:2px solid #4d5966;
-  padding:13px;
-  line-height:1.55;
-}
-
-.settingsFooter{
-  padding:9px;
-  border-top:3px solid #555;
-  text-align:right;
-}
-
-/* ================= CRAFT ================= */
-
-#craft{
-  display:none;
-}
-
-/* ================= MOBILE MEDIA ================= */
-
-@media(max-width:700px){
-
-  #gameTitle{
-    font-size:15px;
-  }
-
-  #help{
+.settingPage{
     display:none;
-  }
+}
 
-  #topButtons{
-    top:45px;
-  }
+.settingPage.active{
+    display:block;
+}
 
-  #topButtons .uiButton:not(#settingsButton){
-    display:none;
-  }
+.settingRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid #283c4c;
+}
 
-  .menuButtons{
-    grid-template-columns:1fr;
-  }
+.settingRow input,
+.settingRow select{
+    padding:6px;
+}
 
-  .playButton{
-    grid-column:auto;
-  }
+.danger{
+    background:#8e2732;
+    color:white;
+    padding:10px 15px;
+}
 
-  .tabs{
-    width:125px;
-  }
+/* =========================
+   MESSAGE
+========================= */
 
-  .tab{
-    font-size:11px;
-  }
+#message{
+    position:fixed;
+    z-index:300;
+    left:50%;
+    top:90px;
+    transform:translateX(-50%);
+    color:white;
+    background:rgba(0,0,0,.8);
+    border:1px solid #5d7483;
+    padding:10px 18px;
+    opacity:0;
+    pointer-events:none;
+    transition:.2s;
+}
 
-  .option{
-    flex-direction:column;
-    align-items:flex-start;
-  }
+#message.show{
+    opacity:1;
+}
 
-  select,
-  input[type=range]{
-    width:100%;
-  }
+/* =========================
+   PAUSE BUTTON
+========================= */
+
+.pauseMini{
+    pointer-events:auto;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#405667;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ================= MAIN MENU ================= -->
+<!-- =========================
+     MAIN MENU
+========================= -->
 
-<div id="mainMenu">
+<div id="menu">
+    <div class="menuGrid"></div>
 
-  <div class="menuBox">
+    <div class="menuBox">
 
-    <h1 class="logo">PIXEL WORLD</h1>
+        <div class="logo">PIXEL WORLD</div>
+        <div class="subtitle">MINI PIXEL SANDBOX</div>
 
-    <div class="subtitle">
-      MINI PIXEL SANDBOX
+        <div class="menuCharacter">
+            <div class="head"></div>
+            <div class="hair"></div>
+            <div class="body"></div>
+            <div class="leg1"></div>
+            <div class="leg2"></div>
+        </div>
+
+        <div class="menuButtons">
+
+            <button class="menuBtn playBtn" id="playBtn">
+                ▶ GRAJ
+            </button>
+
+            <button class="menuBtn" id="newsBtn">
+                📰 NEWS
+            </button>
+
+            <button class="menuBtn" id="shopBtn">
+                🛒 SHOP
+            </button>
+
+            <button class="menuBtn" id="accountBtn">
+                👤 ACCOUNT
+            </button>
+
+            <button class="menuBtn" id="socialBtn">
+                👥 SOCIAL
+            </button>
+
+            <button class="menuBtn" id="settingsBtn">
+                ⚙ USTAWIENIA
+            </button>
+
+        </div>
     </div>
+</div>
 
-    <div class="menuCharacter">
-      <div class="mcHair"></div>
-      <div class="mcHead"></div>
-      <div class="mcEye1"></div>
-      <div class="mcEye2"></div>
-      <div class="mcBody"></div>
-      <div class="mcArm mcArm1"></div>
-      <div class="mcArm mcArm2"></div>
-      <div class="mcLeg mcLeg1"></div>
-      <div class="mcLeg mcLeg2"></div>
-    </div>
+<!-- =========================
+     INFORMATION MODAL
+========================= -->
 
-    <div class="menuButtons">
+<div id="infoModal" class="modalLayer hidden">
 
-      <button class="menuButton playButton" id="playButton">
-        ▶ GRAJ
-      </button>
+    <div class="modal">
 
-      <button class="menuButton" data-info="NEWS">
-        📰 NEWS
-      </button>
+        <button class="closeBtn" id="closeInfo">X</button>
 
-      <button class="menuButton" data-info="SHOP">
-        🛒 SHOP
-      </button>
+        <h2 id="infoTitle">PIXEL WORLD</h2>
 
-      <button class="menuButton" data-info="ACCOUNT">
-        👤 ACCOUNT
-      </button>
-
-      <button class="menuButton" data-info="SOCIAL">
-        👥 SOCIAL
-      </button>
-
-      <button class="menuButton" id="menuSettings">
-        ⚙ USTAWIENIA
-      </button>
+        <div id="infoContent">
+            Witaj w Pixel World!
+        </div>
 
     </div>
-
-    <div id="menuMessage">
-      Kliknij GRAJ, aby rozpocząć
-    </div>
-
-  </div>
 
 </div>
 
-<!-- ================= INFO MODAL ================= -->
+<!-- =========================
+     SETTINGS
+========================= -->
 
-<div class="modal" id="infoModal">
+<div id="settingsModal" class="modalLayer hidden">
 
-  <div class="modalBox">
+    <div class="modal">
 
-    <h2 id="infoTitle"></h2>
+        <button class="closeBtn" id="closeSettings">X</button>
 
-    <p id="infoText"></p>
+        <h2>⚙ USTAWIENIA</h2>
 
-    <button class="modalButton" id="infoClose">
-      WRÓĆ
-    </button>
+        <div class="settingsTabs">
 
-  </div>
+            <button class="settingsTab active" data-page="gameSettings">
+                Gra
+            </button>
 
+            <button class="settingsTab" data-page="graphicsSettings">
+                Grafika
+            </button>
+
+            <button class="settingsTab" data-page="animationSettings">
+                Animacje
+            </button>
+
+            <button class="settingsTab" data-page="soundSettings">
+                Dźwięk
+            </button>
+
+            <button class="settingsTab" data-page="controlSettings">
+                Sterowanie
+            </button>
+
+            <button class="settingsTab" data-page="saveSettings">
+                Zapis
+            </button>
+
+            <button class="settingsTab" data-page="helpSettings">
+                Pomoc
+            </button>
+
+            <button class="settingsTab" data-page="infoSettings">
+                Informacje
+            </button>
+
+        </div>
+
+        <div id="gameSettings" class="settingPage active">
+
+            <div class="settingRow">
+                <span>Mobilne przyciski</span>
+                <input id="mobileSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Autozapis</span>
+                <input id="autosaveSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Dzień / noc</span>
+                <input id="dayNightSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Cząsteczki</span>
+                <input id="particlesSwitch" type="checkbox" checked>
+            </div>
+
+        </div>
+
+        <div id="graphicsSettings" class="settingPage">
+
+            <div class="settingRow">
+                <span>Jakość</span>
+                <select id="qualitySelect">
+                    <option value="low">Niska</option>
+                    <option value="medium" selected>Średnia</option>
+                    <option value="high">Wysoka</option>
+                </select>
+            </div>
+
+            <div class="settingRow">
+                <span>Pixel Perfect</span>
+                <input id="pixelPerfectSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Animowana woda</span>
+                <input id="waterSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Pokaż FPS</span>
+                <input id="fpsSwitch" type="checkbox">
+            </div>
+
+        </div>
+
+        <div id="animationSettings" class="settingPage">
+
+            <div class="settingRow">
+                <span>Wszystkie animacje</span>
+                <input id="animationsSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Animacja chodzenia</span>
+                <input id="walkingSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Idle</span>
+                <input id="idleSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Mruganie</span>
+                <input id="blinkSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Skok / lądowanie</span>
+                <input id="jumpAnimSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Włosy</span>
+                <input id="hairSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Szybkość animacji</span>
+                <select id="animationSpeedSelect">
+                    <option value=".7">Wolna</option>
+                    <option value="1" selected>Normalna</option>
+                    <option value="1.3">Szybka</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div id="soundSettings" class="settingPage">
+
+            <div class="settingRow">
+                <span>Efekty dźwiękowe</span>
+                <input id="soundSwitch" type="checkbox" checked>
+            </div>
+
+            <div class="settingRow">
+                <span>Muzyka</span>
+                <input id="musicSwitch" type="checkbox">
+            </div>
+
+            <div class="settingRow">
+                <span>Głośność</span>
+                <input id="volumeRange" type="range" min="0" max="1" step=".05" value=".5">
+            </div>
+
+        </div>
+
+        <div id="controlSettings" class="settingPage">
+
+            <p><b>Klawiatura:</b></p>
+            <p>A / D lub ← / → — ruch</p>
+            <p>W / ↑ / SPACJA — skok</p>
+            <p>LPM — kopanie</p>
+            <p>PPM — stawianie bloku</p>
+            <p>E — crafting</p>
+            <p>ESC — pauza</p>
+
+        </div>
+
+        <div id="saveSettings" class="settingPage">
+
+            <button id="saveBtn2" class="smallBtn">
+                💾 ZAPISZ GRĘ
+            </button>
+
+            <button id="resetSaveBtn" class="danger">
+                🗑 USUŃ ZAPIS
+            </button>
+
+        </div>
+
+        <div id="helpSettings" class="settingPage">
+
+            <p>
+                W Pixel World możesz chodzić, skakać, kopać,
+                stawiać bloki i tworzyć nowe materiały.
+            </p>
+
+            <p>
+                Zasięg kopania i budowania wynosi około 5 bloków.
+            </p>
+
+        </div>
+
+        <div id="infoSettings" class="settingPage">
+
+            <p><b>PIXEL WORLD</b></p>
+            <p>Mini Pixel Sandbox</p>
+            <p>Complete Edition</p>
+            <p>Single HTML Game</p>
+
+        </div>
+
+    </div>
 </div>
 
-<!-- ================= GAME ================= -->
+<!-- =========================
+     CRAFTING
+========================= -->
+
+<div id="craftModal" class="modalLayer hidden">
+
+    <div class="modal">
+
+        <button class="closeBtn" id="closeCraft">X</button>
+
+        <h2>🔨 CRAFTING</h2>
+
+        <div class="recipe">
+
+            <div>
+                🟨 🟨 → 🟦
+            </div>
+
+            <div>
+                2 × PIACH
+                <br>
+                = 1 × SZKŁO
+            </div>
+
+            <button id="craftGlass">
+                STWÓRZ
+            </button>
+
+        </div>
+
+        <div class="recipe">
+
+            <div>
+                ⬜ ⬜ → 🧱
+            </div>
+
+            <div>
+                2 × KAMIEŃ
+                <br>
+                = 1 × CEGŁA
+            </div>
+
+            <button id="craftBrick">
+                STWÓRZ
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- =========================
+     CANVAS
+========================= -->
 
 <canvas id="game"></canvas>
 
-<div id="ui">
+<!-- =========================
+     GAME UI
+========================= -->
 
-  <div id="gameTitle">
-    PIXEL WORLD
-  </div>
+<div id="gameUI">
 
-  <div id="health">
-    <div id="healthFill"></div>
-    <div id="healthText">100 / 100</div>
-  </div>
+    <div class="topBar">
 
-  <div id="help">
-    A/D lub ←/→ — ruch |
-    W/↑/SPACJA — skok |
-    LPM — kopanie |
-    PPM — stawianie |
-    E — crafting |
-    ESC — pauza
-  </div>
+        <div class="gameTitle">
+            PIXEL WORLD
+        </div>
 
-  <div id="topButtons">
+        <div class="health">
 
-    <button class="uiButton" id="saveButton">
-      💾 ZAPISZ
-    </button>
+            <div class="healthFill" id="healthFill"></div>
 
-    <button class="uiButton" id="newWorldButton">
-      ↻ NOWY ŚWIAT
-    </button>
+            <div class="healthText" id="healthText">
+                100 / 100
+            </div>
 
-    <button class="uiButton" id="settingsButton">
-      ⚙ USTAWIENIA
-    </button>
+        </div>
 
-  </div>
-
-  <!-- HOTBAR -->
-
-  <div id="hotbar">
-
-    <div class="slot selected" data-block="dirt">
-      <span class="slotNumber">1</span>
-      <div class="slotIcon"
-           style="background:#795548;border-top:7px solid #4caf50">
-      </div>
-      <span class="slotCount" id="count-dirt">20</span>
     </div>
 
-    <div class="slot" data-block="stone">
-      <span class="slotNumber">2</span>
-      <div class="slotIcon" style="background:#777"></div>
-      <span class="slotCount" id="count-stone">10</span>
+    <div class="actionButtons">
+
+        <button class="smallBtn pauseMini" id="pauseBtn">
+            ⏸
+        </button>
+
+        <button class="smallBtn" id="saveBtn">
+            💾
+        </button>
+
+        <button class="smallBtn" id="openCraft">
+            🔨
+        </button>
+
+        <button class="smallBtn" id="openGameSettings">
+            ⚙
+        </button>
+
     </div>
 
-    <div class="slot" data-block="wood">
-      <span class="slotNumber">3</span>
-      <div class="slotIcon" style="background:#754c24"></div>
-      <span class="slotCount" id="count-wood">10</span>
+    <div class="help">
+        A/D lub ←/→ ruch • W/↑/SPACJA skok • LPM kop • PPM postaw • E crafting • ESC pauza
     </div>
 
-    <div class="slot" data-block="sand">
-      <span class="slotNumber">4</span>
-      <div class="slotIcon" style="background:#d9bd70"></div>
-      <span class="slotCount" id="count-sand">10</span>
+    <div id="hotbar"></div>
+
+    <div class="mobileControls" id="mobileControls">
+
+        <div class="mobileGroup">
+
+            <button class="mobileBtn" id="leftBtn">
+                ◀
+            </button>
+
+            <button class="mobileBtn" id="rightBtn">
+                ▶
+            </button>
+
+        </div>
+
+        <div class="mobileGroup">
+
+            <button class="mobileBtn" id="jumpBtn">
+                ▲
+            </button>
+
+        </div>
+
     </div>
-
-    <div class="slot" data-block="glass">
-      <span class="slotNumber">5</span>
-      <div class="slotIcon"
-           style="background:#aee8ff;border:2px solid white">
-      </div>
-      <span class="slotCount" id="count-glass">0</span>
-    </div>
-
-    <div class="slot" data-block="brick">
-      <span class="slotNumber">6</span>
-      <div class="slotIcon" style="background:#a94d3e"></div>
-      <span class="slotCount" id="count-brick">0</span>
-    </div>
-
-  </div>
-
-  <div id="message"></div>
-
-  <!-- MOBILE -->
-
-  <div id="mobileControls">
-
-    <button class="mobileButton" id="leftButton">
-      ◀
-    </button>
-
-    <button class="mobileButton" id="rightButton">
-      ▶
-    </button>
-
-  </div>
-
-  <button class="mobileButton" id="jumpButton">
-    ▲
-  </button>
 
 </div>
 
-<!-- ================= PAUSE ================= -->
+<!-- =========================
+     PAUSE
+========================= -->
 
-<div id="pause">
+<div id="pauseOverlay">
 
-  <div class="pauseBox">
+    <div class="pauseBox">
 
-    <h2>⏸ PAUZA</h2>
+        <h2>⏸ GRA WSTRZYMANA</h2>
 
-    <button class="pauseButton" id="resumeButton">
-      ▶ WRÓĆ DO GRY
-    </button>
+        <div class="pauseActions">
 
-    <br>
+            <button class="menuBtn" id="resumeBtn">
+                ▶ WRÓĆ DO GRY
+            </button>
 
-    <button class="pauseButton" id="pauseSettings">
-      ⚙ USTAWIENIA
-    </button>
+            <button class="menuBtn" id="pauseCraftBtn">
+                🔨 CRAFTING
+            </button>
 
-    <br>
+            <button class="menuBtn" id="pauseSettingsBtn">
+                ⚙ USTAWIENIA
+            </button>
 
-    <button class="pauseButton" id="pauseMenu">
-      ⌂ MENU GŁÓWNE
-    </button>
+            <button class="menuBtn" id="backMenuBtn">
+                🏠 MENU
+            </button>
 
-  </div>
-
-</div>
-
-<!-- ================= CRAFTING ================= -->
-
-<div class="modal" id="craft">
-
-  <div class="modalBox">
-
-    <h2>🔨 CRAFTING</h2>
-
-    <p>
-      Twórz nowe bloki z zebranych materiałów.
-    </p>
-
-    <button class="modalButton craftButton" data-craft="glass">
-      🧊 SZKŁO — 2 PIASKU → 1 SZKŁO
-    </button>
-
-    <br><br>
-
-    <button class="modalButton craftButton" data-craft="brick">
-      🧱 CEGŁA — 2 KAMIENIE → 1 CEGŁA
-    </button>
-
-    <br><br>
-
-    <button class="modalButton" id="craftClose">
-      ZAMKNIJ
-    </button>
-
-  </div>
-
-</div>
-
-<!-- ================= SETTINGS ================= -->
-
-<div id="settings">
-
-  <div class="settingsBox">
-
-    <div class="settingsHeader">
-
-      <h2>
-        ⚙ USTAWIENIA PIXEL WORLD
-      </h2>
-
-      <button class="modalButton" id="closeSettings">
-        ✕
-      </button>
+        </div>
 
     </div>
 
-    <div class="settingsBody">
-
-      <div class="tabs">
-
-        <button class="tab active" data-page="gamePage">
-          🎮 Gra
-        </button>
-
-        <button class="tab" data-page="graphicsPage">
-          🎨 Grafika
-        </button>
-
-        <button class="tab" data-page="animationPage">
-          ✨ Animacje
-        </button>
-
-        <button class="tab" data-page="soundPage">
-          🔊 Dźwięk
-        </button>
-
-        <button class="tab" data-page="controlsPage">
-          ⌨ Sterowanie
-        </button>
-
-        <button class="tab" data-page="savePage">
-          💾 Zapis
-        </button>
-
-        <button class="tab" data-page="helpPage">
-          🆘 Pomoc
-        </button>
-
-        <button class="tab" data-page="infoPage">
-          ℹ Informacje
-        </button>
-
-      </div>
-
-      <div class="pages">
-
-        <!-- GAME -->
-
-        <div class="page active" id="gamePage">
-
-          <h3>🎮 Gra</h3>
-
-          <div class="option">
-            <div>
-              <b>Przyciski mobilne</b>
-              <small>Pokazuje sterowanie telefonu.</small>
-            </div>
-            <button class="switch" id="mobileSwitch"></button>
-          </div>
-
-          <div class="option">
-            <div>
-              <b>Automatyczny zapis</b>
-              <small>Zapisuje świat co 2 minuty.</small>
-            </div>
-            <button class="switch" id="autoSaveSwitch"></button>
-          </div>
-
-          <div class="option">
-            <div>
-              <b>Dzień / noc</b>
-              <small>Włącza cykl dnia i nocy.</small>
-            </div>
-            <button class="switch" id="dayNightSwitch"></button>
-          </div>
-
-          <div class="option">
-            <div>
-              <b>Cząsteczki</b>
-              <small>Kurz, kopanie i lądowanie.</small>
-            </div>
-            <button class="switch" id="particlesSwitch"></button>
-          </div>
-
-        </div>
-
-        <!-- GRAPHICS -->
-
-        <div class="page" id="graphicsPage">
-
-          <h3>🎨 Grafika</h3>
-
-          <div class="option">
-            <b>Jakość</b>
-
-            <select id="qualitySelect">
-              <option value="low">Niska</option>
-              <option value="medium">Średnia</option>
-              <option value="high">Wysoka</option>
-            </select>
-          </div>
-
-          <div class="option">
-            <b>Pixel Perfect</b>
-            <button class="switch" id="pixelSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Animowana woda</b>
-            <button class="switch" id="waterSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Limit FPS</b>
-
-            <select id="fpsSelect">
-              <option value="30">30 FPS</option>
-              <option value="60">60 FPS</option>
-              <option value="120">120 FPS</option>
-            </select>
-          </div>
-
-        </div>
-
-        <!-- ANIMATIONS -->
-
-        <div class="page" id="animationPage">
-
-          <h3>✨ Animacje</h3>
-
-          <div class="option">
-            <b>Wszystkie animacje</b>
-            <button class="switch" id="animationsSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Chodzenie</b>
-            <button class="switch" id="walkSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Idle</b>
-            <button class="switch" id="idleSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Mruganie</b>
-            <button class="switch" id="blinkSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Skok i lądowanie</b>
-            <button class="switch" id="jumpSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Włosy</b>
-            <button class="switch" id="hairSwitch"></button>
-          </div>
-
-          <div class="option">
-
-            <b>Szybkość animacji</b>
-
-            <select id="animSpeed">
-              <option value=".7">Wolna</option>
-              <option value="1">Normalna</option>
-              <option value="1.35">Szybka</option>
-            </select>
-
-          </div>
-
-        </div>
-
-        <!-- SOUND -->
-
-        <div class="page" id="soundPage">
-
-          <h3>🔊 Dźwięk</h3>
-
-          <div class="option">
-            <b>Efekty dźwiękowe</b>
-            <button class="switch" id="soundSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Muzyka</b>
-            <button class="switch" id="musicSwitch"></button>
-          </div>
-
-          <div class="option">
-            <b>Głośność</b>
-            <input
-              type="range"
-              id="volumeRange"
-              min="0"
-              max="1"
-              step=".05">
-          </div>
-
-        </div>
-
-        <!-- CONTROLS -->
-
-        <div class="page" id="controlsPage">
-
-          <h3>⌨ Sterowanie</h3>
-
-          <div class="info">
-
-            <b>💻 KOMPUTER</b>
-
-            <br><br>
-
-            A / D lub ← / → — ruch<br>
-            W / ↑ / SPACJA — skok<br>
-            LPM — kopanie<br>
-            PPM — stawianie<br>
-            1–6 — wybór bloku<br>
-            E — crafting<br>
-            ESC — pauza
-
-            <br><br>
-
-            <b>📱 TELEFON</b>
-
-            <br><br>
-
-            ◀ / ▶ — ruch<br>
-            ▲ — skok<br>
-            Dotknięcie — kopanie<br>
-            Przytrzymanie — stawianie
-
-          </div>
-
-        </div>
-
-        <!-- SAVE -->
-
-        <div class="page" id="savePage">
-
-          <h3>💾 Zapis</h3>
-
-          <div class="info">
-
-            Świat, ekwipunek, ustawienia i pozycja
-            są zapisywane lokalnie w przeglądarce.
-
-          </div>
-
-          <br>
-
-          <button class="settingButton" id="saveSettings">
-            💾 ZAPISZ TERAZ
-          </button>
-
-          <br><br>
-
-          <button class="settingButton" id="deleteSave">
-            🗑 USUŃ ZAPIS
-          </button>
-
-        </div>
-
-        <!-- HELP -->
-
-        <div class="page" id="helpPage">
-
-          <h3>🆘 Pomoc</h3>
-
-          <div class="info">
-
-            <b>KOPANIE</b><br>
-            Kliknij LPM na komputerze lub dotknij blok na telefonie.
-
-            <br><br>
-
-            <b>BUDOWANIE</b><br>
-            Wybierz blok i kliknij PPM.
-            Na telefonie przytrzymaj ekran.
-
-            <br><br>
-
-            <b>SKAKANIE</b><br>
-            Skok działa tylko po faktycznym naciśnięciu.
-            Przytrzymanie klawisza nie powoduje ciągłego skakania.
-
-            <br><br>
-
-            <b>CRAFTING</b><br>
-            Naciśnij E.
-
-          </div>
-
-        </div>
-
-        <!-- INFO -->
-
-        <div class="page" id="infoPage">
-
-          <h3>ℹ Informacje</h3>
-
-          <div class="info">
-
-            <b>PIXEL WORLD</b>
-
-            <br><br>
-
-            Complete Edition
-
-            <br><br>
-
-            ✔ Main Menu<br>
-            ✔ Shop / Account / Social<br>
-            ✔ Crafting<br>
-            ✔ Dzień / noc<br>
-            ✔ Jaskinie<br>
-            ✔ Woda<br>
-            ✔ Drzewa<br>
-            ✔ Animacje<br>
-            ✔ Dźwięki<br>
-            ✔ Zapis gry<br>
-            ✔ Sterowanie PC<br>
-            ✔ Sterowanie telefonem
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="settingsFooter">
-
-      <button class="settingButton" id="closeSettingsBottom">
-        ZAMKNIJ
-      </button>
-
-    </div>
-
-  </div>
-
 </div>
+
+<div id="message"></div>
 
 <script>
-"use strict";
-
 /* =========================================================
    PIXEL WORLD — COMPLETE EDITION
-   ========================================================= */
-
-const TILE = 32;
-const WORLD_W = 420;
-const WORLD_H = 90;
-
-const BLOCK = {
-  air:0,
-  grass:1,
-  dirt:2,
-  stone:3,
-  wood:4,
-  leaves:5,
-  sand:6,
-  water:7,
-  glass:8,
-  brick:9
-};
-
-const SAVE_KEY = "PIXEL_WORLD_COMPLETE_V3";
-
-const defaults = {
-  mobile:true,
-  autoSave:true,
-  dayNight:true,
-  particles:true,
-  quality:"medium",
-  pixelPerfect:true,
-  water:true,
-  fps:60,
-  sound:true,
-  music:false,
-  volume:.65,
-  animations:true,
-  walk:true,
-  idle:true,
-  blink:true,
-  jump:true,
-  hair:true,
-  animSpeed:1
-};
-
-let settings = {...defaults};
-
-let world = [];
-let heights = [];
-
-let inventory = {
-  dirt:20,
-  stone:10,
-  wood:10,
-  sand:10,
-  glass:0,
-  brick:0
-};
-
-let selectedBlock = "dirt";
-
-let particles = [];
-
-let gameStarted = false;
-let paused = true;
-
-let keys = {};
-
-let jumpRequested = false;
-
-let W = innerWidth;
-let H = innerHeight;
-
-let camera = {
-  x:0,
-  y:0
-};
-
-let lastTime = 0;
-let gameTime = 0;
-let dayTime = 0;
-
-let messageTimer = null;
+========================================================= */
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-const player = {
+let W = innerWidth;
+let H = innerHeight;
 
-  x:0,
-  y:0,
+canvas.width = W;
+canvas.height = H;
 
-  w:20,
-  h:40,
+/* =========================================================
+   DAY / NIGHT
+========================================================= */
 
-  vx:0,
-  vy:0,
+/*
+   Pełny cykl = 5 minut.
+   2,5 minuty dzień
+   2,5 minuty noc
+*/
 
-  speed:185,
-  jump:440,
+const DAY_LENGTH = 300000;
 
-  grounded:false,
+let dayTime = 0;
 
-  dir:1,
+function getNightAmount(){
 
-  anim:0,
+    if(!settings.dayNight) return 0;
 
-  mine:0,
+    const cycle = (dayTime % DAY_LENGTH) / DAY_LENGTH;
 
-  land:0,
+    const sun =
+        Math.sin(
+            cycle * Math.PI * 2 - Math.PI / 2
+        );
 
-  stepTimer:0,
+    return Math.max(
+        0,
+        Math.min(
+            1,
+            (1 - sun) / 2
+        )
+    );
+}
 
-  health:100,
-  maxHealth:100
+/* =========================================================
+   SETTINGS
+========================================================= */
 
+const settings = {
+
+    mobile:true,
+    autosave:true,
+    dayNight:true,
+    particles:true,
+
+    quality:"medium",
+    pixelPerfect:true,
+    water:true,
+    showFPS:false,
+
+    animations:true,
+    walking:true,
+    idle:true,
+    blink:true,
+    jumpAnim:true,
+    hair:true,
+    animationSpeed:1,
+
+    sound:true,
+    music:false,
+    volume:.5
 };
 
 /* =========================================================
-   RESIZE
-   ========================================================= */
+   WORLD
+========================================================= */
 
-function resize(){
+const TILE = 32;
 
-  W = innerWidth;
-  H = innerHeight;
+const WORLD_W = 420;
+const WORLD_H = 90;
 
-  canvas.width = W;
-  canvas.height = H;
+const BLOCK = {
 
-  ctx.imageSmoothingEnabled = !settings.pixelPerfect;
+    air:0,
+    grass:1,
+    dirt:2,
+    stone:3,
+    wood:4,
+    leaves:5,
+    sand:6,
+    water:7,
+    glass:8,
+    brick:9
+};
+
+const blockNames = [
+
+    "air",
+    "grass",
+    "dirt",
+    "stone",
+    "wood",
+    "leaves",
+    "sand",
+    "water",
+    "glass",
+    "brick"
+
+];
+
+let world = [];
+
+function createEmptyWorld(){
+
+    world = [];
+
+    for(let y=0;y<WORLD_H;y++){
+
+        world[y] = new Array(WORLD_W).fill(BLOCK.air);
+
+    }
 }
 
-addEventListener("resize",resize);
+function getBlock(x,y){
+
+    if(x<0 || y<0 || x>=WORLD_W || y>=WORLD_H)
+        return BLOCK.stone;
+
+    return world[y][x];
+}
+
+function setBlock(x,y,type){
+
+    if(x<0 || y<0 || x>=WORLD_W || y>=WORLD_H)
+        return;
+
+    world[y][x] = type;
+}
 
 /* =========================================================
-   WORLD
-   ========================================================= */
+   WORLD GENERATION
+========================================================= */
 
-function terrainHeight(x){
+function generateWorld(){
 
-  return Math.max(
-    17,
-    Math.min(
-      36,
-      Math.floor(
-        25 +
-        Math.sin(x*.13)*2.5 +
-        Math.sin(x*.037)*4 +
-        Math.sin(x*.011)*5
-      )
-    )
-  );
+    createEmptyWorld();
 
-}
+    for(let x=0;x<WORLD_W;x++){
 
-function createWorld(){
+        let height =
+            34 +
+            Math.sin(x*.055)*5 +
+            Math.sin(x*.017)*7 +
+            Math.sin(x*.11)*2;
 
-  world = Array.from(
-    {length:WORLD_H},
-    () => Array(WORLD_W).fill(BLOCK.air)
-  );
+        height = Math.floor(height);
 
-  heights = [];
+        for(let y=height;y<WORLD_H;y++){
 
-  for(let x=0;x<WORLD_W;x++){
+            if(y===height){
 
-    const h = terrainHeight(x);
+                setBlock(x,y,BLOCK.grass);
 
-    heights[x] = h;
+            }else if(y<height+5){
 
-    for(let y=h;y<WORLD_H;y++){
+                setBlock(x,y,BLOCK.dirt);
 
-      if(y===h){
-        world[y][x] = BLOCK.grass;
-      }
-      else if(y<h+5){
-        world[y][x] = BLOCK.dirt;
-      }
-      else{
-        world[y][x] = BLOCK.stone;
-      }
+            }else{
 
+                setBlock(x,y,BLOCK.stone);
+
+            }
+
+        }
     }
 
-  }
+    /* CAVES */
 
-  /* JASKINIE */
+    for(let x=4;x<WORLD_W-4;x++){
 
-  for(let x=4;x<WORLD_W-4;x++){
+        for(let y=40;y<WORLD_H-5;y++){
 
-    for(let y=heights[x]+7;y<WORLD_H-6;y++){
+            const cave =
+                Math.sin(x*.18+y*.12) +
+                Math.sin(x*.06-y*.16);
 
-      const n =
-        Math.sin(x*.17+y*.29) +
-        Math.sin(x*.07-y*.13);
+            if(cave>1.35){
 
-      if(n>1.35 && y<72){
-        world[y][x]=BLOCK.air;
-      }
+                setBlock(x,y,BLOCK.air);
 
-    }
-
-  }
-
-  /* DRZEWA */
-
-  for(
-    let x=12;
-    x<WORLD_W-10;
-    x+=8+Math.floor(Math.random()*8)
-  ){
-
-    if(Math.random()>.62) continue;
-
-    const ground=heights[x];
-
-    for(let y=1;y<=4;y++){
-
-      if(
-        ground-y>=0 &&
-        world[ground-y][x]===BLOCK.air
-      ){
-        world[ground-y][x]=BLOCK.wood;
-      }
-
-    }
-
-    const top=ground-5;
-
-    for(let yy=-2;yy<=2;yy++){
-
-      for(let xx=-2;xx<=2;xx++){
-
-        if(Math.abs(xx)+Math.abs(yy)<=3){
-
-          const tx=x+xx;
-          const ty=top+yy;
-
-          if(
-            tx>=0 &&
-            tx<WORLD_W &&
-            ty>=0 &&
-            ty<WORLD_H &&
-            world[ty][tx]===BLOCK.air
-          ){
-            world[ty][tx]=BLOCK.leaves;
-          }
+            }
 
         }
 
-      }
+    }
+
+    /* TREES */
+
+    for(let x=5;x<WORLD_W-5;x+=7+Math.floor(Math.random()*5)){
+
+        let ground=-1;
+
+        for(let y=0;y<WORLD_H;y++){
+
+            if(getBlock(x,y)===BLOCK.grass){
+
+                ground=y;
+                break;
+
+            }
+
+        }
+
+        if(ground>5 && Math.random()>.35){
+
+            const treeHeight =
+                4 + Math.floor(Math.random()*3);
+
+            for(let t=1;t<=treeHeight;t++){
+
+                if(ground-t>=0)
+                    setBlock(x,ground-t,BLOCK.wood);
+
+            }
+
+            const top = ground-treeHeight;
+
+            for(let yy=-2;yy<=2;yy++){
+
+                for(let xx=-2;xx<=2;xx++){
+
+                    if(
+                        Math.abs(xx)+Math.abs(yy)<=3 &&
+                        getBlock(x+xx,top+yy)===BLOCK.air
+                    ){
+
+                        setBlock(
+                            x+xx,
+                            top+yy,
+                            BLOCK.leaves
+                        );
+
+                    }
+
+                }
+
+            }
+
+        }
 
     }
 
-  }
+    /* PONDS */
 
-  /* MAŁE STAWY */
-
-  for(let p=0;p<3;p++){
-
-    const px=
-      30+
-      Math.floor(
-        Math.random()*(WORLD_W-60)
-      );
+    let ponds=0;
 
     for(
-      let x=px-2;
-      x<=px+2;
-      x++
+        let x=10;
+        x<WORLD_W-10 && ponds<3;
+        x+=Math.floor(15+Math.random()*25)
     ){
 
-      if(x<0 || x>=WORLD_W) continue;
+        if(Math.random()<.45){
 
-      const h=heights[x];
+            let ground=-1;
 
-      if(world[h][x]===BLOCK.grass){
-        world[h][x]=BLOCK.sand;
-      }
+            for(let y=0;y<50;y++){
 
-      if(h+1<WORLD_H){
-        world[h+1][x]=BLOCK.water;
-      }
+                if(getBlock(x,y)===BLOCK.grass){
+
+                    ground=y;
+                    break;
+
+                }
+
+            }
+
+            if(ground>2){
+
+                for(let xx=-3;xx<=3;xx++){
+
+                    for(let yy=0;yy<2;yy++){
+
+                        const bx=x+xx;
+                        const by=ground+yy;
+
+                        if(
+                            Math.abs(xx)<=3 &&
+                            getBlock(bx,by)!==BLOCK.stone
+                        ){
+
+                            setBlock(
+                                bx,
+                                by,
+                                BLOCK.water
+                            );
+
+                        }
+
+                    }
+
+                }
+
+                ponds++;
+
+            }
+
+        }
 
     }
-
-  }
 
 }
 
 /* =========================================================
-   COLLISION
-   ========================================================= */
-
-function solidAt(x,y){
-
-  if(
-    x<0 ||
-    x>=WORLD_W ||
-    y<0 ||
-    y>=WORLD_H
-  ){
-    return true;
-  }
-
-  const id=world[y][x];
-
-  return (
-    id!==BLOCK.air &&
-    id!==BLOCK.water &&
-    id!==BLOCK.leaves
-  );
-
-}
-
-function collision(x,y,w,h){
-
-  const left=Math.floor(x/TILE);
-  const right=Math.floor((x+w-1)/TILE);
-  const top=Math.floor(y/TILE);
-  const bottom=Math.floor((y+h-1)/TILE);
-
-  return (
-    solidAt(left,top) ||
-    solidAt(right,top) ||
-    solidAt(left,bottom) ||
-    solidAt(right,bottom)
-  );
-
-}
+   SPAWN
+========================================================= */
 
 function findSpawn(){
 
-  const x=12;
+    for(let x=10;x<WORLD_W-10;x++){
 
-  for(let y=0;y<WORLD_H-2;y++){
+        for(let y=5;y<WORLD_H-5;y++){
 
-    if(solidAt(x,y)){
+            if(
+                getBlock(x,y)===BLOCK.grass &&
+                getBlock(x,y-1)===BLOCK.air &&
+                getBlock(x,y-2)===BLOCK.air
+            ){
 
-      player.x=x*TILE;
-      player.y=y*TILE-player.h;
+                return {
+                    x:x*TILE+6,
+                    y:(y-2)*TILE
+                };
 
-      player.vx=0;
-      player.vy=0;
+            }
 
-      player.grounded=true;
-
-      return;
-
-    }
-
-  }
-
-  player.x=12*TILE;
-  player.y=10*TILE;
-
-}
-
-/* =========================================================
-   AUDIO
-   ========================================================= */
-
-let audio=null;
-
-function initAudio(){
-
-  if(!settings.sound) return;
-
-  try{
-
-    if(!audio){
-
-      audio=
-        new(
-          window.AudioContext ||
-          window.webkitAudioContext
-        )();
+        }
 
     }
 
-    if(audio.state==="suspended"){
-      audio.resume();
-    }
-
-  }
-  catch(e){}
-
-}
-
-function sound(type){
-
-  if(!settings.sound) return;
-
-  try{
-
-    initAudio();
-
-    if(!audio) return;
-
-    const osc=
-      audio.createOscillator();
-
-    const gain=
-      audio.createGain();
-
-    osc.connect(gain);
-    gain.connect(audio.destination);
-
-    const frequencies={
-      mine:150,
-      place:270,
-      jump:480,
-      land:100,
-      step:85,
-      craft:620
+    return {
+        x:20*TILE,
+        y:20*TILE
     };
-
-    const durations={
-      mine:.07,
-      place:.06,
-      jump:.1,
-      land:.08,
-      step:.025,
-      craft:.14
-    };
-
-    const frequency=
-      frequencies[type]||300;
-
-    const duration=
-      durations[type]||.06;
-
-    osc.type=
-      type==="step"
-      ? "triangle"
-      : "square";
-
-    osc.frequency.value=frequency;
-
-    gain.gain.setValueAtTime(
-      settings.volume*.04,
-      audio.currentTime
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      .001,
-      audio.currentTime+duration
-    );
-
-    osc.start();
-
-    osc.stop(
-      audio.currentTime+duration
-    );
-
-  }
-  catch(e){}
-
-}
-
-/* =========================================================
-   PARTICLES
-   ========================================================= */
-
-function spawnDust(x,y,count=4){
-
-  if(!settings.particles) return;
-
-  for(let i=0;i<count;i++){
-
-    particles.push({
-
-      x:x,
-      y:y,
-
-      vx:(Math.random()-.5)*90,
-
-      vy:-Math.random()*100,
-
-      life:.25+
-        Math.random()*.3,
-
-      max:.5
-
-    });
-
-  }
-
-}
-
-function updateParticles(dt){
-
-  for(
-    let i=particles.length-1;
-    i>=0;
-    i--
-  ){
-
-    const p=particles[i];
-
-    p.x+=p.vx*dt;
-
-    p.y+=p.vy*dt;
-
-    p.vy+=260*dt;
-
-    p.life-=dt;
-
-    if(p.life<=0){
-      particles.splice(i,1);
-    }
-
-  }
-
 }
 
 /* =========================================================
    PLAYER
-   ========================================================= */
+========================================================= */
 
-function updatePlayer(dt){
+const player = {
 
-  player.mine=
-    Math.max(
-      0,
-      player.mine-dt
-    );
+    x:0,
+    y:0,
 
-  player.land=
-    Math.max(
-      0,
-      player.land-dt
-    );
+    w:20,
+    h:40,
 
-  const left=
-    keys.KeyA ||
-    keys.ArrowLeft;
+    vx:0,
+    vy:0,
 
-  const right=
-    keys.KeyD ||
-    keys.ArrowRight;
+    speed:185,
+    jump:440,
 
-  if(left){
+    grounded:false,
 
-    player.vx=-player.speed;
-    player.dir=-1;
+    dir:1,
 
-  }
-  else if(right){
+    anim:0,
+    blinkTimer:0,
+    blink:false,
 
-    player.vx=player.speed;
-    player.dir=1;
+    mining:false,
+    mineTimer:0,
 
-  }
-  else{
+    landing:0
+};
 
-    player.vx *=
-      Math.pow(.06,dt);
+function resetPlayer(){
 
-  }
+    const spawn=findSpawn();
 
-  if(Math.abs(player.vx)<4){
-    player.vx=0;
-  }
-
-  /*
-    WAŻNE:
-    skok jest jednorazowym żądaniem.
-    Nie ma automatycznego skakania.
-  */
-
-  if(
-    jumpRequested &&
-    player.grounded
-  ){
-
-    player.vy=-player.jump;
-
-    player.grounded=false;
-
-    jumpRequested=false;
-
-    sound("jump");
-
-    spawnDust(
-      player.x+10,
-      player.y+40,
-      4
-    );
-
-  }
-
-  jumpRequested=false;
-
-  const moving=
-    Math.abs(player.vx)>10;
-
-  if(
-    moving &&
-    player.grounded &&
-    settings.animations &&
-    settings.walk
-  ){
-
-    player.anim+=
-      dt*10*settings.animSpeed;
-
-  }
-  else{
-
-    player.anim *=
-      Math.pow(.15,dt);
-
-  }
-
-  /* KROKI */
-
-  if(
-    moving &&
-    player.grounded
-  ){
-
-    player.stepTimer-=dt;
-
-    if(player.stepTimer<=0){
-
-      sound("step");
-
-      spawnDust(
-        player.x+10,
-        player.y+40,
-        1
-      );
-
-      player.stepTimer=
-        .18/settings.animSpeed;
-
-    }
-
-  }
-
-  player.vy +=
-    1250*dt;
-
-  player.vy=
-    Math.min(
-      player.vy,
-      650
-    );
-
-  /* RUCH X */
-
-  const nx=
-    player.x+
-    player.vx*dt;
-
-  if(
-    !collision(
-      nx,
-      player.y,
-      player.w,
-      player.h
-    )
-  ){
-
-    player.x=nx;
-
-  }
-  else{
+    player.x=spawn.x;
+    player.y=spawn.y;
 
     player.vx=0;
-
-  }
-
-  /* RUCH Y */
-
-  const ny=
-    player.y+
-    player.vy*dt;
-
-  if(
-    !collision(
-      player.x,
-      ny,
-      player.w,
-      player.h
-    )
-  ){
-
-    player.y=ny;
-
-    player.grounded=false;
-
-  }
-  else{
-
-    if(
-      player.vy>0 &&
-      !player.grounded
-    ){
-
-      player.land=.3;
-
-      sound("land");
-
-      spawnDust(
-        player.x+10,
-        player.y+40,
-        5
-      );
-
-    }
-
-    if(player.vy>0){
-
-      player.grounded=true;
-
-    }
-
     player.vy=0;
 
-  }
-
-  player.x=
-    Math.max(
-      0,
-      Math.min(
-        WORLD_W*TILE-player.w,
-        player.x
-      )
-    );
-
-  if(
-    player.y>
-    WORLD_H*TILE
-  ){
-
-    findSpawn();
-
-    player.health=player.maxHealth;
-
-  }
+    player.grounded=false;
+    player.dir=1;
+    player.anim=0;
+    player.mining=false;
+    player.mineTimer=0;
+    player.landing=0;
 
 }
 
 /* =========================================================
    CAMERA
-   ========================================================= */
+========================================================= */
 
-function updateCamera(dt){
+const camera = {
 
-  const targetX=
-    player.x+
-    player.w/2-
-    W/2;
+    x:0,
+    y:0
+};
 
-  const targetY=
-    player.y+
-    player.h/2-
-    H/2;
+function updateCamera(){
 
-  camera.x +=
-    (targetX-camera.x)*
-    Math.min(1,dt*7);
+    camera.x =
+        player.x +
+        player.w/2 -
+        W/2;
 
-  camera.y +=
-    (targetY-camera.y)*
-    Math.min(1,dt*7);
+    camera.y =
+        player.y +
+        player.h/2 -
+        H/2;
 
-  camera.x=
-    Math.max(
-      0,
-      Math.min(
-        Math.max(
-          0,
-          WORLD_W*TILE-W
-        ),
-        camera.x
-      )
+    camera.x=Math.max(
+        0,
+        Math.min(
+            WORLD_W*TILE-W,
+            camera.x
+        )
     );
 
-  camera.y=
-    Math.max(
-      0,
-      Math.min(
-        Math.max(
-          0,
-          WORLD_H*TILE-H
-        ),
-        camera.y
-      )
+    camera.y=Math.max(
+        0,
+        Math.min(
+            WORLD_H*TILE-H,
+            camera.y
+        )
     );
 
 }
 
 /* =========================================================
-   SKY
-   ========================================================= */
+   INPUT
+========================================================= */
 
-function drawSky(){
+const keys={};
 
-  let night=0;
+let jumpRequested=false;
 
-  if(settings.dayNight){
+let leftMobile=false;
+let rightMobile=false;
 
-    night=
-      Math.max(
-        0,
-        (
-          Math.sin(
-            dayTime*.00008*
-            Math.PI*2
-          )+1
-        )/2
-      );
+window.addEventListener("keydown",e=>{
 
-  }
+    if(
+        e.code==="ArrowLeft" ||
+        e.code==="ArrowRight" ||
+        e.code==="Space" ||
+        e.code==="ArrowUp"
+    ){
 
-  const gradient=
-    ctx.createLinearGradient(
-      0,0,
-      0,H
-    );
-
-  gradient.addColorStop(
-    0,
-    night>.6
-      ? "#08152e"
-      : "#69c9ff"
-  );
-
-  gradient.addColorStop(
-    .65,
-    night>.6
-      ? "#1d3d63"
-      : "#b9edff"
-  );
-
-  gradient.addColorStop(
-    1,
-    night>.6
-      ? "#203d39"
-      : "#8ad05e"
-  );
-
-  ctx.fillStyle=gradient;
-
-  ctx.fillRect(
-    0,0,W,H
-  );
-
-  if(night>.45){
-
-    ctx.fillStyle=
-      "rgba(255,255,255,.8)";
-
-    for(let i=0;i<55;i++){
-
-      const x=
-        (i*83)%W;
-
-      const y=
-        (i*47)%(H*.6);
-
-      ctx.fillRect(
-        x,y,
-        2,2
-      );
+        e.preventDefault();
 
     }
 
-  }
+    if(!e.repeat){
 
-}
+        if(
+            e.code==="Space" ||
+            e.code==="ArrowUp" ||
+            e.code==="KeyW"
+        ){
 
-/* =========================================================
-   WORLD DRAW
-   ========================================================= */
-
-function drawWorld(time){
-
-  const startX=
-    Math.max(
-      0,
-      Math.floor(camera.x/TILE)-2
-    );
-
-  const endX=
-    Math.min(
-      WORLD_W,
-      Math.ceil(
-        (camera.x+W)/TILE
-      )+2
-    );
-
-  const startY=
-    Math.max(
-      0,
-      Math.floor(camera.y/TILE)-2
-    );
-
-  const endY=
-    Math.min(
-      WORLD_H,
-      Math.ceil(
-        (camera.y+H)/TILE
-      )+2
-    );
-
-  for(
-    let y=startY;
-    y<endY;
-    y++
-  ){
-
-    for(
-      let x=startX;
-      x<endX;
-      x++
-    ){
-
-      const id=
-        world[y][x];
-
-      if(id===BLOCK.air) continue;
-
-      const px=
-        x*TILE-camera.x;
-
-      const py=
-        y*TILE-camera.y;
-
-      /* GRASS */
-
-      if(id===BLOCK.grass){
-
-        ctx.fillStyle="#795548";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-        ctx.fillStyle="#45a943";
-
-        ctx.fillRect(
-          px,py,
-          TILE,7
-        );
-
-      }
-
-      /* DIRT */
-
-      else if(id===BLOCK.dirt){
-
-        ctx.fillStyle="#795548";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-        ctx.fillStyle=
-          "rgba(50,25,15,.18)";
-
-        ctx.fillRect(
-          px+5,
-          py+8,
-          4,4
-        );
-
-      }
-
-      /* STONE */
-
-      else if(id===BLOCK.stone){
-
-        ctx.fillStyle="#777";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-        ctx.fillStyle="#5f5f5f";
-
-        ctx.fillRect(
-          px+5,
-          py+6,
-          5,5
-        );
-
-        ctx.fillRect(
-          px+19,
-          py+18,
-          4,4
-        );
-
-      }
-
-      /* WOOD */
-
-      else if(id===BLOCK.wood){
-
-        ctx.fillStyle="#754c24";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-        ctx.fillStyle="#a16a32";
-
-        ctx.fillRect(
-          px+7,
-          py,
-          4,TILE
-        );
-
-      }
-
-      /* LEAVES */
-
-      else if(id===BLOCK.leaves){
-
-        ctx.fillStyle="#319447";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-        ctx.fillStyle="#45b957";
-
-        ctx.fillRect(
-          px+5,
-          py+5,
-          7,7
-        );
-
-        ctx.fillRect(
-          px+18,
-          py+12,
-          6,6
-        );
-
-      }
-
-      /* SAND */
-
-      else if(id===BLOCK.sand){
-
-        ctx.fillStyle="#d9bd70";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-      }
-
-      /* WATER */
-
-      else if(id===BLOCK.water){
-
-        ctx.fillStyle=
-          "rgba(48,151,225,.72)";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-        if(settings.water){
-
-          ctx.fillStyle=
-            "rgba(255,255,255,.28)";
-
-          ctx.fillRect(
-            px,
-            py+
-              7+
-              Math.sin(
-                time*.003+
-                x*.7
-              )*2,
-            TILE,
-            3
-          );
+            jumpRequested=true;
 
         }
 
-      }
-
-      /* GLASS */
-
-      else if(id===BLOCK.glass){
-
-        ctx.fillStyle=
-          "rgba(174,232,255,.65)";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-        ctx.strokeStyle="#eaffff";
-
-        ctx.strokeRect(
-          px+3,
-          py+3,
-          TILE-6,
-          TILE-6
-        );
-
-      }
-
-      /* BRICK */
-
-      else if(id===BLOCK.brick){
-
-        ctx.fillStyle="#a94d3e";
-
-        ctx.fillRect(
-          px,py,
-          TILE,TILE
-        );
-
-        ctx.fillStyle="#6e352e";
-
-        ctx.fillRect(
-          px,
-          py+15,
-          TILE,
-          2
-        );
-
-        ctx.fillRect(
-          px+14,
-          py,
-          2,15
-        );
-
-        ctx.fillRect(
-          px+25,
-          py+17,
-          2,15
-        );
-
-      }
-
     }
-
-  }
-
-}
-
-/* =========================================================
-   PLAYER DRAW
-   ========================================================= */
-
-function drawPlayer(time){
-
-  const walking=
-    Math.abs(player.vx)>10 &&
-    player.grounded &&
-    settings.animations &&
-    settings.walk;
-
-  let bob=0;
-  let arm=0;
-  let leg=0;
-  let rotation=0;
-
-  if(walking){
-
-    const s=
-      Math.sin(player.anim);
-
-    bob=
-      Math.abs(s)*1.3;
-
-    arm=s*3.5;
-
-    leg=s*4.5;
-
-    rotation=
-      s*.025;
-
-  }
-  else if(
-    player.grounded &&
-    settings.animations &&
-    settings.idle
-  ){
-
-    bob=
-      Math.sin(
-        time*.002
-      )*.6;
-
-  }
-
-  if(
-    !player.grounded &&
-    settings.animations &&
-    settings.jump
-  ){
-
-    arm=
-      player.vy<0
-      ? -5
-      : 4;
-
-    leg=
-      player.vy<0
-      ? 3
-      : -3;
-
-  }
-
-  if(player.mine>0){
-
-    const m=
-      Math.sin(
-        (
-          .2-player.mine
-        )/.2*
-        Math.PI
-      );
-
-    arm=
-      -18*m;
-
-    rotation=
-      -.08*m*player.dir;
-
-  }
-
-  const cx=
-    Math.round(
-      player.x-
-      camera.x+
-      player.w/2
-    );
-
-  const base=
-    Math.round(
-      player.y-
-      camera.y+
-      bob
-    );
-
-  /* SHADOW */
-
-  if(player.grounded){
-
-    ctx.fillStyle=
-      "rgba(0,0,0,.22)";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-      cx,
-      player.y-
-        camera.y+
-        42,
-      11,
-      3,
-      0,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fill();
-
-  }
-
-  ctx.save();
-
-  ctx.translate(
-    cx,
-    base
-  );
-
-  ctx.scale(
-    player.dir,
-    1
-  );
-
-  ctx.rotate(rotation);
-
-  /* NOGI */
-
-  ctx.fillStyle="#4d3b78";
-
-  ctx.fillRect(
-    -4-leg*.12,
-    24,
-    12,
-    14
-  );
-
-  ctx.fillStyle="#25252b";
-
-  ctx.fillRect(
-    -5-leg*.12,
-    37,
-    14,
-    4
-  );
-
-  ctx.fillStyle="#4d3b78";
-
-  ctx.fillRect(
-    2+leg*.12,
-    24,
-    12,
-    14
-  );
-
-  ctx.fillStyle="#25252b";
-
-  ctx.fillRect(
-    1+leg*.12,
-    37,
-    14,
-    4
-  );
-
-  /* BODY */
-
-  ctx.fillStyle="#315aa0";
-
-  ctx.fillRect(
-    -9,
-    10,
-    18,
-    16
-  );
-
-  ctx.fillStyle="#3f73c9";
-
-  ctx.fillRect(
-    -7,
-    10,
-    14,
-    14
-  );
-
-  /* LEWA RĘKA */
-
-  ctx.save();
-
-  ctx.translate(
-    -4-arm*.18,
-    0
-  );
-
-  ctx.rotate(
-    arm*.018
-  );
-
-  ctx.fillStyle="#d49c78";
-
-  ctx.fillRect(
-    -4,
-    12,
-    4,
-    14
-  );
-
-  ctx.fillStyle="#f0bd91";
-
-  ctx.fillRect(
-    -4,
-    24,
-    4,
-    4
-  );
-
-  ctx.restore();
-
-  /* PRAWA RĘKA */
-
-  ctx.save();
-
-  ctx.translate(
-    4+arm*.18,
-    0
-  );
-
-  ctx.rotate(
-    -arm*.018
-  );
-
-  ctx.fillStyle="#f0bd91";
-
-  ctx.fillRect(
-    14,
-    12,
-    4,
-    14
-  );
-
-  ctx.fillRect(
-    14,
-    24,
-    4,
-    4
-  );
-
-  /* KILOF */
-
-  if(player.mine>0){
-
-    ctx.save();
-
-    ctx.translate(
-      17,
-      14
-    );
-
-    ctx.rotate(
-      -.8+
-      Math.sin(
-        player.mine*20
-      )*.35
-    );
-
-    ctx.fillStyle="#704728";
-
-    ctx.fillRect(
-      0,
-      0,
-      4,
-      20
-    );
-
-    ctx.fillStyle="#9ca3aa";
-
-    ctx.fillRect(
-      -8,
-      0,
-      20,
-      4
-    );
-
-    ctx.restore();
-
-  }
-
-  ctx.restore();
-
-  /* GŁOWA */
-
-  ctx.fillStyle="#f0bd91";
-
-  ctx.fillRect(
-    -4,
-    6,
-    8,
-    6
-  );
-
-  ctx.fillRect(
-    -10,
-    12,
-    4,
-    6
-  );
-
-  ctx.fillRect(
-    6,
-    12,
-    4,
-    6
-  );
-
-  /* WŁOSY */
-
-  ctx.fillStyle="#542f20";
-
-  ctx.fillRect(
-    -6,
-    0,
-    12,
-    5
-  );
-
-  if(settings.hair){
-
-    ctx.fillRect(
-      -8,
-      2,
-      4,
-      5
-    );
-
-    ctx.fillRect(
-      4,
-      2,
-      5,
-      5
-    );
-
-  }
-
-  /* TWARZ */
-
-  ctx.fillStyle="#f0bd91";
-
-  ctx.fillRect(
-    -6,
-    4,
-    12,
-    10
-  );
-
-  /* OCZY */
-
-  ctx.fillStyle="#111";
-
-  const blink=
-    settings.animations &&
-    settings.blink &&
-    Math.floor(time/100)%83===0;
-
-  if(blink){
-
-    ctx.fillRect(
-      -4,
-      9,
-      3,
-      1
-    );
-
-    ctx.fillRect(
-      2,
-      9,
-      3,
-      1
-    );
-
-  }
-  else{
-
-    ctx.fillRect(
-      -4,
-      8,
-      2,
-      2
-    );
-
-    ctx.fillRect(
-      2,
-      8,
-      2,
-      2
-    );
-
-  }
-
-  /* NOS */
-
-  ctx.fillStyle="#d89f7a";
-
-  ctx.fillRect(
-    0,
-    10,
-    2,
-    2
-  );
-
-  /* USTA */
-
-  ctx.fillStyle="#bd765f";
-
-  ctx.fillRect(
-    -2,
-    12,
-    6,
-    2
-  );
-
-  ctx.restore();
-
-}
-
-/* =========================================================
-   PARTICLES DRAW
-   ========================================================= */
-
-function drawParticles(){
-
-  for(const p of particles){
-
-    ctx.fillStyle=
-      "rgba(210,190,150,.8)";
-
-    ctx.fillRect(
-      Math.round(
-        p.x-camera.x
-      ),
-      Math.round(
-        p.y-camera.y
-      ),
-      3,
-      3
-    );
-
-  }
-
-}
-
-/* =========================================================
-   RENDER
-   ========================================================= */
-
-function render(time){
-
-  ctx.clearRect(
-    0,
-    0,
-    W,
-    H
-  );
-
-  drawSky();
-
-  drawWorld(time);
-
-  drawParticles();
-
-  drawPlayer(time);
-
-  if(settings.dayNight){
-
-    const night=
-      Math.max(
-        0,
-        (
-          Math.sin(
-            dayTime*.00008*
-            Math.PI*2
-          )+1
-        )/2
-      );
-
-    if(night>.35){
-
-      ctx.fillStyle=
-        `rgba(5,10,30,${(night-.35)*.48})`;
-
-      ctx.fillRect(
-        0,0,W,H
-      );
-
-    }
-
-  }
-
-  updateHealth();
-
-}
-
-/* =========================================================
-   MINING / PLACING
-   ========================================================= */
-
-function screenToBlock(x,y){
-
-  return {
-
-    x:Math.floor(
-      (x+camera.x)/TILE
-    ),
-
-    y:Math.floor(
-      (y+camera.y)/TILE
-    )
-
-  };
-
-}
-
-function reachable(x,y){
-
-  const px=
-    player.x+
-    player.w/2;
-
-  const py=
-    player.y+
-    player.h/2;
-
-  const bx=
-    x*TILE+
-    TILE/2;
-
-  const by=
-    y*TILE+
-    TILE/2;
-
-  return Math.hypot(
-    bx-px,
-    by-py
-  )<=TILE*5.2;
-
-}
-
-function mine(clientX,clientY){
-
-  const p=
-    screenToBlock(
-      clientX,
-      clientY
-    );
-
-  if(
-    p.x<0 ||
-    p.x>=WORLD_W ||
-    p.y<0 ||
-    p.y>=WORLD_H
-  ) return;
-
-  if(!reachable(p.x,p.y)){
-
-    showMessage(
-      "Za daleko!"
-    );
-
-    return;
-
-  }
-
-  const id=
-    world[p.y][p.x];
-
-  if(
-    id===BLOCK.air ||
-    id===BLOCK.water
-  ) return;
-
-  const names={
-    1:"dirt",
-    2:"dirt",
-    3:"stone",
-    4:"wood",
-    5:null,
-    6:"sand",
-    8:"glass",
-    9:"brick"
-  };
-
-  const item=
-    names[id];
-
-  if(item){
-
-    inventory[item]++;
-
-  }
-
-  world[p.y][p.x]=
-    BLOCK.air;
-
-  player.mine=.2;
-
-  sound("mine");
-
-  spawnDust(
-    p.x*TILE+16,
-    p.y*TILE+16,
-    6
-  );
-
-  updateInventory();
-
-}
-
-function place(clientX,clientY){
-
-  const p=
-    screenToBlock(
-      clientX,
-      clientY
-    );
-
-  if(
-    p.x<0 ||
-    p.x>=WORLD_W ||
-    p.y<0 ||
-    p.y>=WORLD_H
-  ) return;
-
-  if(
-    !reachable(
-      p.x,
-      p.y
-    )
-  ) return;
-
-  if(
-    world[p.y][p.x]!==BLOCK.air
-  ) return;
-
-  if(
-    inventory[selectedBlock]<=0
-  ){
-
-    showMessage(
-      "Brak bloku!"
-    );
-
-    return;
-
-  }
-
-  const bx=
-    p.x*TILE+
-    TILE/2;
-
-  const by=
-    p.y*TILE+
-    TILE/2;
-
-  const px=
-    player.x+
-    player.w/2;
-
-  const py=
-    player.y+
-    player.h/2;
-
-  /* nie można postawić w graczu */
-
-  if(
-    Math.abs(bx-px)<TILE &&
-    Math.abs(by-py)<TILE
-  ) return;
-
-  world[p.y][p.x]=
-    BLOCK[selectedBlock];
-
-  inventory[selectedBlock]--;
-
-  sound("place");
-
-  spawnDust(
-    bx,
-    by,
-    3
-  );
-
-  updateInventory();
-
-}
-
-/* =========================================================
-   MOUSE / TOUCH
-   ========================================================= */
-
-canvas.addEventListener(
-  "mousedown",
-  e=>{
-
-    if(paused) return;
-
-    initAudio();
-
-    if(e.button===0){
-
-      mine(
-        e.clientX,
-        e.clientY
-      );
-
-    }
-
-    if(e.button===2){
-
-      place(
-        e.clientX,
-        e.clientY
-      );
-
-    }
-
-  }
-);
-
-canvas.addEventListener(
-  "contextmenu",
-  e=>e.preventDefault()
-);
-
-let touchData=null;
-let touchTimer=null;
-
-canvas.addEventListener(
-  "touchstart",
-  e=>{
-
-    if(
-      paused ||
-      !e.touches[0]
-    ) return;
-
-    e.preventDefault();
-
-    const t=e.touches[0];
-
-    touchData={
-      x:t.clientX,
-      y:t.clientY,
-      time:performance.now()
-    };
-
-    touchTimer=
-      setTimeout(
-        ()=>{
-
-          if(touchData){
-
-            place(
-              touchData.x,
-              touchData.y
-            );
-
-          }
-
-        },
-        400
-      );
-
-  },
-  {passive:false}
-);
-
-canvas.addEventListener(
-  "touchend",
-  e=>{
-
-    e.preventDefault();
-
-    if(!touchData) return;
-
-    clearTimeout(
-      touchTimer
-    );
-
-    if(
-      performance.now()-
-      touchData.time<400
-    ){
-
-      mine(
-        touchData.x,
-        touchData.y
-      );
-
-    }
-
-    touchData=null;
-
-  },
-  {passive:false}
-);
-
-/* =========================================================
-   MOBILE BUTTONS
-   ========================================================= */
-
-function holdButton(
-  id,
-  key
-){
-
-  const el=
-    document.getElementById(id);
-
-  function down(e){
-
-    e.preventDefault();
-
-    keys[key]=true;
-
-  }
-
-  function up(e){
-
-    e.preventDefault();
-
-    keys[key]=false;
-
-  }
-
-  el.addEventListener(
-    "pointerdown",
-    down,
-    {passive:false}
-  );
-
-  el.addEventListener(
-    "pointerup",
-    up,
-    {passive:false}
-  );
-
-  el.addEventListener(
-    "pointercancel",
-    up,
-    {passive:false}
-  );
-
-  el.addEventListener(
-    "pointerleave",
-    up,
-    {passive:false}
-  );
-
-}
-
-holdButton(
-  "leftButton",
-  "ArrowLeft"
-);
-
-holdButton(
-  "rightButton",
-  "ArrowRight"
-);
-
-document
-  .getElementById("jumpButton")
-  .addEventListener(
-    "pointerdown",
-    e=>{
-
-      e.preventDefault();
-
-      initAudio();
-
-      /*
-        tylko jedno żądanie skoku
-      */
-
-      jumpRequested=true;
-
-    },
-    {passive:false}
-  );
-
-/* =========================================================
-   KEYBOARD
-   ========================================================= */
-
-addEventListener(
-  "keydown",
-  e=>{
 
     keys[e.code]=true;
 
-    if([
-      "Space",
-      "ArrowUp",
-      "ArrowDown",
-      "ArrowLeft",
-      "ArrowRight"
-    ].includes(e.code)){
-
-      e.preventDefault();
-
-    }
-
-    if(
-      (
-        e.code==="Space" ||
-        e.code==="ArrowUp" ||
-        e.code==="KeyW"
-      ) &&
-      !e.repeat
-    ){
-
-      jumpRequested=true;
-
-    }
-
-    const blocks={
-
-      Digit1:"dirt",
-      Digit2:"stone",
-      Digit3:"wood",
-      Digit4:"sand",
-      Digit5:"glass",
-      Digit6:"brick"
-
-    };
-
-    if(blocks[e.code]){
-
-      selectBlock(
-        blocks[e.code]
-      );
-
-    }
-
-    if(
-      e.code==="KeyE" &&
-      !e.repeat &&
-      gameStarted &&
-      !paused
-    ){
-
-      openCraft();
-
-    }
-
-    if(
-      e.code==="Escape" &&
-      !e.repeat
-    ){
-
-      if(
-        document.getElementById(
-          "settings"
-        ).style.display==="flex"
-      ){
-
-        closeSettings();
-
-      }
-      else if(
-        document.getElementById(
-          "craft"
-        ).style.display==="flex"
-      ){
-
-        closeCraft();
-
-      }
-      else{
+    if(e.code==="Escape"){
 
         togglePause();
 
-      }
+    }
+
+    if(e.code==="KeyE"){
+
+        if(!gamePaused)
+            openCrafting();
 
     }
 
-  }
-);
+    if(e.code>="Digit1" && e.code<="Digit6"){
 
-addEventListener(
-  "keyup",
-  e=>{
+        const n =
+            Number(e.code.substring(5))-1;
+
+        if(n>=0 && n<6){
+
+            selected=n;
+            updateHotbar();
+
+        }
+
+    }
+
+});
+
+window.addEventListener("keyup",e=>{
+
     keys[e.code]=false;
-  }
+
+});
+
+/* =========================================================
+   MOBILE INPUT
+========================================================= */
+
+function setupHoldButton(id,down,up){
+
+    const el=document.getElementById(id);
+
+    el.addEventListener("pointerdown",e=>{
+
+        e.preventDefault();
+        down();
+
+    });
+
+    ["pointerup","pointercancel","pointerleave"].forEach(type=>{
+
+        el.addEventListener(type,e=>{
+
+            e.preventDefault();
+            up();
+
+        });
+
+    });
+
+}
+
+setupHoldButton(
+    "leftBtn",
+    ()=>leftMobile=true,
+    ()=>leftMobile=false
 );
 
-/* =========================================================
-   INVENTORY
-   ========================================================= */
+setupHoldButton(
+    "rightBtn",
+    ()=>rightMobile=true,
+    ()=>rightMobile=false
+);
 
-function selectBlock(block){
+document.getElementById("jumpBtn")
+.addEventListener("pointerdown",e=>{
 
-  if(
-    inventory[block]===undefined
-  ) return;
+    e.preventDefault();
 
-  selectedBlock=block;
+    jumpRequested=true;
 
-  document
-    .querySelectorAll(".slot")
-    .forEach(
-      slot=>{
-        slot.classList.toggle(
-          "selected",
-          slot.dataset.block===block
-        );
-      }
-    );
-
-}
-
-document
-  .querySelectorAll(".slot")
-  .forEach(
-    slot=>{
-
-      slot.onclick=()=>{
-
-        selectBlock(
-          slot.dataset.block
-        );
-
-      };
-
-    }
-  );
-
-function updateInventory(){
-
-  for(
-    const block of
-    Object.keys(inventory)
-  ){
-
-    const element=
-      document.getElementById(
-        "count-"+block
-      );
-
-    if(element){
-
-      element.textContent=
-        inventory[block];
-
-    }
-
-  }
-
-}
+});
 
 /* =========================================================
-   HEALTH
-   ========================================================= */
+   MOVEMENT
+========================================================= */
 
-function updateHealth(){
+function isSolid(type){
 
-  const percent=
-    Math.max(
-      0,
-      Math.min(
-        100,
-        player.health/
-        player.maxHealth*
-        100
-      )
-    );
-
-  document
-    .getElementById(
-      "healthFill"
-    )
-    .style.width=
-      percent+"%";
-
-  document
-    .getElementById(
-      "healthText"
-    )
-    .textContent=
-      Math.ceil(player.health)+
-      " / "+
-      player.maxHealth;
-
-}
-
-/* =========================================================
-   MESSAGE
-   ========================================================= */
-
-function showMessage(text){
-
-  const element=
-    document.getElementById(
-      "message"
-    );
-
-  element.textContent=text;
-
-  element.style.opacity="1";
-
-  clearTimeout(
-    messageTimer
-  );
-
-  messageTimer=
-    setTimeout(
-      ()=>{
-        element.style.opacity="0";
-      },
-      1600
+    return (
+        type!==BLOCK.air &&
+        type!==BLOCK.water &&
+        type!==BLOCK.leaves
     );
 
 }
 
-/* =========================================================
-   SAVE
-   ========================================================= */
+function rectCollides(x,y,w,h){
 
-function saveGame(){
+    const left=Math.floor(x/TILE);
+    const right=Math.floor((x+w-1)/TILE);
 
-  try{
+    const top=Math.floor(y/TILE);
+    const bottom=Math.floor((y+h-1)/TILE);
 
-    localStorage.setItem(
-      SAVE_KEY,
-      JSON.stringify({
+    for(let yy=top;yy<=bottom;yy++){
 
-        version:3,
+        for(let xx=left;xx<=right;xx++){
 
-        world:world,
+            if(isSolid(getBlock(xx,yy)))
+                return true;
 
-        player:{
-          x:player.x,
-          y:player.y,
-          health:player.health
-        },
-
-        inventory:inventory,
-
-        selectedBlock:selectedBlock,
-
-        settings:settings
-
-      })
-    );
-
-    showMessage(
-      "Gra została zapisana!"
-    );
-
-  }
-  catch(e){
-
-    showMessage(
-      "Nie udało się zapisać."
-    );
-
-  }
-
-}
-
-function loadGame(){
-
-  try{
-
-    const raw=
-      localStorage.getItem(
-        SAVE_KEY
-      );
-
-    if(!raw) return false;
-
-    const data=
-      JSON.parse(raw);
-
-    if(
-      !data ||
-      !Array.isArray(data.world) ||
-      data.world.length!==WORLD_H
-    ){
-
-      return false;
+        }
 
     }
-
-    world=data.world;
-
-    if(
-      data.player
-    ){
-
-      player.x=
-        Number(data.player.x)||0;
-
-      player.y=
-        Number(data.player.y)||0;
-
-      player.health=
-        Number(data.player.health)||100;
-
-    }
-
-    if(data.inventory){
-
-      for(
-        const block of
-        Object.keys(inventory)
-      ){
-
-        inventory[block]=
-          Math.max(
-            0,
-            Math.floor(
-              Number(
-                data.inventory[block]
-              )||0
-            )
-          );
-
-      }
-
-    }
-
-    if(
-      data.selectedBlock &&
-      inventory[
-        data.selectedBlock
-      ]!==undefined
-    ){
-
-      selectedBlock=
-        data.selectedBlock;
-
-    }
-
-    if(data.settings){
-
-      settings={
-        ...defaults,
-        ...data.settings
-      };
-
-    }
-
-    return true;
-
-  }
-  catch(e){
 
     return false;
 
-  }
+}
+
+function movePlayer(dx,dy){
+
+    if(dx!==0){
+
+        let nx=player.x+dx;
+
+        if(!rectCollides(
+            nx,
+            player.y,
+            player.w,
+            player.h
+        )){
+
+            player.x=nx;
+
+        }else{
+
+            const sign=Math.sign(dx);
+
+            while(
+                Math.abs(dx)>0.5 &&
+                !rectCollides(
+                    player.x+sign,
+                    player.y,
+                    player.w,
+                    player.h
+                )
+            ){
+
+                player.x+=sign;
+                dx-=sign;
+
+            }
+
+            player.vx=0;
+
+        }
+
+    }
+
+    if(dy!==0){
+
+        let ny=player.y+dy;
+
+        if(!rectCollides(
+            player.x,
+            ny,
+            player.w,
+            player.h
+        )){
+
+            player.y=ny;
+            player.grounded=false;
+
+        }else{
+
+            if(dy>0){
+
+                player.grounded=true;
+                player.landing=.15;
+
+            }
+
+            player.vy=0;
+
+        }
+
+    }
 
 }
 
-function saveSettingsOnly(){
+function updatePlayer(dt){
 
-  try{
+    const left =
+        keys["KeyA"] ||
+        keys["ArrowLeft"] ||
+        leftMobile;
 
-    const old=
-      JSON.parse(
-        localStorage.getItem(
-          SAVE_KEY
-        )||"{}"
-      );
+    const right =
+        keys["KeyD"] ||
+        keys["ArrowRight"] ||
+        rightMobile;
 
-    old.settings=settings;
+    let dir=0;
 
-    localStorage.setItem(
-      SAVE_KEY,
-      JSON.stringify(old)
+    if(left) dir--;
+
+    if(right) dir++;
+
+    if(dir!==0){
+
+        player.vx +=
+            (dir*player.speed-player.vx)
+            *Math.min(1,dt*12);
+
+        player.dir=dir;
+
+    }else{
+
+        player.vx *= Math.pow(.0001,dt);
+
+    }
+
+    /* JUMP — tylko po jednorazowym żądaniu */
+
+    if(
+        jumpRequested &&
+        player.grounded
+    ){
+
+        player.vy=-player.jump;
+        player.grounded=false;
+
+        playSound("jump");
+
+    }
+
+    /* WAŻNE:
+       kasujemy żądanie po każdym ticku,
+       żeby postać nie skakała sama.
+    */
+
+    jumpRequested=false;
+
+    player.vy += 1150*dt;
+
+    movePlayer(
+        player.vx*dt,
+        player.vy*dt
     );
 
-  }
-  catch(e){}
+    if(Math.abs(player.vx)>20 && player.grounded){
+
+        player.anim +=
+            dt*8*settings.animationSpeed;
+
+    }
+
+    if(player.landing>0){
+
+        player.landing-=dt;
+
+    }
+
+    /* zapobiega wypadnięciu poza świat */
+
+    if(player.y>WORLD_H*TILE){
+
+        const spawn=findSpawn();
+
+        player.x=spawn.x;
+        player.y=spawn.y;
+
+        player.vx=0;
+        player.vy=0;
+
+    }
 
 }
 
 /* =========================================================
-   NEW WORLD
-   ========================================================= */
+   INVENTORY
+========================================================= */
 
-function newWorld(){
+let inventory={
 
-  if(
-    !confirm(
-      "Czy na pewno stworzyć nowy świat?"
-    )
-  ) return;
-
-  createWorld();
-
-  findSpawn();
-
-  inventory={
     dirt:20,
     stone:10,
     wood:10,
     sand:10,
     glass:0,
     brick:0
-  };
 
-  selectedBlock="dirt";
+};
 
-  updateInventory();
+let selected=0;
 
-  selectBlock(
-    "dirt"
-  );
+const hotbarBlocks=[
 
-  saveGame();
+    BLOCK.dirt,
+    BLOCK.stone,
+    BLOCK.wood,
+    BLOCK.sand,
+    BLOCK.glass,
+    BLOCK.brick
 
-  showMessage(
-    "Utworzono nowy świat!"
-  );
+];
 
-}
+const inventoryKeys=[
 
-document
-  .getElementById(
-    "saveButton"
-  )
-  .onclick=saveGame;
+    "dirt",
+    "stone",
+    "wood",
+    "sand",
+    "glass",
+    "brick"
 
-document
-  .getElementById(
-    "newWorldButton"
-  )
-  .onclick=newWorld;
+];
 
-/* =========================================================
-   CRAFTING
-   ========================================================= */
+function updateHotbar(){
 
-function openCraft(){
+    const hotbar=document.getElementById("hotbar");
 
-  if(paused) return;
+    hotbar.innerHTML="";
 
-  paused=true;
+    for(let i=0;i<6;i++){
 
-  document
-    .getElementById(
-      "craft"
-    )
-    .style.display="flex";
+        const slot=document.createElement("div");
 
-}
+        slot.className=
+            "slot"+
+            (i===selected?" selected":"");
 
-function closeCraft(){
+        slot.innerHTML=`
 
-  document
-    .getElementById(
-      "craft"
-    )
-    .style.display="none";
+            <div
+                class="slotIcon"
+                style="
+                    background:${blockColor(hotbarBlocks[i])};
+                    border:2px solid rgba(0,0,0,.4);
+                "
+            ></div>
 
-  paused=false;
+            <div class="slotCount">
+                ${inventory[inventoryKeys[i]]}
+            </div>
 
-}
+        `;
 
-document
-  .getElementById(
-    "craftClose"
-  )
-  .onclick=closeCraft;
+        slot.addEventListener("pointerdown",()=>{
 
-document
-  .querySelectorAll(
-    ".craftButton"
-  )
-  .forEach(
-    button=>{
+            selected=i;
+            updateHotbar();
 
-      button.onclick=()=>{
+        });
 
-        const type=
-          button.dataset.craft;
-
-        if(
-          type==="glass" &&
-          inventory.sand>=2
-        ){
-
-          inventory.sand-=2;
-          inventory.glass++;
-
-          sound("craft");
-
-          showMessage(
-            "Stworzono szkło!"
-          );
-
-        }
-        else if(
-          type==="brick" &&
-          inventory.stone>=2
-        ){
-
-          inventory.stone-=2;
-          inventory.brick++;
-
-          sound("craft");
-
-          showMessage(
-            "Stworzono cegłę!"
-          );
-
-        }
-        else{
-
-          showMessage(
-            "Brak materiałów!"
-          );
-
-        }
-
-        updateInventory();
-
-      };
+        hotbar.appendChild(slot);
 
     }
-  );
+
+}
 
 /* =========================================================
-   PAUSE
-   ========================================================= */
+   BLOCK COLORS
+========================================================= */
+
+function blockColor(type){
+
+    switch(type){
+
+        case BLOCK.grass:
+            return "#55a83e";
+
+        case BLOCK.dirt:
+            return "#85502c";
+
+        case BLOCK.stone:
+            return "#7d858a";
+
+        case BLOCK.wood:
+            return "#754421";
+
+        case BLOCK.leaves:
+            return "#3f9137";
+
+        case BLOCK.sand:
+            return "#d8c276";
+
+        case BLOCK.water:
+            return "#329bd1";
+
+        case BLOCK.glass:
+            return "rgba(130,220,255,.65)";
+
+        case BLOCK.brick:
+            return "#a64d3b";
+
+        default:
+            return "transparent";
+
+    }
+
+}
+
+/* =========================================================
+   MINING / PLACING
+========================================================= */
+
+let mouseX=0;
+let mouseY=0;
+
+let miningMouse=false;
+let placingMouse=false;
+
+function screenToWorld(){
+
+    return {
+
+        x:
+            mouseX+
+            camera.x,
+
+        y:
+            mouseY+
+            camera.y
+
+    };
+
+}
+
+function distanceToPlayer(wx,wy){
+
+    const px=
+        player.x+
+        player.w/2;
+
+    const py=
+        player.y+
+        player.h/2;
+
+    return Math.hypot(
+        wx-px,
+        wy-py
+    )/TILE;
+
+}
+
+function mineBlock(){
+
+    const p=screenToWorld();
+
+    const bx=Math.floor(p.x/TILE);
+    const by=Math.floor(p.y/TILE);
+
+    const type=getBlock(bx,by);
+
+    if(type===BLOCK.air)
+        return;
+
+    if(
+        distanceToPlayer(
+            bx*TILE+TILE/2,
+            by*TILE+TILE/2
+        )>5.2
+    ){
+
+        showMessage("Za daleko!");
+
+        return;
+
+    }
+
+    let item=null;
+
+    if(
+        type===BLOCK.grass ||
+        type===BLOCK.dirt
+    ){
+
+        item="dirt";
+
+    }else if(type===BLOCK.stone){
+
+        item="stone";
+
+    }else if(type===BLOCK.wood){
+
+        item="wood";
+
+    }else if(type===BLOCK.sand){
+
+        item="sand";
+
+    }else if(type===BLOCK.glass){
+
+        item="glass";
+
+    }else if(type===BLOCK.brick){
+
+        item="brick";
+
+    }
+
+    setBlock(bx,by,BLOCK.air);
+
+    if(item){
+
+        inventory[item]++;
+
+    }
+
+    player.mining=true;
+    player.mineTimer=.18;
+
+    playSound("mine");
+
+    if(settings.particles){
+
+        for(let i=0;i<7;i++){
+
+            particles.push({
+
+                x:bx*TILE+TILE/2,
+                y:by*TILE+TILE/2,
+
+                vx:(Math.random()-.5)*90,
+                vy:-Math.random()*100,
+
+                life:.5,
+                max:.5,
+
+                type:"dust",
+                color:blockColor(type)
+
+            });
+
+        }
+
+    }
+
+    updateHotbar();
+
+}
+
+function placeBlock(){
+
+    const p=screenToWorld();
+
+    const bx=Math.floor(p.x/TILE);
+    const by=Math.floor(p.y/TILE);
+
+    if(getBlock(bx,by)!==BLOCK.air)
+        return;
+
+    if(
+        distanceToPlayer(
+            bx*TILE+TILE/2,
+            by*TILE+TILE/2
+        )>5.2
+    ){
+
+        showMessage("Za daleko!");
+        return;
+
+    }
+
+    const item=inventoryKeys[selected];
+
+    if(inventory[item]<=0){
+
+        showMessage("Brak tego bloku!");
+        return;
+
+    }
+
+    const nx=bx*TILE;
+    const ny=by*TILE;
+
+    if(
+        nx<player.x+player.w &&
+        nx+TILE>player.x &&
+        ny<player.y+player.h &&
+        ny+TILE>player.y
+    ){
+
+        return;
+
+    }
+
+    setBlock(
+        bx,
+        by,
+        hotbarBlocks[selected]
+    );
+
+    inventory[item]--;
+
+    playSound("place");
+
+    updateHotbar();
+
+}
+
+/* =========================================================
+   MOUSE
+========================================================= */
+
+canvas.addEventListener("pointermove",e=>{
+
+    mouseX=e.clientX;
+    mouseY=e.clientY;
+
+});
+
+canvas.addEventListener("pointerdown",e=>{
+
+    mouseX=e.clientX;
+    mouseY=e.clientY;
+
+    if(e.button===0){
+
+        miningMouse=true;
+        mineBlock();
+
+    }
+
+    if(e.button===2){
+
+        placingMouse=true;
+        placeBlock();
+
+    }
+
+});
+
+window.addEventListener("pointerup",e=>{
+
+    if(e.button===0)
+        miningMouse=false;
+
+    if(e.button===2)
+        placingMouse=false;
+
+});
+
+canvas.addEventListener("contextmenu",e=>{
+
+    e.preventDefault();
+
+});
+
+/* =========================================================
+   TOUCH
+========================================================= */
+
+let touchTimer=null;
+
+canvas.addEventListener("touchstart",e=>{
+
+    if(e.touches.length!==1)
+        return;
+
+    const t=e.touches[0];
+
+    mouseX=t.clientX;
+    mouseY=t.clientY;
+
+    touchTimer=setTimeout(()=>{
+
+        placeBlock();
+
+    },400);
+
+    mineBlock();
+
+},{passive:true});
+
+canvas.addEventListener("touchend",()=>{
+
+    if(touchTimer){
+
+        clearTimeout(touchTimer);
+        touchTimer=null;
+
+    }
+
+});
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+const particles=[];
+
+function updateParticles(dt){
+
+    for(let i=particles.length-1;i>=0;i--){
+
+        const p=particles[i];
+
+        p.life-=dt;
+
+        p.x+=p.vx*dt;
+        p.y+=p.vy*dt;
+
+        p.vy+=220*dt;
+
+        if(p.life<=0)
+            particles.splice(i,1);
+
+    }
+
+}
+
+function drawParticles(){
+
+    if(!settings.particles)
+        return;
+
+    for(const p of particles){
+
+        ctx.globalAlpha=
+            Math.max(0,p.life/p.max);
+
+        ctx.fillStyle=p.color;
+
+        ctx.fillRect(
+
+            p.x-camera.x,
+            p.y-camera.y,
+
+            4,
+            4
+
+        );
+
+    }
+
+    ctx.globalAlpha=1;
+
+}
+
+/* =========================================================
+   AUDIO
+========================================================= */
+
+let audioCtx=null;
+
+function getAudio(){
+
+    if(!audioCtx){
+
+        try{
+
+            audioCtx=
+                new(
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+        }catch(e){
+
+            return null;
+
+        }
+
+    }
+
+    return audioCtx;
+
+}
+
+function playSound(type){
+
+    if(!settings.sound)
+        return;
+
+    const ac=getAudio();
+
+    if(!ac)
+        return;
+
+    const osc=ac.createOscillator();
+    const gain=ac.createGain();
+
+    osc.connect(gain);
+    gain.connect(ac.destination);
+
+    const now=ac.currentTime;
+
+    let freq=300;
+    let duration=.08;
+    let wave="square";
+
+    if(type==="mine"){
+
+        freq=130;
+        duration=.09;
+        wave="square";
+
+    }
+
+    if(type==="place"){
+
+        freq=220;
+        duration=.08;
+        wave="triangle";
+
+    }
+
+    if(type==="jump"){
+
+        freq=500;
+        duration=.12;
+        wave="square";
+
+    }
+
+    if(type==="land"){
+
+        freq=100;
+        duration=.08;
+        wave="triangle";
+
+    }
+
+    if(type==="step"){
+
+        freq=100;
+        duration=.04;
+        wave="square";
+
+    }
+
+    if(type==="craft"){
+
+        freq=700;
+        duration=.15;
+        wave="triangle";
+
+    }
+
+    osc.type=wave;
+    osc.frequency.setValueAtTime(freq,now);
+
+    gain.gain.setValueAtTime(
+        .0001,
+        now
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        .06*settings.volume,
+        now+.01
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        .0001,
+        now+duration
+    );
+
+    osc.start(now);
+    osc.stop(now+duration);
+
+}
+
+/* =========================================================
+   PLAYER ANIMATION
+========================================================= */
+
+function drawPlayer(time){
+
+    const x=
+        player.x-camera.x;
+
+    const y=
+        player.y-camera.y;
+
+    let bob=0;
+
+    /*
+       USUNIĘTE:
+       wcześniejszy idle bob powodował,
+       że postać wyglądała jakby sama skakała.
+    */
+
+    if(
+        settings.animations &&
+        settings.idle &&
+        player.grounded &&
+        Math.abs(player.vx)<10
+    ){
+
+        bob=0;
+
+    }
+
+    let walk=0;
+
+    if(
+        settings.animations &&
+        settings.walking &&
+        player.grounded &&
+        Math.abs(player.vx)>15
+    ){
+
+        walk=
+            Math.sin(player.anim*1.4)*3;
+
+    }
+
+    let jumpOffset=0;
+
+    if(
+        settings.animations &&
+        settings.jumpAnim &&
+        !player.grounded
+    ){
+
+        jumpOffset=2;
+
+    }
+
+    /* cień */
+
+    ctx.fillStyle="rgba(0,0,0,.25)";
+
+    ctx.fillRect(
+        x-4,
+        y+player.h-2,
+        player.w+8,
+        5
+    );
+
+    /* nogi */
+
+    ctx.fillStyle="#222";
+
+    ctx.fillRect(
+        x+3,
+        y+29+bob+walk,
+        6,
+        11
+    );
+
+    ctx.fillRect(
+        x+11,
+        y+29+bob-walk,
+        6,
+        11
+    );
+
+    /* ciało */
+
+    ctx.fillStyle="#2589dc";
+
+    ctx.fillRect(
+        x+2,
+        y+16+bob-jumpOffset,
+        16,
+        17
+    );
+
+    /* ręce */
+
+    ctx.fillStyle="#e9b27a";
+
+    ctx.fillRect(
+        x-2,
+        y+17+bob-walk,
+        4,
+        13
+    );
+
+    ctx.fillRect(
+        x+18,
+        y+17+bob+walk,
+        4,
+        13
+    );
+
+    /* głowa */
+
+    ctx.fillStyle="#f2bd83";
+
+    ctx.fillRect(
+        x+1,
+        y+1+bob-jumpOffset,
+        18,
+        17
+    );
+
+    /* włosy */
+
+    if(settings.hair){
+
+        ctx.fillStyle="#35200f";
+
+        ctx.fillRect(
+            x+1,
+            y+1+bob-jumpOffset,
+            18,
+            6
+        );
+
+        ctx.fillRect(
+            x+1,
+            y+5+bob-jumpOffset,
+            4,
+            7
+        );
+
+    }
+
+    /* oczy */
+
+    let blink=false;
+
+    if(
+        settings.blink &&
+        settings.animations
+    ){
+
+        player.blinkTimer+=
+            1/60;
+
+        if(
+            player.blinkTimer>3.2
+        ){
+
+            player.blinkTimer=0;
+
+        }
+
+        blink=
+            player.blinkTimer>3.05;
+
+    }
+
+    ctx.fillStyle="#111";
+
+    if(!blink){
+
+        ctx.fillRect(
+            x+5,
+            y+10+bob-jumpOffset,
+            2,
+            2
+        );
+
+        ctx.fillRect(
+            x+13,
+            y+10+bob-jumpOffset,
+            2,
+            2
+        );
+
+    }else{
+
+        ctx.fillRect(
+            x+5,
+            y+11+bob-jumpOffset,
+            3,
+            1
+        );
+
+        ctx.fillRect(
+            x+13,
+            y+11+bob-jumpOffset,
+            3,
+            1
+        );
+
+    }
+
+    /* mining animation */
+
+    if(player.mining){
+
+        ctx.save();
+
+        ctx.translate(
+            x+player.w/2,
+            y+22
+        );
+
+        ctx.rotate(
+            -0.9 +
+            Math.sin(player.mineTimer*35)*.5
+        );
+
+        ctx.fillStyle="#8b5a2b";
+
+        ctx.fillRect(
+            8,-3,
+            15,
+            3
+        );
+
+        ctx.fillStyle="#aaa";
+
+        ctx.fillRect(
+            20,-6,
+            7,
+            5
+        );
+
+        ctx.restore();
+
+    }
+
+}
+
+/* =========================================================
+   SKY
+========================================================= */
+
+function mixColor(a,b,t){
+
+    return {
+
+        r:Math.round(
+            a.r+(b.r-a.r)*t
+        ),
+
+        g:Math.round(
+            a.g+(b.g-a.g)*t
+        ),
+
+        b:Math.round(
+            a.b+(b.b-a.b)*t
+        )
+
+    };
+
+}
+
+function rgb(c){
+
+    return `rgb(${c.r},${c.g},${c.b})`;
+
+}
+
+function drawSky(){
+
+    const night=getNightAmount();
+
+    const dayTop={
+        r:70,
+        g:180,
+        b:245
+    };
+
+    const dayBottom={
+        r:190,
+        g:230,
+        b:255
+    };
+
+    const nightTop={
+        r:8,
+        g:14,
+        b:35
+    };
+
+    const nightBottom={
+        r:25,
+        g:32,
+        b:58
+    };
+
+    const top=mixColor(
+        dayTop,
+        nightTop,
+        night
+    );
+
+    const bottom=mixColor(
+        dayBottom,
+        nightBottom,
+        night
+    );
+
+    const gradient=
+        ctx.createLinearGradient(
+            0,0,
+            0,H
+        );
+
+    gradient.addColorStop(
+        0,
+        rgb(top)
+    );
+
+    gradient.addColorStop(
+        1,
+        rgb(bottom)
+    );
+
+    ctx.fillStyle=gradient;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    /* słońce */
+
+    if(night<.75){
+
+        const cycle=
+            (dayTime%DAY_LENGTH)/DAY_LENGTH;
+
+        const angle=
+            cycle*Math.PI*2-Math.PI/2;
+
+        const sunX=
+            W/2+
+            Math.cos(angle)*(W*.42);
+
+        const sunY=
+            H*.62+
+            Math.sin(angle)*(H*.55);
+
+        if(sunY>-50 && sunY<H+50){
+
+            ctx.globalAlpha=
+                Math.max(
+                    0,
+                    1-night*1.3
+                );
+
+            ctx.fillStyle="#ffe88a";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                sunX,
+                sunY,
+                28,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            ctx.globalAlpha=1;
+
+        }
+
+    }
+
+    /* księżyc */
+
+    if(night>.35){
+
+        const cycle=
+            (dayTime%DAY_LENGTH)/DAY_LENGTH;
+
+        const angle=
+            cycle*Math.PI*2-Math.PI/2;
+
+        const moonX=
+            W/2-
+            Math.cos(angle)*(W*.42);
+
+        const moonY=
+            H*.62-
+            Math.sin(angle)*(H*.55);
+
+        if(moonY>-50 && moonY<H+50){
+
+            ctx.globalAlpha=
+                Math.min(
+                    1,
+                    (night-.35)*2
+                );
+
+            ctx.fillStyle="#e9f3ff";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                moonX,
+                moonY,
+                20,
+                0,
+                Math.PI*2
+            );
+
+            ctx.fill();
+
+            ctx.globalAlpha=1;
+
+        }
+
+    }
+
+}
+
+/* =========================================================
+   WORLD DRAW
+========================================================= */
+
+function drawWorld(){
+
+    const startX=
+        Math.floor(camera.x/TILE)-1;
+
+    const endX=
+        Math.ceil((camera.x+W)/TILE)+1;
+
+    const startY=
+        Math.floor(camera.y/TILE)-1;
+
+    const endY=
+        Math.ceil((camera.y+H)/TILE)+1;
+
+    for(
+        let y=Math.max(0,startY);
+        y<Math.min(WORLD_H,endY);
+        y++
+    ){
+
+        for(
+            let x=Math.max(0,startX);
+            x<Math.min(WORLD_W,endX);
+            x++
+        ){
+
+            const type=getBlock(x,y);
+
+            if(type===BLOCK.air)
+                continue;
+
+            const sx=x*TILE-camera.x;
+            const sy=y*TILE-camera.y;
+
+            if(type===BLOCK.water){
+
+                ctx.fillStyle=
+                    settings.water
+                    ? "#349bd1"
+                    : "#2d8fbe";
+
+                ctx.fillRect(
+                    sx,
+                    sy,
+                    TILE,
+                    TILE
+                );
+
+                if(settings.water){
+
+                    ctx.fillStyle=
+                        "rgba(255,255,255,.18)";
+
+                    const wave=
+                        Math.sin(
+                            (x+y+performance.now()*.003)
+                        )*3;
+
+                    ctx.fillRect(
+                        sx+4,
+                        sy+6+wave,
+                        TILE-8,
+                        2
+                    );
+
+                }
+
+                continue;
+
+            }
+
+            ctx.fillStyle=
+                blockColor(type);
+
+            ctx.fillRect(
+                sx,
+                sy,
+                TILE,
+                TILE
+            );
+
+            /* tekstury */
+
+            if(type===BLOCK.grass){
+
+                ctx.fillStyle="#76d255";
+
+                ctx.fillRect(
+                    sx,
+                    sy,
+                    TILE,
+                    5
+                );
+
+            }
+
+            if(type===BLOCK.stone){
+
+                ctx.fillStyle=
+                    "rgba(255,255,255,.08)";
+
+                ctx.fillRect(
+                    sx+5,
+                    sy+5,
+                    5,
+                    5
+                );
+
+                ctx.fillRect(
+                    sx+20,
+                    sy+15,
+                    4,
+                    4
+                );
+
+            }
+
+            if(type===BLOCK.wood){
+
+                ctx.fillStyle=
+                    "rgba(35,15,5,.25)";
+
+                ctx.fillRect(
+                    sx+9,
+                    sy,
+                    4,
+                    TILE
+                );
+
+            }
+
+            if(type===BLOCK.glass){
+
+                ctx.strokeStyle=
+                    "rgba(255,255,255,.6)";
+
+                ctx.strokeRect(
+                    sx+2,
+                    sy+2,
+                    TILE-4,
+                    TILE-4
+                );
+
+            }
+
+            if(type===BLOCK.brick){
+
+                ctx.strokeStyle=
+                    "rgba(40,20,15,.35)";
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    sx,
+                    sy+16
+                );
+
+                ctx.lineTo(
+                    sx+TILE,
+                    sy+16
+                );
+
+                ctx.moveTo(
+                    sx+16,
+                    sy
+                );
+
+                ctx.lineTo(
+                    sx+16,
+                    sy+16
+                );
+
+                ctx.moveTo(
+                    sx+8,
+                    sy+16
+                );
+
+                ctx.lineTo(
+                    sx+8,
+                    sy+TILE
+                );
+
+                ctx.moveTo(
+                    sx+24,
+                    sy+16
+                );
+
+                ctx.lineTo(
+                    sx+24,
+                    sy+TILE
+                );
+
+                ctx.stroke();
+
+            }
+
+        }
+
+    }
+
+}
+
+/* =========================================================
+   MAIN RENDER
+========================================================= */
+
+function render(time){
+
+    drawSky();
+
+    drawWorld();
+
+    drawParticles();
+
+    drawPlayer(time);
+
+    const night=getNightAmount();
+
+    if(night>0){
+
+        ctx.fillStyle=
+            `rgba(5,8,25,${night*.48})`;
+
+        ctx.fillRect(
+            0,
+            0,
+            W,
+            H
+        );
+
+    }
+
+}
+
+/* =========================================================
+   GAME STATE
+========================================================= */
+
+let gamePaused=true;
 
 function togglePause(){
 
-  if(!gameStarted) return;
+    if(
+        document.getElementById("menu").style.display!=="none"
+    ){
 
-  paused=!paused;
+        return;
 
-  document
-    .getElementById(
-      "pause"
-    )
-    .style.display=
-      paused
-      ? "flex"
-      : "none";
+    }
+
+    gamePaused=!gamePaused;
+
+    document.getElementById(
+        "pauseOverlay"
+    ).style.display=
+        gamePaused
+        ? "flex"
+        : "none";
+
+}
+
+function setPause(value){
+
+    gamePaused=value;
+
+    document.getElementById(
+        "pauseOverlay"
+    ).style.display=
+        value
+        ? "flex"
+        : "none";
+
+}
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+let messageTimer=null;
+
+function showMessage(text){
+
+    const el=
+        document.getElementById("message");
+
+    el.textContent=text;
+
+    el.classList.add("show");
+
+    clearTimeout(messageTimer);
+
+    messageTimer=setTimeout(()=>{
+
+        el.classList.remove("show");
+
+    },1500);
+
+}
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+const SAVE_KEY="PIXEL_WORLD_COMPLETE_V4";
+
+function saveGame(){
+
+    const data={
+
+        world,
+
+        player:{
+            x:player.x,
+            y:player.y
+        },
+
+        inventory,
+
+        selected,
+
+        settings,
+
+        dayTime
+
+    };
+
+    try{
+
+        localStorage.setItem(
+            SAVE_KEY,
+            JSON.stringify(data)
+        );
+
+        showMessage("💾 Gra zapisana!");
+
+    }catch(e){
+
+        showMessage("Nie udało się zapisać gry.");
+
+    }
+
+}
+
+function loadGame(){
+
+    try{
+
+        const raw=
+            localStorage.getItem(SAVE_KEY);
+
+        if(!raw)
+            return false;
+
+        const data=
+            JSON.parse(raw);
+
+        if(
+            !data.world ||
+            data.world.length!==WORLD_H
+        ){
+
+            return false;
+
+        }
+
+        world=data.world;
+
+        player.x=
+            Number(data.player?.x) || 0;
+
+        player.y=
+            Number(data.player?.y) || 0;
+
+        inventory={
+            ...inventory,
+            ...(data.inventory||{})
+        };
+
+        selected=
+            Number(data.selected)||0;
+
+        if(data.settings){
+
+            Object.assign(
+                settings,
+                data.settings
+            );
+
+        }
+
+        dayTime=
+            Number(data.dayTime)||0;
+
+        updateHotbar();
+
+        applySettings();
+
+        return true;
+
+    }catch(e){
+
+        return false;
+
+    }
+
+}
+
+/* =========================================================
+   NEW WORLD
+========================================================= */
+
+function newWorld(){
+
+    generateWorld();
+
+    resetPlayer();
+
+    dayTime=0;
+
+    inventory={
+
+        dirt:20,
+        stone:10,
+        wood:10,
+        sand:10,
+        glass:0,
+        brick:0
+
+    };
+
+    selected=0;
+
+    updateHotbar();
+
+}
+
+/* =========================================================
+   DELETE SAVE
+========================================================= */
+
+function deleteSave(){
+
+    if(
+        confirm(
+            "Czy na pewno chcesz usunąć zapis?"
+        )
+    ){
+
+        localStorage.removeItem(
+            SAVE_KEY
+        );
+
+        newWorld();
+
+        showMessage(
+            "Zapis usunięty. Nowy świat utworzony."
+        );
+
+    }
+
+}
+
+/* =========================================================
+   CRAFTING
+========================================================= */
+
+function openCrafting(){
+
+    setPause(true);
+
+    document
+        .getElementById("craftModal")
+        .classList.remove("hidden");
+
+}
+
+function closeCrafting(){
+
+    document
+        .getElementById("craftModal")
+        .classList.add("hidden");
 
 }
 
 document
-  .getElementById(
-    "resumeButton"
-  )
-  .onclick=()=>{
+.getElementById("craftGlass")
+.addEventListener("click",()=>{
 
-    paused=false;
+    if(inventory.sand>=2){
 
-    document
-      .getElementById(
-        "pause"
-      )
-      .style.display="none";
+        inventory.sand-=2;
+        inventory.glass++;
 
-  };
+        playSound("craft");
+
+        updateHotbar();
+
+        showMessage(
+            "Stworzono szkło!"
+        );
+
+    }else{
+
+        showMessage(
+            "Potrzebujesz 2 piasku."
+        );
+
+    }
+
+});
 
 document
-  .getElementById(
-    "pauseMenu"
-  )
-  .onclick=()=>{
+.getElementById("craftBrick")
+.addEventListener("click",()=>{
 
-    saveGame();
+    if(inventory.stone>=2){
 
-    paused=true;
+        inventory.stone-=2;
+        inventory.brick++;
 
-    gameStarted=false;
+        playSound("craft");
 
-    document
-      .getElementById(
-        "pause"
-      )
-      .style.display="none";
+        updateHotbar();
 
-    document
-      .getElementById(
-        "mainMenu"
-      )
-      .style.display="flex";
+        showMessage(
+            "Stworzono cegłę!"
+        );
 
-  };
+    }else{
+
+        showMessage(
+            "Potrzebujesz 2 kamienia."
+        );
+
+    }
+
+});
+
+document
+.getElementById("closeCraft")
+.addEventListener("click",()=>{
+
+    closeCrafting();
+
+    setPause(false);
+
+});
 
 /* =========================================================
    SETTINGS
-   ========================================================= */
+========================================================= */
+
+function applySettings(){
+
+    document.getElementById(
+        "mobileControls"
+    ).style.display=
+        settings.mobile
+        ? ""
+        : "none";
+
+    canvas.style.imageRendering=
+        settings.pixelPerfect
+        ? "pixelated"
+        : "auto";
+
+}
+
+document
+.getElementById("mobileSwitch")
+.addEventListener("change",e=>{
+
+    settings.mobile=e.target.checked;
+    applySettings();
+
+});
+
+document
+.getElementById("autosaveSwitch")
+.addEventListener("change",e=>{
+
+    settings.autosave=e.target.checked;
+
+});
+
+document
+.getElementById("dayNightSwitch")
+.addEventListener("change",e=>{
+
+    settings.dayNight=e.target.checked;
+
+});
+
+document
+.getElementById("particlesSwitch")
+.addEventListener("change",e=>{
+
+    settings.particles=e.target.checked;
+
+});
+
+document
+.getElementById("pixelPerfectSwitch")
+.addEventListener("change",e=>{
+
+    settings.pixelPerfect=e.target.checked;
+    applySettings();
+
+});
+
+document
+.getElementById("waterSwitch")
+.addEventListener("change",e=>{
+
+    settings.water=e.target.checked;
+
+});
+
+document
+.getElementById("fpsSwitch")
+.addEventListener("change",e=>{
+
+    settings.showFPS=e.target.checked;
+
+});
+
+document
+.getElementById("animationsSwitch")
+.addEventListener("change",e=>{
+
+    settings.animations=e.target.checked;
+
+});
+
+document
+.getElementById("walkingSwitch")
+.addEventListener("change",e=>{
+
+    settings.walking=e.target.checked;
+
+});
+
+document
+.getElementById("idleSwitch")
+.addEventListener("change",e=>{
+
+    settings.idle=e.target.checked;
+
+});
+
+document
+.getElementById("blinkSwitch")
+.addEventListener("change",e=>{
+
+    settings.blink=e.target.checked;
+
+});
+
+document
+.getElementById("jumpAnimSwitch")
+.addEventListener("change",e=>{
+
+    settings.jumpAnim=e.target.checked;
+
+});
+
+document
+.getElementById("hairSwitch")
+.addEventListener("change",e=>{
+
+    settings.hair=e.target.checked;
+
+});
+
+document
+.getElementById("animationSpeedSelect")
+.addEventListener("change",e=>{
+
+    settings.animationSpeed=
+        Number(e.target.value);
+
+});
+
+document
+.getElementById("soundSwitch")
+.addEventListener("change",e=>{
+
+    settings.sound=e.target.checked;
+
+});
+
+document
+.getElementById("musicSwitch")
+.addEventListener("change",e=>{
+
+    settings.music=e.target.checked;
+
+});
+
+document
+.getElementById("volumeRange")
+.addEventListener("input",e=>{
+
+    settings.volume=
+        Number(e.target.value);
+
+});
+
+/* =========================================================
+   SETTINGS TABS
+========================================================= */
+
+document
+.querySelectorAll(".settingsTab")
+.forEach(tab=>{
+
+    tab.addEventListener("click",()=>{
+
+        document
+        .querySelectorAll(".settingsTab")
+        .forEach(x=>
+            x.classList.remove("active")
+        );
+
+        document
+        .querySelectorAll(".settingPage")
+        .forEach(x=>
+            x.classList.remove("active")
+        );
+
+        tab.classList.add("active");
+
+        document
+        .getElementById(
+            tab.dataset.page
+        )
+        .classList.add("active");
+
+    });
+
+});
+
+/* =========================================================
+   INFO MENU
+========================================================= */
+
+function openInfo(title,content){
+
+    document.getElementById(
+        "infoTitle"
+    ).textContent=title;
+
+    document.getElementById(
+        "infoContent"
+    ).innerHTML=content;
+
+    document
+        .getElementById("infoModal")
+        .classList.remove("hidden");
+
+}
+
+document
+.getElementById("newsBtn")
+.addEventListener("click",()=>{
+
+    openInfo(
+        "📰 NEWS",
+        `
+        <p><b>PIXEL WORLD COMPLETE EDITION</b></p>
+        <p>Nowa wersja zawiera:</p>
+        <ul>
+            <li>dłuższy cykl dnia i nocy</li>
+            <li>płynne przejście dzień/noc</li>
+            <li>poprawione skakanie postaci</li>
+            <li>animację kopania</li>
+            <li>dźwięki kopania i stawiania</li>
+            <li>crafting</li>
+            <li>mobilne sterowanie</li>
+            <li>zapis świata</li>
+        </ul>
+        `
+    );
+
+});
+
+document
+.getElementById("shopBtn")
+.addEventListener("click",()=>{
+
+    openInfo(
+        "🛒 SHOP",
+        `
+        <p>Sklep jest obecnie w wersji demonstracyjnej.</p>
+        <p>W przyszłości możesz tutaj dodać skiny, przedmioty i inne elementy.</p>
+        `
+    );
+
+});
+
+document
+.getElementById("accountBtn")
+.addEventListener("click",()=>{
+
+    openInfo(
+        "👤 ACCOUNT",
+        `
+        <p>Konto lokalne.</p>
+        <p>Postęp jest przechowywany w pamięci przeglądarki.</p>
+        `
+    );
+
+});
+
+document
+.getElementById("socialBtn")
+.addEventListener("click",()=>{
+
+    openInfo(
+        "👥 SOCIAL",
+        `
+        <p>Tryb społecznościowy może zostać dodany w kolejnej wersji.</p>
+        `
+    );
+
+});
+
+document
+.getElementById("closeInfo")
+.addEventListener("click",()=>{
+
+    document
+        .getElementById("infoModal")
+        .classList.add("hidden");
+
+});
+
+/* =========================================================
+   SETTINGS OPEN
+========================================================= */
 
 function openSettings(){
 
-  document
-    .getElementById(
-      "settings"
-    )
-    .style.display="flex";
+    setPause(true);
 
-  paused=true;
+    document
+        .getElementById("settingsModal")
+        .classList.remove("hidden");
+
+    syncSettingsUI();
 
 }
 
 function closeSettings(){
 
-  document
-    .getElementById(
-      "settings"
-    )
-    .style.display="none";
-
-  applySettings();
-
-  saveSettingsOnly();
-
-  if(gameStarted){
-
-    paused=false;
-
     document
-      .getElementById(
-        "pause"
-      )
-      .style.display="none";
-
-  }
-  else{
-
-    document
-      .getElementById(
-        "mainMenu"
-      )
-      .style.display="flex";
-
-  }
+        .getElementById("settingsModal")
+        .classList.add("hidden");
 
 }
 
-document
-  .getElementById(
-    "settingsButton"
-  )
-  .onclick=openSettings;
+function syncSettingsUI(){
+
+    document.getElementById(
+        "mobileSwitch"
+    ).checked=settings.mobile;
+
+    document.getElementById(
+        "autosaveSwitch"
+    ).checked=settings.autosave;
+
+    document.getElementById(
+        "dayNightSwitch"
+    ).checked=settings.dayNight;
+
+    document.getElementById(
+        "particlesSwitch"
+    ).checked=settings.particles;
+
+    document.getElementById(
+        "pixelPerfectSwitch"
+    ).checked=settings.pixelPerfect;
+
+    document.getElementById(
+        "waterSwitch"
+    ).checked=settings.water;
+
+    document.getElementById(
+        "fpsSwitch"
+    ).checked=settings.showFPS;
+
+    document.getElementById(
+        "animationsSwitch"
+    ).checked=settings.animations;
+
+    document.getElementById(
+        "walkingSwitch"
+    ).checked=settings.walking;
+
+    document.getElementById(
+        "idleSwitch"
+    ).checked=settings.idle;
+
+    document.getElementById(
+        "blinkSwitch"
+    ).checked=settings.blink;
+
+    document.getElementById(
+        "jumpAnimSwitch"
+    ).checked=settings.jumpAnim;
+
+    document.getElementById(
+        "hairSwitch"
+    ).checked=settings.hair;
+
+    document.getElementById(
+        "animationSpeedSelect"
+    ).value=settings.animationSpeed;
+
+    document.getElementById(
+        "soundSwitch"
+    ).checked=settings.sound;
+
+    document.getElementById(
+        "musicSwitch"
+    ).checked=settings.music;
+
+    document.getElementById(
+        "volumeRange"
+    ).value=settings.volume;
+
+}
+
+/* =========================================================
+   MENU BUTTONS
+========================================================= */
 
 document
-  .getElementById(
-    "menuSettings"
-  )
-  .onclick=()=>{
-
-    document
-      .getElementById(
-        "mainMenu"
-      )
-      .style.display="none";
+.getElementById("settingsBtn")
+.addEventListener("click",()=>{
 
     openSettings();
 
-  };
+});
 
 document
-  .getElementById(
-    "pauseSettings"
-  )
-  .onclick=()=>{
-
-    document
-      .getElementById(
-        "pause"
-      )
-      .style.display="none";
+.getElementById("openGameSettings")
+.addEventListener("click",()=>{
 
     openSettings();
 
-  };
+});
 
 document
-  .getElementById(
-    "closeSettings"
-  )
-  .onclick=closeSettings;
+.getElementById("closeSettings")
+.addEventListener("click",()=>{
 
-document
-  .getElementById(
-    "closeSettingsBottom"
-  )
-  .onclick=closeSettings;
-
-/* SETTINGS TABS */
-
-document
-  .querySelectorAll(
-    ".tab"
-  )
-  .forEach(
-    tab=>{
-
-      tab.onclick=()=>{
-
-        document
-          .querySelectorAll(
-            ".tab"
-          )
-          .forEach(
-            x=>
-              x.classList.remove(
-                "active"
-              )
-          );
-
-        document
-          .querySelectorAll(
-            ".page"
-          )
-          .forEach(
-            x=>
-              x.classList.remove(
-                "active"
-              )
-          );
-
-        tab.classList.add(
-          "active"
-        );
-
-        document
-          .getElementById(
-            tab.dataset.page
-          )
-          .classList.add(
-            "active"
-          );
-
-      };
-
-    }
-  );
-
-/* SWITCH */
-
-function updateSwitch(
-  id,
-  value
-){
-
-  document
-    .getElementById(id)
-    .classList.toggle(
-      "on",
-      !!value
-    );
-
-}
-
-function setupSwitch(
-  id,
-  key
-){
-
-  document
-    .getElementById(id)
-    .onclick=()=>{
-
-      settings[key]=
-        !settings[key];
-
-      updateSwitch(
-        id,
-        settings[key]
-      );
-
-      applySettings();
-
-    };
-
-}
-
-/* SWITCHES */
-
-setupSwitch(
-  "mobileSwitch",
-  "mobile"
-);
-
-setupSwitch(
-  "autoSaveSwitch",
-  "autoSave"
-);
-
-setupSwitch(
-  "dayNightSwitch",
-  "dayNight"
-);
-
-setupSwitch(
-  "particlesSwitch",
-  "particles"
-);
-
-setupSwitch(
-  "pixelSwitch",
-  "pixelPerfect"
-);
-
-setupSwitch(
-  "waterSwitch",
-  "water"
-);
-
-setupSwitch(
-  "animationsSwitch",
-  "animations"
-);
-
-setupSwitch(
-  "walkSwitch",
-  "walk"
-);
-
-setupSwitch(
-  "idleSwitch",
-  "idle"
-);
-
-setupSwitch(
-  "blinkSwitch",
-  "blink"
-);
-
-setupSwitch(
-  "jumpSwitch",
-  "jump"
-);
-
-setupSwitch(
-  "hairSwitch",
-  "hair"
-);
-
-setupSwitch(
-  "soundSwitch",
-  "sound"
-);
-
-setupSwitch(
-  "musicSwitch",
-  "music"
-);
-
-/* SELECTS */
-
-document
-  .getElementById(
-    "qualitySelect"
-  )
-  .onchange=e=>{
-
-    settings.quality=
-      e.target.value;
-
-  };
-
-document
-  .getElementById(
-    "fpsSelect"
-  )
-  .onchange=e=>{
-
-    settings.fps=
-      Number(e.target.value);
-
-  };
-
-document
-  .getElementById(
-    "volumeRange"
-  )
-  .oninput=e=>{
-
-    settings.volume=
-      Number(e.target.value);
-
-  };
-
-document
-  .getElementById(
-    "animSpeed"
-  )
-  .onchange=e=>{
-
-    settings.animSpeed=
-      Number(e.target.value);
-
-  };
-
-/* APPLY SETTINGS */
-
-function applySettings(){
-
-  updateSwitch(
-    "mobileSwitch",
-    settings.mobile
-  );
-
-  updateSwitch(
-    "autoSaveSwitch",
-    settings.autoSave
-  );
-
-  updateSwitch(
-    "dayNightSwitch",
-    settings.dayNight
-  );
-
-  updateSwitch(
-    "particlesSwitch",
-    settings.particles
-  );
-
-  updateSwitch(
-    "pixelSwitch",
-    settings.pixelPerfect
-  );
-
-  updateSwitch(
-    "waterSwitch",
-    settings.water
-  );
-
-  updateSwitch(
-    "animationsSwitch",
-    settings.animations
-  );
-
-  updateSwitch(
-    "walkSwitch",
-    settings.walk
-  );
-
-  updateSwitch(
-    "idleSwitch",
-    settings.idle
-  );
-
-  updateSwitch(
-    "blinkSwitch",
-    settings.blink
-  );
-
-  updateSwitch(
-    "jumpSwitch",
-    settings.jump
-  );
-
-  updateSwitch(
-    "hairSwitch",
-    settings.hair
-  );
-
-  updateSwitch(
-    "soundSwitch",
-    settings.sound
-  );
-
-  updateSwitch(
-    "musicSwitch",
-    settings.music
-  );
-
-  document
-    .getElementById(
-      "qualitySelect"
-    )
-    .value=
-      settings.quality;
-
-  document
-    .getElementById(
-      "fpsSelect"
-    )
-    .value=
-      settings.fps;
-
-  document
-    .getElementById(
-      "volumeRange"
-    )
-    .value=
-      settings.volume;
-
-  document
-    .getElementById(
-      "animSpeed"
-    )
-    .value=
-      settings.animSpeed;
-
-  document
-    .getElementById(
-      "mobileControls"
-    )
-    .style.display=
-      settings.mobile
-      ? "flex"
-      : "none";
-
-  document
-    .getElementById(
-      "jumpButton"
-    )
-    .style.display=
-      settings.mobile
-      ? "block"
-      : "none";
-
-  resize();
-
-}
-
-/* SAVE SETTINGS */
-
-document
-  .getElementById(
-    "saveSettings"
-  )
-  .onclick=saveGame;
-
-/* DELETE SAVE */
-
-document
-  .getElementById(
-    "deleteSave"
-  )
-  .onclick=()=>{
+    closeSettings();
 
     if(
-      !confirm(
-        "Usunąć zapis gry?"
-      )
-    ) return;
-
-    localStorage.removeItem(
-      SAVE_KEY
-    );
-
-    createWorld();
-
-    findSpawn();
-
-    inventory={
-      dirt:20,
-      stone:10,
-      wood:10,
-      sand:10,
-      glass:0,
-      brick:0
-    };
-
-    selectedBlock="dirt";
-
-    updateInventory();
-
-    selectBlock(
-      "dirt"
-    );
-
-    showMessage(
-      "Zapis usunięty."
-    );
-
-  };
-
-/* =========================================================
-   MENU INFO
-   ========================================================= */
-
-const info={
-
-  NEWS:[
-    "📰 NEWS",
-
-    `✨ COMPLETE EDITION
-
-🌙 Dzień i noc
-⛏️ Animacja kopania
-🔊 Dźwięki
-🌳 Drzewa
-🌊 Woda
-🏔️ Jaskinie
-🔨 Crafting
-🧱 Nowe bloki
-📱 Sterowanie mobilne
-💾 Poprawiony zapis`
-  ],
-
-  SHOP:[
-    "🛒 SHOP",
-
-    `Sklep jest przygotowany
-pod przyszłe dodatki
-i kosmetyczne elementy gry.`
-  ],
-
-  ACCOUNT:[
-    "👤 ACCOUNT",
-
-    `PIXEL PLAYER
-
-Poziom: 1
-Światy: 1
-Status: ONLINE`
-  ],
-
-  SOCIAL:[
-    "👥 SOCIAL",
-
-    `Sekcja społecznościowa
-jest przygotowana pod
-znajomych i przyszły
-multiplayer.`
-  ]
-
-};
-
-document
-  .querySelectorAll(
-    "[data-info]"
-  )
-  .forEach(
-    button=>{
-
-      button.onclick=()=>{
-
-        const data=
-          info[
-            button.dataset.info
-          ];
-
-        document
-          .getElementById(
-            "infoTitle"
-          )
-          .textContent=
-            data[0];
-
-        document
-          .getElementById(
-            "infoText"
-          )
-          .textContent=
-            data[1];
-
-        document
-          .getElementById(
-            "infoModal"
-          )
-          .style.display=
-            "flex";
-
-        sound("place");
-
-      };
-
-    }
-  );
-
-document
-  .getElementById(
-    "infoClose"
-  )
-  .onclick=()=>{
-
-    document
-      .getElementById(
-        "infoModal"
-      )
-      .style.display=
-        "none";
-
-  };
-
-/* =========================================================
-   START
-   ========================================================= */
-
-document
-  .getElementById(
-    "playButton"
-  )
-  .onclick=()=>{
-
-    gameStarted=true;
-
-    paused=false;
-
-    document
-      .getElementById(
-        "mainMenu"
-      )
-      .style.display=
-        "none";
-
-    initAudio();
-
-    sound("place");
-
-  };
-
-/* =========================================================
-   AUTO SAVE
-   ========================================================= */
-
-setInterval(
-  ()=>{
-
-    if(
-      settings.autoSave &&
-      gameStarted &&
-      !paused
+        document.getElementById("menu")
+        .style.display!=="none"
     ){
 
-      saveGame();
+        setPause(true);
+
+    }else{
+
+        setPause(false);
 
     }
 
-  },
-  120000
+});
+
+document
+.getElementById("saveBtn")
+.addEventListener("click",saveGame);
+
+document
+.getElementById("saveBtn2")
+.addEventListener("click",saveGame);
+
+document
+.getElementById("resetSaveBtn")
+.addEventListener("click",deleteSave);
+
+document
+.getElementById("openCraft")
+.addEventListener("click",openCrafting);
+
+document
+.getElementById("pauseBtn")
+.addEventListener("click",togglePause);
+
+document
+.getElementById("resumeBtn")
+.addEventListener("click",()=>{
+
+    setPause(false);
+
+});
+
+document
+.getElementById("pauseCraftBtn")
+.addEventListener("click",openCrafting);
+
+document
+.getElementById("pauseSettingsBtn")
+.addEventListener("click",openSettings);
+
+document
+.getElementById("backMenuBtn")
+.addEventListener("click",()=>{
+
+    saveGame();
+
+    setPause(true);
+
+    document.getElementById(
+        "menu"
+    ).style.display="flex";
+
+});
+
+/* =========================================================
+   PLAY
+========================================================= */
+
+document
+.getElementById("playBtn")
+.addEventListener("click",()=>{
+
+    document.getElementById(
+        "menu"
+    ).style.display="none";
+
+    closeSettings();
+    closeCrafting();
+
+    setPause(false);
+
+    const ac=getAudio();
+
+    if(ac && ac.state==="suspended"){
+
+        ac.resume();
+
+    }
+
+});
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+function resize(){
+
+    W=innerWidth;
+    H=innerHeight;
+
+    const dpr=
+        Math.min(
+            window.devicePixelRatio||1,
+            2
+        );
+
+    canvas.width=
+        Math.floor(W*dpr);
+
+    canvas.height=
+        Math.floor(H*dpr);
+
+    canvas.style.width=
+        W+"px";
+
+    canvas.style.height=
+        H+"px";
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    ctx.imageSmoothingEnabled=
+        !settings.pixelPerfect;
+
+}
+
+window.addEventListener(
+    "resize",
+    resize
 );
+
+/* =========================================================
+   FPS
+========================================================= */
+
+let fps=60;
+let fpsCounter=0;
+let fpsTime=0;
 
 /* =========================================================
    GAME LOOP
-   ========================================================= */
+========================================================= */
 
-function gameLoop(time){
+let lastTime=performance.now();
 
-  const dt=
-    Math.min(
-      .033,
-      Math.max(
-        .001,
-        (time-lastTime)/1000 ||
-        .016
-      )
+function gameLoop(now){
+
+    let dt=
+        (now-lastTime)/1000;
+
+    lastTime=now;
+
+    dt=Math.min(
+        dt,
+        .033
     );
 
-  lastTime=time;
+    if(!gamePaused){
 
-  if(!paused){
+        dayTime+=dt*1000;
 
-    gameTime+=dt;
+        updatePlayer(dt);
 
-    dayTime+=
-      dt*1000;
+        updateParticles(dt);
 
-    updatePlayer(dt);
+        updateCamera();
 
-    updateParticles(dt);
+        if(
+            miningMouse
+        ){
 
-    updateCamera(dt);
+            if(
+                Math.random()<.15
+            ){
 
-    render(time);
+                mineBlock();
 
-  }
+            }
 
-  requestAnimationFrame(
-    gameLoop
-  );
+        }
+
+        if(
+            placingMouse
+        ){
+
+            if(
+                Math.random()<.08
+            ){
+
+                placeBlock();
+
+            }
+
+        }
+
+        if(
+            player.mineTimer>0
+        ){
+
+            player.mineTimer-=dt;
+
+        }else{
+
+            player.mining=false;
+
+        }
+
+        if(
+            settings.autosave &&
+            dayTime%120000<100
+        ){
+
+            saveGame();
+
+        }
+
+    }
+
+    render(now);
+
+    fpsCounter++;
+
+    fpsTime+=dt;
+
+    if(fpsTime>=1){
+
+        fps=fpsCounter;
+        fpsCounter=0;
+        fpsTime=0;
+
+    }
+
+    if(settings.showFPS){
+
+        ctx.fillStyle="white";
+        ctx.font="14px Arial";
+
+        ctx.fillText(
+            "FPS: "+fps,
+            W-70,
+            25
+        );
+
+    }
+
+    requestAnimationFrame(gameLoop);
 
 }
 
 /* =========================================================
-   INIT
-   ========================================================= */
-
-resize();
+   START
+========================================================= */
 
 if(!loadGame()){
 
-  createWorld();
+    newWorld();
 
-  findSpawn();
+}else{
+
+    updateHotbar();
 
 }
 
-updateInventory();
-
-selectBlock(
-  selectedBlock
-);
-
 applySettings();
 
-document
-  .getElementById(
-    "mainMenu"
-  )
-  .style.display=
-    "flex";
+resize();
 
-requestAnimationFrame(
-  gameLoop
-);
+setPause(true);
+
+requestAnimationFrame(gameLoop);
 
 </script>
 
