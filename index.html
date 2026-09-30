@@ -4955,5 +4955,227 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   if(typeof settings!=='undefined'){settings.pixelPerfect=true;saveSettings&&saveSettings()}
 })();
 </script>
+<script>
+/* =========================================================
+   PIXEL WORLD — MEGA QUALITY UPDATE
+   Fixes + extra gameplay systems
+========================================================= */
+(function(){
+  'use strict';
+  const root=document;
+  const gameCanvas=root.getElementById('game');
+  if(!gameCanvas || typeof ctx==='undefined') return;
+  gameCanvas.style.imageRendering='pixelated';
+  ctx.imageSmoothingEnabled=false;
+
+  /* ---------- Safe helpers ---------- */
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const now=()=>performance.now()/1000;
+  const state={t:0,weather:'clear',weatherTimer:0,particles:[],stars:[],shake:0,flash:0,combo:0,lastMine:0,fireflies:[],fishRipples:[]};
+  const addP=(x,y,vx,vy,life,size,char)=>state.particles.push({x,y,vx,vy,life,max:life,size,char:char||'square'});
+  function toast(s){ if(typeof pwToast==='function') pwToast(s); }
+
+  /* ---------- Weather ---------- */
+  const weathers=['clear','rain','leaves','snow'];
+  function chooseWeather(){
+    if(typeof S!=='undefined' && S.anim===false){state.weather='clear';state.weatherTimer=45;return;}
+    const r=Math.random(); state.weather=r<.48?'clear':r<.78?'rain':r<.92?'leaves':'snow'; state.weatherTimer=35+Math.random()*55;
+  }
+  chooseWeather();
+
+  /* ---------- Better fishing: only works at/near water ---------- */
+  const oldFishNow=window.pwFishNow;
+  window.pwFishNow=function(){
+    const bx=Math.floor((me.x+me.w/2)/T), by=Math.floor((me.y+me.h+T*.2)/T);
+    let near=false;
+    for(let yy=by-1;yy<=by+1;yy++) for(let xx=bx-3;xx<=bx+3;xx++){
+      if(typeof getB==='function' && getB(xx,yy)===B.water) near=true;
+    }
+    if(!near){toast('🎣 Podejdź do wody, żeby łowić!');return;}
+    if(typeof oldFishNow==='function') oldFishNow();
+    for(let i=0;i<7;i++) addP(me.x+me.w/2+(Math.random()-.5)*12,me.y+me.h,Math.random()-.5,-(1+Math.random()*1.5),.5,2,'bubble');
+  };
+
+  /* ---------- Farming reliability ---------- */
+  const oldPlant=window.pwPlantAt;
+  window.pwPlantAt=function(x,y,seed){
+    if(!PW.seeds[seed] || PW.seeds[seed]<1){toast('🌱 Brak tego nasiona');return false;}
+    const ok=oldPlant(x,y,seed);
+    if(ok!==false){
+      for(let i=0;i<6;i++) addP(x*T+T/2,y*T+T/2,Math.random()*2-1,-Math.random()*1.5,.5,2,'square');
+      return true;
+    }
+    return ok;
+  };
+
+  /* ---------- Better pet: animated follower ---------- */
+  let petX=0,petY=0;
+  function drawPet(){
+    if(PW.activePet==null || !PW.pets[PW.activePet]) return;
+    const targetX=me.x-18, targetY=me.y+8;
+    petX += (targetX-petX)*.09; petY += (targetY-petY)*.09;
+    const bob=Math.sin(state.t*5)*2;
+    const x=Math.round(petX-cam.x),y=Math.round(petY-cam.y+bob);
+    const type=PW.pets[PW.activePet].type;
+    const body=type==='fox'?'#d97932':type==='crystal'?'#6feaff':'#9b70e8';
+    ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(x+1,y+11,10,2);
+    ctx.fillStyle=body;ctx.fillRect(x+1,y+2,9,8);ctx.fillRect(x+3,y,5,3);
+    ctx.fillStyle='#fff';ctx.fillRect(x+3,y+3,1,1);ctx.fillRect(x+7,y+3,1,1);
+    if(type==='crystal'){ctx.fillStyle='#fff';ctx.fillRect(x+5,y+5,2,2)}
+  }
+
+  /* ---------- Ambient particles ---------- */
+  function spawnAmbient(){
+    const x=cam.x+Math.random()*VW, y=cam.y+Math.random()*VH;
+    if(state.weather==='rain') addP(x,y,-.2,5+Math.random()*4,.8+Math.random()*.5,1,'rain');
+    else if(state.weather==='snow') addP(x,y,(Math.random()-.5)*.5,.4+Math.random()*.5,2+Math.random()*2,2,'snow');
+    else if(state.weather==='leaves') addP(x,y,(Math.random()-.5),.5+Math.random()*.5,2+Math.random()*2,2,'leaf');
+    else if(Math.random()<.18) addP(x,y,(Math.random()-.5)*.2,-.1,.8+Math.random(),2,'firefly');
+  }
+  function updateParticles(dt){
+    for(const p of state.particles){p.x+=p.vx*dt*60;p.y+=p.vy*dt*60;p.life-=dt;if(p.char==='rain'||p.char==='snow'||p.char==='leaf')p.vx+=Math.sin(state.t*2+p.x)*.01;}
+    state.particles=state.particles.filter(p=>p.life>0);
+  }
+  function drawParticles(){
+    for(const p of state.particles){
+      const a=clamp(p.life/p.max,0,1); const x=Math.round(p.x-cam.x),y=Math.round(p.y-cam.y); if(x<-5||y<-5||x>VW+5||y>VH+5)continue;
+      ctx.globalAlpha=a;
+      if(p.char==='rain'){ctx.fillStyle='#7bdcff';ctx.fillRect(x,y,1,5)}
+      else if(p.char==='snow'){ctx.fillStyle='#fff';ctx.fillRect(x,y,p.size,p.size)}
+      else if(p.char==='leaf'){ctx.fillStyle='#65b84c';ctx.fillRect(x,y,3,2)}
+      else if(p.char==='bubble'){ctx.strokeStyle='#a8f3ff';ctx.strokeRect(x,y,3,3)}
+      else if(p.char==='firefly'){ctx.fillStyle='#eaff75';ctx.fillRect(x,y,2,2)}
+      else {ctx.fillStyle='#d9d9d9';ctx.fillRect(x,y,p.size,p.size)}
+    }
+    ctx.globalAlpha=1;
+  }
+
+  /* ---------- Pixel weather + sky overlays ---------- */
+  function drawSkyFX(){
+    const night=(typeof nightAmount==='function')?nightAmount():0;
+    if(night>0){
+      ctx.fillStyle='rgba(12,18,48,'+(0.10+night*.28)+')';ctx.fillRect(0,0,VW,VH);
+      if(night>.45){
+        for(let i=0;i<28;i++){const x=(i*83)%Math.max(1,VW),y=(i*47)%Math.max(1,VH*.55);ctx.fillStyle='rgba(255,255,220,.65)';ctx.fillRect(x,y,2,2)}
+      }
+    }
+    if(state.weather==='rain'){
+      ctx.fillStyle='rgba(50,100,130,.07)';ctx.fillRect(0,0,VW,VH);
+    }
+  }
+
+  /* ---------- Animated block overlay ---------- */
+  function drawWorldAnimations(){
+    const sx=Math.floor(cam.x/T)-1, ex=Math.ceil((cam.x+VW)/T)+1;
+    const sy=Math.floor(cam.y/T)-1, ey=Math.ceil((cam.y+VH)/T)+1;
+    for(let y=Math.max(0,sy);y<Math.min(WORLD_H,ey);y++) for(let x=Math.max(0,sx);x<Math.min(WORLD_W,ex);x++){
+      const t=getB(x,y),px0=x*T-cam.x,py0=y*T-cam.y;
+      if(t===B.water){
+        const w=Math.sin(state.t*3+x*.65+y*.25);
+        ctx.fillStyle='rgba(170,245,255,.7)';ctx.fillRect(Math.round(px0+3+w*2),Math.round(py0+5),7,2);
+        ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(Math.round(px0+18-w*2),Math.round(py0+14),5,1);
+      }
+      if(t===B.leaves){
+        const s=Math.sin(state.t*2.2+x*.5+y*.3);ctx.fillStyle='rgba(120,220,100,.22)';ctx.fillRect(Math.round(px0+6+s*1.5),Math.round(py0+5),4,3);ctx.fillRect(Math.round(px0+20-s),Math.round(py0+19),3,3);
+      }
+      if(t===B.grass){
+        const s=Math.sin(state.t*2+x*.8)*1.5;ctx.fillStyle='#72d35b';ctx.fillRect(Math.round(px0+7+s),Math.round(py0-3),2,5);ctx.fillRect(Math.round(px0+22-s),Math.round(py0-2),2,4);
+      }
+      if(t===B.crystal){
+        ctx.globalAlpha=.25+.15*Math.sin(state.t*4+x);ctx.fillStyle='#fff';ctx.fillRect(px0+9,py0+6,2,2);ctx.globalAlpha=1;
+      }
+    }
+  }
+
+  /* ---------- Main render wrapper ---------- */
+  const oldRender=render;
+  render=function(){
+    oldRender();
+    drawWorldAnimations();
+    drawSkyFX();
+    drawParticles();
+    drawPet();
+    if(state.shake>0) state.shake=Math.max(0,state.shake-.016);
+  };
+
+  /* ---------- Main loop wrapper ---------- */
+  const oldLoop=loop;
+  loop=function(t){
+    const dt=.016;
+    state.t=t/1000;
+    state.weatherTimer-=dt;
+    if(state.weatherTimer<=0) chooseWeather();
+    if(!paused){
+      if(Math.random()<.12) spawnAmbient();
+      updateParticles(dt);
+    }
+    oldLoop(t);
+  };
+
+  /* ---------- Better mining feedback ---------- */
+  const oldMine=mine;
+  mine=function(){
+    const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T),before=getB(bx,by);
+    oldMine();
+    if(before && getB(bx,by)===B.air){
+      state.shake=.08;state.flash=.08;state.combo++;
+      for(let i=0;i<8;i++)addP(bx*T+T/2,by*T+T/2,(Math.random()-.5)*2,(Math.random()-.5)*2,.45+Math.random()*.3,2,'square');
+    }
+  };
+
+  /* ---------- Place feedback ---------- */
+  const oldPlace=place;
+  place=function(){
+    const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T),before=getB(bx,by);
+    oldPlace();
+    if(before===B.air && getB(bx,by)!==B.air){
+      for(let i=0;i<5;i++)addP(bx*T+T/2,by*T+T/2,(Math.random()-.5),-(Math.random()),.35,2,'square');
+    }
+  };
+
+  /* ---------- New quick systems ---------- */
+  window.pwDailyGift=function(){
+    const key='PIXEL_WORLD_DAILY_V2', last=Number(localStorage.getItem(key)||0), day=86400000;
+    if(Date.now()-last<day)return toast('🎁 Dzisiejszy prezent został już odebrany!');
+    localStorage.setItem(key,String(Date.now())); PW.gems+=100; PW.bait+=5; pwGainXP(35); pwSaveExtra(); pwRefresh(); toast('🎁 Dzienny prezent: +100 💎 +5 przynęt');
+  };
+  window.pwHeal=function(){
+    if(typeof me.hp!=='number') me.hp=100;
+    if(me.hp>=100)return toast('❤️ Masz pełne zdrowie');
+    me.hp=100;toast('❤️ Zdrowie odnowione');
+  };
+  window.pwWeather=function(){chooseWeather();toast('🌦️ Pogoda: '+({clear:'bezchmurnie',rain:'deszcz',leaves:'opadające liście',snow:'śnieg'}[state.weather]));};
+
+  /* ---------- Add a small utilities panel to HUB ---------- */
+  const hub=document.getElementById('pwHub');
+  if(hub && !document.getElementById('pwMegaTools')){
+    const box=document.createElement('div');box.id='pwMegaTools';box.className='pwGrid';
+    box.innerHTML='<button onclick="pwDailyGift()">🎁 DZIENNY PREZENT</button><button onclick="pwWeather()">🌦️ ZMIEŃ POGODĘ</button><button onclick="pwHeal()">❤️ ODŚWIEŻ POSTAĆ</button>';
+    hub.appendChild(box);
+  }
+
+  /* ---------- Fix settings persistence ---------- */
+  try{
+    if(typeof settings==='object'){
+      settings.pixelPerfect=true; settings.animations=true; settings.water=true;
+      if(typeof saveSettings==='function')saveSettings();
+    }
+  }catch(e){}
+
+  /* ---------- Fix malformed/old saves without destroying worlds ---------- */
+  try{
+    if(Array.isArray(world)){
+      for(let y=0;y<WORLD_H;y++){
+        if(!world[y] || world[y].length!==WORLD_W){
+          const row=new Uint8Array(WORLD_W); if(world[y]) row.set(Array.from(world[y]).slice(0,WORLD_W)); world[y]=row;
+        }
+      }
+    }
+  }catch(e){console.warn('Save repair:',e)}
+
+  toast('✨ Mega aktualizacja gotowa!');
+})();
+
+</script>
 </body>
 </html>
