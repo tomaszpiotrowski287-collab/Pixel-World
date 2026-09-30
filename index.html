@@ -694,17 +694,14 @@ select{
 
         </div>
 
-        <div class="row">
-
-            <span>
-                2 × kamień → 1 × cegła
-            </span>
-
-            <button id="brickCraft">
-                STWÓRZ
-            </button>
-
-        </div>
+        <div class="row"><span>2 × kamień → 1 × cegła</span><button id="brickCraft">STWÓRZ</button></div>
+        <div class="row"><span>4 × węgiel → blok węgla</span><button id="coalCraft">STWÓRZ</button></div>
+        <div class="row"><span>4 × złoto → blok złota</span><button id="goldCraft">STWÓRZ</button></div>
+        <div class="row"><span>4 × lapis → blok lapisu</span><button id="lapisCraft">STWÓRZ</button></div>
+        <div class="row"><span>4 × szmaragd → blok szmaragdu</span><button id="emeraldCraft">STWÓRZ</button></div>
+        <div class="row"><span>4 × diament → blok diamentu</span><button id="diamondCraft">STWÓRZ</button></div>
+        <div class="row"><span>4 × obsydian → blok obsydianu</span><button id="obsidianCraft">STWÓRZ</button></div>
+        <div class="row"><span>2 × diament + 2 × złoto → kryształ</span><button id="crystalCraft">STWÓRZ</button></div>
 
     </div>
 
@@ -910,41 +907,30 @@ const B = {
 
     glass:8,
 
-    brick:9
+    brick:9,
+    coal:10,
+    gold:11,
+    lapis:12,
+    emerald:13,
+    diamond:14,
+    obsidian:15,
+    crystal:16
 
 };
 
 const items = [
-
-    "dirt",
-    "stone",
-    "wood",
-    "sand",
-    "glass",
-    "brick"
-
+    "dirt","stone","wood","sand","glass","brick",
+    "coal","gold","lapis","emerald","diamond","obsidian","crystal"
 ];
 
 const slots = [
-
-    B.dirt,
-    B.stone,
-    B.wood,
-    B.sand,
-    B.glass,
-    B.brick
-
+    B.dirt,B.stone,B.wood,B.sand,B.glass,B.brick,
+    B.coal,B.gold,B.lapis,B.emerald,B.diamond,B.obsidian,B.crystal
 ];
 
 let inv = {
-
-    dirt:20,
-    stone:10,
-    wood:10,
-    sand:10,
-    glass:0,
-    brick:0
-
+    dirt:20,stone:10,wood:10,sand:10,glass:0,brick:0,
+    coal:0,gold:0,lapis:0,emerald:0,diamond:0,obsidian:0,crystal:0
 };
 
 /* =========================================================
@@ -1160,6 +1146,23 @@ function generate(){
 
         }
 
+    }
+
+
+    /* RARE ORES — im głębiej, tym rzadsze */
+    for(let x=3;x<WORLD_W-3;x++){
+        for(let y=40;y<WORLD_H-3;y++){
+            if(getB(x,y)!==B.stone) continue;
+            const r=Math.random();
+
+            if(y>=40 && y<58 && r<.075){setB(x,y,B.coal);continue;}
+            if(y>=52 && r<.028){setB(x,y,B.gold);continue;}
+            if(y>=58 && r<.020){setB(x,y,B.lapis);continue;}
+            if(y>=64 && r<.009){setB(x,y,B.emerald);continue;}
+            if(y>=70 && r<.006){setB(x,y,B.diamond);continue;}
+            if(y>=76 && r<.004){setB(x,y,B.obsidian);continue;}
+            if(y>=80 && r<.0025){setB(x,y,B.crystal);}
+        }
     }
 
     /* TREES */
@@ -1415,7 +1418,8 @@ function newWorld(){
         wood:10,
         sand:10,
         glass:0,
-        brick:0
+        brick:0,
+        coal:0,gold:0,lapis:0,emerald:0,diamond:0,obsidian:0,crystal:0
 
     };
 
@@ -2132,6 +2136,14 @@ function drawWorld(){
 
             }
 
+            if(t===B.coal){ctx.fillStyle="#101010";ctx.fillRect(px+3,py+4,4,4);ctx.fillRect(px+10,py+10,3,3);}
+            if(t===B.gold){ctx.fillStyle="#ffe15a";ctx.fillRect(px+4,py+4,4,4);ctx.fillRect(px+10,py+10,3,3);}
+            if(t===B.lapis){ctx.fillStyle="#72a9ff";ctx.fillRect(px+3,py+5,4,4);ctx.fillRect(px+10,py+11,3,3);}
+            if(t===B.emerald){ctx.fillStyle="#a0ffbd";ctx.fillRect(px+5,py+3,4,4);ctx.fillRect(px+10,py+10,4,4);}
+            if(t===B.diamond){ctx.fillStyle="#eaffff";ctx.fillRect(px+4,py+3,4,4);ctx.fillRect(px+10,py+9,4,4);ctx.fillStyle="#58dfff";ctx.fillRect(px+7,py+7,3,3);}
+            if(t===B.obsidian){ctx.fillStyle="#8c5cff";ctx.fillRect(px+4,py+5,3,3);ctx.fillRect(px+11,py+10,2,2);}
+            if(t===B.crystal){ctx.fillStyle="#f0b7ff";ctx.fillRect(px+6,py+2,4,12);ctx.fillStyle="#fff";ctx.fillRect(px+8,py+4,2,7);}
+
             if(
                 t===B.water &&
                 S.parts
@@ -2704,9 +2716,14 @@ function mine(){
         : t===B.glass
         ? "glass"
 
-        : t===B.brick
-        ? "brick"
-
+        : t===B.brick ? "brick"
+        : t===B.coal ? "coal"
+        : t===B.gold ? "gold"
+        : t===B.lapis ? "lapis"
+        : t===B.emerald ? "emerald"
+        : t===B.diamond ? "diamond"
+        : t===B.obsidian ? "obsidian"
+        : t===B.crystal ? "crystal"
         : null;
 
     /*
@@ -3088,7 +3105,7 @@ addEventListener(
 
             if(
                 n>=0 &&
-                n<6
+                n<items.length
             ){
 
                 selected=n;
@@ -3427,6 +3444,31 @@ document
 
 };
 
+function craftBlock(input,cost,output){
+    if(inv[input]>=cost){
+        inv[input]-=cost;
+        inv[output]++;
+        sound("craft");
+        updateHotbar();
+    }
+}
+
+document.getElementById("coalCraft").onclick=()=>craftBlock("coal",4,"coal");
+document.getElementById("goldCraft").onclick=()=>craftBlock("gold",4,"gold");
+document.getElementById("lapisCraft").onclick=()=>craftBlock("lapis",4,"lapis");
+document.getElementById("emeraldCraft").onclick=()=>craftBlock("emerald",4,"emerald");
+document.getElementById("diamondCraft").onclick=()=>craftBlock("diamond",4,"diamond");
+document.getElementById("obsidianCraft").onclick=()=>craftBlock("obsidian",4,"obsidian");
+document.getElementById("crystalCraft").onclick=()=>{
+    if(inv.diamond>=2 && inv.gold>=2){
+        inv.diamond-=2;
+        inv.gold-=2;
+        inv.crystal++;
+        sound("craft");
+        updateHotbar();
+    }
+};
+
 /* =========================================================
    PAUSE
 ========================================================= */
@@ -3520,7 +3562,7 @@ document
 ========================================================= */
 
 const SAVE =
-    "PIXEL_WORLD_MP_V2";
+    "PIXEL_WORLD_MP_V3_ORES";
 
 function save(){
 
