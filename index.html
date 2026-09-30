@@ -332,6 +332,39 @@ select{
     text-shadow:2px 2px #000;
 }
 
+
+/* =========================================================
+   PIXEL WORLDS STYLE BACKPACK
+========================================================= */
+#inventoryBtn{min-width:38px}
+#pwInventory{z-index:80}
+.pwInvBox{width:min(920px,94vw);max-height:90vh;overflow:hidden;background:linear-gradient(#17232c,#0d151b);border:4px solid #607887;box-shadow:0 0 0 3px #101820,8px 8px 0 #000;image-rendering:pixelated}
+.pwInvHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#243541;border-bottom:3px solid #111}
+.pwInvTitle{font-size:20px;font-weight:900;letter-spacing:1px;text-shadow:2px 2px #000}
+.pwInvTabs{display:flex;gap:5px;padding:7px;background:#10191f;border-bottom:3px solid #0a0f13;overflow:auto}
+.pwInvTab{flex:0 0 auto;background:#263842;border:2px solid #5d7280;color:#fff;padding:7px 12px;font-weight:800;cursor:pointer}
+.pwInvTab.active{background:#3f5967;border-color:#fff;box-shadow:inset 0 -3px #00d9ff}
+.pwInvBody{display:grid;grid-template-columns:180px 1fr;gap:10px;padding:10px;min-height:430px;overflow:auto}
+.pwInvSide{background:#111b21;border:3px solid #465c68;padding:10px;text-align:center}
+.pwInvChar{height:190px;display:grid;place-items:center;background:repeating-conic-gradient(#18252d 0 25%,#142028 0 50%) 50%/16px 16px;border:3px solid #0b1014;margin-bottom:10px}
+.pwInvChar .head{width:38px;height:38px;background:#d99b70;border:3px solid #171717;position:relative;box-shadow:0 0 0 3px #513625}
+.pwInvChar .head:before{content:"";position:absolute;left:-3px;top:-7px;width:38px;height:11px;background:#3b2418;border:3px solid #171717}
+.pwInvChar .body{width:44px;height:55px;background:#2674a8;border:3px solid #171717;margin-top:-3px}
+.pwInvChar .legs{width:42px;height:45px;border-left:9px solid #292d35;border-right:9px solid #292d35;margin-top:-3px}
+.pwInvStat{font-size:12px;line-height:1.7;text-align:left;color:#c9d6dc}
+.pwInvStat b{color:#fff}
+.pwInvGrid{display:grid;grid-template-columns:repeat(6,minmax(60px,1fr));gap:6px;align-content:start}
+.pwInvSlot{aspect-ratio:1;background:#18242b;border:3px solid #506773;position:relative;display:grid;place-items:center;cursor:pointer;image-rendering:pixelated;box-shadow:inset 0 0 0 2px #0b1115}
+.pwInvSlot:hover{border-color:#a9c5d2;transform:translate(-1px,-1px)}
+.pwInvSlot.selected{border-color:#fff;box-shadow:0 0 0 3px #00d9ff,inset 0 0 0 2px #101820}
+.pwInvIcon{width:34px;height:34px;border:3px solid #111;box-shadow:inset 4px 4px rgba(255,255,255,.18),inset -4px -4px rgba(0,0,0,.25);image-rendering:pixelated}
+.pwInvCount{position:absolute;right:3px;bottom:2px;background:#080d10;color:#fff;font-weight:900;font-size:12px;padding:1px 4px;border:1px solid #53636b}
+.pwInvName{position:absolute;left:3px;right:3px;top:3px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;text-shadow:1px 1px #000;color:#dce8ed;pointer-events:none}
+.pwInvFooter{padding:9px 10px;background:#111b21;border-top:3px solid #05090c;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.pwInvSelected{font-size:13px;color:#d9e4e8}.pwInvSelected b{color:#fff}
+.pwInvActions{display:flex;gap:6px}.pwInvActions button{padding:7px 12px}
+@media(max-width:700px){.pwInvBody{grid-template-columns:1fr}.pwInvSide{display:none}.pwInvGrid{grid-template-columns:repeat(4,minmax(58px,1fr))}.pwInvBox{max-height:94vh}.pwInvTitle{font-size:16px}}
+
 /* =========================
    HOTBAR
 ========================= */
@@ -769,6 +802,38 @@ select{
   </div>
 </div>
 
+<!-- =====================================================
+     PIXEL WORLDS STYLE INVENTORY
+===================================================== -->
+<div id="pwInventory" class="panel hidden">
+  <div class="pwInvBox">
+    <div class="pwInvHead">
+      <div class="pwInvTitle">🎒 EKWIPUNEK</div>
+      <button class="close" id="pwInvClose">X</button>
+    </div>
+    <div class="pwInvTabs">
+      <button class="pwInvTab active" data-invtab="all">WSZYSTKO</button>
+      <button class="pwInvTab" data-invtab="blocks">BLOKI</button>
+      <button class="pwInvTab" data-invtab="items">PRZEDMIOTY</button>
+      <button class="pwInvTab" data-invtab="seeds">NASIONA</button>
+      <button class="pwInvTab" data-invtab="fish">RYBY</button>
+    </div>
+    <div class="pwInvBody">
+      <div class="pwInvSide">
+        <div class="pwInvChar"><div><div class="head"></div><div class="body"></div><div class="legs"></div></div></div>
+        <div class="pwInvStat">Gracz: <b>PIXEL PLAYER</b><br>Poziom: <b id="pwInvLevel">1</b><br>💎 Gemy: <b id="pwInvGems">0</b><br>📦 Sloty: <b id="pwInvUsed">0/36</b></div>
+      </div>
+      <div>
+        <div id="pwInvGrid" class="pwInvGrid"></div>
+      </div>
+    </div>
+    <div class="pwInvFooter">
+      <div id="pwInvSelected" class="pwInvSelected">Wybierz przedmiot</div>
+      <div class="pwInvActions"><button id="pwInvEquip">WYPOSAŻ</button><button id="pwInvUse">UŻYJ</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- =========================
      GAME UI
 ========================= -->
@@ -799,6 +864,10 @@ select{
 
             <button class="small" id="craftBtn">
                 🔨
+            </button>
+
+            <button class="small" id="inventoryBtn" title="Ekwipunek">
+                🎒
             </button>
 
             <button class="small" id="gameSettingsBtn">
@@ -5176,6 +5245,109 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   toast('✨ Mega aktualizacja gotowa!');
 })();
 
+
+</script>
+<script>
+/* =========================================================
+   INVENTORY REWORK — PIXEL WORLDS INSPIRED
+========================================================= */
+(function(){
+  const invPanel=document.getElementById('pwInventory');
+  const invGrid=document.getElementById('pwInvGrid');
+  const invSelected=document.getElementById('pwInvSelected');
+  const invEquip=document.getElementById('pwInvEquip');
+  const invUse=document.getElementById('pwInvUse');
+  let invTab='all', invPick=null, invWasPaused=false;
+  const names={dirt:'Ziemia',stone:'Kamień',wood:'Drewno',sand:'Piasek',glass:'Szkło',brick:'Cegła',coal:'Węgiel',gold:'Złoto',lapis:'Lapis',emerald:'Szmaragd',diamond:'Diament',obsidian:'Obsydian',crystal:'Kryształ'};
+  const blockSet=new Set(items);
+  const extraItems=[
+    ['rod','Wędka','items',()=>PW.rod||0],['bait','Przynęta','items',()=>PW.bait||0],
+    ['gems','Gemy','items',()=>PW.gems||0]
+  ];
+  const seedNames={dirt:'Nasiono ziemi',stone:'Nasiono kamienia',sand:'Nasiono piasku',crystal:'Nasiono kryształu',gold:'Nasiono złota',diamond:'Nasiono diamentu'};
+  const seedColors={dirt:'#68a844',stone:'#78838a',sand:'#d7b45c',crystal:'#c76cff',gold:'#e7bd35',diamond:'#5de7e7'};
+  function openInv(){
+    invWasPaused=paused; paused=true; if(typeof close==='function'){try{close('pause')}catch(e){}}
+    invPanel.classList.remove('hidden'); renderInv();
+  }
+  function closeInv(){invPanel.classList.add('hidden');paused=invWasPaused;}
+  function categoryOf(k){
+    if(blockSet.has(k)) return 'blocks';
+    if(seedNames[k]) return 'seeds';
+    if(k==='fish') return 'fish';
+    return 'items';
+  }
+  function iconColor(k){
+    if(seedColors[k]) return seedColors[k];
+    if(k==='rod') return '#9b6b42'; if(k==='bait') return '#d58c7b'; if(k==='gems') return '#55e6ff';
+    const i=items.indexOf(k); return i>=0?color(slots[i]):'#777';
+  }
+  function data(){
+    const a=[];
+    items.forEach(k=>a.push({key:k,name:names[k]||k,cat:'blocks',count:inv[k]||0,kind:'block'}));
+    Object.keys(seedNames).forEach(k=>a.push({key:k,name:seedNames[k],cat:'seeds',count:PW.seeds?.[k]||0,kind:'seed'}));
+    extraItems.forEach(([key,name,cat,get])=>a.push({key,name,cat,count:get(),kind:'item'}));
+    const fishCount=PW.fish||0;
+    a.push({key:'fish',name:'Złowione ryby',cat:'fish',count:fishCount,kind:'fish'});
+    return a;
+  }
+  function renderInv(){
+    if(!invGrid)return;
+    const all=data();
+    const shown=all.filter(x=>invTab==='all'||x.cat===invTab);
+    invGrid.innerHTML='';
+    shown.forEach(x=>{
+      const el=document.createElement('div'); el.className='pwInvSlot'+(invPick===x.key?' selected':'');
+      el.title=x.name+' × '+x.count;
+      el.innerHTML='<div class="pwInvName">'+x.name+'</div><div class="pwInvIcon" style="background:'+iconColor(x.key)+'"></div><div class="pwInvCount">'+x.count+'</div>';
+      el.onclick=()=>{invPick=x.key;updateInvFooter();renderInv()};
+      el.ondblclick=()=>{invPick=x.key;equipPicked()};
+      invGrid.appendChild(el);
+    });
+    const used=all.filter(x=>x.count>0).length;
+    const u=document.getElementById('pwInvUsed'); if(u)u.textContent=used+'/36';
+    const l=document.getElementById('pwInvLevel'); if(l)l.textContent=PW.level||1;
+    const g=document.getElementById('pwInvGems'); if(g)g.textContent=PW.gems||0;
+    updateInvFooter();
+  }
+  function updateInvFooter(){
+    const d=data().find(x=>x.key===invPick);
+    if(!d){invSelected.textContent='Wybierz przedmiot';return;}
+    invSelected.innerHTML='<b>'+d.name+'</b> × '+d.count;
+  }
+  function equipPicked(){
+    const d=data().find(x=>x.key===invPick); if(!d)return;
+    if(d.kind==='block'){
+      const i=items.indexOf(d.key); if(i>=0){selected=i;updateHotbar();closeInv();pwToast('🎒 Wybrano: '+d.name)}
+    }else if(d.kind==='seed'){
+      PW.farmMode=true; PW.selectedSeed=d.key; closeInv(); pwToast('🌱 Wybrano '+d.name+' — kliknij ziemię, aby posadzić');
+    }else pwToast('Ten przedmiot nie trafia do hotbara');
+  }
+  function usePicked(){
+    const d=data().find(x=>x.key===invPick); if(!d)return;
+    if(d.kind==='seed'){if((PW.seeds?.[d.key]||0)>0){PW.farmMode=true;PW.selectedSeed=d.key;closeInv();pwToast('🌱 Tryb sadzenia: '+d.name)}else pwToast('Brak tego nasiona');return}
+    if(d.key==='bait'){pwToast('🪱 Przynęta służy do łowienia');return}
+    if(d.key==='rod'){pwFishUI();closeInv();return}
+    if(d.kind==='fish'){pwToast('🎣 Złowione ryby: '+(PW.fish||0)+' • wartość: '+(PW.fishValue||0)+' 💎');return}
+    equipPicked();
+  }
+  document.getElementById('inventoryBtn')?.addEventListener('click',openInv);
+  document.getElementById('pwInvClose')?.addEventListener('click',closeInv);
+  invEquip?.addEventListener('click',equipPicked); invUse?.addEventListener('click',usePicked);
+  document.querySelectorAll('.pwInvTab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.pwInvTab').forEach(x=>x.classList.remove('active'));b.classList.add('active');invTab=b.dataset.invtab;renderInv()}));
+  window.addEventListener('keydown',e=>{
+    if(e.code==='KeyB' || e.code==='KeyI'){
+      if(document.activeElement?.tagName==='INPUT')return;
+      if(invPanel.classList.contains('hidden'))openInv();else closeInv();
+    }
+    if(e.code==='Escape'&&!invPanel.classList.contains('hidden')){e.preventDefault();closeInv()}
+  });
+  const oldHot=updateHotbar;
+  updateHotbar=function(){oldHot();if(!invPanel.classList.contains('hidden'))renderInv()};
+  const oldSave=save;
+  save=function(){oldSave();if(!invPanel.classList.contains('hidden'))renderInv()};
+  setInterval(()=>{if(!invPanel.classList.contains('hidden'))renderInv()},1000);
+})();
 </script>
 </body>
 </html>
