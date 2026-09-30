@@ -3828,529 +3828,155 @@ function saveMaybe(){
 }
 
 /* =========================================================
-   MULTIPLAYER STATUS
+   MULTIPLAYER STATUS / PEER CONNECTION
+   FIXED VERSION
 ========================================================= */
 
 function setNet(text){
-
-    document
-    .getElementById(
-        "netStatus"
-    )
-    .textContent=text;
-
-    document
-    .getElementById(
-        "multiMsg"
-    )
-    .textContent=text;
-
+    const net = document.getElementById("netStatus");
+    const msg = document.getElementById("multiMsg");
+    if(net) net.textContent = text;
+    if(msg) msg.textContent = text;
 }
 
-/* =========================================================
-   MULTIPLAYER SEND
-========================================================= */
-
 function broadcast(m){
-
-    for(
-        const c
-        of multiplayer.conns
-    ){
-
-        if(c.open){
-
-            c.send(m);
-
+    for(const c of multiplayer.conns){
+        if(c && c.open){
+            try{ c.send(m); }catch(e){}
         }
-
     }
-
 }
 
 function send(m){
-
-    if(
-        multiplayer.host
-    ){
-
+    if(multiplayer.host){
         broadcast(m);
-
-    }else if(
-        multiplayer.hostConn &&
-        multiplayer.hostConn.open
-    ){
-
-        multiplayer
-            .hostConn
-            .send(m);
-
+    }else if(multiplayer.hostConn && multiplayer.hostConn.open){
+        try{ multiplayer.hostConn.send(m); }catch(e){}
     }
-
 }
 
-/* =========================================================
-   MULTIPLAYER CONNECTION
-========================================================= */
+function destroyMultiplayer(){
+    multiplayer.connected = false;
+    multiplayer.hostConn = null;
+    multiplayer.conns.clear();
+
+    if(multiplayer.peer){
+        try{ multiplayer.peer.destroy(); }catch(e){}
+    }
+
+    multiplayer.peer = null;
+    multiplayer.id = "";
+}
 
 function setupConn(c){
-
-    c.on(
-        "open",
-        ()=>{
-
-            multiplayer.connected=true;
-
-            if(
-                multiplayer.host
-            ){
-
-                multiplayer
-                    .conns
-                    .add(c);
-
-                c.send({
-
-                    type:"init",
-
-                    world:
-                        Array.from(
-                            world,
-                            y=>
-                                Array.from(y)
-                        ),
-
-                    dayTime,
-
-                    inv,
-
-                    players:
-                        [
-                            ...remotes.entries()
-                        ]
-
-                });
-
-                setNet(
-                    "MULTIPLAYER • HOST • "+
-                    multiplayer.conns.size+
-                    " graczy"
-                );
-
-            }else{
-
-                multiplayer.hostConn=c;
-
-                setNet(
-                    "MULTIPLAYER • POŁĄCZONO"
-                );
-
-            }
-
-        }
-    );
-
-    c.on(
-        "data",
-        m=>
-            receive(
-                m,
-                c
-            )
-    );
-
-    c.on(
-        "close",
-        ()=>{
-
-            multiplayer
-                .conns
-                .delete(c);
-
-            if(
-                c===
-                multiplayer.hostConn
-            ){
-
-                multiplayer.hostConn=
-                    null;
-
-            }
-
-            setNet(
-                multiplayer.host
-                ? "MULTIPLAYER • HOST"
-                : "MULTIPLAYER • ROZŁĄCZONO"
-            );
-
-        }
-    );
-
-    c.on(
-        "error",
-        ()=>{
-
-            setNet(
-                "Błąd połączenia"
-            );
-
-        }
-    );
-
-}
-
-/* =========================================================
-   MULTIPLAYER RECEIVE
-========================================================= */
-
-function receive(
-    m,
-    c
-){
-
-    /* INIT */
-
-    if(
-        m.type==="init" &&
-        !multiplayer.host
-    ){
-
-        world =
-            m.world.map(
-                a=>
-                    Uint8Array.from(a)
-            );
-
-        dayTime =
-            m.dayTime||0;
-
-        inv =
-            {
-                ...inv,
-                ...(m.inv||{})
-            };
-
-        updateHotbar();
-
-        for(
-            const [
-                id,
-                p
-            ]
-            of
-            m.players||[]
-        ){
-
-            remotes.set(
-                id,
-                p
-            );
-
-        }
-
-        c.send({
-
-            type:"hello",
-
-            x:me.x,
-
-            y:me.y
-
-        });
-
-    }
-
-    /* HELLO */
-
-    if(
-        m.type==="hello" &&
-        multiplayer.host
-    ){
-
-        remotes.set(
-            c.peer,
-            {
-
-                x:m.x,
-
-                y:m.y,
-
-                w:11,
-
-                h:22,
-
-                vx:0,
-
-                vy:0,
-
-                ground:false,
-
-                walk:0,
-
-                mine:0
-
-            }
-        );
-
-        broadcast({
-
-            type:"players",
-
-            players:
-                [
-                    ...remotes.entries()
-                ]
-
-        });
-
-    }
-
-    /* CLIENT PLAYER STATE */
-
-    if(
-        m.type==="state" &&
-        multiplayer.host
-    ){
-
-        const p =
-            remotes.get(
-                c.peer
-            );
-
-        if(p){
-
-            Object.assign(
-                p,
-                m.p
-            );
-
-            broadcast({
-
-                type:"remote",
-
-                id:c.peer,
-
-                p
-
+    if(!c) return;
+
+    c.on("open", ()=>{
+        multiplayer.connected = true;
+
+        if(multiplayer.host){
+            multiplayer.conns.add(c);
+
+            c.send({
+                type:"init",
+                world:Array.from(world, y=>Array.from(y)),
+                dayTime,
+                inv,
+                players:[...remotes.entries()]
             });
 
-        }
-
-    }
-
-    /* REMOTE PLAYER */
-
-    if(
-        m.type==="remote" &&
-        !multiplayer.host
-    ){
-
-        remotes.set(
-            m.id,
-            m.p
-        );
-
-    }
-
-    /* PLAYERS LIST */
-
-    if(
-        m.type==="players" &&
-        !multiplayer.host
-    ){
-
-        for(
-            const [
-                id,
-                p
-            ]
-            of
-            m.players
-        ){
-
-            remotes.set(
-                id,
-                p
+            setNet(
+                "MULTIPLAYER • HOST • "+
+                multiplayer.conns.size+
+                " graczy"
             );
+        }else{
+            multiplayer.hostConn = c;
+            setNet("MULTIPLAYER • POŁĄCZONO");
 
+            /* Client tells host where it spawned. */
+            c.send({
+                type:"hello",
+                x:me.x,
+                y:me.y
+            });
+        }
+    });
+
+    c.on("data", m=>{
+        receive(m,c);
+    });
+
+    c.on("close", ()=>{
+        multiplayer.conns.delete(c);
+
+        if(c === multiplayer.hostConn){
+            multiplayer.hostConn = null;
         }
 
-    }
+        if(multiplayer.host && multiplayer.conns.size > 0){
+            setNet(
+                "MULTIPLAYER • HOST • "+
+                multiplayer.conns.size+
+                " graczy"
+            );
+        }else if(!multiplayer.host){
+            multiplayer.connected = false;
+            setNet("MULTIPLAYER • ROZŁĄCZONO");
+        }else{
+            multiplayer.connected = false;
+            setNet("MULTIPLAYER • HOST • OCZEKUJE");
+        }
+    });
 
-    /* HOST TIME */
-
-    if(
-        m.type==="worldtime" &&
-        !multiplayer.host
-    ){
-
-        dayTime =
-            m.dayTime||
-            dayTime;
-
-    }
-
-    /* BLOCK */
-
-    if(
-        m.type==="block"
-    ){
-
-        setB(
-            m.x,
-            m.y,
-            m.v
-        );
-
-    }
-
-    /* ACTION */
-
-    if(
-        m.type==="action" &&
-        multiplayer.host
-    ){
-
-        hostAction(m);
-
-    }
-
+    c.on("error", err=>{
+        console.error("PeerJS connection error:", err);
+        setNet("Błąd połączenia — sprawdź kod pokoju");
+    });
 }
 
-/* =========================================================
-   CREATE HOST
-========================================================= */
-
-document
-.getElementById(
-    "hostBtn"
-)
-.onclick=()=>{
-
-    if(
-        multiplayer.peer
-    ){
-
-        return;
-
-    }
-
-    multiplayer.host=true;
-
-    multiplayer.peer =
-        new Peer();
-
-    multiplayer.peer.on(
-        "open",
-        id=>{
-
-            multiplayer.id=id;
-
-            document
-            .getElementById(
-                "myId"
-            )
-            .value=id;
-
-            setNet(
-                "POKÓJ GOTOWY • PODAJ KOD"
-            );
-
+function makePeer(onReady){
+    /*
+       Explicit PeerJS cloud server settings make the connection
+       much more reliable than relying on library defaults.
+    */
+    const peer = new Peer({
+        debug: 1,
+        config:{
+            iceServers:[
+                {urls:"stun:stun.l.google.com:19302"},
+                {urls:"stun:global.stun.twilio.com:3478"}
+            ]
         }
-    );
+    });
 
-    multiplayer.peer.on(
-        "connection",
-        c=>
-            setupConn(c)
-    );
+    peer.once("open", id=>{
+        multiplayer.id = id;
+        onReady(id);
+    });
 
-    multiplayer.peer.on(
-        "error",
-        e=>{
+    peer.on("disconnected", ()=>{
+        multiplayer.connected = false;
+        setNet("Serwer pośredniczący rozłączony — ponawiam...");
+        try{ peer.reconnect(); }catch(e){}
+    });
 
-            setNet(
-                "Błąd: "+
-                e.type
-            );
+    peer.on("error", e=>{
+        console.error("PeerJS error:", e);
 
-        }
-    );
+        const names = {
+            "peer-unavailable":"Nie znaleziono pokoju — sprawdź kod",
+            "network":"Błąd sieci",
+            "server-error":"Błąd serwera pośredniczącego",
+            "socket-error":"Błąd połączenia z serwerem",
+            "unavailable-id":"Ten kod jest zajęty"
+        };
 
-};
+        setNet("Błąd: "+(names[e.type] || e.type || "połączenia"));
+    });
 
-/* =========================================================
-   JOIN
-========================================================= */
-
-document
-.getElementById(
-    "joinBtn"
-)
-.onclick=()=>{
-
-    const id =
-        document
-        .getElementById(
-            "joinId"
-        )
-        .value
-        .trim();
-
-    if(!id)
-        return;
-
-    if(
-        multiplayer.peer
-    ){
-
-        multiplayer.peer.destroy();
-
-    }
-
-    multiplayer.host=false;
-
-    multiplayer.peer =
-        new Peer();
-
-    multiplayer.peer.on(
-        "open",
-        ()=>{
-
-            setupConn(
-
-                multiplayer
-                .peer
-                .connect(
-                    id,
-                    {
-
-                        reliable:true,
-
-                        serialization:
-                            "json"
-
-                    }
-                )
-
-            );
-
-        }
-    );
-
-    multiplayer.peer.on(
-        "error",
-        e=>{
-
-            setNet(
-                "Błąd: "+
-                e.type
-            );
-
-        }
-    );
-
-};
+    return peer;
+}
 
 /* =========================================================
    MULTIPLAYER SYNC
