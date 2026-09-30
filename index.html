@@ -6,7 +6,157 @@
 
 <title>PIXEL WORLD — MULTIPLAYER</title>
 
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js">
+/* =========================================================
+   PIXEL WORLD EXPANSION PACK
+========================================================= */
+const PW = {
+  gems:0, xp:0, level:1, fish:0, fishValue:0,
+  seeds:{dirt:8,stone:0,sand:0,crystal:0,gold:0,diamond:0},
+  crops:{}, pets:[], activePet:null, locks:[], worlds:{}, currentWorld:'MAIN',
+  quests:{mine:0,fish:0,harvest:0,craft:0,build:0}, completed:{},
+  achievements:{}, clan:null, skin:0, outfit:0, rod:1, bait:10,
+  inventoryExtra:{}, farmMode:false, tradeTarget:null, tradeOffer:{},
+  lastFish:0, dungeon:{active:false,time:0,gems:0,stage:0},
+  crossA:'dirt', crossB:'stone'
+};
+
+const PW_SEEDS={dirt:'Nasiono ziemi',stone:'Nasiono kamienia',sand:'Nasiono piasku',crystal:'Nasiono kryształu',gold:'Nasiono złota',diamond:'Nasiono diamentu'};
+const PW_SEED_BLOCK={dirt:B.dirt,stone:B.stone,sand:B.sand,crystal:B.crystal,gold:B.gold,diamond:B.diamond};
+const PW_HYBRIDS={
+  'dirt+stone':'granite','dirt+sand':'clay','dirt+crystal':'crystal','gold+stone':'metal','diamond+crystal':'star'
+};
+const PW_HYBRID_GEMS={granite:2,clay:3,crystal:8,metal:12,star:30};
+
+function pwToast(t){const e=document.getElementById('pwToast');e.textContent=t;e.style.display='block';clearTimeout(pwToast.t);pwToast.t=setTimeout(()=>e.style.display='none',1800)}
+function pwOpen(title,html){document.getElementById('pwSubTitle').textContent=title;document.getElementById('pwSubBody').innerHTML=html;open('pwSub')}
+function pwGainXP(n){PW.xp+=n;while(PW.xp>=100+PW.level*35){PW.xp-=100+PW.level*35;PW.level++;pwToast('⭐ Awans! Poziom '+PW.level);PW.gems+=15}pwRefresh()}
+function pwQuest(k,n=1){PW.quests[k]=(PW.quests[k]||0)+n;const goals={mine:25,fish:5,harvest:10,craft:5,build:25};if(PW.quests[k]>=goals[k]&&!PW.completed['q_'+k]){PW.completed['q_'+k]=1;PW.gems+=50;pwGainXP(40);pwToast('📜 Ukończono questa! +50 💎')}pwRefresh()}
+function pwRefresh(){
+  const g=document.getElementById('pwGems');if(g)g.textContent=Math.floor(PW.gems);
+  const l=document.getElementById('pwLevel');if(l)l.textContent=PW.level;
+  const a=document.getElementById('pwAch');if(a)a.textContent=Object.keys(PW.achievements).length;
+  const bar=document.getElementById('pwXpBar');if(bar)bar.style.width=Math.min(100,PW.xp/(100+PW.level*35)*100)+'%';
+}
+function pwAch(id,name,reward=25){if(!PW.achievements[id]){PW.achievements[id]=1;PW.gems+=reward;pwGainXP(30);pwToast('🏆 '+name+' +'+reward+' 💎')}}
+
+function pwSaveExtra(){
+  try{localStorage.setItem('PIXEL_WORLD_EXPANSION_V1',JSON.stringify(PW));}catch(e){}
+}
+function pwLoadExtra(){try{const x=JSON.parse(localStorage.getItem('PIXEL_WORLD_EXPANSION_V1')||'null');if(x)Object.assign(PW,x)}catch(e){}pwRefresh()}
+
+function pwSnapshot(){return Array.from(world,y=>Array.from(y))}
+function pwRestoreWorld(w){if(!Array.isArray(w)||w.length!==WORLD_H)return false;world=w.map(a=>Uint8Array.from(a));const p=spawn();me.x=p.x;me.y=p.y;me.vx=0;me.vy=0;return true}
+function pwSaveWorld(name){PW.worlds[name]={world:pwSnapshot(),dayTime};PW.currentWorld=name;pwSaveExtra();pwToast('🌍 Zapisano świat: '+name)}
+function pwWorldsUI(){
+ let rows='';for(const n of Object.keys(PW.worlds)){rows+=`<div class="pwItem"><span>🌍 ${n}</span><button onclick="pwSwitchWorld(${JSON.stringify(n)})">WEJDŹ</button></div>`}
+ pwOpen('🌍 ŚWIATY',`<p>Twórz własne światy i przełączaj się między zapisanymi mapami.</p><div class="pwGrid"><button onclick="pwNewWorldSlot()">➕ NOWY ŚWIAT</button><button onclick="pwSaveWorld(PW.currentWorld)">💾 ZAPISZ TEN</button></div><div class="pwList">${rows||'<p>Brak dodatkowych światów.</p>'}</div>`)
+}
+function pwNewWorldSlot(){const n=prompt('Nazwa świata:','WORLD'+(Object.keys(PW.worlds).length+1));if(!n)return;PW.worlds[n]={world:pwSnapshot(),dayTime};PW.currentWorld=n;newWorld();PW.worlds[n]={world:pwSnapshot(),dayTime};pwSaveExtra();pwWorldsUI()}
+function pwSwitchWorld(n){if(PW.currentWorld!==n)pwSaveWorld(PW.currentWorld);const d=PW.worlds[n];if(d&&pwRestoreWorld(d.world)){dayTime=d.dayTime||0;PW.currentWorld=n;pwSaveExtra();pwToast('🌍 Witaj w '+n);close('pwSub')}}
+
+function pwPlantAt(bx,by,seed){
+ if(PW.seeds[seed]<=0)return pwToast('Brak nasion');
+ const key=bx+','+by;if(PW.crops[key])return;
+ const base=getB(bx,by);if(base!==B.grass&&base!==B.dirt)return pwToast('Posadź na ziemi');
+ PW.seeds[seed]--;PW.crops[key]={seed,grow:0,max:45+Math.random()*45};pwSaveExtra();pwToast('🌱 Posadzono '+PW_SEEDS[seed]);pwGainXP(2)
+}
+function pwHarvestAt(bx,by){const key=bx+','+by,c=PW.crops[key];if(!c)return false;if(c.grow<c.max){pwToast('🌱 Jeszcze rośnie...');return true}delete PW.crops[key];const seed=c.seed;const block=PW_SEED_BLOCK[seed];const item=seed==='dirt'?'dirt':seed;inv[item]=(inv[item]||0)+2+Math.floor(Math.random()*3);PW.seeds[seed]=(PW.seeds[seed]||0)+1;if(Math.random()<.45)PW.gems+=2+PW.level;pwQuest('harvest');pwGainXP(12);pwAch('first_harvest','Pierwsze zbiory',20);pwSaveExtra();pwToast('🌾 Zebrano plon');updateHotbar();return true}
+function pwGrow(dt){for(const c of Object.values(PW.crops))c.grow=Math.min(c.max,c.grow+dt);}
+function pwDrawCrops(){for(const [key,c] of Object.entries(PW.crops)){const [x,y]=key.split(',').map(Number);const sx=x*T-cam.x,sy=y*T-cam.y;if(sx<-T||sy<-T||sx>VW||sy>VH)continue;const p=Math.min(1,c.grow/c.max);ctx.fillStyle=p>.85?'#62e86a':'#2e9d4b';ctx.fillRect(sx+6,sy+8,4,Math.max(2,Math.floor(7*p)));ctx.fillRect(sx+3,sy+10,3,Math.max(1,Math.floor(3*p)));ctx.fillRect(sx+10,sy+9,3,Math.max(1,Math.floor(4*p)));}}
+
+function pwFarmUI(){
+ const seedBtns=Object.keys(PW_SEEDS).map(k=>`<button onclick="PW.farmMode=true;PW.selectedSeed='${k}';close('pwSub');pwToast('🌱 Tryb sadzenia: ${PW_SEEDS[k]}')">🌱 ${PW_SEEDS[k]} (${PW.seeds[k]||0})</button>`).join('');
+ const hybrids=Object.entries(PW_HYBRIDS).map(([k,v])=>`<div class="pwItem"><span>${k.replace('+',' + ')} → ${v}</span><button onclick="pwCross('${k.split('+')[0]}','${k.split('+')[1]}')">KRZYŻUJ</button></div>`).join('');
+ pwOpen('🌱 FARMA & CROSSBREEDING',`<p>Wybierz nasiono, potem kliknij blok ziemi w świecie. Roślina dojrzewa z czasem.</p><div class="pwGrid">${seedBtns}</div><h3>🧬 Crossbreeding</h3><div class="pwList">${hybrids}</div>`)
+}
+function pwCross(a,b){if((PW.seeds[a]||0)<1||(PW.seeds[b]||0)<1)return pwToast('Brakuje nasion');PW.seeds[a]--;PW.seeds[b]--;const key=[a,b].sort().join('+');const out=PW_HYBRIDS[key]||'crystal';PW.seeds[out]=(PW.seeds[out]||0)+1;pwGainXP(10);pwSaveExtra();pwFarmUI();pwToast('🧬 Powstało nasiono: '+out)}
+
+function pwFishUI(){pwOpen('🎣 WĘDKOWANIE',`<p>Rod: poziom ${PW.rod} • Przynęty: ${PW.bait}</p><div class="pwGrid"><button onclick="pwFishNow()">🎣 ZARZUĆ WĘDKĘ</button><button onclick="pwBuyBait()">🪱 KUP 5 PRZYNĘT — 10 💎</button></div><p>Ryby złowione: ${PW.fish}<br>Wartość połowu: ${PW.fishValue} 💎</p><p class="pwTiny">Kliknięcie łowienia uruchamia prostą minigrę czasową.</p>`)}
+function pwBuyBait(){if(PW.gems>=10){PW.gems-=10;PW.bait+=5;pwRefresh();pwFishUI()}else pwToast('Za mało gemów')}
+function pwFishNow(){if(PW.bait<=0)return pwToast('Brak przynęt');if(PW.lastFish&&performance.now()-PW.lastFish<3500)return pwToast('Poczekaj na następne branie');PW.lastFish=performance.now();PW.bait--;const types=[['Minnow',4],['Carp',7],['Pike',12],['Golden Fish',25],['Crystal Fish',50]];const luck=Math.random()+PW.rod*.08;let f=types[Math.min(types.length-1,Math.floor(luck*types.length))];PW.fish++;PW.fishValue+=f[1];PW.gems+=f[1];pwQuest('fish');pwGainXP(15);if(f[0]==='Golden Fish')pwAch('goldfish','Złota ryba',50);pwSaveExtra();pwFishUI();pwToast('🎣 '+f[0]+' +'+f[1]+' 💎')}
+
+function pwShopUI(){pwOpen('🛒 SKLEP',`<p>Gemy: <b>${PW.gems}</b> 💎</p><div class="pwList">
+ <div class="pwItem"><span>🪱 10 przynęt</span><button onclick="pwBuy(20,'bait')">20 💎</button></div>
+ <div class="pwItem"><span>🎣 Wędka poziom ${PW.rod+1}</span><button onclick="pwBuy(120,'rod')">120 💎</button></div>
+ <div class="pwItem"><span>🥚 Jajko peta</span><button onclick="pwBuy(80,'pet')">80 💎</button></div>
+ <div class="pwItem"><span>🔒 World Lock</span><button onclick="pwBuy(100,'lock')">100 💎</button></div>
+ <div class="pwItem"><span>🌱 5 nasion kryształu</span><button onclick="pwBuy(75,'seed')">75 💎</button></div>
+ </div>`)}
+function pwBuy(cost,type){if(PW.gems<cost)return pwToast('Za mało gemów');PW.gems-=cost;if(type==='bait')PW.bait+=10;if(type==='rod')PW.rod++;if(type==='pet'){PW.pets.push({name:'Pixel '+(PW.pets.length+1),type:['slime','fox','crystal'][PW.pets.length%3]});PW.activePet=PW.pets.length-1}if(type==='lock')PW.locks.push({x:Math.floor(me.x/T),y:Math.floor(me.y/T),owner:'you'});if(type==='seed')PW.seeds.crystal=(PW.seeds.crystal||0)+5;pwSaveExtra();pwRefresh();pwShopUI();pwToast('Kupiono!')}
+
+function pwPetUI(){const p=PW.activePet==null?null:PW.pets[PW.activePet];pwOpen('🐾 PETY',`<p>${PW.pets.length?'Masz: '+PW.pets.map(x=>x.name).join(', '):'Nie masz jeszcze peta.'}</p><div class="pwGrid"><button onclick="pwShopUI()">🥚 SKLEP</button><button onclick="PW.activePet=null;pwSaveExtra();pwPetUI()">ODŁĄCZ</button></div>${p?'<p>Aktywny: 🐾 '+p.name+'</p>':''}`)}
+
+function pwLockAt(bx,by){return PW.locks.some(l=>Math.abs(l.x-bx)<=6&&Math.abs(l.y-by)<=6)}
+function pwLocksUI(){pwOpen('🔒 WORLD LOCKS',`<p>Lock chroni obszar przed budowaniem i kopaniem. Masz ${PW.locks.length} locków.</p><div class="pwGrid"><button onclick="pwPlaceLock()">🔒 POSTAW LOCK</button><button onclick="pwRemoveLock()">🗑️ USUŃ LOCK</button></div><div class="pwList">${PW.locks.map((l,i)=>`<div class="pwItem"><span>Lock #${i+1} (${l.x},${l.y})</span><button onclick="PW.locks.splice(${i},1);pwSaveExtra();pwLocksUI()">USUŃ</button></div>`).join('')||'<p>Brak locków.</p>'}</div>`)}
+function pwPlaceLock(){if(PW.locks.length>=10)return pwToast('Limit locków: 10');PW.locks.push({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h)/T),owner:'you'});pwSaveExtra();pwLocksUI();pwToast('🔒 Obszar zablokowany')}
+function pwRemoveLock(){const x=Math.floor((me.x+me.w/2)/T),y=Math.floor((me.y+me.h)/T);const i=PW.locks.findIndex(l=>Math.abs(l.x-x)<=1&&Math.abs(l.y-y)<=1);if(i>=0){PW.locks.splice(i,1);pwSaveExtra();pwLocksUI();pwToast('Lock usunięty')}else pwToast('Nie ma tu locka')}
+
+function pwQuestsUI(){const g={mine:25,fish:5,harvest:10,craft:5,build:25};pwOpen('📜 QUESTY',Object.entries(g).map(([k,v])=>`<div class="pwItem"><span>${k==='mine'?'⛏️ Kopanie':k==='fish'?'🎣 Ryby':k==='harvest'?'🌾 Zbiory':k==='craft'?'🔨 Crafting':'🧱 Budowanie'}<br><span class="pwTiny">${PW.quests[k]||0}/${v}</span></span><b>${PW.completed['q_'+k]?'✓ +50 💎':'50 💎'}</b></div>`).join(''))}
+function pwCharacterUI(){pwOpen('🧑 POSTAĆ',`<p>Skórka: ${PW.skin+1} • Ubranie: ${PW.outfit+1}</p><div class="pwGrid"><button onclick="PW.skin=(PW.skin+1)%5;pwSaveExtra();pwCharacterUI()">🎨 ZMIEŃ SKÓRKĘ</button><button onclick="PW.outfit=(PW.outfit+1)%6;pwSaveExtra();pwCharacterUI()">👕 ZMIEŃ UBRANIE</button></div><p>Po zmianie wygląd postaci aktualizuje się w grze.</p>`)}
+function pwClanUI(){pwOpen('🛡️ KLAN',PW.clan?`<p><b>${PW.clan}</b></p><p>Poziom klanu: 1<br>Członkowie: 1</p><button onclick="PW.clan=null;pwSaveExtra();pwClanUI()">OPUŚĆ KLAN</button>`:`<p>Załóż własny klan.</p><button onclick="pwCreateClan()">➕ STWÓRZ KLAN — 500 💎</button>`)}
+function pwCreateClan(){if(PW.gems<500)return pwToast('Potrzebujesz 500 💎');const n=prompt('Nazwa klanu:','Pixel Clan');if(!n)return;PW.gems-=500;PW.clan=n;pwSaveExtra();pwRefresh();pwClanUI();pwToast('🛡️ Klan utworzony')}
+function pwAchUI(){const list=[['first_mine','Pierwsze kopanie'],['first_harvest','Pierwsze zbiory'],['goldfish','Złota ryba'],['deep','Głębiny'],['builder','Budowniczy'],['rich','Bogaty']];pwOpen('🏆 OSIĄGNIĘCIA',list.map(x=>`<div class="pwItem"><span>${PW.achievements[x[0]]?'🏆':'⬜'} ${x[1]}</span><span>${PW.achievements[x[0]]?'ODBLOCKOWANE':'???'}</span></div>`).join(''))}
+
+function pwDungeonUI(){pwOpen('🏰 DUNGEON',`<p>Wejdź do proceduralnego lochu. Unikaj pułapek, zbieraj kryształy i wróć przed końcem czasu.</p><div class="pwStats"><div class="pwStat">Etap<br><b>${PW.dungeon.stage}</b></div><div class="pwStat">Czas<br><b>${Math.ceil(PW.dungeon.time)}s</b></div><div class="pwStat">Nagroda<br><b>${PW.dungeon.gems} 💎</b></div></div><button onclick="pwStartDungeon()">🏰 WEJDŹ DO DUNGEONU</button>`)}
+function pwStartDungeon(){if(PW.dungeon.active)return;PW.dungeon={active:true,time:45,gems:0,stage:0};close('pwSub');pwToast('🏰 Dungeon rozpoczęty!');}
+function pwDungeonTick(dt){if(!PW.dungeon.active)return;PW.dungeon.time-=dt;if(Math.random()<dt*.7){PW.dungeon.stage++;PW.dungeon.gems+=5+Math.floor(Math.random()*16);pwGainXP(4)}if(PW.dungeon.time<=0){PW.dungeon.active=false;PW.gems+=PW.dungeon.gems;pwGainXP(50);pwToast('🏰 Dungeon ukończony! +'+PW.dungeon.gems+' 💎');pwSaveExtra()}}
+
+function pwTradeUI(){
+ const opts=items.filter(x=>(inv[x]||0)>0).map(x=>`<div class="pwItem"><span>${x}: ${inv[x]}</span><button onclick="pwOffer('${x}')">+1</button></div>`).join('');
+ pwOpen('🤝 HANDEL',`<p>Prosty handel działa w połączeniu multiplayer. Wybierz przedmioty do oferty.</p><div id="pwTradeItems" class="pwList">${opts||'<p>Brak przedmiotów.</p>'}</div><p>Oferta: ${Object.entries(PW.tradeOffer).map(([k,v])=>k+' ×'+v).join(', ')||'pusta'}</p><div class="pwGrid"><button onclick="pwSendTrade()">📨 WYŚLIJ OFERTĘ</button><button onclick="PW.tradeOffer={};pwTradeUI()">WYCZYŚĆ</button></div>`)}
+function pwOffer(x){PW.tradeOffer[x]=(PW.tradeOffer[x]||0)+1;if(PW.tradeOffer[x]>inv[x])PW.tradeOffer[x]=inv[x];pwTradeUI()}
+function pwSendTrade(){if(!multiplayer.connected)return pwToast('Najpierw połącz multiplayer');send({type:'pw_trade',offer:PW.tradeOffer,gems:0});pwToast('📨 Oferta wysłana')}
+
+/* Wrap core actions without replacing the original mechanics. */
+const PW_oldMine=mine;
+mine=function(){
+ const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T);
+ if(PW.farmMode){PW.farmMode=false;const key=bx+','+by;if(pwHarvestAt(bx,by))return;pwPlantAt(bx,by,PW.selectedSeed||'dirt');return}
+ if(pwLockAt(bx,by)){pwToast('🔒 Ten obszar jest zablokowany');return}
+ const before={...inv};PW_oldMine();
+ let changed=false;for(const k of items){if((inv[k]||0)>(before[k]||0))changed=true}if(changed){pwQuest('mine');pwGainXP(3);pwAch('first_mine','Pierwsze kopanie',15);if(by>72)pwAch('deep','Zszedłeś głęboko',50);if(PW.gems>=5000)pwAch('rich','Bogacz',100)}
+ pwSaveExtra();
+};
+const PW_oldPlace=place;
+place=function(){const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T);if(pwLockAt(bx,by)){pwToast('🔒 Ten obszar jest zablokowany');return}const before=JSON.stringify(world[by]);PW_oldPlace();if(JSON.stringify(world[by])!==before){pwQuest('build');pwGainXP(2);pwAch('builder','Budowniczy',30)}pwSaveExtra()};
+
+/* Render crops and pet. */
+const PW_oldRender=render;
+render=function(){PW_oldRender();pwDrawCrops();if(PW.activePet!=null&&PW.pets[PW.activePet]){const px=me.x-cam.x-14,py=me.y-cam.y+5;ctx.fillStyle='#8d6cff';ctx.fillRect(px,py,9,9);ctx.fillStyle='#fff';ctx.fillRect(px+2,py+2,2,2);ctx.fillRect(px+6,py+2,2,2)}};
+const PW_oldLoop=loop;
+loop=function(now){const dt=Math.min(.033,(now-last)/1000);if(!paused){pwGrow(dt);pwDungeonTick(dt)}PW_oldLoop(now)};
+
+/* Multiplayer messages for trade and expansion data. */
+const PW_oldReceive=receive;
+receive=function(m,c){
+  PW_oldReceive(m,c);
+  if(m.type==='pw_trade'){pwToast('🤝 Otrzymano ofertę handlu: '+Object.entries(m.offer||{}).map(([k,v])=>k+' ×'+v).join(', '))}
+};
+
+/* Extra save/load and UI. */
+pwLoadExtra();
+const PW_oldSave=save;
+save=function(){PW_oldSave();pwSaveExtra()};
+
+document.getElementById('pwHubBtn').onclick=()=>{pwRefresh();open('pwHub')};
+document.getElementById('pwWorlds').onclick=pwWorldsUI;
+document.getElementById('pwFarm').onclick=pwFarmUI;
+document.getElementById('pwFish').onclick=pwFishUI;
+document.getElementById('pwShop').onclick=pwShopUI;
+document.getElementById('pwTrade').onclick=pwTradeUI;
+document.getElementById('pwDungeon').onclick=pwDungeonUI;
+document.getElementById('pwPets').onclick=pwPetUI;
+document.getElementById('pwLocks').onclick=pwLocksUI;
+document.getElementById('pwQuests').onclick=pwQuestsUI;
+document.getElementById('pwCharacter').onclick=pwCharacterUI;
+document.getElementById('pwClan').onclick=pwClanUI;
+document.getElementById('pwAchBtn').onclick=pwAchUI;
+
+/* Persist expansion periodically. */
+setInterval(pwSaveExtra,10000);
+
+</script>
 
 <style>
 *{
@@ -482,6 +632,24 @@ select{
     }
 }
 </style>
+<style>
+/* PIXEL WORLDS-STYLE EXPANSION */
+#pwHubBtn{position:fixed;right:10px;top:74px;z-index:12;padding:8px 10px;font-size:12px;background:#163247;border:2px solid #59cfff}
+#pwHub.panel{z-index:60}
+.pwGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.pwGrid button{min-height:44px}
+.pwStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.pwStat{background:#0d1a24;border:2px solid #29495a;padding:8px;text-align:center}
+.pwList{max-height:260px;overflow:auto;border:2px solid #29495a;padding:7px;background:#081119}
+.pwItem{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:6px 2px;border-bottom:1px solid #203744}
+.pwItem:last-child{border-bottom:0}
+.pwTiny{font-size:11px;color:#9cc5d8}
+.pwBar{height:10px;background:#101b22;border:2px solid #345060;margin:5px 0 10px}.pwBar i{display:block;height:100%;width:0;background:#43e5ff}
+.pwToast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);z-index:90;background:#07131c;border:2px solid #59cfff;padding:9px 13px;font-weight:900;display:none;box-shadow:4px 4px #000}
+#pwTradeItems{max-height:180px;overflow:auto}
+@media(max-width:700px){#pwHubBtn{top:auto;bottom:92px;right:8px}.pwGrid{grid-template-columns:1fr 1fr}.box{max-height:88vh;overflow:auto}}
+</style>
+
 </head>
 
 <body>
@@ -514,6 +682,10 @@ select{
 
             <button id="multi">
                 👥 MULTIPLAYER
+            </button>
+
+            <button id="menuHubBtn">
+                🌎 PIXEL WORLD HUB
             </button>
 
             <button id="news">
@@ -705,6 +877,45 @@ select{
 
     </div>
 
+</div>
+
+
+<button id="pwHubBtn">☰ HUB</button>
+<div id="pwToast" class="pwToast"></div>
+
+<div id="pwHub" class="panel hidden">
+  <div class="box">
+    <button class="close" data-close="pwHub">X</button>
+    <h2>🌎 PIXEL WORLD HUB</h2>
+    <div class="pwStats">
+      <div class="pwStat">💎<br><b id="pwGems">0</b><br><span class="pwTiny">GEMY</span></div>
+      <div class="pwStat">⭐<br><b id="pwLevel">1</b><br><span class="pwTiny">POZIOM</span></div>
+      <div class="pwStat">🏆<br><b id="pwAch">0</b><br><span class="pwTiny">OSIĄGNIĘCIA</span></div>
+    </div>
+    <div class="pwBar"><i id="pwXpBar"></i></div>
+    <div class="pwGrid">
+      <button id="pwWorlds">🌍 ŚWIATY</button>
+      <button id="pwFarm">🌱 FARMA</button>
+      <button id="pwFish">🎣 WĘDKOWANIE</button>
+      <button id="pwShop">🛒 SKLEP</button>
+      <button id="pwTrade">🤝 HANDEL</button>
+      <button id="pwDungeon">🏰 DUNGEON</button>
+      <button id="pwPets">🐾 PET</button>
+      <button id="pwLocks">🔒 LOCKI</button>
+      <button id="pwQuests">📜 QUESTY</button>
+      <button id="pwCharacter">🧑 POSTAĆ</button>
+      <button id="pwClan">🛡️ KLAN</button>
+      <button id="pwAchBtn">🏆 OSIĄGNIĘCIA</button>
+    </div>
+  </div>
+</div>
+
+<div id="pwSub" class="panel hidden">
+  <div class="box">
+    <button class="close" data-close="pwSub">X</button>
+    <h2 id="pwSubTitle">SYSTEM</h2>
+    <div id="pwSubBody"></div>
+  </div>
 </div>
 
 <!-- =========================
@@ -3363,6 +3574,8 @@ document
     ()=>open(
         "multiPanel"
     );
+
+document.getElementById('menuHubBtn').onclick=()=>{gameStarted=true;document.getElementById('menu').style.display='none';setPause(false);open('pwHub');pwRefresh()};
 
 document
 .getElementById("craftBtn")
