@@ -5018,7 +5018,12 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
     }
 
     function createPeer(){
+        /* IMPORTANT: cleanupPeer() used to erase multiplayer.host.
+           That made the host create a Peer successfully, but then the
+           incoming connection was rejected as if this peer were a client. */
+        const keepHost = !!multiplayer.host;
         cleanupPeer();
+        multiplayer.host = keepHost;
 
         mpStatus("Łączenie z serwerem multiplayer…");
 
