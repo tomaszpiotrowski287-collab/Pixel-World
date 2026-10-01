@@ -4113,14 +4113,19 @@ function receive(
 ========================================================= */
 
 function makePeer(){
-    return new Peer(undefined, {
+    return new Peer({
+        host: "0.peerjs.com",
+        port: 443,
+        path: "/",
+        secure: true,
         debug: 1,
         config: {
             iceServers: [
                 { urls: "stun:stun.l.google.com:19302" },
                 { urls: "stun:stun1.l.google.com:19302" },
                 { urls: "stun:stun.cloudflare.com:3478" }
-            ]
+            ],
+            sdpSemantics: "unified-plan"
         }
     });
 }
@@ -4256,65 +4261,87 @@ document.getElementById("joinBtn").onclick=()=>{
 
     if(multiplayer.peer){
         try{ multiplayer.peer.destroy(); }catch(e){}
+        multiplayer.peer=null;
     }
 
     multiplayer.host=false;
     multiplayer.connected=false;
     multiplayer.hostConn=null;
     multiplayer.conns.clear();
-
     setNet("Łączenie z pokojem…");
 
     const peer=makePeer();
     multiplayer.peer=peer;
-    let attempts=0;
-    let closed=false;
+    let finished=false;
+    let timer=null;
 
-    const tryConnect=()=>{
-        if(closed || multiplayer.peer!==peer || multiplayer.connected) return;
-        attempts++;
-        setNet("Łączenie… próba "+attempts+"/8");
-
-        let c;
-        try{
-            c=peer.connect(id,{reliable:true,serialization:"json"});
-        }catch(e){
-            if(attempts<8) setTimeout(tryConnect,1200);
-            else setNet("Nie udało się połączyć z pokojem.");
-            return;
-        }
-
-        let opened=false;
-        c.on("open",()=>{ opened=true; });
-        c.on("error",err=>{
-            if(err?.type==="peer-unavailable" && !opened && attempts<8){
-                setTimeout(tryConnect,1200);
-            }
-        });
-        setupConn(c);
+    const fail=(msg)=>{
+        if(finished) return;
+        finished=true;
+        if(timer) clearTimeout(timer);
+        setNet(msg);
     };
 
     peer.on("open",()=>{
-        setTimeout(tryConnect,300);
-    });
+        if(finished || multiplayer.peer!==peer) return;
+        setNet("Serwer gotowy — szukam pokoju…");
 
-    peer.on("disconnected",()=>{
-        if(multiplayer.peer===peer && !peer.destroyed){
-            try{ peer.reconnect(); }catch(e){}
+        let c;
+        try{
+            c=peer.connect(id,{
+                reliable:true,
+                serialization:"json",
+                metadata:{game:"PIXEL_WORLD"}
+            });
+        }catch(e){
+            fail("Nie można rozpocząć połączenia. Sprawdź kod pokoju.");
+            return;
         }
+
+        setupConn(c);
+
+        timer=setTimeout(()=>{
+            if(!c.open && !multiplayer.connected){
+                fail("Nie znaleziono pokoju. Host musi mieć otwarte MULTIPLAYER → UTWÓRZ POKÓJ.");
+                try{ c.close(); }catch(e){}
+            }
+        },7000);
+
+        c.on("open",()=>{
+            if(timer) clearTimeout(timer);
+            if(!finished){
+                finished=true;
+                multiplayer.connected=true;
+                setNet("MULTIPLAYER • POŁĄCZONO");
+            }
+        });
+
+        c.on("error",err=>{
+            console.warn("Join connection error:",err);
+            if(err?.type==="peer-unavailable"){
+                fail("Nie znaleziono pokoju. Sprawdź, czy host nadal ma otwarty pokój i czy kod jest aktualny.");
+            }else if(err?.type){
+                fail("Błąd połączenia: "+err.type);
+            }
+        });
     });
 
     peer.on("error",e=>{
-        console.warn("PeerJS client error",e);
+        console.warn("PeerJS join error:",e);
         if(e.type==="peer-unavailable"){
-            if(attempts<8) setTimeout(tryConnect,1200);
-            else setNet("Nie znaleziono pokoju. Sprawdź kod i upewnij się, że host ma otwarty pokój.");
-        }else if(e.type!=="network"){
-            setNet("Błąd połączenia: "+e.type);
+            fail("Nie znaleziono pokoju. Sprawdź kod pokoju.");
+        }else if(e.type==="network" || e.type==="server-error" || e.type==="socket-error"){
+            fail("Nie można połączyć z serwerem multiplayer. Sprawdź połączenie z internetem.");
+        }else{
+            fail("Błąd multiplayer: "+(e.type || "nieznany"));
         }
     });
 
-    setTimeout(()=>{ closed=true; }, 15000);
+    peer.on("disconnected",()=>{
+        if(multiplayer.peer===peer && !peer.destroyed && !finished){
+            try{ peer.reconnect(); }catch(e){}
+        }
+    });
 };
 
 /* =========================================================
