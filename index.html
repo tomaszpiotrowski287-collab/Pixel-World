@@ -3890,6 +3890,225 @@ function send(m){
 }
 
 /* =========================================================
+   MULTIPLAYER RECEIVE
+========================================================= */
+
+function receive(
+    m,
+    c
+){
+
+    /* INIT */
+
+    if(
+        m.type==="init" &&
+        !multiplayer.host
+    ){
+
+        world =
+            m.world.map(
+                a=>
+                    Uint8Array.from(a)
+            );
+
+        dayTime =
+            m.dayTime||0;
+
+        inv =
+            {
+                ...inv,
+                ...(m.inv||{})
+            };
+
+        updateHotbar();
+
+        for(
+            const [
+                id,
+                p
+            ]
+            of
+            m.players||[]
+        ){
+
+            remotes.set(
+                id,
+                p
+            );
+
+        }
+
+        c.send({
+
+            type:"hello",
+
+            x:me.x,
+
+            y:me.y
+
+        });
+
+    }
+
+    /* HELLO */
+
+    if(
+        m.type==="hello" &&
+        multiplayer.host
+    ){
+
+        remotes.set(
+            c.peer,
+            {
+
+                x:m.x,
+
+                y:m.y,
+
+                w:11,
+
+                h:22,
+
+                vx:0,
+
+                vy:0,
+
+                ground:false,
+
+                walk:0,
+
+                mine:0
+
+            }
+        );
+
+        broadcast({
+
+            type:"players",
+
+            players:
+                [
+                    ...remotes.entries()
+                ]
+
+        });
+
+    }
+
+    /* CLIENT PLAYER STATE */
+
+    if(
+        m.type==="state" &&
+        multiplayer.host
+    ){
+
+        const p =
+            remotes.get(
+                c.peer
+            );
+
+        if(p){
+
+            Object.assign(
+                p,
+                m.p
+            );
+
+            broadcast({
+
+                type:"remote",
+
+                id:c.peer,
+
+                p
+
+            });
+
+        }
+
+    }
+
+    /* REMOTE PLAYER */
+
+    if(
+        m.type==="remote" &&
+        !multiplayer.host
+    ){
+
+        remotes.set(
+            m.id,
+            m.p
+        );
+
+    }
+
+    /* PLAYERS LIST */
+
+    if(
+        m.type==="players" &&
+        !multiplayer.host
+    ){
+
+        for(
+            const [
+                id,
+                p
+            ]
+            of
+            m.players
+        ){
+
+            remotes.set(
+                id,
+                p
+            );
+
+        }
+
+    }
+
+    /* HOST TIME */
+
+    if(
+        m.type==="worldtime" &&
+        !multiplayer.host
+    ){
+
+        dayTime =
+            m.dayTime||
+            dayTime;
+
+    }
+
+    /* BLOCK */
+
+    if(
+        m.type==="block"
+    ){
+
+        setB(
+            m.x,
+            m.y,
+            m.v
+        );
+
+    }
+
+    /* ACTION */
+
+    if(
+        m.type==="action" &&
+        multiplayer.host
+    ){
+
+        hostAction(m);
+
+    }
+
+}
+
+
+/* =========================================================
    MULTIPLAYER CONNECTION — STABLE VERSION
 ========================================================= */
 
