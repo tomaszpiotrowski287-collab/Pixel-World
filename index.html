@@ -5794,43 +5794,41 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
 })();
 </script>
 
-</body>
-</html>\n<script>
+<script>
+/* FINAL CHAT/NAME COMPATIBILITY PATCH — no receive() override */
 (function(){
-  const KEY='pixelWorldPlayerName';
-  let playerName=localStorage.getItem(KEY)||'PIXEL PLAYER';
-  const panel=document.getElementById('namePanel'), input=document.getElementById('playerName'), preview=document.getElementById('namePreview');
-  const box=document.getElementById('chatBox'), msgs=document.getElementById('chatMessages'), cin=document.getElementById('chatInput');
+  const $=id=>document.getElementById(id);
   const clean=v=>String(v||'').replace(/[<>]/g,'').replace(/\s+/g,' ').trim().slice(0,16)||'PIXEL PLAYER';
-  function setName(v,sync){playerName=clean(v);localStorage.setItem(KEY,playerName);input.value=playerName;preview.textContent=playerName;if(sync&&multiplayer.connected)try{send({type:'playerName',name:playerName})}catch(e){}}
-  function line(name,text,system){const r=document.createElement('div');r.className='chatLine';const n=document.createElement('span');n.className='chatName';n.textContent=(system?'SYSTEM':clean(name))+':';const t=document.createElement('span');t.textContent=' '+String(text||'').slice(0,120);r.append(n,t);msgs.appendChild(r);while(msgs.children.length>80)msgs.removeChild(msgs.firstChild);msgs.scrollTop=msgs.scrollHeight}
-  function openChat(){box.classList.remove('hidden');cin.focus()}
-  function sendChat(){const text=cin.value.trim();if(!text)return;if(!multiplayer.connected){line('', 'Czat działa tylko w multiplayerze.',true);cin.value='';return}const m={type:'chat',name:playerName,text:text.slice(0,120)};line(playerName,m.text,false);try{if(multiplayer.host)broadcast(m);else send(m)}catch(e){}cin.value=''}
-  setName(playerName,false);
-  document.getElementById('nameBtn').onclick=()=>{panel.classList.remove('hidden');input.value=playerName;preview.textContent=playerName;setTimeout(()=>{input.focus();input.select()},30)};
-  document.getElementById('saveNameBtn').onclick=()=>{setName(input.value,true);panel.classList.add('hidden');line('', 'Ustawiono nazwę: '+playerName,true)};
-  input.addEventListener('input',()=>preview.textContent=clean(input.value));
-  input.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('saveNameBtn').click()});
-  document.getElementById('chatBtn').onclick=()=>box.classList.contains('hidden')?openChat():box.classList.add('hidden');
-  document.getElementById('chatSend').onclick=sendChat;
-  cin.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat()}if(e.key==='Escape')box.classList.add('hidden')});
-  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&gameStarted&&document.activeElement!==cin)openChat()});
-  setInterval(()=>{if(multiplayer.connected)try{send({type:'playerName',name:playerName})}catch(e){}},2500);
-
-  const oldReceive=receive;
-  receive=function(m,c){
-    if(m&&m.type==='chat'){line(m.name||'GRACZ',m.text||'',false);if(multiplayer.host)for(const x of multiplayer.conns)if(x!==c&&x.open)try{x.send(m)}catch(e){}return}
-    if(m&&m.type==='playerName'){
-      if(multiplayer.host&&c){const p=remotes.get(c.peer);if(p)p.name=clean(m.name);for(const x of multiplayer.conns)if(x!==c&&x.open)try{x.send(m)}catch(e){}}
-      else if(c){const p=remotes.get(c.peer);if(p)p.name=clean(m.name)}
-      return
-    }
-    return oldReceive(m,c);
+  const nameInput=$('playerName'), namePanel=$('namePanel'), namePreview=$('namePreview');
+  const chatBox=$('chatBox'), chatInput=$('chatInput');
+  let name=clean(localStorage.getItem('pixelWorldPlayerName')||'PIXEL PLAYER');
+  function applyName(v,sendNow){
+    name=clean(v);
+    localStorage.setItem('pixelWorldPlayerName',name);
+    if(nameInput)nameInput.value=name;
+    if(namePreview)namePreview.textContent=name;
+    if(sendNow&&typeof sendIdentity==='function')try{sendIdentity()}catch(e){}
+  }
+  applyName(name,false);
+  const nameBtn=$('nameBtn'), saveNameBtn=$('saveNameBtn');
+  if(nameBtn)nameBtn.onclick=()=>{
+    if(namePanel)namePanel.classList.remove('hidden');
+    if(nameInput){nameInput.value=name;nameInput.focus();nameInput.select();}
   };
-
-  // Names above remote players.
-  const oldDraw=drawRemote;
-  drawRemote=function(){oldDraw();for(const p of remotes.values()){if(!p.name)continue;const x=p.x-cam.x+p.w/2,y=p.y-cam.y-5;ctx.save();ctx.font='10px monospace';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeText(p.name,x,y);ctx.fillText(p.name,x,y);ctx.restore()}};
-  line('', 'Witaj w czacie Pixel World!',true);
+  if(saveNameBtn)saveNameBtn.onclick=()=>{applyName(nameInput?.value,true);namePanel?.classList.add('hidden');};
+  nameInput?.addEventListener('input',()=>{if(namePreview)namePreview.textContent=clean(nameInput.value)});
+  nameInput?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveNameBtn?.click()}if(e.key==='Escape')namePanel?.classList.add('hidden')});
+  const chatBtn=$('chatBtn');
+  if(chatBtn)chatBtn.onclick=()=>{if(!chatBox)return;chatBox.classList.toggle('hidden');if(!chatBox.classList.contains('hidden'))chatInput?.focus()};
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&typeof gameStarted!=='undefined'&&gameStarted&&document.activeElement!==chatInput&&document.activeElement!==nameInput){
+      chatBox?.classList.remove('hidden');chatInput?.focus();e.preventDefault();
+    }
+  });
+  // Keep the identity alive after reconnect without touching receive().
+  setInterval(()=>{if(typeof multiplayer!=='undefined'&&multiplayer.connected&&typeof sendIdentity==='function')try{sendIdentity()}catch(e){}},4000);
 })();
 </script>
+
+</body>
+</html>
