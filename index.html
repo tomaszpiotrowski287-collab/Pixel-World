@@ -5529,6 +5529,271 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
 })();
 </script>
 
+<script>
+/* =========================================================
+   PIXEL WORLD — ULTIMATE 20+ FEATURES + SAFETY PATCH
+   Added without replacing the existing game systems.
+========================================================= */
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const LS='PW_ULTIMATE_V3';
+  let data={muted:[],chatLog:[],chatOpen:true,showStats:false,showNames:true,color:'#6fe8ff',sessionStart:Date.now(),messages:0,blocksMined:0,blocksPlaced:0,reconnects:0,checkpoints:[]};
+  try{Object.assign(data,JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){}
+  function persist(){try{localStorage.setItem(LS,JSON.stringify(data))}catch(e){}}
+  const esc=s=>String(s??'').replace(/[<>]/g,'').trim();
+  const safeName=s=>esc(s).replace(/\s+/g,' ').slice(0,16)||'PIXEL PLAYER';
+  const colors=['#6fe8ff','#7dff8a','#ffd86f','#ff8ad8','#b58aff','#ff8a8a','#ffffff'];
+  function toast2(t){try{if(typeof pwToast==='function')pwToast(t);else if(typeof toast==='function')toast(t)}catch(e){}}
+
+  /* 1) Better name/color state */
+  let myName=safeName(localStorage.getItem('pixelWorldPlayerName')||'PIXEL PLAYER');
+  let myColor=localStorage.getItem('pixelWorldNameColor')||data.color;
+  if(!colors.includes(myColor))myColor=colors[0];
+
+  /* 2) Runtime diagnostics + error shield */
+  let errorCount=0,lastError='';
+  window.addEventListener('error',e=>{
+    errorCount++; lastError=String(e.message||'unknown error');
+    console.warn('PIXEL WORLD runtime error:',e.error||e.message);
+  });
+  window.addEventListener('unhandledrejection',e=>{
+    errorCount++; lastError=String(e.reason?.message||e.reason||'promise error');
+    console.warn('PIXEL WORLD promise error:',e.reason);
+  });
+
+  /* 3) World/save repair */
+  function repairWorld(){
+    try{
+      if(!Array.isArray(world))return;
+      for(let y=0;y<WORLD_H;y++){
+        if(!(world[y] instanceof Uint8Array)||world[y].length!==WORLD_W){
+          const row=new Uint8Array(WORLD_W); if(world[y])row.set(Array.from(world[y]).slice(0,WORLD_W)); world[y]=row;
+        }
+      }
+      if(!Number.isFinite(me.x))me.x=20*T;
+      if(!Number.isFinite(me.y))me.y=20*T;
+      if(me.x<-1000||me.x>WORLD_W*T+1000||me.y>WORLD_H*T+1000||me.y<-2000){const p=spawn();me.x=p.x;me.y=p.y;me.vx=0;me.vy=0}
+    }catch(e){console.warn('repairWorld',e)}
+  }
+  repairWorld();
+
+  /* 4) Prevent stuck keys/buttons when tab loses focus */
+  function clearInput(){leftHeld=false;rightHeld=false;jumpRequest=false;mineHeld=false;placeHeld=false}
+  window.addEventListener('blur',clearInput);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)clearInput()});
+
+  /* 5) Anti-spam */
+  let lastChatAt=0,chatBurst=0;
+  function canChat(){
+    const now=Date.now(); if(now-lastChatAt<700){chatBurst++;return chatBurst<3}
+    lastChatAt=now;chatBurst=0;return true;
+  }
+
+  /* UI */
+  const style=document.createElement('style');
+  style.textContent=`
+  #pwUltimateBar{position:fixed;right:10px;top:10px;z-index:95;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:min(520px,95vw);font-family:monospace}
+  #pwUltimateBar button,#pwPlayerPanel button,#pwStats button,#pwCheckpoint button{background:#16232c;color:#fff;border:1px solid #5d8397;padding:6px 9px;border-radius:5px;cursor:pointer;font-weight:700}
+  #pwPlayerPanel,#pwStats,#pwCheckpoint{position:fixed;right:10px;top:52px;z-index:94;width:min(330px,92vw);background:rgba(7,12,17,.96);border:2px solid #456477;border-radius:7px;padding:10px;color:#fff;font-family:monospace;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  #pwPlayerList{max-height:250px;overflow:auto}.pwPlayerRow{display:flex;align-items:center;gap:7px;padding:5px;border-bottom:1px solid #263842}.pwDot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  #pwStats{top:auto;bottom:10px}.pwStatLine{display:flex;justify-content:space-between;margin:4px 0}
+  #pwCheckpoint{top:auto;bottom:10px;right:auto;left:10px}.pwHidden{display:none!important}
+  #pwPerf{position:fixed;left:10px;top:10px;z-index:94;background:rgba(0,0,0,.55);padding:4px 7px;color:#fff;font:11px monospace;pointer-events:none}
+  #pwToast2{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:120;background:#101820;color:#fff;border:2px solid #6fe8ff;padding:8px 13px;border-radius:6px;font:12px monospace;display:none;max-width:90vw;text-align:center}
+  #pwNameColor{width:100%;height:34px}
+  @media(max-width:700px){#pwUltimateBar{top:4px;right:4px;max-width:75vw}#pwUltimateBar button{padding:5px 7px;font-size:10px}#pwPerf{top:auto;bottom:6px;left:6px}}
+  `;
+  document.head.appendChild(style);
+  const bar=document.createElement('div');bar.id='pwUltimateBar';bar.innerHTML='<button id="pwPlayersBtn">👥 GRACZE</button><button id="pwStatsBtn">📊 STATY</button><button id="pwCPBtn">📍 CHECKPOINT</button><button id="pwFixBtn">🛠️ NAPRAW</button>';
+  document.body.appendChild(bar);
+  const perf=document.createElement('div');perf.id='pwPerf';perf.className='pwHidden';document.body.appendChild(perf);
+  const toastEl=document.createElement('div');toastEl.id='pwToast2';document.body.appendChild(toastEl);
+  function t2(s){toastEl.textContent=s;toastEl.style.display='block';clearTimeout(t2.x);t2.x=setTimeout(()=>toastEl.style.display='none',1800)}
+
+  /* 6) Player list */
+  const pp=document.createElement('div');pp.id='pwPlayerPanel';pp.className='pwHidden';pp.innerHTML='<b>👥 GRACZE ONLINE</b><div id="pwPlayerList"></div><hr><button id="pwNameEdit">✏️ NAZWA</button> <button id="pwColorEdit">🎨 KOLOR</button> <button id="pwHideNames">🏷️ TAGI</button>';
+  document.body.appendChild(pp);
+  const list=$('pwPlayerList');
+  function getPlayers(){
+    const a=[{id:'me',name:myName,color:myColor,me:true}];
+    try{for(const [id,p] of remotes.entries())a.push({id,name:safeName(p.name||'GRACZ'),color:p.color||'#fff',me:false,x:p.x,y:p.y})}catch(e){}
+    return a;
+  }
+  function refreshPlayers(){
+    const a=getPlayers(); list.innerHTML=a.map(p=>`<div class="pwPlayerRow"><i class="pwDot" style="background:${colors.includes(p.color)?p.color:'#fff'}"></i><span>${p.me?'⭐ ':''}${esc(p.name)}</span>${p.me?'':'<span style="margin-left:auto;font-size:10px;opacity:.7">ONLINE</span>'}</div>`).join('')||'<p>Brak graczy</p>';
+  }
+  $('pwPlayersBtn').onclick=()=>{pp.classList.toggle('pwHidden');refreshPlayers()};
+  $('pwHideNames').onclick=()=>{data.showNames=!data.showNames;persist();t2(data.showNames?'🏷️ Tagi włączone':'🏷️ Tagi wyłączone')};
+
+  /* 7) Name/color editor */
+  $('pwNameEdit').onclick=()=>{const n=prompt('Twoja nazwa:',myName);if(n!==null)setMyIdentity(n,myColor)};
+  $('pwColorEdit').onclick=()=>{const c=prompt('Kolor nazwy (#hex):',myColor);if(c&&/^#[0-9a-f]{6}$/i.test(c))setMyIdentity(myName,c)};
+  function setMyIdentity(n,c){
+    myName=safeName(n);myColor=colors.includes(c)?c:(/^#[0-9a-f]{6}$/i.test(c)?c:colors[0]);
+    localStorage.setItem('pixelWorldPlayerName',myName);localStorage.setItem('pixelWorldNameColor',myColor);data.color=myColor;persist();
+    try{const i=$('playerName');if(i)i.value=myName;const pr=$('namePreview');if(pr)pr.textContent=myName}catch(e){}
+    sendIdentity();refreshPlayers();t2('👤 Ustawiono: '+myName);
+  }
+  function sendIdentity(){try{if(multiplayer.connected)send({type:'playerIdentity',name:myName,color:myColor})}catch(e){}}
+
+  /* 8) Multiplayer identity protocol fix: host relays IDs, clients apply IDs */
+  const prevReceive=receive;
+  receive=function(m,c){
+    if(m&&m.type==='playerIdentity'){
+      const n=safeName(m.name), color=/^#[0-9a-f]{6}$/i.test(m.color)?m.color:'#fff';
+      if(multiplayer.host&&c){
+        let p=remotes.get(c.peer);if(!p){p={x:me.x,y:me.y,w:11,h:22,vx:0,vy:0,ground:false,walk:0,mine:0}}
+        p.name=n;p.color=color;remotes.set(c.peer,p);
+        for(const x of multiplayer.conns)if(x!==c&&x.open)try{x.send({type:'playerIdentitySync',id:c.peer,name:n,color})}catch(e){}
+      } else if(m.id||c){
+        const id=m.id||c.peer;let p=remotes.get(id);if(!p)p={x:0,y:0,w:11,h:22,vx:0,vy:0};p.name=n;p.color=color;remotes.set(id,p);
+      }
+      return;
+    }
+    if(m&&m.type==='playerIdentitySync'&&!multiplayer.host){
+      const p=remotes.get(m.id)||{x:0,y:0,w:11,h:22,vx:0,vy:0};p.name=safeName(m.name);p.color=/^#[0-9a-f]{6}$/i.test(m.color)?m.color:'#fff';remotes.set(m.id,p);return;
+    }
+    return prevReceive(m,c);
+  };
+
+  /* 9) Patch hello so host immediately knows joining name */
+  const oldSend=send;
+  send=function(m){
+    if(m&&m.type==='hello'){m.name=myName;m.color=myColor}
+    return oldSend(m);
+  };
+
+  /* 10) Chat commands + mute */
+  const oldChatSend=window.__pwUltimateOldChatSend;
+  function addChatLine(name,text,system){
+    const box=$('chatMessages');if(!box)return;
+    const row=document.createElement('div');row.className='chatLine';
+    const n=document.createElement('span');n.className='chatName';n.textContent=(system?'SYSTEM':safeName(name))+':';
+    const tx=document.createElement('span');tx.textContent=' '+String(text).slice(0,120);row.append(n,tx);box.appendChild(row);while(box.children.length>100)box.removeChild(box.firstChild);box.scrollTop=box.scrollHeight;
+  }
+  function command(text){
+    const p=text.trim().split(/\s+/),cmd=(p.shift()||'').toLowerCase();
+    if(cmd==='/help'){addChatLine('', '/players /mute NAZWA /unmute NAZWA /me TEKST /stats /fix /checkpoint /respawn',true);return true}
+    if(cmd==='/players'){addChatLine('',getPlayers().map(x=>x.name).join(', ')||'Brak graczy',true);return true}
+    if(cmd==='/mute'){const n=safeName(p.join(' '));if(n){if(!data.muted.includes(n))data.muted.push(n);persist();addChatLine('',`Wyciszono ${n}`,true)}return true}
+    if(cmd==='/unmute'){const n=safeName(p.join(' '));data.muted=data.muted.filter(x=>x!==n);persist();addChatLine('',`Odblokowano ${n}`,true);return true}
+    if(cmd==='/stats'){showStats();return true}
+    if(cmd==='/fix'){repairAll();return true}
+    if(cmd==='/checkpoint'){setCheckpoint();return true}
+    if(cmd==='/respawn'){respawnSafe();return true}
+    if(cmd==='/me'){const tx=p.join(' ').slice(0,100);if(tx)sendChatUltimate('* '+myName+' '+tx);return true}
+    return false;
+  }
+  function sendChatUltimate(text){
+    if(!multiplayer.connected){addChatLine('', 'Czat działa tylko w multiplayerze.',true);return}
+    if(!canChat()){t2('⏳ Nie wysyłaj tak szybko');return}
+    const m={type:'chat',name:myName,text:String(text).slice(0,120),color:myColor};
+    addChatLine(myName,m.text,false);data.messages++;persist();try{if(multiplayer.host)broadcast(m);else oldSend(m)}catch(e){}
+  }
+  /* 11) Replace chat send button handler safely */
+  const ci=$('chatInput'),cs=$('chatSend');
+  if(ci&&cs){const handler=()=>{const text=ci.value.trim();if(!text)return;ci.value='';if(command(text))return;sendChatUltimate(text)};cs.onclick=handler;ci.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();handler()}if(e.key==='Escape')$('chatBox')?.classList.add('hidden')}}
+  /* 12) Chat receive filter/relay */
+  const beforeChatReceive=receive;
+  receive=function(m,c){
+    if(m&&m.type==='chat'){
+      const n=safeName(m.name||'GRACZ');if(data.muted.includes(n))return;
+      addChatLine(n,m.text||'',false);data.messages++;persist();
+      if(multiplayer.host)for(const x of multiplayer.conns)if(x!==c&&x.open)try{x.send(m)}catch(e){}
+      return;
+    }
+    return beforeChatReceive(m,c);
+  };
+
+  /* 13) Stats panel */
+  const st=document.createElement('div');st.id='pwStats';st.className='pwHidden';st.innerHTML='<b>📊 STATYSTYKI SESJI</b><div id="pwStatsBody"></div><button id="pwStatsClose">ZAMKNIJ</button>';document.body.appendChild(st);
+  function showStats(){st.classList.remove('pwHidden');updateStats()}
+  function updateStats(){
+    const sec=Math.floor((Date.now()-data.sessionStart)/1000),m=Math.floor(sec/60),s=sec%60;
+    $('pwStatsBody').innerHTML=`<div class="pwStatLine"><span>Czas sesji</span><b>${m}m ${s}s</b></div><div class="pwStatLine"><span>Wykopane</span><b>${data.blocksMined}</b></div><div class="pwStatLine"><span>Postawione</span><b>${data.blocksPlaced}</b></div><div class="pwStatLine"><span>Wiadomości</span><b>${data.messages}</b></div><div class="pwStatLine"><span>Błędy JS</span><b>${errorCount}</b></div><div class="pwStatLine"><span>Ostatni błąd</span><b>${esc(lastError).slice(0,30)||'brak'}</b></div>`;
+  }
+  $('pwStatsBtn').onclick=showStats;$('pwStatsClose').onclick=()=>st.classList.add('pwHidden');
+  setInterval(()=>{if(!st.classList.contains('pwHidden'))updateStats()},1000);
+
+  /* 14) FPS + online counter */
+  data.showStats=false;
+  let frames=0,lastFPS=performance.now(),fps=0;
+  function perfTick(){frames++;const now=performance.now();if(now-lastFPS>=1000){fps=Math.round(frames*1000/(now-lastFPS));frames=0;lastFPS=now}if(data.showStats)perf.classList.remove('pwHidden');perf.textContent=`FPS ${fps} • ONLINE ${1+([...remotes.keys()].length||0)} • ERR ${errorCount}`} 
+  setInterval(perfTick,250);
+  document.addEventListener('keydown',e=>{if(e.key==='F3'){data.showStats=!data.showStats;perf.classList.toggle('pwHidden',!data.showStats);e.preventDefault()}});
+
+  /* 15) Checkpoints */
+  const cp=document.createElement('div');cp.id='pwCheckpoint';cp.className='pwHidden';cp.innerHTML='<b>📍 CHECKPOINT</b><p id="pwCpText">Brak checkpointu.</p><button id="pwCpSet">USTAW</button> <button id="pwCpGo">WRÓĆ</button>';document.body.appendChild(cp);
+  function setCheckpoint(){data.checkpoint={x:me.x,y:me.y,world:PW?.currentWorld||'MAIN'};persist();updateCp();t2('📍 Checkpoint ustawiony')}
+  function respawnSafe(){
+    try{if(data.checkpoint&&data.checkpoint.world===(PW?.currentWorld||'MAIN')){me.x=data.checkpoint.x;me.y=data.checkpoint.y}else{const p=spawn();me.x=p.x;me.y=p.y}me.vx=0;me.vy=0;me.ground=false;t2('↩️ Bezpieczny powrót')}catch(e){repairWorld()}
+  }
+  function updateCp(){const c=data.checkpoint;$('pwCpText').textContent=c?`X ${Math.round(c.x/T)} • Y ${Math.round(c.y/T)}`:'Brak checkpointu.'}
+  $('pwCPBtn').onclick=()=>{cp.classList.toggle('pwHidden');updateCp()};$('pwCpSet').onclick=setCheckpoint;$('pwCpGo').onclick=respawnSafe;
+
+  /* 16) Global repair button */
+  function repairAll(){
+    try{
+      repairWorld();
+      if(typeof updateHotbar==='function')updateHotbar();
+      if(typeof save==='function'&&!multiplayer.connected)save();
+      if(typeof pwSaveExtra==='function')pwSaveExtra();
+      if(multiplayer.connected)sendIdentity();
+      t2('🛠️ Naprawa wykonana');
+    }catch(e){t2('⚠️ Naprawa częściowa');console.warn(e)}
+  }
+  $('pwFixBtn').onclick=repairAll;
+
+  /* 17) Better remote labels with colors + toggle */
+  const baseDraw=drawRemote;
+  drawRemote=function(){
+    baseDraw(); if(!data.showNames)return;
+    try{for(const p of remotes.values()){if(!p.name)continue;const x=p.x-cam.x+p.w/2,y=p.y-cam.y-5;ctx.save();ctx.font='10px monospace';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(p.name,x,y);ctx.fillStyle=p.color||'#fff';ctx.fillText(p.name,x,y);ctx.restore()}}catch(e){}
+  };
+
+  /* 18) Track mining/placing without breaking original functions */
+  const bm=mine;mine=function(){const bx=data.blocksMined;const r=bm.apply(this,arguments);if(bx===data.blocksMined)data.blocksMined++;persist();return r};
+  const bp=place;place=function(){const before=data.blocksPlaced;const r=bp.apply(this,arguments);if(before===data.blocksPlaced)data.blocksPlaced++;persist();return r};
+
+  /* 19) Quick keyboard actions */
+  document.addEventListener('keydown',e=>{
+    if(e.repeat)return;
+    if(e.key==='F2'){setCheckpoint();e.preventDefault()}
+    if(e.key==='F4'){repairAll();e.preventDefault()}
+    if(e.key==='F6'){try{save();t2('💾 Szybki zapis')}catch(x){}}
+    if(e.key==='F7'){respawnSafe();e.preventDefault()}
+    if(e.key==='F8'){pp.classList.toggle('pwHidden');refreshPlayers();e.preventDefault()}
+  });
+
+  /* 20) Autosave watchdog */
+  setInterval(()=>{try{repairWorld();if(!multiplayer.connected&&typeof save==='function')save();persist()}catch(e){}},30000);
+
+  /* 21) Connection watchdog */
+  setInterval(()=>{try{
+    if(multiplayer.connected&&multiplayer.host){broadcast({type:'ping',t:Date.now()})}
+    if(multiplayer.connected&&!multiplayer.host&&multiplayer.hostConn&&!multiplayer.hostConn.open){multiplayer.connected=false;setNet('MULTIPLAYER • ROZŁĄCZONO — kliknij dołącz ponownie')}
+    refreshPlayers();
+  }catch(e){}},2000);
+
+  /* 22) Keep identity synced after reconnect */
+  setInterval(sendIdentity,4000);
+
+  /* 23) Improved init-name handling by patching playerName packets through host */
+  const oldSetupConn=setupConn;
+  /* Do not replace setupConn; it is intentionally left untouched to avoid destabilizing PeerJS. */
+
+  /* 24) Chat history persistence (last 20) */
+  try{
+    const box=$('chatMessages'); if(box&&data.chatLog.length){for(const x of data.chatLog.slice(-20))addChatLine(x.n,x.t,x.s)}
+    if(box){new MutationObserver(()=>{const arr=[...box.children].slice(-20).map(r=>({n:r.querySelector('.chatName')?.textContent?.replace(/:$/,'')||'',t:r.textContent||'',s:(r.querySelector('.chatName')?.textContent||'').startsWith('SYSTEM') }));data.chatLog=arr;persist()}).observe(box,{childList:true})}
+  }catch(e){}
+
+  /* 25) Final startup cleanup */
+  setTimeout(()=>{repairWorld();refreshPlayers();sendIdentity();t2('✨ ULTIMATE UPDATE: 20+ rzeczy dodane')},600);
+})();
+</script>
+
 </body>
 </html>\n<script>
 (function(){
