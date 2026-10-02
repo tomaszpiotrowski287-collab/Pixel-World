@@ -532,6 +532,16 @@ select{
 .pwToast{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);z-index:90;background:#07131c;border:2px solid #59cfff;padding:9px 13px;font-weight:900;display:none;box-shadow:4px 4px #000}
 #pwTradeItems{max-height:180px;overflow:auto}
 @media(max-width:700px){#pwHubBtn{top:auto;bottom:92px;right:8px}.pwGrid{grid-template-columns:1fr 1fr}.box{max-height:88vh;overflow:auto}}
+
+/* =========================
+   POLISHED HUD / MINIMAP
+========================= */
+#pwMiniMap{position:fixed;right:10px;top:64px;width:190px;height:92px;z-index:13;background:rgba(5,10,15,.88);border:2px solid #5d7b8c;box-shadow:4px 4px #000;image-rendering:pixelated;pointer-events:none}
+#pwOnline{position:fixed;right:10px;top:164px;z-index:13;background:rgba(5,10,15,.88);border:2px solid #456477;padding:5px 8px;font-size:11px;min-width:190px;text-shadow:2px 2px #000}
+#pwCoords{position:fixed;left:10px;top:58px;z-index:13;background:rgba(5,10,15,.72);padding:4px 7px;font-size:10px;color:#bdefff;text-shadow:2px 2px #000;pointer-events:none}
+#pwQuick{position:fixed;right:10px;bottom:10px;z-index:14;display:flex;gap:5px;pointer-events:auto}
+#pwQuick button{padding:6px 8px;font-size:11px}
+@media(max-width:700px){#pwMiniMap{width:145px;height:70px;top:54px}#pwOnline{top:130px;min-width:145px;font-size:10px}#pwQuick{bottom:150px;right:8px;flex-direction:column}.pwHideMobile{display:none!important}}
 </style>
 
 </head>
@@ -637,6 +647,8 @@ select{
                 readonly
                 placeholder="Twój kod"
             >
+
+            <button id="copyIdBtn" class="small">KOPIUJ</button>
 
         </div>
 
@@ -3876,6 +3888,12 @@ function receive(
     c
 ){
 
+    if(m && m.type==="ping") {
+        try{ c.send({type:"pong",t:m.t}); }catch(e){}
+        return;
+    }
+    if(m && m.type==="pong") return;
+
     /* INIT */
 
     if(
@@ -4105,7 +4123,7 @@ function makePeer(){
 }
 
 function cleanRoomCode(v){
-    return String(v || "").trim();
+    return String(v || "").replace(/\s+/g, "").trim();
 }
 
 function resetMultiplayerPeer(){
@@ -4169,6 +4187,34 @@ function setupConn(c){
     });
 }
 
+setInterval(()=>{
+    if(!multiplayer.connected) return;
+    const packet={type:"ping",t:Date.now()};
+    try{
+        if(multiplayer.host){
+            for(const c of [...multiplayer.conns]) if(c&&c.open) c.send(packet);
+        }else if(multiplayer.hostConn&&multiplayer.hostConn.open){
+            multiplayer.hostConn.send(packet);
+        }
+    }catch(e){}
+},5000);
+
+const copyIdBtn=document.getElementById("copyIdBtn");
+if(copyIdBtn){
+    copyIdBtn.onclick=async()=>{
+        const id=document.getElementById("myId").value.trim();
+        if(!id){setNet("Najpierw utwórz pokój.");return;}
+        try{
+            await navigator.clipboard.writeText(id);
+            setNet("KOD POKOJU SKOPIOWANY");
+        }catch(e){
+            const input=document.getElementById("myId");
+            input.focus(); input.select();
+            setNet("Zaznaczono kod — skopiuj Ctrl+C.");
+        }
+    };
+}
+
 document.getElementById("hostBtn").onclick=()=>{
     if(multiplayer.peer){
         setNet("Pokój jest już uruchomiony.");
@@ -4189,7 +4235,19 @@ document.getElementById("hostBtn").onclick=()=>{
         setNet("POKÓJ GOTOWY • KOD: "+id);
     });
 
-    peer.on("connection",c=>setupConn(c));
+    peer.on("connection",c=>{
+        setNet("Ktoś próbuje dołączyć…");
+        setupConn(c);
+        const wait=setTimeout(()=>{
+            if(c && !c.open){
+                try{c.close();}catch(e){}
+                if(multiplayer.connected) setNet("MULTIPLAYER • HOST • POŁĄCZONO");
+                else setNet("POŁĄCZENIE NIE DOSZŁO DO SKUTKU — spróbuj ponownie.");
+            }
+        },15000);
+        c.on("open",()=>clearTimeout(wait));
+        c.on("close",()=>clearTimeout(wait));
+    });
 
     peer.on("disconnected",()=>{
         if(multiplayer.peer===peer&&!peer.destroyed){
@@ -5303,5 +5361,138 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   setInterval(()=>{if(!invPanel.classList.contains('hidden'))renderInv()},1000);
 })();
 </script>
+
+<!-- POLISHED HUD -->
+<canvas id="pwMiniMap" width="190" height="92"></canvas>
+<div id="pwOnline">🌐 OFFLINE • 0 GRACZY</div>
+<div id="pwCoords">X: 0 • Y: 0</div>
+<div id="pwQuick">
+  <button id="pwMapToggle">🗺 MAPA</button>
+  <button id="pwSaveQuick">💾 ZAPISZ</button>
+</div>
+
+
+<script>
+/* =========================================================
+   PIXEL WORLD — QUALITY OF LIFE UPDATE
+   - minimap
+   - online player counter
+   - safe respawn if player falls out of the world
+   - quick save
+   - keyboard shortcuts
+========================================================= */
+(function(){
+  const map=document.getElementById('pwMiniMap');
+  const mctx=map?.getContext('2d');
+  const online=document.getElementById('pwOnline');
+  const coords=document.getElementById('pwCoords');
+  const mapToggle=document.getElementById('pwMapToggle');
+  const saveQuick=document.getElementById('pwSaveQuick');
+  let mapVisible=true;
+  let lastRespawn=0;
+
+  function playerSnapshot(){
+    return {x:me.x,y:me.y,vx:me.vx,vy:me.vy,ground:me.ground,dir:me.dir,walk:me.walk,mine:me.mine,w:11,h:22};
+  }
+
+  function drawMiniMap(){
+    if(!mctx||!mapVisible)return;
+    const w=map.width,h=map.height;
+    mctx.clearRect(0,0,w,h);
+    mctx.fillStyle='#07131c';mctx.fillRect(0,0,w,h);
+    const sx=w/WORLD_W, sy=h/WORLD_H;
+    for(let y=0;y<WORLD_H;y+=1){
+      for(let x=0;x<WORLD_W;x+=1){
+        const b=getB(x,y);
+        if(b===B.air)continue;
+        if(b===B.water)mctx.fillStyle='#3ca9d6';
+        else if(b===B.grass)mctx.fillStyle='#58a84d';
+        else if(b===B.dirt)mctx.fillStyle='#8a5b3c';
+        else if(b===B.stone)mctx.fillStyle='#667078';
+        else if(b===B.wood)mctx.fillStyle='#70462c';
+        else if(b===B.leaves)mctx.fillStyle='#3e873d';
+        else if(b===B.gold)mctx.fillStyle='#d7ae35';
+        else if(b===B.diamond)mctx.fillStyle='#62e5e8';
+        else if(b===B.crystal)mctx.fillStyle='#c56cff';
+        else mctx.fillStyle='#737b82';
+        mctx.fillRect(Math.floor(x*sx),Math.floor(y*sy),Math.max(1,Math.ceil(sx)),Math.max(1,Math.ceil(sy)));
+      }
+    }
+    for(const p of remotes.values()){
+      mctx.fillStyle='#ffbd4a';
+      mctx.fillRect(Math.floor((p.x/T)*sx)-1,Math.floor((p.y/T)*sy)-1,3,3);
+    }
+    mctx.fillStyle='#fff';
+    mctx.fillRect(Math.floor((me.x/T)*sx)-2,Math.floor((me.y/T)*sy)-2,5,5);
+    mctx.strokeStyle='#8fe7ff';mctx.strokeRect(0,0,w-1,h-1);
+  }
+
+  function refreshOnline(){
+    const n=remotes.size;
+    if(!multiplayer.connected){
+      online.textContent='🌐 OFFLINE • 0 GRACZY';
+      return;
+    }
+    const role=multiplayer.host?'HOST':'GRACZ';
+    online.textContent='🌐 '+role+' • '+(n+1)+' GRACZ'+((n+1)===1?'':'Y');
+  }
+
+  function safeRespawn(){
+    if(paused || !gameStarted)return;
+    if(me.y < WORLD_H*T+80)return;
+    const now=performance.now();
+    if(now-lastRespawn<1200)return;
+    lastRespawn=now;
+    const p=spawn();
+    me.x=p.x;me.y=p.y;me.vx=0;me.vy=0;me.ground=false;me.hp=100;
+    if(typeof sound==='function')sound('jump');
+    if(typeof toast==='function')toast('🛟 Bezpieczny powrót na powierzchnię');
+    if(multiplayer.connected)send({type:'state',p:playerSnapshot()});
+  }
+
+  function updateCoords(){
+    if(!coords)return;
+    coords.textContent='X: '+Math.floor(me.x/T)+' • Y: '+Math.floor(me.y/T);
+  }
+
+  mapToggle?.addEventListener('click',()=>{
+    mapVisible=!mapVisible;
+    map.style.display=mapVisible?'block':'none';
+  });
+  saveQuick?.addEventListener('click',()=>{
+    try{save(); if(typeof toast==='function')toast('💾 Świat zapisany');}
+    catch(e){console.warn('Quick save failed',e)}
+  });
+
+  addEventListener('keydown',e=>{
+    if(e.code==='KeyM' && document.activeElement?.tagName!=='INPUT'){
+      mapVisible=!mapVisible;map.style.display=mapVisible?'block':'none';
+    }
+    if(e.code==='F5' && document.activeElement?.tagName!=='INPUT'){
+      e.preventDefault();try{save();if(typeof toast==='function')toast('💾 Szybki zapis wykonany')}catch(err){}
+    }
+  });
+
+  const oldRenderFinal=render;
+  render=function(){
+    oldRenderFinal();
+    drawMiniMap();
+    refreshOnline();
+    updateCoords();
+  };
+
+  const oldLoopFinal=loop;
+  loop=function(now){
+    safeRespawn();
+    oldLoopFinal(now);
+    drawMiniMap();
+    refreshOnline();
+    updateCoords();
+  };
+
+  setInterval(()=>{refreshOnline();drawMiniMap();updateCoords()},500);
+})();
+</script>
+
 </body>
 </html>
