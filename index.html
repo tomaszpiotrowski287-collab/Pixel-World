@@ -4140,64 +4140,46 @@ function receive(
 
 
 /* =========================================================
-   MULTIPLAYER CONNECTION — FINAL FIX
+   MULTIPLAYER CONNECTION — STABLE VERSION
 ========================================================= */
 
-function makeRoomCode(){
-    const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let out="PW-";
-    for(let i=0;i<6;i++) out+=chars[Math.floor(Math.random()*chars.length)];
-    return out;
-}
-
-function makePeer(peerId=null){
-    const options={
-        host:"0.peerjs.com",
-        port:443,
-        path:"/",
-        secure:true,
-        debug:1,
-        config:{
-            iceServers:[
+function makePeer(){
+    return new Peer({
+        debug: 1,
+        config: {
+            iceServers: [
                 {urls:"stun:stun.l.google.com:19302"},
                 {urls:"stun:stun1.l.google.com:19302"},
-                {urls:"stun.cloudflare.com:3478"}
+                {urls:"stun:stun.cloudflare.com:3478"}
             ],
             sdpSemantics:"unified-plan"
         }
-    };
-    return peerId ? new Peer(peerId,options) : new Peer(options);
+    });
 }
 
 function cleanRoomCode(v){
-    return String(v||"").replace(/\s+/g,"").trim().toUpperCase();
+    return String(v || "").replace(/\s+/g, "").trim();
 }
 
 function resetMultiplayerPeer(){
-    try{
-        for(const c of [...multiplayer.conns]){
-            try{c.close();}catch(e){}
-        }
-        if(multiplayer.hostConn)try{multiplayer.hostConn.close();}catch(e){}
-        if(multiplayer.peer)try{multiplayer.peer.destroy();}catch(e){}
-    }catch(e){}
+    if(multiplayer.peer){
+        try{ multiplayer.peer.destroy(); }catch(e){}
+    }
     multiplayer.peer=null;
     multiplayer.id="";
     multiplayer.connected=false;
     multiplayer.host=false;
     multiplayer.hostConn=null;
     multiplayer.conns.clear();
-    remotes.clear();
 }
 
 function setupConn(c){
-    if(!c)return;
+    if(!c) return;
 
     c.on("open",()=>{
+        multiplayer.connected=true;
         if(multiplayer.host){
             multiplayer.conns.add(c);
-            multiplayer.connected=true;
-
             try{
                 c.send({
                     type:"init",
@@ -4206,33 +4188,23 @@ function setupConn(c){
                     inv:{...inv},
                     players:[...remotes.entries()]
                 });
-            }catch(e){console.warn("init send failed",e);}
-
+            }catch(e){ console.warn("init send failed",e); }
             setNet("MULTIPLAYER • HOST • POŁĄCZONO");
         }else{
             multiplayer.hostConn=c;
-            multiplayer.connected=true;
             setNet("MULTIPLAYER • POŁĄCZONO");
-
-            try{
-                c.send({
-                    type:"hello",
-                    x:me.x,
-                    y:me.y
-                });
-            }catch(e){console.warn("hello send failed",e);}
+            try{ c.send({type:"hello",x:me.x,y:me.y}); }
+            catch(e){ console.warn("hello send failed",e); }
         }
     });
 
     c.on("data",m=>{
-        try{receive(m,c);}
-        catch(e){console.warn("receive error",e);}
+        try{ receive(m,c); }catch(e){ console.warn("receive error",e); }
     });
 
     c.on("close",()=>{
         multiplayer.conns.delete(c);
-        if(c===multiplayer.hostConn)multiplayer.hostConn=null;
-
+        if(c===multiplayer.hostConn) multiplayer.hostConn=null;
         if(multiplayer.host){
             multiplayer.connected=multiplayer.conns.size>0;
             setNet(multiplayer.connected
@@ -4246,29 +4218,17 @@ function setupConn(c){
 
     c.on("error",err=>{
         console.warn("PeerJS connection error",err);
-        if(err?.type!=="peer-unavailable")
-            setNet("Błąd połączenia: "+(err?.type||"nieznany"));
+        setNet("Błąd połączenia: "+(err?.type||"nieznany"));
     });
 }
 
-/* keep the signalling connection alive */
 setInterval(()=>{
-    if(!multiplayer.peer || multiplayer.peer.destroyed)return;
-
-    if(multiplayer.peer.disconnected){
-        try{multiplayer.peer.reconnect();}
-        catch(e){}
-    }
-
-    if(!multiplayer.connected)return;
-
+    if(!multiplayer.connected) return;
     const packet={type:"ping",t:Date.now()};
     try{
         if(multiplayer.host){
-            for(const c of [...multiplayer.conns]){
-                if(c&&c.open)c.send(packet);
-            }
-        }else if(multiplayer.hostConn?.open){
+            for(const c of [...multiplayer.conns]) if(c&&c.open) c.send(packet);
+        }else if(multiplayer.hostConn&&multiplayer.hostConn.open){
             multiplayer.hostConn.send(packet);
         }
     }catch(e){}
@@ -4278,218 +4238,170 @@ const copyIdBtn=document.getElementById("copyIdBtn");
 if(copyIdBtn){
     copyIdBtn.onclick=async()=>{
         const id=document.getElementById("myId").value.trim();
-        if(!id){
-            setNet("Najpierw utwórz pokój.");
-            return;
-        }
-
+        if(!id){setNet("Najpierw utwórz pokój.");return;}
         try{
             await navigator.clipboard.writeText(id);
             setNet("KOD POKOJU SKOPIOWANY");
         }catch(e){
             const input=document.getElementById("myId");
-            input.focus();
-            input.select();
-            setNet("Kod zaznaczony — naciśnij Ctrl+C.");
+            input.focus(); input.select();
+            setNet("Zaznaczono kod — skopiuj Ctrl+C.");
         }
     };
 }
 
-/* =========================
-   CREATE ROOM
-========================= */
-
 document.getElementById("hostBtn").onclick=()=>{
-    if(multiplayer.peer && !multiplayer.peer.destroyed){
+    if(multiplayer.peer){
         setNet("Pokój jest już uruchomiony.");
         return;
     }
-
-    resetMultiplayerPeer();
-
     multiplayer.host=true;
     multiplayer.connected=false;
+    multiplayer.conns.clear();
+    multiplayer.hostConn=null;
     setNet("Tworzenie pokoju…");
 
-    const room=makeRoomCode();
-    const peer=makePeer(room);
+    const peer=makePeer();
     multiplayer.peer=peer;
-    multiplayer.id=room;
-
-    const input=document.getElementById("myId");
-    input.value=room;
-
-    let opened=false;
 
     peer.on("open",id=>{
-        opened=true;
         multiplayer.id=id;
-        input.value=id;
+        document.getElementById("myId").value=id;
         setNet("POKÓJ GOTOWY • KOD: "+id);
     });
 
     peer.on("connection",c=>{
-        setNet("DRUGI GRACZ ŁĄCZY SIĘ…");
+        setNet("Ktoś próbuje dołączyć…");
         setupConn(c);
+        const wait=setTimeout(()=>{
+            if(c && !c.open){
+                try{c.close();}catch(e){}
+                if(multiplayer.connected) setNet("MULTIPLAYER • HOST • POŁĄCZONO");
+                else setNet("POŁĄCZENIE NIE DOSZŁO DO SKUTKU — spróbuj ponownie.");
+            }
+        },15000);
+        c.on("open",()=>clearTimeout(wait));
+        c.on("close",()=>clearTimeout(wait));
     });
 
     peer.on("disconnected",()=>{
-        if(multiplayer.peer===peer && !peer.destroyed){
-            setNet("Ponowne łączenie pokoju…");
-            setTimeout(()=>{
-                try{
-                    if(peer.disconnected && !peer.destroyed)peer.reconnect();
-                }catch(e){}
-            },500);
-        }
-    });
-
-    peer.on("close",()=>{
-        if(multiplayer.peer===peer){
-            multiplayer.connected=false;
-            setNet("POKÓJ ZAMKNIĘTY");
+        if(multiplayer.peer===peer&&!peer.destroyed){
+            setNet("Ponowne łączenie z serwerem…");
+            try{peer.reconnect();}catch(e){}
         }
     });
 
     peer.on("error",e=>{
         console.warn("PeerJS host error",e);
-
-        if(e?.type==="unavailable-id"){
-            /* extremely unlikely, but generate another room */
-            setNet("Kod zajęty — tworzę nowy pokój…");
-            try{peer.destroy();}catch(x){}
-            multiplayer.peer=null;
-
-            setTimeout(()=>{
-                if(multiplayer.host){
-                    document.getElementById("hostBtn").click();
-                }
-            },400);
-            return;
-        }
-
-        if(e?.type==="network" || e?.type==="server-error" || e?.type==="socket-error"){
-            setNet("Nie można połączyć z serwerem multiplayer.");
-        }else{
-            setNet("Błąd hosta: "+(e?.type||"nieznany"));
-        }
+        setNet("Błąd hosta: "+(e?.type||"nieznany"));
     });
-
-    setTimeout(()=>{
-        if(!opened && multiplayer.peer===peer && !peer.destroyed){
-            setNet("Serwer multiplayer nie odpowiedział. Sprawdź internet.");
-        }
-    },10000);
 };
-
-/* =========================
-   JOIN ROOM
-========================= */
 
 document.getElementById("joinBtn").onclick=()=>{
     const id=cleanRoomCode(document.getElementById("joinId").value);
+    if(!id){ setNet("Wpisz kod pokoju."); return; }
 
-    if(!/^PW-[A-Z0-9]{6}$/.test(id)){
-        setNet("Nieprawidłowy kod. Kod wygląda np. tak: PW-AB12CD");
-        return;
+    if(multiplayer.peer){
+        try{multiplayer.peer.destroy();}catch(e){}
+        multiplayer.peer=null;
     }
-
-    resetMultiplayerPeer();
 
     multiplayer.host=false;
     multiplayer.connected=false;
-    setNet("Łączenie z pokojem "+id+"…");
+    multiplayer.hostConn=null;
+    multiplayer.conns.clear();
+    setNet("Łączenie z pokojem…");
 
     const peer=makePeer();
     multiplayer.peer=peer;
-
-    let done=false;
-    let connection=null;
-    let timeout=null;
+    let finished=false;
+    let timer=null;
 
     const fail=msg=>{
-        if(done)return;
-        done=true;
-        if(timeout)clearTimeout(timeout);
-        multiplayer.connected=false;
+        if(finished)return;
+        finished=true;
+        if(timer)clearTimeout(timer);
         setNet(msg);
-
-        try{
-            if(connection)connection.close();
-            if(peer && !peer.destroyed)peer.destroy();
-        }catch(e){}
-
+        try{if(!peer.destroyed)peer.destroy();}catch(e){}
         if(multiplayer.peer===peer)multiplayer.peer=null;
     };
 
     peer.on("open",()=>{
-        if(done || multiplayer.peer!==peer)return;
+        if(finished||multiplayer.peer!==peer)return;
+        setNet("Serwer gotowy — szukam pokoju…");
 
-        setNet("Serwer gotowy — dołączam do pokoju…");
-
-        try{
-            connection=peer.connect(id,{
-                reliable:true,
-                serialization:"json",
-                metadata:{game:"PIXEL_WORLD",version:2}
-            });
-        }catch(e){
-            fail("Nie można rozpocząć połączenia.");
+        const targetId=String(id||"").trim();
+        if(!targetId){
+            fail("Brak kodu pokoju.");
             return;
         }
 
-        setupConn(connection);
+        let c;
+        try{
+            c=peer.connect(targetId,{reliable:true});
+        }catch(e){
+            console.error("peer.connect() wyjątek:",e);
+            fail("Błąd rozpoczęcia połączenia: "+(e&&e.message?e.message:"sprawdź kod pokoju"));
+            return;
+        }
 
-        timeout=setTimeout(()=>{
-            if(!connection?.open && !multiplayer.connected){
-                fail("Pokój nie odpowiedział. Sprawdź, czy host nadal ma otwarty pokój.");
+        setupConn(c);
+
+        timer=setTimeout(()=>{
+            if(!c.open&&!multiplayer.connected){
+                fail("Host nie odebrał połączenia. Sprawdź kod i czy host ma otwarty pokój.");
+                try{c.close();}catch(e){}
             }
-        },15000);
+        },12000);
 
-        connection.on("open",()=>{
-            if(timeout)clearTimeout(timeout);
-            done=true;
-            multiplayer.connected=true;
-            setNet("MULTIPLAYER • POŁĄCZONO");
+        c.on("open",()=>{
+            if(timer)clearTimeout(timer);
+            if(!finished){
+                finished=true;
+                multiplayer.connected=true;
+                setNet("MULTIPLAYER • POŁĄCZONO");
+            }
         });
 
-        connection.on("error",err=>{
+        c.on("error",err=>{
             console.warn("Join connection error",err);
-            if(err?.type==="peer-unavailable"){
-                fail("Pokój nie istnieje lub host zamknął grę.");
-            }else{
-                fail("Błąd połączenia: "+(err?.type||"nieznany"));
-            }
+            fail(err?.type==="peer-unavailable"
+                ?"Nie znaleziono pokoju. Sprawdź kod."
+                :"Błąd połączenia: "+(err?.type||"nieznany"));
         });
     });
 
     peer.on("error",e=>{
         console.warn("PeerJS join error",e);
-
-        if(e?.type==="peer-unavailable"){
-            fail("Pokój nie istnieje lub host zamknął grę.");
-        }else if(["network","server-error","socket-error"].includes(e?.type)){
+        if(e.type==="peer-unavailable") fail("Nie znaleziono pokoju. Sprawdź kod.");
+        else if(["network","server-error","socket-error"].includes(e.type))
             fail("Nie można połączyć z serwerem multiplayer.");
-        }else{
-            fail("Błąd multiplayer: "+(e?.type||"nieznany"));
-        }
+        else fail("Błąd multiplayer: "+(e.type||"nieznany"));
     });
 
     peer.on("disconnected",()=>{
-        if(multiplayer.peer===peer && !peer.destroyed && !done){
+        if(multiplayer.peer===peer&&!peer.destroyed&&!finished){
             try{peer.reconnect();}catch(e){}
         }
     });
 };
 
-/* =========================
-   MULTIPLAYER PANEL BACK
-========================= */
+/* =========================================================
+   MULTIPLAYER PANEL BACK / CLEANUP
+========================================================= */
 
 const multiBackBtn=document.getElementById("multiBack");
 if(multiBackBtn){
     multiBackBtn.addEventListener("click",()=>{
-        resetMultiplayerPeer();
+        if(multiplayer.peer){
+            try{ multiplayer.peer.destroy(); }catch(e){}
+        }
+        multiplayer.peer=null;
+        multiplayer.connected=false;
+        multiplayer.host=false;
+        multiplayer.hostConn=null;
+        multiplayer.conns.clear();
+        remotes.clear();
         setNet("Offline");
     });
 }
