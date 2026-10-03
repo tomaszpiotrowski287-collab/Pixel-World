@@ -5894,11 +5894,16 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
          - szeroki zasięg poziomy,
          - osobny zasięg pionowy,
          - działa również wtedy, gdy item leży kilka pikseli obok nóg. */
-      const pcx=me.x+me.w/2, pcy=me.y+me.h*.58;
-      const dx=pcx-cx, dy=pcy-(d.y+5);
-      const pickupX=Math.max(T*1.85, me.w+12);
-      const pickupY=Math.max(T*1.55, me.h*.95+12);
-      const near=Math.abs(dx)<=pickupX && Math.abs(dy)<=pickupY;
+      /* Pewne podnoszenie: liczymy odległość od całego prostokąta gracza,
+         a nie tylko od jego środka. Dzięki temu blok ziemi leżący pod nogami
+         albo tuż obok gracza można normalnie zebrać. */
+      const dropW=10, dropH=10;
+      const px1=me.x-12, px2=me.x+me.w+12;
+      const py1=me.y-18, py2=me.y+me.h+18;
+      const dx=Math.max(px1-(d.x+dropW), d.x-px2, 0);
+      const dy=Math.max(py1-(d.y+dropH), d.y-py2, 0);
+      const pickupRadius=Math.max(10,T*.55);
+      const near=(dx*dx+dy*dy)<=pickupRadius*pickupRadius;
 
       if(near){
         inv[d.item]=(inv[d.item]||0)+d.count;
@@ -6000,10 +6005,10 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
     ctx.save();
     ctx.imageSmoothingEnabled=false;
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='900 11px Arial, sans-serif';
+    ctx.font='900 9px Arial, sans-serif';
     ctx.textRendering='geometricPrecision';
     const tw=Math.ceil(ctx.measureText(nick).width);
-    const bw=tw+10,bh=16,bx=Math.round(nx-bw/2),by=Math.round(ny-bh);
+    const bw=tw+8,bh=14,bx=Math.round(nx-bw/2),by=Math.round(ny-bh);
     /* ciemna plakietka zamiast dużej półprzezroczystej plamy */
     ctx.fillStyle='rgba(12,18,24,.92)';ctx.fillRect(bx,by,bw,bh);
     ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;ctx.strokeRect(bx+.5,by+.5,bw-1,bh-1);
