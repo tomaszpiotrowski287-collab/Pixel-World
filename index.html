@@ -5590,7 +5590,7 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   }catch(e){}
 
   /* ---- Utility helpers ---- */
-  const starterInv=()=>({dirt:20,stone:10,wood:10,sand:10,glass:0,brick:0,coal:0,gold:0,lapis:0,emerald:0,diamond:0,obsidian:0,crystal:0});
+  const starterInv=()=>({dirt:20,stone:10,wood:10,leaves:0,sand:10,glass:0,brick:0,coal:0,gold:0,lapis:0,emerald:0,diamond:0,obsidian:0,crystal:0,iron:0,clay:0,granite:0,marble:0,moss:0,snow:0,ice:0,copper:0,quartz:0,basalt:0,ruby:0,amethyst:0,plank:0,darkwood:0,sandstone:0,glowstone:0,mossstone:0,terracotta:0,prismarine:0,bedrock:0,mud:0});
   function freshPW(){
     return {
       gems:0,xp:0,level:1,fish:0,fishValue:0,
@@ -5778,5 +5778,329 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   /* ---- Initial repair after all previous patches initialize ---- */
   setTimeout(()=>{deepRepair();},250);
 })();
-</script>\n</body>
+</script>\n<script>
+/* =========================================================
+   PIXEL WORLD — DROPS + 20 BLOCKS + SEEDS + NICK + FALL DAMAGE + ANIMATION
+========================================================= */
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const safe=(fn)=>{try{return fn()}catch(e){console.warn('PW extra patch',e);return null}};
+
+  /* ---------- 20+ NEW BLOCKS ---------- */
+  const extraBlocks={
+    iron:17,
+    clay:18, granite:19, marble:20, moss:21, snow:22,
+    ice:23, copper:24, quartz:25, basalt:26, ruby:27,
+    amethyst:28, plank:29, darkwood:30, sandstone:31,
+    glowstone:32, mossstone:33, terracotta:34, prismarine:35,
+    bedrock:36, mud:37
+  };
+  Object.entries(extraBlocks).forEach(([k,v])=>{ if(B[k]==null) B[k]=v; });
+
+  const extraItems=Object.keys(extraBlocks);
+  if(!items.includes('leaves'))items.push('leaves');
+  if(!slots.includes(B.leaves))slots.push(B.leaves);
+  if(typeof inv.leaves!=='number')inv.leaves=0;
+  extraItems.forEach(k=>{
+    if(!items.includes(k)) items.push(k);
+    if(!slots.includes(B[k])) slots.push(B[k]);
+    if(typeof inv[k]!=='number') inv[k]=0;
+  });
+
+  const extraColors={
+    iron:'#c7cbd0', clay:'#b86f58', granite:'#777b80', marble:'#d9d9d4',
+    moss:'#4e8d48', snow:'#f4fbff', ice:'#78dff5', copper:'#c87945',
+    quartz:'#eee9dc', basalt:'#3e4148', ruby:'#d93655', amethyst:'#a86bea',
+    plank:'#b77942', darkwood:'#4b2d1d', sandstone:'#d9ae69', glowstone:'#ffd95a',
+    mossstone:'#587a55', terracotta:'#b6533e', prismarine:'#4da99c',
+    bedrock:'#292d33', mud:'#6b4a35'
+  };
+  const oldColor=color;
+  color=function(t){
+    for(const [k,v] of Object.entries(extraBlocks)) if(t===v) return extraColors[k]||'#aaa';
+    return oldColor(t);
+  };
+
+  /* ---------- Better inventory labels ---------- */
+  window.PW_BLOCK_NAMES=window.PW_BLOCK_NAMES||{};
+  Object.assign(window.PW_BLOCK_NAMES,{
+    iron:'Żelazo',clay:'Glina',granite:'Granit',marble:'Marmur',moss:'Mech',snow:'Śnieg',
+    ice:'Lód',copper:'Miedź',quartz:'Kwarc',basalt:'Bazalt',ruby:'Rubin',amethyst:'Ametyst',
+    plank:'Deski',darkwood:'Ciemne drewno',sandstone:'Piaskowiec',glowstone:'Jasnogłaz',
+    mossstone:'Omszały kamień',terracotta:'Terakota',prismarine:'Pryzmarin',bedrock:'Skała macierzysta',mud:'Błoto'
+  });
+
+  /* ---------- Minecraft-like physical block drops ---------- */
+  const drops=[];
+  const dropMap={
+    [B.grass]:'dirt',[B.dirt]:'dirt',[B.stone]:'stone',[B.wood]:'wood',[B.leaves]:'leaves',
+    [B.sand]:'sand',[B.glass]:'glass',[B.brick]:'brick',[B.coal]:'coal',[B.gold]:'gold',
+    [B.lapis]:'lapis',[B.emerald]:'emerald',[B.diamond]:'diamond',[B.obsidian]:'obsidian',
+    [B.crystal]:'crystal'
+  };
+  for(const k of extraItems) dropMap[B[k]]=k;
+  function dropItemForBlock(t){return dropMap[t]||null}
+  function spawnDrop(item,bx,by,count=1){
+    if(!item)return;
+    drops.push({item,count,x:bx*T+T/2-4,y:by*T+T/2-4,vx:(Math.random()-.5)*55,vy:-105-lifeRandom(),age:0,bob:Math.random()*6});
+  }
+  function lifeRandom(){return Math.random()*35}
+
+  const oldMineDrops=mine;
+  mine=function(){
+    const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T),before=getB(bx,by),beforeCount=(inv[dropItemForBlock(before)]||0);
+    oldMineDrops();
+    if(before!==B.air && getB(bx,by)===B.air){
+      const item=dropItemForBlock(before);
+      if(item){
+        /* The old mining system adds normal drops directly to inventory.
+           Remove that immediate pickup so the physical item must be collected. */
+        if(typeof inv[item]==='number' && inv[item]>beforeCount) inv[item]--;
+        spawnDrop(item,bx,by,1);
+        if(typeof pwAch==='function') pwAch('first_drop','Pierwszy wypadający blok',10);
+      }
+    }
+  };
+
+  function updateDrops(dt){
+    for(let i=drops.length-1;i>=0;i--){
+      const d=drops[i];
+      d.age+=dt; d.vy+=520*dt; d.x+=d.vx*dt; d.y+=d.vy*dt; d.vx*=Math.pow(.08,dt);
+      const bx=Math.floor((d.x+4)/T), by=Math.floor((d.y+8)/T);
+      if(getB(bx,by)!==B.air && d.vy>0){d.y=by*T-10;d.vy*=-.25;d.vx*=.75}
+      const dx=(me.x+me.w/2)-(d.x+4),dy=(me.y+me.h/2)-(d.y+4);
+      if(dx*dx+dy*dy < (T*1.15)*(T*1.15)){
+        inv[d.item]=(inv[d.item]||0)+d.count;
+        drops.splice(i,1);
+        if(typeof updateHotbar==='function')updateHotbar();
+        if(typeof pwToast==='function')pwToast('⬆️ Podniesiono: '+(window.PW_BLOCK_NAMES?.[d.item]||d.item));
+        if(typeof pwAch==='function'){
+          pwAch('collector5','Zbieracz bloków',25);
+          pwAch('collector20','Pełne kieszenie',40);
+        }
+        continue;
+      }
+      if(d.age>120)drops.splice(i,1);
+    }
+  }
+
+  function drawDrops(){
+    for(const d of drops){
+      const sx=d.x-cam.x, sy=d.y-cam.y+Math.sin(performance.now()*.006+d.bob)*1.5;
+      if(sx<-T||sy<-T||sx>VW||sy>VH)continue;
+      const t=B[d.item];
+      ctx.save();
+      ctx.translate(Math.round(sx+4),Math.round(sy+4));
+      ctx.rotate(Math.sin(performance.now()*.004+d.bob)*.12);
+      ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(-5,5,10,2);
+      ctx.fillStyle=extraColors[d.item]||oldColor(t)||'#aaa';ctx.fillRect(-5,-5,10,10);
+      ctx.strokeStyle='rgba(255,255,255,.45)';ctx.strokeRect(-5.5,-5.5,11,11);
+      ctx.restore();
+    }
+  }
+  const oldDrawWorldDrops=drawWorld;
+  drawWorld=function(){oldDrawWorldDrops();drawDrops()};
+
+  /* ---------- Add the blocks naturally to the world ---------- */
+  function decorateNewBlocks(){
+    if(!Array.isArray(world))return;
+    const choices=[B.iron,B.clay,B.granite,B.marble,B.moss,B.snow,B.ice,B.copper,B.quartz,B.basalt,B.ruby,B.amethyst,B.plank,B.darkwood,B.sandstone,B.glowstone,B.mossstone,B.terracotta,B.prismarine,B.mud];
+    for(let i=0;i<260;i++){
+      const x=8+Math.floor(Math.random()*(WORLD_W-16));
+      const y=38+Math.floor(Math.random()*(WORLD_H-42));
+      if(getB(x,y)===B.stone){
+        const r=Math.random();
+        let idx=Math.floor(Math.random()*choices.length);
+        if(r<.35)idx=0; else if(r<.52)idx=1+Math.floor(Math.random()*4);
+        setB(x,y,choices[idx]);
+      }
+    }
+    /* surface materials */
+    for(let i=0;i<28;i++){
+      const x=12+Math.floor(Math.random()*(WORLD_W-24));
+      for(let y=8;y<50;y++){
+        if(getB(x,y)===B.grass&&getB(x,y-1)===B.air){
+          if(i%4===0)setB(x,y-1,B.snow);
+          else if(i%4===1)setB(x,y-1,B.moss);
+          else if(i%4===2)setB(x,y-1,B.plank);
+          else setB(x,y-1,B.sandstone);
+          break;
+        }
+      }
+    }
+  }
+  const oldGenerateExtra=generate;
+  generate=function(){oldGenerateExtra();decorateNewBlocks()};
+  decorateNewBlocks();
+
+  /* ---------- Extra block visuals ---------- */
+  const oldRenderExtras=render;
+  render=function(){
+    oldRenderExtras();
+    const sx=Math.floor(cam.x/T)-1, ex=Math.ceil((cam.x+VW)/T)+1;
+    const sy=Math.floor(cam.y/T)-1, ey=Math.ceil((cam.y+VH)/T)+1;
+    for(let y=Math.max(0,sy);y<Math.min(WORLD_H,ey);y++) for(let x=Math.max(0,sx);x<Math.min(WORLD_W,ex);x++){
+      const t=getB(x,y),px=x*T-cam.x,py=y*T-cam.y;
+      if(t===B.iron){ctx.fillStyle='#eef2f4';ctx.fillRect(px+3,py+4,4,4);ctx.fillRect(px+11,py+10,3,3)}
+      if(t===B.copper){ctx.fillStyle='#f2a06b';ctx.fillRect(px+4,py+5,4,4);ctx.fillRect(px+11,py+11,3,3)}
+      if(t===B.ruby){ctx.fillStyle='#ff718a';ctx.fillRect(px+6,py+3,5,5);ctx.fillRect(px+10,py+10,3,3)}
+      if(t===B.amethyst){ctx.fillStyle='#e6b6ff';ctx.fillRect(px+6,py+3,4,9);ctx.fillRect(px+11,py+9,3,5)}
+      if(t===B.quartz){ctx.fillStyle='#fffaf0';ctx.fillRect(px+4,py+4,9,2);ctx.fillRect(px+8,py+9,6,2)}
+      if(t===B.glowstone){ctx.fillStyle='#fff4a0';ctx.fillRect(px+4,py+4,4,4);ctx.fillRect(px+11,py+10,4,4)}
+      if(t===B.prismarine){ctx.fillStyle='#b8fff1';ctx.fillRect(px+4,py+6,4,3);ctx.fillRect(px+11,py+11,3,3)}
+      if(t===B.ice){ctx.strokeStyle='rgba(255,255,255,.65)';ctx.strokeRect(px+2,py+2,T-4,T-4)}
+      if(t===B.snow){ctx.fillStyle='#fff';ctx.fillRect(px,py,T,5)}
+      if(t===B.moss||t===B.mossstone){ctx.fillStyle='#8ad56d';ctx.fillRect(px+3,py+4,3,3);ctx.fillRect(px+11,py+11,3,3)}
+      if(t===B.bedrock){ctx.fillStyle='#555b64';ctx.fillRect(px+3,py+3,4,3);ctx.fillRect(px+10,py+10,5,3)}
+      if(t===B.terracotta){ctx.strokeStyle='#7e3025';ctx.strokeRect(px+2,py+2,T-4,T-4)}
+      if(t===B.plank||t===B.darkwood){ctx.fillStyle=t===B.plank?'#70431f':'#2f1c12';ctx.fillRect(px+3,py+4,2,T-8);ctx.fillRect(px+10,py+4,2,T-8)}
+      if(t===B.sandstone){ctx.strokeStyle='#b4874c';ctx.strokeRect(px+1,py+1,T-2,T-2);ctx.fillRect(px+4,py+8,8,1)}
+      if(t===B.basalt){ctx.fillStyle='#656a73';ctx.fillRect(px+4,py+3,2,11);ctx.fillRect(px+11,py+7,2,7)}
+      if(t===B.granite){ctx.fillStyle='#b4a59f';ctx.fillRect(px+3,py+4,3,3);ctx.fillRect(px+11,py+10,3,3)}
+      if(t===B.marble){ctx.strokeStyle='rgba(120,120,120,.55)';ctx.beginPath();ctx.moveTo(px+2,py+4);ctx.lineTo(px+T-2,py+12);ctx.stroke()}
+      if(t===B.clay||t===B.mud){ctx.fillStyle=t===B.clay?'#d18b73':'#8a6046';ctx.fillRect(px+4,py+5,3,3);ctx.fillRect(px+11,py+10,2,2)}
+    }
+    /* Nick nad postacią */
+    const nick=String(localStorage.getItem('pixelWorldPlayerName')||'PIXEL PLAYER').replace(/[<>]/g,'').slice(0,16);
+    const nx=Math.round(me.x-cam.x+me.w/2), ny=Math.round(me.y-cam.y-8);
+    ctx.save();ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
+    const tw=ctx.measureText(nick).width;
+    ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(nx-tw/2-3,ny-10,tw+6,11);
+    ctx.fillStyle='#ffffff';ctx.fillText(nick,nx,ny-1);ctx.restore();
+  };
+
+  /* ---------- Right click = plant seed ---------- */
+  function firstSeed(){
+    const order=['dirt','stone','sand','crystal','gold','diamond'];
+    const selected=PW.selectedSeed;
+    if(selected&&PW.seeds?.[selected]>0)return selected;
+    return order.find(k=>(PW.seeds?.[k]||0)>0)||null;
+  }
+  PW.selectedSeed=PW.selectedSeed||'dirt';
+  canvas.addEventListener('pointerdown',e=>{
+    if(e.button!==2)return;
+    e.preventDefault();e.stopImmediatePropagation();
+    mouse.x=e.clientX/cssW*VW;mouse.y=e.clientY/cssH*VH;
+    const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T);
+    const seed=firstSeed();
+    if(seed && (getB(bx,by)===B.grass||getB(bx,by)===B.dirt)){
+      pwPlantAt(bx,by,seed);
+      PW.selectedSeed=seed;
+      return;
+    }
+    /* If no seed is available, keep right click as normal block placing. */
+    place();
+  },true);
+  canvas.addEventListener('contextmenu',e=>e.preventDefault(),true);
+  document.addEventListener('keydown',e=>{
+    if(e.code==='KeyZ'&&!e.repeat){
+      const order=['dirt','stone','sand','crystal','gold','diamond'];
+      const idx=Math.max(0,order.indexOf(PW.selectedSeed));
+      for(let i=1;i<=order.length;i++){
+        const k=order[(idx+i)%order.length];
+        if((PW.seeds?.[k]||0)>0){PW.selectedSeed=k;pwToast?.('🌱 Wybrano nasiono: '+(PW_SEEDS?.[k]||k));break}
+      }
+      e.preventDefault();
+    }
+  });
+
+  /* ---------- Fall damage ---------- */
+  let falling=false,fallStartY=0;
+  const oldUpdateMeFall=updateMe;
+  updateMe=function(dt){
+    const wasGround=me.ground;
+    const beforeY=me.y;
+    const beforeVy=me.vy;
+    if(!me.ground && me.vy>=0 && !falling){falling=true;fallStartY=me.y}
+    oldUpdateMeFall(dt);
+    if(!wasGround && falling && me.ground){
+      const dist=Math.max(0,me.y-fallStartY)/T;
+      if(dist>3.5){
+        const dmg=Math.min(100,Math.floor((dist-3.0)*10));
+        me.hp=Math.max(0,(Number(me.hp)||100)-dmg);
+        if(typeof pwToast==='function')pwToast('💥 Obrażenia od upadku: -'+dmg+' HP');
+        if(typeof pwAch==='function'){
+          pwAch('fall_damage','Pierwszy bolesny upadek',20);
+          if(dist>=8)pwAch('long_fall','Twarde lądowanie',50);
+        }
+        if(me.hp<=0){
+          const p=spawn();me.x=p.x;me.y=p.y;me.vx=0;me.vy=0;me.hp=100;
+          if(typeof pwToast==='function')pwToast('❤️ Odrodzenie po upadku');
+        }
+      }
+      falling=false;
+    }
+    if(me.ground&&beforeY===me.y&&beforeVy===0) falling=false;
+    const hf=$('hpFill'),ht=$('hpText');
+    if(hf)hf.style.width=Math.max(0,Math.min(100,me.hp||0))+'%';
+    if(ht)ht.textContent=Math.max(0,Math.floor(me.hp||0))+' / 100';
+  };
+
+  /* ---------- Walking + eye animation ---------- */
+  const oldLoopAnim=loop;
+  loop=function(now){
+    const blinkPhase=(now%4300);
+    if(blinkPhase>4100&&blinkPhase<4250)me.blink=.05; else me.blink=.8;
+    oldLoopAnim(now);
+  };
+
+  /* ---------- More achievements ---------- */
+  const extraAch=[
+    ['first_drop','Pierwszy wypadający blok',10],
+    ['collector5','Zbieracz bloków',25],
+    ['collector20','Pełne kieszenie',40],
+    ['fall_damage','Pierwszy bolesny upadek',20],
+    ['long_fall','Twarde lądowanie',50],
+    ['seedling','Mały ogrodnik',30],
+    ['block20','Kolekcjoner bloków',60],
+    ['blink_walk','Żywa postać',35],
+    ['deep_miner','Górnik głębinowy',70],
+    ['rich_miner','Skarbnik',100]
+  ];
+  const oldAchUI=pwAchUI;
+  pwAchUI=function(){
+    const base=[['first_mine','Pierwsze kopanie'],['first_harvest','Pierwsze zbiory'],['goldfish','Złota ryba'],['deep','Głębiny'],['builder','Budowniczy'],['rich','Bogaty']];
+    const all=base.concat(extraAch.map(a=>[a[0],a[1]]));
+    pwOpen('🏆 OSIĄGNIĘCIA',all.map(x=>`<div class="pwItem"><span>${PW.achievements[x[0]]?'🏆':'⬜'} ${x[1]}</span><span>${PW.achievements[x[0]]?'ODBLOKOWANE':'???'}</span></div>`).join(''));
+  };
+  $('pwAchBtn')?.addEventListener('click',pwAchUI);
+
+  /* Achievement checks for collection/planting. */
+  const oldPlant=window.pwPlantAt;
+  if(oldPlant){
+    window.pwPlantAt=function(bx,by,seed){
+      const before=PW.seeds?.[seed]||0;const r=oldPlant(bx,by,seed);
+      if((PW.seeds?.[seed]||0)<before) {
+        PW.planted=(PW.planted||0)+1;
+        if(PW.planted>=1)pwAch('seedling','Mały ogrodnik',30);
+      }
+      return r;
+    };
+  }
+  let blinkWalkAwarded=false;
+  setInterval(()=>{
+    if(!blinkWalkAwarded && me.ground && Math.abs(me.vx)>10){blinkWalkAwarded=true;pwAch('blink_walk','Żywa postać',35)}
+    let n=0;for(const k of extraItems)n+=inv[k]||0;
+    if(n>=20)pwAch('block20','Kolekcjoner bloków',60);
+    if((inv.diamond||0)>=5)pwAch('deep_miner','Górnik głębinowy',70);
+    if((PW.gems||0)>=5000)pwAch('rich_miner','Skarbnik',100);
+  },1500);
+
+  /* Save new inventory keys and drop state on normal saves. */
+  const oldSaveExtra=window.pwSaveExtra;
+  if(oldSaveExtra){
+    window.pwSaveExtra=function(){
+      for(const k of extraItems)if(typeof inv[k]!=='number')inv[k]=0;
+      oldSaveExtra();
+    };
+  }
+
+  if(typeof updateHotbar==='function')updateHotbar();
+  if(typeof pwRefresh==='function')pwRefresh();
+  safe(()=>localStorage.setItem('PW_EXTRA_BLOCKS_V1','1'));
+})();
+</script>
+
+</body>
 </html>
