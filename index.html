@@ -5868,31 +5868,59 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   };
 
   function updateDrops(dt){
+    if(!Array.isArray(drops)) return;
     for(let i=drops.length-1;i>=0;i--){
       const d=drops[i];
-      d.age+=dt; d.vy+=520*dt; d.x+=d.vx*dt; d.y+=d.vy*dt; d.vx*=Math.pow(.08,dt);
-      const bx=Math.floor((d.x+4)/T), by=Math.floor((d.y+8)/T);
-      if(getB(bx,by)!==B.air && d.vy>0){d.y=by*T-10;d.vy*=-.25;d.vx*=.75}
-      const dx=(me.x+me.w/2)-(d.x+4),dy=(me.y+me.h/2)-(d.y+4);
-      /* Minecraft-like pickup radius: walking close to an item collects it. */
-      if(dx*dx+dy*dy < (T*1.55)*(T*1.55)){
+      if(!d || !d.item){ drops.splice(i,1); continue; }
+
+      /* Fizyka itemu — liczona w każdej klatce. */
+      d.age+=dt;
+      d.vy+=520*dt;
+      d.x+=d.vx*dt;
+      d.y+=d.vy*dt;
+      d.vx*=Math.pow(.08,dt);
+
+      /* Item nie może zatrzymać się w środku bloku. Sprawdzamy blok POD
+         dolną krawędzią itemu, a nie jego środkiem. */
+      const cx=d.x+4, bottom=d.y+10;
+      const bx=Math.floor(cx/T), by=Math.floor((bottom+1)/T);
+      if(getB(bx,by)!==B.air && d.vy>=0){
+        d.y=by*T-10;
+        d.vy=-Math.min(75,Math.abs(d.vy)*.22);
+        d.vx*=.70;
+      }
+
+      /* DUŻO PEWNIEJSZE PODNOSZENIE:
+         - szeroki zasięg poziomy,
+         - osobny zasięg pionowy,
+         - działa również wtedy, gdy item leży kilka pikseli obok nóg. */
+      const pcx=me.x+me.w/2, pcy=me.y+me.h*.58;
+      const dx=pcx-cx, dy=pcy-(d.y+5);
+      const pickupX=Math.max(T*1.85, me.w+12);
+      const pickupY=Math.max(T*1.55, me.h*.95+12);
+      const near=Math.abs(dx)<=pickupX && Math.abs(dy)<=pickupY;
+
+      if(near){
         inv[d.item]=(inv[d.item]||0)+d.count;
         drops.splice(i,1);
-        if(typeof updateHotbar==='function')updateHotbar();
-        if(typeof pwToast==='function')pwToast('⬆️ Podniesiono: '+(window.PW_BLOCK_NAMES?.[d.item]||d.item));
+        if(typeof updateHotbar==='function') updateHotbar();
+        if(typeof saveMaybe==='function') safe(()=>saveMaybe());
+        if(typeof pwToast==='function') pwToast('⬆️ Podniesiono: '+(window.PW_BLOCK_NAMES?.[d.item]||d.item));
         if(typeof pwAch==='function'){
           pwAch('collector5','Zbieracz bloków',25);
           pwAch('collector20','Pełne kieszenie',40);
         }
         continue;
       }
-      if(d.age>120)drops.splice(i,1);
+
+      /* Itemy nie znikają już po 120 sekundach — pozostają do zebrania,
+         dopóki gracz nie zbierze ich albo nie wykona resetu świata. */
     }
   }
 
   function drawDrops(){
     for(const d of drops){
-      const sx=d.x-cam.x, sy=d.y-cam.y+Math.sin(performance.now()*.006+d.bob)*1.5;
+      const sx=Math.round(d.x-cam.x), sy=Math.round(d.y-cam.y+Math.sin(performance.now()*.006+d.bob)*1.5);
       if(sx<-T||sy<-T||sx>VW||sy>VH)continue;
       const t=B[d.item];
       ctx.save();
@@ -5966,13 +5994,23 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
       if(t===B.marble){ctx.strokeStyle='rgba(120,120,120,.55)';ctx.beginPath();ctx.moveTo(px+2,py+4);ctx.lineTo(px+T-2,py+12);ctx.stroke()}
       if(t===B.clay||t===B.mud){ctx.fillStyle=t===B.clay?'#d18b73':'#8a6046';ctx.fillRect(px+4,py+5,3,3);ctx.fillRect(px+11,py+10,2,2)}
     }
-    /* Nick nad postacią */
+    /* Nick nad postacią — większy, ostry i czytelny */
     const nick=String(localStorage.getItem('pixelWorldPlayerName')||'PIXEL PLAYER').replace(/[<>]/g,'').slice(0,16);
-    const nx=Math.round(me.x-cam.x+me.w/2), ny=Math.round(me.y-cam.y-8);
-    ctx.save();ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
-    const tw=ctx.measureText(nick).width;
-    ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(nx-tw/2-3,ny-10,tw+6,11);
-    ctx.fillStyle='#ffffff';ctx.fillText(nick,nx,ny-1);ctx.restore();
+    const nx=Math.round(me.x-cam.x+me.w/2), ny=Math.round(me.y-cam.y-10);
+    ctx.save();
+    ctx.imageSmoothingEnabled=false;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='900 11px Arial, sans-serif';
+    ctx.textRendering='geometricPrecision';
+    const tw=Math.ceil(ctx.measureText(nick).width);
+    const bw=tw+10,bh=16,bx=Math.round(nx-bw/2),by=Math.round(ny-bh);
+    /* ciemna plakietka zamiast dużej półprzezroczystej plamy */
+    ctx.fillStyle='rgba(12,18,24,.92)';ctx.fillRect(bx,by,bw,bh);
+    ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;ctx.strokeRect(bx+.5,by+.5,bw-1,bh-1);
+    /* czarny obrys daje czytelność bez rozmywania białych liter */
+    ctx.lineWidth=2;ctx.strokeStyle='#111';ctx.lineJoin='round';ctx.strokeText(nick,nx,by+bh/2+.5);
+    ctx.fillStyle='#fff';ctx.fillText(nick,nx,by+bh/2);
+    ctx.restore();
   };
 
   /* ---------- Right click = plant seed ---------- */
