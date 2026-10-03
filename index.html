@@ -6,9 +6,6 @@
 
 <title>PIXEL WORLD — MULTIPLAYER</title>
 
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js">
-</script>
-
 <style>
 *{
     box-sizing:border-box;
@@ -4145,8 +4142,6 @@ function receive(
 ========================================================= */
 
 const MULTI_SERVER_URL = "wss://pixel-world-1.onrender.com";
-    
-    
 
 let multiSocket = null;
 let multiRole = "";
@@ -4207,7 +4202,6 @@ function send(msg){
 function setupConn(c){
     if(!c) return;
     c.peer = c.peer || multiPlayerId || "PLAYER2";
-    
     c.send = (m)=>sendSocket({type:"game",msg:m});
     multiplayer.hostConn = multiplayer.host ? null : c;
 }
@@ -4261,6 +4255,7 @@ function connectMultiSocket(onReady){
         if(packet.type==="player-left"){
             const id=packet.playerId;
             if(id) remotes.delete(id);
+            multiplayer.connected=false;
             if(multiplayer.host) setNet("MULTIPLAYER • HOST • OCZEKUJE NA GRACZA");
             else {
                 multiplayer.connected=false;
@@ -5693,3 +5688,4 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
 
 </body>
 </html>
+
