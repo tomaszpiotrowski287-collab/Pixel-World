@@ -6,6 +6,9 @@
 
 <title>PIXEL WORLD — MULTIPLAYER</title>
 
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js">
+</script>
+
 <style>
 *{
     box-sizing:border-box;
@@ -520,6 +523,44 @@ select{
 #namePanel{z-index:85}.namePreview{padding:10px;background:#0b151d;border:2px solid #345060;margin:10px 0;color:#7de8ff;font-weight:900}
 #playerName{width:100%;font-size:16px}
 @media(max-width:700px){#chatBox{bottom:125px;width:calc(100vw - 20px)}#chatMessages{height:110px}.chatLine{font-size:11px}}
+
+/* =========================================================
+   DEVICE / UI / PERFORMANCE PATCH
+========================================================= */
+html,body{overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none}
+canvas{touch-action:none;max-width:100vw;max-height:100vh}
+input,textarea{user-select:text;-webkit-user-select:text}
+@media(max-width:900px){
+  .top{top:max(6px,env(safe-area-inset-top));left:6px;right:6px;gap:5px;flex-wrap:wrap}
+  .top>b{font-size:12px}
+  .hp{width:120px;height:16px}
+  .topRight{gap:3px}
+  .small{padding:6px 8px;min-width:34px}
+  #help{bottom:92px;font-size:9px;max-width:95vw}
+}
+@media(max-width:700px){
+  #gameUI{padding-bottom:env(safe-area-inset-bottom)}
+  #hotbar{bottom:70px;max-width:96vw;overflow-x:auto;justify-content:flex-start}
+  #netStatus{top:58px;font-size:9px}
+  #pwMiniMap{display:none!important}
+  #pwQuick{bottom:155px;right:6px;transform:scale(.9);transform-origin:right bottom}
+}
+@media(pointer:coarse){
+  button{min-height:38px}
+  .small{min-height:40px}
+}
+.pwMobileActions{position:absolute;right:10px;bottom:105px;display:flex;gap:7px;z-index:25}
+.pwMobileActions button{width:52px;height:52px;border:3px solid #6f8794;background:#172832;box-shadow:3px 3px 0 #000;font-size:20px}
+@media(min-width:701px){.pwMobileActions{display:none!important}}
+.pwBreakOverlay{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:160px;height:8px;background:#101820;border:2px solid #fff;z-index:90;pointer-events:none;display:none;box-shadow:3px 3px 0 #000}
+.pwBreakOverlay i{display:block;height:100%;width:0;background:#f1f1f1}
+.pwSettingGroup{margin-top:12px;padding:8px;border:2px solid #435864;background:#101a20}
+.pwSettingGroup h3{margin:0 0 7px;font-size:13px}
+.pwEqExtra{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px}
+.pwEqExtra .eqSlot{min-height:48px;background:#0e171d;border:3px solid #4d6470;display:grid;place-items:center;font-size:11px;position:relative}
+.pwEqExtra .eqSlot span{position:absolute;bottom:2px;font-size:8px;color:#b8c8cf}
+@media(max-width:700px){.pwEqExtra{grid-template-columns:repeat(4,1fr)}.pwEqExtra .eqSlot{min-height:42px}}
+
 </style>
 <style>
 /* PIXEL WORLDS-STYLE EXPANSION */
@@ -748,6 +789,31 @@ select{
         <div class="row">
             <span>Autozapis</span>
             <input id="auto" type="checkbox" checked>
+        </div>
+
+        <div class="pwSettingGroup">
+            <h3>🎨 GRAFIKA</h3>
+            <div class="row"><span>Cienie</span><input id="setShadows" type="checkbox" checked></div>
+            <div class="row"><span>Animacje świata</span><input id="setWorldAnim" type="checkbox" checked></div>
+            <div class="row"><span>Efekty trafienia</span><input id="setHitFx" type="checkbox" checked></div>
+            <div class="row"><span>Potrząsanie kamerą</span><input id="setShake" type="checkbox" checked></div>
+        </div>
+        <div class="pwSettingGroup">
+            <h3>🎮 STEROWANIE</h3>
+            <div class="row"><span>Przytrzymanie kopania</span><input id="setHoldMine" type="checkbox" checked></div>
+            <div class="row"><span>Przytrzymanie stawiania</span><input id="setHoldPlace" type="checkbox" checked></div>
+            <div class="row"><span>Wibracje telefonu</span><input id="setVibrate" type="checkbox" checked></div>
+        </div>
+        <div class="pwSettingGroup">
+            <h3>🖥️ INTERFEJS</h3>
+            <div class="row"><span>Minimapa</span><input id="setMap" type="checkbox" checked></div>
+            <div class="row"><span>Współrzędne</span><input id="setCoords" type="checkbox" checked></div>
+            <div class="row"><span>FPS</span><input id="setFps" type="checkbox" checked></div>
+            <div class="row"><span>Tryb kompaktowy</span><input id="setCompact" type="checkbox"></div>
+        </div>
+        <div class="pwSettingGroup">
+            <h3>🧰 NARZĘDZIA</h3>
+            <div class="pwGrid"><button id="pwResetSettings">↩ RESET USTAWIEŃ</button><button id="pwFullscreen">⛶ PEŁNY EKRAN</button></div>
         </div>
 
     </div>
@@ -1047,19 +1113,9 @@ let audio = null;
 ========================================================= */
 
 const S = {
-
-    pixel:true,
-
-    dayNight:true,
-
-    parts:true,
-
-    sound:true,
-
-    volume:.5,
-
-    auto:true
-
+    pixel:true, dayNight:true, parts:true, sound:true, volume:.5, auto:true,
+    shadows:true, worldAnim:true, hitFx:true, shake:true, holdMine:true, holdPlace:true,
+    vibrate:true, map:true, coords:true, fps:true, compact:false
 };
 
 /* =========================================================
@@ -4137,160 +4193,99 @@ function receive(
 
 
 /* =========================================================
-   MULTIPLAYER CONNECTION — WEBSOCKET ROOM SERVER
-   Host + room code. No PeerJS/WebRTC.
+   MULTIPLAYER CONNECTION — STABLE VERSION
 ========================================================= */
 
-const MULTI_SERVER_URL = "wss://pixel-world-1.onrender.com";
-
-let multiSocket = null;
-let multiRole = "";
-let multiPlayerId = "";
-
-function cleanRoomCode(v){
-    return String(v || "").replace(/\s+/g, "").trim().toUpperCase();
+function makePeer(){
+    return new Peer({
+        debug: 1,
+        config: {
+            iceServers: [
+                {urls:"stun:stun.l.google.com:19302"},
+                {urls:"stun:stun1.l.google.com:19302"},
+                {urls:"stun:stun.cloudflare.com:3478"}
+            ],
+            sdpSemantics:"unified-plan"
+        }
+    });
 }
 
-function setMultiSocket(ws){
-    multiSocket = ws;
-    multiplayer.peer = {
-        destroyed:false,
-        destroy(){
-            this.destroyed=true;
-            try{ ws.close(); }catch(e){}
-            if(multiSocket===ws) multiSocket=null;
-        },
-        close(){
-            try{ ws.close(); }catch(e){}
-        }
-    };
+function cleanRoomCode(v){
+    return String(v || "").replace(/\s+/g, "").trim();
 }
 
 function resetMultiplayerPeer(){
-    try{ multiSocket?.close(); }catch(e){}
-    multiSocket=null;
+    if(multiplayer.peer){
+        try{ multiplayer.peer.destroy(); }catch(e){}
+    }
     multiplayer.peer=null;
     multiplayer.id="";
     multiplayer.connected=false;
     multiplayer.host=false;
     multiplayer.hostConn=null;
     multiplayer.conns.clear();
-    remotes.clear();
-}
-
-function sendSocket(msg){
-    if(!multiSocket || multiSocket.readyState!==WebSocket.OPEN) return false;
-    try{
-        multiSocket.send(JSON.stringify(msg));
-        return true;
-    }catch(e){
-        console.warn("WebSocket send failed",e);
-        return false;
-    }
-}
-
-function broadcast(msg){
-    if(!multiplayer.host) return;
-    sendSocket({type:"game",msg});
-}
-
-function send(msg){
-    if(multiplayer.host) broadcast(msg);
-    else sendSocket({type:"game",msg});
 }
 
 function setupConn(c){
     if(!c) return;
-    c.peer = c.peer || multiPlayerId || "PLAYER2";
-    c.send = (m)=>sendSocket({type:"game",msg:m});
-    multiplayer.hostConn = multiplayer.host ? null : c;
-}
 
-function handleGameMessage(m,c){
-    if(!m) return;
-    try{ receive(m,c); }catch(e){ console.warn("receive error",e); }
-}
-
-function connectMultiSocket(onReady){
-    if(multiSocket && multiSocket.readyState===WebSocket.OPEN){ onReady(multiSocket); return; }
-    let ws;
-    try{ ws=new WebSocket(MULTI_SERVER_URL); }
-    catch(e){ setNet("Nie można uruchomić połączenia z serwerem."); return; }
-    setMultiSocket(ws);
-
-    ws.onopen=()=>onReady(ws);
-    ws.onmessage=e=>{
-        let packet;
-        try{ packet=JSON.parse(e.data); }catch(err){ return; }
-        if(packet.type==="room-created"){
-            multiplayer.id=packet.code;
-            multiPlayerId=packet.playerId||"HOST";
-            document.getElementById("myId").value=packet.code;
-            setNet("POKÓJ GOTOWY • KOD: "+packet.code);
-            return;
-        }
-        if(packet.type==="room-joined"){
-            multiplayer.id=packet.code;
-            multiPlayerId=packet.playerId||"CLIENT";
-            setNet("DOŁĄCZONO DO POKOJU");
-            return;
-        }
-        if(packet.type==="player-joined"){
-            const c=ws;
-            c.peer=packet.playerId;
-            if(multiplayer.host){
-                multiplayer.connected=true;
-                setupConn(c);
-                sendSocket({type:"game",msg:{
+    c.on("open",()=>{
+        multiplayer.connected=true;
+        if(multiplayer.host){
+            multiplayer.conns.add(c);
+            try{
+                c.send({
                     type:"init",
                     world:Array.from(world,y=>Array.from(y)),
                     dayTime,
                     inv:{...inv},
                     players:[...remotes.entries()]
-                }});
-                setNet("MULTIPLAYER • HOST • GRACZ DOŁĄCZYŁ");
-            }
-            return;
+                });
+            }catch(e){ console.warn("init send failed",e); }
+            setNet("MULTIPLAYER • HOST • POŁĄCZONO");
+        }else{
+            multiplayer.hostConn=c;
+            setNet("MULTIPLAYER • POŁĄCZONO");
+            try{ c.send({type:"hello",x:me.x,y:me.y}); }
+            catch(e){ console.warn("hello send failed",e); }
         }
-        if(packet.type==="player-left"){
-            const id=packet.playerId;
-            if(id) remotes.delete(id);
+    });
+
+    c.on("data",m=>{
+        try{ receive(m,c); }catch(e){ console.warn("receive error",e); }
+    });
+
+    c.on("close",()=>{
+        multiplayer.conns.delete(c);
+        if(c===multiplayer.hostConn) multiplayer.hostConn=null;
+        if(multiplayer.host){
+            multiplayer.connected=multiplayer.conns.size>0;
+            setNet(multiplayer.connected
+                ?"MULTIPLAYER • HOST • POŁĄCZONO"
+                :"MULTIPLAYER • HOST • OCZEKUJE NA GRACZA");
+        }else{
             multiplayer.connected=false;
-            if(multiplayer.host) setNet("MULTIPLAYER • HOST • OCZEKUJE NA GRACZA");
-            else {
-                multiplayer.connected=false;
-                setNet("MULTIPLAYER • ROZŁĄCZONO");
-            }
-            refreshPlayers();
-            return;
+            setNet("MULTIPLAYER • ROZŁĄCZONO");
         }
-        if(packet.type==="game"){
-            const c=ws;
-            c.peer=packet.playerId || c.peer || "PLAYER";
-            if(!multiplayer.host && packet.playerId) c.peer=packet.playerId;
-            handleGameMessage(packet.msg,c);
-            if(packet.msg?.type==="init" || packet.msg?.type==="remote" || packet.msg?.type==="worldtime"){
-                multiplayer.connected=true;
-            }
-            return;
-        }
-        if(packet.type==="error"){
-            setNet("Serwer: "+(packet.message||"błąd"));
-            return;
-        }
-        if(packet.type==="pong") return;
-    };
+    });
 
-    ws.onclose=()=>{
-        if(multiSocket===ws) multiSocket=null;
-        multiplayer.connected=false;
-        multiplayer.conns.clear();
-        multiplayer.hostConn=null;
-        setNet("MULTIPLAYER • SERWER ROZŁĄCZONY");
-    };
-
-    ws.onerror=()=>setNet("Błąd połączenia z serwerem pokoju.");
+    c.on("error",err=>{
+        console.warn("PeerJS connection error",err);
+        setNet("Błąd połączenia: "+(err?.type||"nieznany"));
+    });
 }
+
+setInterval(()=>{
+    if(!multiplayer.connected) return;
+    const packet={type:"ping",t:Date.now()};
+    try{
+        if(multiplayer.host){
+            for(const c of [...multiplayer.conns]) if(c&&c.open) c.send(packet);
+        }else if(multiplayer.hostConn&&multiplayer.hostConn.open){
+            multiplayer.hostConn.send(packet);
+        }
+    }catch(e){}
+},5000);
 
 const copyIdBtn=document.getElementById("copyIdBtn");
 if(copyIdBtn){
@@ -4309,7 +4304,7 @@ if(copyIdBtn){
 }
 
 document.getElementById("hostBtn").onclick=()=>{
-    if(multiSocket && multiSocket.readyState===WebSocket.OPEN){
+    if(multiplayer.peer){
         setNet("Pokój jest już uruchomiony.");
         return;
     }
@@ -4317,53 +4312,255 @@ document.getElementById("hostBtn").onclick=()=>{
     multiplayer.connected=false;
     multiplayer.conns.clear();
     multiplayer.hostConn=null;
-    multiRole="host";
-    setNet("Łączenie z serwerem pokoju…");
+    setNet("Tworzenie pokoju…");
 
-    connectMultiSocket(ws=>{
-        sendSocket({type:"create-room"});
-        setNet("Tworzenie pokoju…");
+    const peer=makePeer();
+    multiplayer.peer=peer;
+
+    peer.on("open",id=>{
+        multiplayer.id=id;
+        document.getElementById("myId").value=id;
+        setNet("POKÓJ GOTOWY • KOD: "+id);
+    });
+
+    peer.on("connection",c=>{
+        setNet("Ktoś próbuje dołączyć…");
+        setupConn(c);
+        const wait=setTimeout(()=>{
+            if(c && !c.open){
+                try{c.close();}catch(e){}
+                if(multiplayer.connected) setNet("MULTIPLAYER • HOST • POŁĄCZONO");
+                else setNet("POŁĄCZENIE NIE DOSZŁO DO SKUTKU — spróbuj ponownie.");
+            }
+        },15000);
+        c.on("open",()=>clearTimeout(wait));
+        c.on("close",()=>clearTimeout(wait));
+    });
+
+    peer.on("disconnected",()=>{
+        if(multiplayer.peer===peer&&!peer.destroyed){
+            setNet("Ponowne łączenie z serwerem…");
+            try{peer.reconnect();}catch(e){}
+        }
+    });
+
+    peer.on("error",e=>{
+        console.warn("PeerJS host error",e);
+        setNet("Błąd hosta: "+(e?.type||"nieznany"));
     });
 };
 
 document.getElementById("joinBtn").onclick=()=>{
     const id=cleanRoomCode(document.getElementById("joinId").value);
     if(!id){ setNet("Wpisz kod pokoju."); return; }
-    resetMultiplayerPeer();
+
+    if(multiplayer.peer){
+        try{multiplayer.peer.destroy();}catch(e){}
+        multiplayer.peer=null;
+    }
+
     multiplayer.host=false;
     multiplayer.connected=false;
-    multiRole="client";
-    setNet("Łączenie z serwerem pokoju…");
-    connectMultiSocket(()=>{
-        sendSocket({type:"join-room",code:id});
+    multiplayer.hostConn=null;
+    multiplayer.conns.clear();
+    setNet("Łączenie z pokojem…");
+
+    const peer=makePeer();
+    multiplayer.peer=peer;
+    let finished=false;
+    let timer=null;
+
+    const fail=msg=>{
+        if(finished)return;
+        finished=true;
+        if(timer)clearTimeout(timer);
+        setNet(msg);
+        try{if(!peer.destroyed)peer.destroy();}catch(e){}
+        if(multiplayer.peer===peer)multiplayer.peer=null;
+    };
+
+    peer.on("open",()=>{
+        if(finished||multiplayer.peer!==peer)return;
+        setNet("Serwer gotowy — szukam pokoju…");
+
+        let c;
+        try{
+            c=peer.connect(id,{reliable:true,serialization:"json",metadata:{game:"PIXEL_WORLD"}});
+        }catch(e){
+            fail("Nie można rozpocząć połączenia.");
+            return;
+        }
+
+        setupConn(c);
+
+        timer=setTimeout(()=>{
+            if(!c.open&&!multiplayer.connected){
+                fail("Host nie odebrał połączenia. Sprawdź kod i czy host ma otwarty pokój.");
+                try{c.close();}catch(e){}
+            }
+        },12000);
+
+        c.on("open",()=>{
+            if(timer)clearTimeout(timer);
+            if(!finished){
+                finished=true;
+                multiplayer.connected=true;
+                setNet("MULTIPLAYER • POŁĄCZONO");
+            }
+        });
+
+        c.on("error",err=>{
+            console.warn("Join connection error",err);
+            fail(err?.type==="peer-unavailable"
+                ?"Nie znaleziono pokoju. Sprawdź kod."
+                :"Błąd połączenia: "+(err?.type||"nieznany"));
+        });
+    });
+
+    peer.on("error",e=>{
+        console.warn("PeerJS join error",e);
+        if(e.type==="peer-unavailable") fail("Nie znaleziono pokoju. Sprawdź kod.");
+        else if(["network","server-error","socket-error"].includes(e.type))
+            fail("Nie można połączyć z serwerem multiplayer.");
+        else fail("Błąd multiplayer: "+(e.type||"nieznany"));
+    });
+
+    peer.on("disconnected",()=>{
+        if(multiplayer.peer===peer&&!peer.destroyed&&!finished){
+            try{peer.reconnect();}catch(e){}
+        }
     });
 };
+
+/* =========================================================
+   MULTIPLAYER PANEL BACK / CLEANUP
+========================================================= */
 
 const multiBackBtn=document.getElementById("multiBack");
 if(multiBackBtn){
     multiBackBtn.addEventListener("click",()=>{
-        resetMultiplayerPeer();
+        if(multiplayer.peer){
+            try{ multiplayer.peer.destroy(); }catch(e){}
+        }
+        multiplayer.peer=null;
+        multiplayer.connected=false;
+        multiplayer.host=false;
+        multiplayer.hostConn=null;
+        multiplayer.conns.clear();
+        remotes.clear();
         setNet("Offline");
     });
 }
 
-/* Server-side relay + local game state synchronization */
-setInterval(()=>{
-    if(!multiSocket || multiSocket.readyState!==WebSocket.OPEN || !multiplayer.connected) return;
-    try{
-        sendSocket({type:"ping",t:Date.now()});
-        if(multiplayer.host){
-            broadcast({type:"worldtime",dayTime});
-            broadcast({type:"remote",id:"HOST",p:{x:me.x,y:me.y,vx:me.vx,vy:me.vy,ground:me.ground,dir:me.dir,walk:me.walk,mine:me.mine,w:11,h:22}});
-        }else{
-            send({type:"state",p:{x:me.x,y:me.y,vx:me.vx,vy:me.vy,ground:me.ground,dir:me.dir,walk:me.walk,mine:me.mine,w:11,h:22}});
-        }
-    }catch(e){}
-},100);
+/* =========================================================
+   MULTIPLAYER SYNC
+========================================================= */
 
-setInterval(()=>{
-    if(multiSocket && multiSocket.readyState===WebSocket.OPEN) sendSocket({type:"ping",t:Date.now()});
-},5000);
+setInterval(
+    ()=>{
+
+        if(
+            !gameStarted ||
+            !multiplayer.connected
+        ){
+
+            return;
+
+        }
+
+        if(
+            multiplayer.host
+        ){
+
+            /*
+               Synchronizacja czasu.
+            */
+
+            broadcast({
+
+                type:"worldtime",
+
+                dayTime
+
+            });
+
+            /*
+               Pozycja hosta.
+            */
+
+            broadcast({
+
+                type:"remote",
+
+                id:"HOST",
+
+                p:{
+
+                    x:me.x,
+
+                    y:me.y,
+
+                    vx:me.vx,
+
+                    vy:me.vy,
+
+                    ground:me.ground,
+
+                    dir:me.dir,
+
+                    walk:me.walk,
+
+                    mine:me.mine,
+
+                    w:11,
+
+                    h:22
+
+                }
+
+            });
+
+        }else{
+
+            /*
+               Pozycja klienta.
+            */
+
+            send({
+
+                type:"state",
+
+                p:{
+
+                    x:me.x,
+
+                    y:me.y,
+
+                    vx:me.vx,
+
+                    vy:me.vy,
+
+                    ground:me.ground,
+
+                    dir:me.dir,
+
+                    walk:me.walk,
+
+                    mine:me.mine,
+
+                    w:11,
+
+                    h:22
+
+                }
+
+            });
+
+        }
+
+    },
+    100
+);
 
 /* =========================================================
    MAIN RENDER
@@ -5683,6 +5880,128 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   });
   // Keep the identity alive after reconnect without touching receive().
   setInterval(()=>{if(typeof multiplayer!=='undefined'&&multiplayer.connected&&typeof sendIdentity==='function')try{sendIdentity()}catch(e){}},4000);
+})();
+</script>
+
+
+<div id="pwMobileActions" class="pwMobileActions">
+  <button id="pwMobileMine" aria-label="Kop">⛏️</button>
+  <button id="pwMobilePlace" aria-label="Postaw">🧱</button>
+</div>
+<div id="pwBreakOverlay" class="pwBreakOverlay"><i></i></div>
+
+<script>
+/* =========================================================
+   PIXEL WORLD — DEVICE + MINING + SETTINGS + BUGFIX PATCH
+========================================================= */
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const safe=(fn)=>{try{return fn()}catch(e){console.warn('Pixel World patch:',e);return null}};
+
+  /* ---------- Persistent extended settings ---------- */
+  const KEY='PIXEL_WORLD_SETTINGS_V3';
+  const defaults={shadows:true,worldAnim:true,hitFx:true,shake:true,holdMine:true,holdPlace:true,vibrate:true,map:true,coords:true,fps:true,compact:false};
+  let ext={...defaults};
+  safe(()=>{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&typeof x==='object')ext={...defaults,...x};Object.assign(S,ext)});
+  function saveExt(){safe(()=>localStorage.setItem(KEY,JSON.stringify(ext)));Object.assign(S,ext);applyUI();}
+  function applyUI(){
+    const pairs=[['setShadows','shadows'],['setWorldAnim','worldAnim'],['setHitFx','hitFx'],['setShake','shake'],['setHoldMine','holdMine'],['setHoldPlace','holdPlace'],['setVibrate','vibrate'],['setMap','map'],['setCoords','coords'],['setFps','fps'],['setCompact','compact']];
+    pairs.forEach(([id,k])=>{const e=$(id);if(e)e.checked=!!ext[k]});
+    const map=$('pwMiniMap'),coords=$('pwCoords'),fps=$('pwFps');
+    if(map)map.style.display=ext.map?'block':'none';
+    if(coords)coords.style.display=ext.coords?'block':'none';
+    if(fps)fps.style.display=ext.fps?'block':'none';
+    document.body.classList.toggle('pwCompact',!!ext.compact);
+  }
+  [['setShadows','shadows'],['setWorldAnim','worldAnim'],['setHitFx','hitFx'],['setShake','shake'],['setHoldMine','holdMine'],['setHoldPlace','holdPlace'],['setVibrate','vibrate'],['setMap','map'],['setCoords','coords'],['setFps','fps'],['setCompact','compact']].forEach(([id,k])=>$(id)?.addEventListener('change',e=>{ext[k]=e.target.checked;saveExt()}));
+  $('pwResetSettings')?.addEventListener('click',()=>{ext={...defaults};saveExt();safe(()=>saveSettings&&saveSettings());toast?.('⚙ Ustawienia zresetowane');});
+  $('pwFullscreen')?.addEventListener('click',async()=>{safe(()=>document.documentElement.requestFullscreen?.());});
+  applyUI();
+
+  /* ---------- Better responsive canvas sizing ---------- */
+  function resize(){
+    cssW=Math.max(1,innerWidth);cssH=Math.max(1,innerHeight);
+    if(typeof canvas!=='undefined'){canvas.style.width='100vw';canvas.style.height='100vh';canvas.style.touchAction='none'}
+  }
+  addEventListener('resize',resize,{passive:true});addEventListener('orientationchange',()=>setTimeout(resize,100),{passive:true});resize();
+
+  /* ---------- Mobile mine/place controls ---------- */
+  function holdButton(id,down,up){const b=$(id);if(!b)return;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);down()});b.addEventListener('pointerup',e=>{e.preventDefault();up()});b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',e=>{if(e.buttons===0)up()})}
+  holdButton('pwMobileMine',()=>{mineHeld=true;mine()},()=>{mineHeld=false});
+  holdButton('pwMobilePlace',()=>{placeHeld=true;place()},()=>{placeHeld=false});
+
+  /* ---------- Minecraft-style progressive mining ---------- */
+  let breaking=null;
+  const hardness={
+    [B.grass]:.55,[B.dirt]:.55,[B.sand]:.45,[B.wood]:.9,[B.leaves]:.18,[B.stone]:1.45,[B.coal]:1.7,[B.iron]:1.9,[B.gold]:2.1,[B.lapis]:1.8,[B.emerald]:2.0,[B.diamond]:2.2,[B.obsidian]:4.0,[B.crystal]:1.8,[B.glass]:.25,[B.brick]:1.25
+  };
+  const breakEl=$('pwBreakOverlay'), breakBar=breakEl?.querySelector('i');
+  function resetBreak(){breaking=null;if(breakEl)breakEl.style.display='none';if(breakBar)breakBar.style.width='0%'}
+  function currentTarget(){
+    const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T),t=getB(bx,by);return {q,bx,by,t,key:bx+','+by};
+  }
+  const oldMineFinal=mine;
+  mine=function(){
+    const z=currentTarget();
+    if(!z.t||!inRange(z.bx,z.by)){resetBreak();return}
+    if(!ext.holdMine && breaking && breaking.key===z.key)return;
+    if(!breaking||breaking.key!==z.key||breaking.t!==z.t){breaking={key:z.key,t:z.t,bx:z.bx,by:z.by,p:0};}
+    const h=hardness[z.t]||1;
+    breaking.p=Math.min(1,breaking.p+0.14/h);
+    if(breakEl&&breakBar){breakEl.style.display='block';breakBar.style.width=(breaking.p*100).toFixed(0)+'%'}
+    if(ext.hitFx && typeof state==='object')safe(()=>{state.shake=ext.shake?.035:0;state.flash=.025});
+    if(breaking.p>=1){
+      const bx=breaking.bx,by=breaking.by;
+      resetBreak();
+      oldMineFinal();
+      safe(()=>{if(ext.vibrate&&navigator.vibrate)navigator.vibrate(12)});
+    }
+  };
+  addEventListener('pointerup',()=>{if(!mineHeld)resetBreak()},{passive:true});
+
+  /* ---------- Crack overlay drawn above the world ---------- */
+  const oldRenderFinal=render;
+  render=function(){
+    oldRenderFinal();
+    if(breaking&&breaking.p>0){
+      const sx=breaking.bx*T-cam.x,sy=breaking.by*T-cam.y;
+      if(sx>-T&&sy>-T&&sx<VW&&sy<VH){
+        ctx.save();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.5;ctx.globalAlpha=.25+.65*breaking.p;
+        const n=1+Math.floor(breaking.p*4);
+        for(let i=0;i<n;i++){const a=i*1.47+breaking.t*.01;ctx.beginPath();ctx.moveTo(sx+T*.5,sy+T*.5);ctx.lineTo(sx+T*.5+Math.cos(a)*T*.42,sy+T*.5+Math.sin(a)*T*.42);ctx.stroke()}
+        ctx.restore();
+      }
+    }
+  };
+
+  /* ---------- Better inventory equipment strip ---------- */
+  const body=document.querySelector('.pwInvBody');
+  if(body&&!document.getElementById('pwEqExtra')){
+    const side=body.querySelector('.pwInvSide');
+    if(side){
+      const eq=document.createElement('div');eq.id='pwEqExtra';eq.className='pwEqExtra';
+      eq.innerHTML='<div class="eqSlot">🪖<span>GŁOWA</span></div><div class="eqSlot">🛡️<span>PLECY</span></div><div class="eqSlot">⛏️<span>NARZĘDZIE</span></div><div class="eqSlot">👟<span>BUTY</span></div>';
+      side.appendChild(eq);
+    }
+  }
+
+  /* ---------- More defensive input handling ---------- */
+  function clearAll(){keys={};leftHeld=false;rightHeld=false;jumpRequest=false;mineHeld=false;placeHeld=false;resetBreak()}
+  addEventListener('blur',clearAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearAll()});
+  document.addEventListener('contextmenu',e=>{if(e.target===canvas)e.preventDefault()});
+
+  /* ---------- Camera shake respects setting ---------- */
+  if(typeof camera==='function'){
+    const oldCamera=camera;
+    camera=function(){oldCamera();if(!ext.shake&&typeof state==='object')state.shake=0};
+  }
+
+  /* ---------- Lightweight error shield for optional UI ---------- */
+  ['pwHubBtn','inventoryBtn','chatBtn','gameSettingsBtn','pauseBtn','save','craftBtn'].forEach(id=>{const e=$(id);if(e)e.addEventListener('error',()=>console.warn('UI error',id))});
+  window.addEventListener('error',e=>{console.warn('Pixel World runtime warning:',e.message)});
+
+  toast?.('🛠️ Naprawiono sterowanie, kopanie i ustawienia');
 })();
 </script>
 
