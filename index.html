@@ -4207,7 +4207,7 @@ function send(msg){
 function setupConn(c){
     if(!c) return;
     c.peer = c.peer || multiPlayerId || "PLAYER2";
-    c.readyState = c.readyState ?? WebSocket.OPEN;
+    
     c.send = (m)=>sendSocket({type:"game",msg:m});
     multiplayer.hostConn = multiplayer.host ? null : c;
 }
