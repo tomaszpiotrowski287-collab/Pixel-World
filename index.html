@@ -361,6 +361,13 @@ select{
 .pwInvActions{display:flex;gap:6px}.pwInvActions button{padding:7px 12px}
 @media(max-width:700px){.pwInvBody{grid-template-columns:1fr}.pwInvSide{display:none}.pwInvGrid{grid-template-columns:repeat(4,minmax(58px,1fr))}.pwInvBox{max-height:94vh}.pwInvTitle{font-size:16px}}
 
+
+/* NOWY PANEL EKWIPUNKU — czytelny, nie jest jednym ciągiem */
+.pwEqExtra{display:grid;grid-template-columns:repeat(2,72px);gap:8px;margin-top:12px;justify-content:center}
+.pwEqExtra .eqSlot{height:62px;background:linear-gradient(145deg,#304650,#111a20);border:3px solid #607985;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:23px;box-shadow:inset 2px 2px 0 rgba(255,255,255,.08),0 3px 0 #070b0e}
+.pwEqExtra .eqSlot span{font-size:8px;font-weight:900;color:#dce8ed;letter-spacing:.5px}
+.pwInvSide{border-radius:10px}
+.pwInvGrid{background:#0b1217;padding:8px;border:2px solid #314650;border-radius:8px}
 /* =========================
    HOTBAR
 ========================= */
@@ -4185,7 +4192,7 @@ function loop(now){
 
         /* Physical block drops must be simulated every frame so the items
            fall, bounce and can actually be collected by the player. */
-        if(typeof updateDrops === "function") updateDrops(dt);
+        if(typeof window.__pwUpdateDrops === "function") window.__pwUpdateDrops(dt);
 
         updateParticles(dt);
 
@@ -5898,12 +5905,11 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
          a nie tylko od jego środka. Dzięki temu blok ziemi leżący pod nogami
          albo tuż obok gracza można normalnie zebrać. */
       const dropW=10, dropH=10;
-      const px1=me.x-12, px2=me.x+me.w+12;
-      const py1=me.y-18, py2=me.y+me.h+18;
+      const px1=me.x-T*.8, px2=me.x+me.w+T*.8;
+      const py1=me.y-T*.8, py2=me.y+me.h+T*.8;
       const dx=Math.max(px1-(d.x+dropW), d.x-px2, 0);
       const dy=Math.max(py1-(d.y+dropH), d.y-py2, 0);
-      const pickupRadius=Math.max(10,T*.55);
-      const near=(dx*dx+dy*dy)<=pickupRadius*pickupRadius;
+      const near=(dx===0 && dy===0) || (dx*dx+dy*dy)<=T*T;
 
       if(near){
         inv[d.item]=(inv[d.item]||0)+d.count;
@@ -5922,6 +5928,10 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
          dopóki gracz nie zbierze ich albo nie wykona resetu świata. */
     }
   }
+
+  /* Udostępnij system dropów głównej pętli gry. Wcześniej funkcja była
+     zamknięta w tym skrypcie, więc pętla gry jej nie wywoływała. */
+  window.__pwUpdateDrops=updateDrops;
 
   function drawDrops(){
     for(const d of drops){
