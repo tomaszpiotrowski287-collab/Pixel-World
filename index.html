@@ -4,11 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<title>PIXEL WORLD — MULTIPLAYER</title>
-
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js">
-</script>
-
+<title>PIXEL WORLD — SINGLEPLAYER</title>
 <style>
 *{
     box-sizing:border-box;
@@ -609,7 +605,7 @@ input,textarea{user-select:text;-webkit-user-select:text}
         </div>
 
         <div class="sub">
-            MINI PIXEL SANDBOX • MULTIPLAYER
+            MINI PIXEL SANDBOX • SINGLEPLAYER
         </div>
 
         <div class="menuArt"></div>
@@ -618,14 +614,6 @@ input,textarea{user-select:text;-webkit-user-select:text}
 
             <button class="play" id="play">
                 ▶ GRAJ
-            </button>
-
-            <button id="multi">
-                👥 MULTIPLAYER
-            </button>
-
-            <button id="nameBtn">
-                🧑 NAZWA GRACZA
             </button>
 
             <button id="menuHubBtn">
@@ -667,80 +655,8 @@ input,textarea{user-select:text;-webkit-user-select:text}
 </div>
 
 <!-- =========================
-     MULTIPLAYER
-========================= -->
-
-<div id="multiPanel" class="panel hidden">
-
-    <div class="box">
-
-        <button class="close" data-close="multiPanel">
-            X
-        </button>
-
-        <h2>
-            👥 MULTIPLAYER
-        </h2>
-
-        <p>
-            Host tworzy pokój i podaje swój kod drugiej osobie.
-        </p>
-
-        <div class="row">
-
-            <button id="hostBtn">
-                UTWÓRZ POKÓJ
-            </button>
-
-            <input
-                id="myId"
-                readonly
-                placeholder="Twój kod"
-            >
-
-            <button id="copyIdBtn" class="small">KOPIUJ</button>
-
-        </div>
-
-        <div class="row">
-
-            <input
-                id="joinId"
-                placeholder="Kod pokoju"
-            >
-
-            <button id="joinBtn">
-                DOŁĄCZ
-            </button>
-
-        </div>
-
-        <p id="multiMsg">
-            Offline
-        </p>
-
-        <button id="multiBack">
-            WRÓĆ
-        </button>
-
-    </div>
-
-</div>
-
-<!-- =========================
      SETTINGS
 ========================= -->
-
-<div id="namePanel" class="panel hidden">
-  <div class="box">
-    <button class="close" data-close="namePanel">X</button>
-    <h2>🧑 TWOJA NAZWA</h2>
-    <p>Ta nazwa będzie widoczna dla innych graczy.</p>
-    <input id="playerName" maxlength="16" placeholder="np. Tomek" autocomplete="off">
-    <div class="namePreview">Podgląd: <span id="namePreview">PIXEL PLAYER</span></div>
-    <button id="saveNameBtn">ZAPISZ NAZWĘ</button>
-  </div>
-</div>
 
 <div id="settingsPanel" class="panel hidden">
 
@@ -815,6 +731,13 @@ input,textarea{user-select:text;-webkit-user-select:text}
             <h3>🧰 NARZĘDZIA</h3>
             <div class="pwGrid"><button id="pwResetSettings">↩ RESET USTAWIEŃ</button><button id="pwFullscreen">⛶ PEŁNY EKRAN</button></div>
         </div>
+        <div class="pwSettingGroup pwDangerGroup">
+            <h3>💾 ZARZĄDZANIE GRĄ</h3>
+            <p class="pwTiny">Możesz osobno wyzerować mapę albo cały progres. Przed resetem pojawi się potwierdzenie.</p>
+            <div class="pwGrid"><button id="pwResetWorld">🌍 RESET ŚWIATA</button><button id="pwResetProgress">⭐ RESET PROGRESU</button></div>
+            <button id="pwResetAll" style="width:100%;margin-top:6px">🧨 RESET WSZYSTKIEGO</button>
+            <div class="pwGrid" style="margin-top:6px"><button id="pwBackupGame">📦 KOPIA ZAPASOWA</button><button id="pwRestoreBackup">♻️ PRZYWRÓĆ KOPIĘ</button></div>
+        </div>
 
     </div>
 
@@ -880,7 +803,6 @@ input,textarea{user-select:text;-webkit-user-select:text}
       <button id="pwFarm">🌱 FARMA</button>
       <button id="pwFish">🎣 WĘDKOWANIE</button>
       <button id="pwShop">🛒 SKLEP</button>
-      <button id="pwTrade">🤝 HANDEL</button>
       <button id="pwDungeon">🏰 DUNGEON</button>
       <button id="pwPets">🐾 PET</button>
       <button id="pwLocks">🔒 LOCKI</button>
@@ -936,9 +858,7 @@ input,textarea{user-select:text;-webkit-user-select:text}
      GAME UI
 ========================= -->
 
-<div id="chatBox" class="hidden">
-  <div id="chatMessages"></div>
-  <div class="chatInputRow">
+<div class="chatInputRow">
     <input id="chatInput" maxlength="120" placeholder="Napisz wiadomość..." autocomplete="off">
     <button id="chatSend">WYŚLIJ</button>
   </div>
@@ -3569,14 +3489,14 @@ document
     .innerHTML = `
 
         <p>
-            PIXEL WORLD został przebudowany
-            pod pixel-art i multiplayer.
+            PIXEL WORLD działa teraz w trybie singleplayer.
+            Multiplayer jest tymczasowo wyłączony.
         </p>
 
         <p>
-            Dodano synchronizację świata,
-            graczy, bloków oraz dłuższy
-            cykl dnia i nocy.
+            Dodano nowe systemy świata,
+            animacje, ekwipunek, farmę,
+            wędkowanie i rozbudowane ustawienia.
         </p>
 
     `;
@@ -3592,12 +3512,7 @@ document
         "settingsPanel"
     );
 
-document
-.getElementById("multi")
-.onclick =
-    ()=>open(
-        "multiPanel"
-    );
+/* Multiplayer temporarily disabled. */
 
 document.getElementById('menuHubBtn').onclick=()=>{gameStarted=true;document.getElementById('menu').style.display='none';setPause(false);open('pwHub');pwRefresh()};
 
@@ -4193,374 +4108,21 @@ function receive(
 
 
 /* =========================================================
-   MULTIPLAYER CONNECTION — STABLE VERSION
+   MULTIPLAYER — TEMPORARILY DISABLED
 ========================================================= */
-
-function makePeer(){
-    return new Peer({
-        debug: 1,
-        config: {
-            iceServers: [
-                {urls:"stun:stun.l.google.com:19302"},
-                {urls:"stun:stun1.l.google.com:19302"},
-                {urls:"stun:stun.cloudflare.com:3478"}
-            ],
-            sdpSemantics:"unified-plan"
-        }
-    });
+function setNet(text){
+  const e=document.getElementById('netStatus');
+  if(e)e.textContent='OFFLINE';
+  const m=document.getElementById('multiMsg');
+  if(m)m.textContent='Multiplayer jest obecnie wyłączony.';
 }
-
-function cleanRoomCode(v){
-    return String(v || "").replace(/\s+/g, "").trim();
-}
-
-function resetMultiplayerPeer(){
-    if(multiplayer.peer){
-        try{ multiplayer.peer.destroy(); }catch(e){}
-    }
-    multiplayer.peer=null;
-    multiplayer.id="";
-    multiplayer.connected=false;
-    multiplayer.host=false;
-    multiplayer.hostConn=null;
-    multiplayer.conns.clear();
-}
-
-function setupConn(c){
-    if(!c) return;
-
-    c.on("open",()=>{
-        multiplayer.connected=true;
-        if(multiplayer.host){
-            multiplayer.conns.add(c);
-            try{
-                c.send({
-                    type:"init",
-                    world:Array.from(world,y=>Array.from(y)),
-                    dayTime,
-                    inv:{...inv},
-                    players:[...remotes.entries()]
-                });
-            }catch(e){ console.warn("init send failed",e); }
-            setNet("MULTIPLAYER • HOST • POŁĄCZONO");
-        }else{
-            multiplayer.hostConn=c;
-            setNet("MULTIPLAYER • POŁĄCZONO");
-            try{ c.send({type:"hello",x:me.x,y:me.y}); }
-            catch(e){ console.warn("hello send failed",e); }
-        }
-    });
-
-    c.on("data",m=>{
-        try{ receive(m,c); }catch(e){ console.warn("receive error",e); }
-    });
-
-    c.on("close",()=>{
-        multiplayer.conns.delete(c);
-        if(c===multiplayer.hostConn) multiplayer.hostConn=null;
-        if(multiplayer.host){
-            multiplayer.connected=multiplayer.conns.size>0;
-            setNet(multiplayer.connected
-                ?"MULTIPLAYER • HOST • POŁĄCZONO"
-                :"MULTIPLAYER • HOST • OCZEKUJE NA GRACZA");
-        }else{
-            multiplayer.connected=false;
-            setNet("MULTIPLAYER • ROZŁĄCZONO");
-        }
-    });
-
-    c.on("error",err=>{
-        console.warn("PeerJS connection error",err);
-        setNet("Błąd połączenia: "+(err?.type||"nieznany"));
-    });
-}
-
-setInterval(()=>{
-    if(!multiplayer.connected) return;
-    const packet={type:"ping",t:Date.now()};
-    try{
-        if(multiplayer.host){
-            for(const c of [...multiplayer.conns]) if(c&&c.open) c.send(packet);
-        }else if(multiplayer.hostConn&&multiplayer.hostConn.open){
-            multiplayer.hostConn.send(packet);
-        }
-    }catch(e){}
-},5000);
-
-const copyIdBtn=document.getElementById("copyIdBtn");
-if(copyIdBtn){
-    copyIdBtn.onclick=async()=>{
-        const id=document.getElementById("myId").value.trim();
-        if(!id){setNet("Najpierw utwórz pokój.");return;}
-        try{
-            await navigator.clipboard.writeText(id);
-            setNet("KOD POKOJU SKOPIOWANY");
-        }catch(e){
-            const input=document.getElementById("myId");
-            input.focus(); input.select();
-            setNet("Zaznaczono kod — skopiuj Ctrl+C.");
-        }
-    };
-}
-
-document.getElementById("hostBtn").onclick=()=>{
-    if(multiplayer.peer){
-        setNet("Pokój jest już uruchomiony.");
-        return;
-    }
-    multiplayer.host=true;
-    multiplayer.connected=false;
-    multiplayer.conns.clear();
-    multiplayer.hostConn=null;
-    setNet("Tworzenie pokoju…");
-
-    const peer=makePeer();
-    multiplayer.peer=peer;
-
-    peer.on("open",id=>{
-        multiplayer.id=id;
-        document.getElementById("myId").value=id;
-        setNet("POKÓJ GOTOWY • KOD: "+id);
-    });
-
-    peer.on("connection",c=>{
-        setNet("Ktoś próbuje dołączyć…");
-        setupConn(c);
-        const wait=setTimeout(()=>{
-            if(c && !c.open){
-                try{c.close();}catch(e){}
-                if(multiplayer.connected) setNet("MULTIPLAYER • HOST • POŁĄCZONO");
-                else setNet("POŁĄCZENIE NIE DOSZŁO DO SKUTKU — spróbuj ponownie.");
-            }
-        },15000);
-        c.on("open",()=>clearTimeout(wait));
-        c.on("close",()=>clearTimeout(wait));
-    });
-
-    peer.on("disconnected",()=>{
-        if(multiplayer.peer===peer&&!peer.destroyed){
-            setNet("Ponowne łączenie z serwerem…");
-            try{peer.reconnect();}catch(e){}
-        }
-    });
-
-    peer.on("error",e=>{
-        console.warn("PeerJS host error",e);
-        setNet("Błąd hosta: "+(e?.type||"nieznany"));
-    });
-};
-
-document.getElementById("joinBtn").onclick=()=>{
-    const id=cleanRoomCode(document.getElementById("joinId").value);
-    if(!id){ setNet("Wpisz kod pokoju."); return; }
-
-    if(multiplayer.peer){
-        try{multiplayer.peer.destroy();}catch(e){}
-        multiplayer.peer=null;
-    }
-
-    multiplayer.host=false;
-    multiplayer.connected=false;
-    multiplayer.hostConn=null;
-    multiplayer.conns.clear();
-    setNet("Łączenie z pokojem…");
-
-    const peer=makePeer();
-    multiplayer.peer=peer;
-    let finished=false;
-    let timer=null;
-
-    const fail=msg=>{
-        if(finished)return;
-        finished=true;
-        if(timer)clearTimeout(timer);
-        setNet(msg);
-        try{if(!peer.destroyed)peer.destroy();}catch(e){}
-        if(multiplayer.peer===peer)multiplayer.peer=null;
-    };
-
-    peer.on("open",()=>{
-        if(finished||multiplayer.peer!==peer)return;
-        setNet("Serwer gotowy — szukam pokoju…");
-
-        let c;
-        try{
-            c=peer.connect(id,{reliable:true,serialization:"json",metadata:{game:"PIXEL_WORLD"}});
-        }catch(e){
-            fail("Nie można rozpocząć połączenia.");
-            return;
-        }
-
-        setupConn(c);
-
-        timer=setTimeout(()=>{
-            if(!c.open&&!multiplayer.connected){
-                fail("Host nie odebrał połączenia. Sprawdź kod i czy host ma otwarty pokój.");
-                try{c.close();}catch(e){}
-            }
-        },12000);
-
-        c.on("open",()=>{
-            if(timer)clearTimeout(timer);
-            if(!finished){
-                finished=true;
-                multiplayer.connected=true;
-                setNet("MULTIPLAYER • POŁĄCZONO");
-            }
-        });
-
-        c.on("error",err=>{
-            console.warn("Join connection error",err);
-            fail(err?.type==="peer-unavailable"
-                ?"Nie znaleziono pokoju. Sprawdź kod."
-                :"Błąd połączenia: "+(err?.type||"nieznany"));
-        });
-    });
-
-    peer.on("error",e=>{
-        console.warn("PeerJS join error",e);
-        if(e.type==="peer-unavailable") fail("Nie znaleziono pokoju. Sprawdź kod.");
-        else if(["network","server-error","socket-error"].includes(e.type))
-            fail("Nie można połączyć z serwerem multiplayer.");
-        else fail("Błąd multiplayer: "+(e.type||"nieznany"));
-    });
-
-    peer.on("disconnected",()=>{
-        if(multiplayer.peer===peer&&!peer.destroyed&&!finished){
-            try{peer.reconnect();}catch(e){}
-        }
-    });
-};
-
-/* =========================================================
-   MULTIPLAYER PANEL BACK / CLEANUP
-========================================================= */
-
-const multiBackBtn=document.getElementById("multiBack");
-if(multiBackBtn){
-    multiBackBtn.addEventListener("click",()=>{
-        if(multiplayer.peer){
-            try{ multiplayer.peer.destroy(); }catch(e){}
-        }
-        multiplayer.peer=null;
-        multiplayer.connected=false;
-        multiplayer.host=false;
-        multiplayer.hostConn=null;
-        multiplayer.conns.clear();
-        remotes.clear();
-        setNet("Offline");
-    });
-}
-
-/* =========================================================
-   MULTIPLAYER SYNC
-========================================================= */
-
-setInterval(
-    ()=>{
-
-        if(
-            !gameStarted ||
-            !multiplayer.connected
-        ){
-
-            return;
-
-        }
-
-        if(
-            multiplayer.host
-        ){
-
-            /*
-               Synchronizacja czasu.
-            */
-
-            broadcast({
-
-                type:"worldtime",
-
-                dayTime
-
-            });
-
-            /*
-               Pozycja hosta.
-            */
-
-            broadcast({
-
-                type:"remote",
-
-                id:"HOST",
-
-                p:{
-
-                    x:me.x,
-
-                    y:me.y,
-
-                    vx:me.vx,
-
-                    vy:me.vy,
-
-                    ground:me.ground,
-
-                    dir:me.dir,
-
-                    walk:me.walk,
-
-                    mine:me.mine,
-
-                    w:11,
-
-                    h:22
-
-                }
-
-            });
-
-        }else{
-
-            /*
-               Pozycja klienta.
-            */
-
-            send({
-
-                type:"state",
-
-                p:{
-
-                    x:me.x,
-
-                    y:me.y,
-
-                    vx:me.vx,
-
-                    vy:me.vy,
-
-                    ground:me.ground,
-
-                    dir:me.dir,
-
-                    walk:me.walk,
-
-                    mine:me.mine,
-
-                    w:11,
-
-                    h:22
-
-                }
-
-            });
-
-        }
-
-    },
-    100
-);
+function broadcast(){/* singleplayer */}
+function send(){/* singleplayer */}
+function receive(){/* singleplayer */}
+function setupConn(){/* singleplayer */}
+function makePeer(){return null}
+function resetMultiplayerPeer(){multiplayer.peer=null;multiplayer.id='';multiplayer.connected=false;multiplayer.host=false;multiplayer.hostConn=null;multiplayer.conns.clear();}
+function hostAction(){/* disabled */}
 
 /* =========================================================
    MAIN RENDER
@@ -4863,7 +4425,7 @@ document.getElementById('pwWorlds').onclick=pwWorldsUI;
 document.getElementById('pwFarm').onclick=pwFarmUI;
 document.getElementById('pwFish').onclick=pwFishUI;
 document.getElementById('pwShop').onclick=pwShopUI;
-document.getElementById('pwTrade').onclick=pwTradeUI;
+document.getElementById('pwTrade')?.addEventListener('click',pwTradeUI);
 document.getElementById('pwDungeon').onclick=pwDungeonUI;
 document.getElementById('pwPets').onclick=pwPetUI;
 document.getElementById('pwLocks').onclick=pwLocksUI;
@@ -5658,14 +5220,14 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   @media(max-width:700px){#pwUltimateBar{top:195px;right:6px;max-width:92vw}#pwUltimateBar button{padding:5px 7px;font-size:10px}#pwPerf{top:auto;bottom:6px;left:6px}}
   `;
   document.head.appendChild(style);
-  const bar=document.createElement('div');bar.id='pwUltimateBar';bar.innerHTML='<button id="pwPlayersBtn">👥 GRACZE</button><button id="pwStatsBtn">📊 STATY</button><button id="pwCPBtn">📍 CHECKPOINT</button><button id="pwFixBtn">🛠️ NAPRAW</button>';
+  const bar=document.createElement('div');bar.id='pwUltimateBar';bar.innerHTML='<button id="pwPlayersBtn">🧑 PROFIL</button><button id="pwStatsBtn">📊 STATY</button><button id="pwCPBtn">📍 CHECKPOINT</button><button id="pwFixBtn">🛠️ NAPRAW</button>';
   document.body.appendChild(bar);
   const perf=document.createElement('div');perf.id='pwPerf';perf.className='pwHidden';document.body.appendChild(perf);
   const toastEl=document.createElement('div');toastEl.id='pwToast2';document.body.appendChild(toastEl);
   function t2(s){toastEl.textContent=s;toastEl.style.display='block';clearTimeout(t2.x);t2.x=setTimeout(()=>toastEl.style.display='none',1800)}
 
   /* 6) Player list */
-  const pp=document.createElement('div');pp.id='pwPlayerPanel';pp.className='pwHidden';pp.innerHTML='<b>👥 GRACZE ONLINE</b><div id="pwPlayerList"></div><hr><button id="pwNameEdit">✏️ NAZWA</button> <button id="pwColorEdit">🎨 KOLOR</button> <button id="pwHideNames">🏷️ TAGI</button>';
+  const pp=document.createElement('div');pp.id='pwPlayerPanel';pp.className='pwHidden';pp.innerHTML='<b>🧑 PROFIL GRACZA</b><div id="pwPlayerList"></div><hr><button id="pwNameEdit">✏️ NAZWA</button> <button id="pwColorEdit">🎨 KOLOR</button> <button id="pwHideNames">🏷️ TAGI</button>';
   document.body.appendChild(pp);
   const list=$('pwPlayerList');
   function getPlayers(){
@@ -5772,7 +5334,7 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   /* 14) FPS + online counter */
   data.showStats=false;
   let frames=0,lastFPS=performance.now(),fps=0;
-  function perfTick(){frames++;const now=performance.now();if(now-lastFPS>=1000){fps=Math.round(frames*1000/(now-lastFPS));frames=0;lastFPS=now}if(data.showStats)perf.classList.remove('pwHidden');perf.textContent=`FPS ${fps} • ONLINE ${1+([...remotes.keys()].length||0)} • ERR ${errorCount}`} 
+  function perfTick(){frames++;const now=performance.now();if(now-lastFPS>=1000){fps=Math.round(frames*1000/(now-lastFPS));frames=0;lastFPS=now}if(data.showStats)perf.classList.remove('pwHidden');perf.textContent=`FPS ${fps} • GRACZ 1 • ERR ${errorCount}`} 
   setInterval(perfTick,250);
   document.addEventListener('keydown',e=>{if(e.key==='F3'){data.showStats=!data.showStats;perf.classList.toggle('pwHidden',!data.showStats);e.preventDefault()}});
 
@@ -5915,7 +5477,7 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
     document.body.classList.toggle('pwCompact',!!ext.compact);
   }
   [['setShadows','shadows'],['setWorldAnim','worldAnim'],['setHitFx','hitFx'],['setShake','shake'],['setHoldMine','holdMine'],['setHoldPlace','holdPlace'],['setVibrate','vibrate'],['setMap','map'],['setCoords','coords'],['setFps','fps'],['setCompact','compact']].forEach(([id,k])=>$(id)?.addEventListener('change',e=>{ext[k]=e.target.checked;saveExt()}));
-  $('pwResetSettings')?.addEventListener('click',()=>{ext={...defaults};saveExt();safe(()=>saveSettings&&saveSettings());toast?.('⚙ Ustawienia zresetowane');});
+  $('pwResetSettings')?.addEventListener('click',()=>{ext={...defaults};saveExt();safe(()=>saveSettings&&saveSettings());window.toast?.('⚙ Ustawienia zresetowane');});
   $('pwFullscreen')?.addEventListener('click',async()=>{safe(()=>document.documentElement.requestFullscreen?.());});
   applyUI();
 
@@ -6001,9 +5563,220 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   ['pwHubBtn','inventoryBtn','chatBtn','gameSettingsBtn','pauseBtn','save','craftBtn'].forEach(id=>{const e=$(id);if(e)e.addEventListener('error',()=>console.warn('UI error',id))});
   window.addEventListener('error',e=>{console.warn('Pixel World runtime warning:',e.message)});
 
-  toast?.('🛠️ Naprawiono sterowanie, kopanie i ustawienia');
+  window.toast?.('🛠️ Naprawiono sterowanie, kopanie i ustawienia');
 })();
 </script>
 
-</body>
+\n<script>
+/* =========================================================
+   PIXEL WORLD — SINGLEPLAYER + RESET + EXTRA QUALITY PATCH
+========================================================= */
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const SAVE_KEY='PIXEL_WORLD_MP_V3_ORES';
+  const EXTRA_KEY='PIXEL_WORLD_EXPANSION_V1';
+  const ULT_KEY='PW_ULTIMATE_V3';
+  const SETTINGS_KEY='PIXEL_WORLD_SETTINGS_V3';
+  const DAILY_KEY='PIXEL_WORLD_DAILY_V2';
+
+  /* ---- Make multiplayer permanently offline ---- */
+  try{
+    multiplayer.connected=false;
+    multiplayer.host=false;
+    multiplayer.peer=null;
+    multiplayer.hostConn=null;
+    multiplayer.conns.clear();
+  }catch(e){}
+
+  /* ---- Utility helpers ---- */
+  const starterInv=()=>({dirt:20,stone:10,wood:10,sand:10,glass:0,brick:0,coal:0,gold:0,lapis:0,emerald:0,diamond:0,obsidian:0,crystal:0});
+  function freshPW(){
+    return {
+      gems:0,xp:0,level:1,fish:0,fishValue:0,
+      seeds:{dirt:8,stone:0,sand:0,crystal:0,gold:0,diamond:0},
+      crops:{},pets:[],activePet:null,locks:[],worlds:{},currentWorld:'MAIN',
+      quests:{mine:0,fish:0,harvest:0,craft:0,build:0},completed:{},achievements:{},
+      clan:null,skin:0,outfit:0,rod:1,bait:10,inventoryExtra:{},farmMode:false,
+      tradeTarget:null,tradeOffer:{},lastFish:0,dungeon:{active:false,time:0,gems:0,stage:0},
+      crossA:'dirt',crossB:'stone'
+    };
+  }
+  function toast(t){
+    try{ if(typeof pwToast==='function') pwToast(t); else console.log(t); }catch(e){}
+  }
+  function safeSave(){try{if(typeof save==='function')save();}catch(e){}}
+  function refresh(){
+    try{if(typeof updateHotbar==='function')updateHotbar();}catch(e){}
+    try{if(typeof pwRefresh==='function')pwRefresh();}catch(e){}
+    try{if(typeof pwInvRefresh==='function')pwInvRefresh();}catch(e){}
+  }
+  function resetPlayerAtSpawn(){
+    try{const p=spawn();me.x=p.x;me.y=p.y;}catch(e){me.x=20*T;me.y=20*T;}
+    me.vx=0;me.vy=0;me.ground=false;me.dir=1;me.walk=0;me.mine=0;me.hp=100;
+    jumpRequest=false;leftHeld=false;rightHeld=false;mineHeld=false;placeHeld=false;
+  }
+  function resetWorldOnly(){
+    if(!confirm('Zresetować świat? Mapa, rośliny, locki i zapisane dodatkowe światy zostaną usunięte. Twój poziom, gemy i osiągnięcia pozostaną.'))return;
+    backupGame();
+    try{
+      generate();
+      dayTime=0;
+      resetPlayerAtSpawn();
+      if(typeof PW!=='undefined'){
+        PW.crops={};PW.locks=[];PW.worlds={};PW.currentWorld='MAIN';PW.farmMode=false;
+      }
+      selected=0;
+      localStorage.removeItem(SAVE_KEY);
+      safeSave();
+      try{if(typeof pwSaveExtra==='function')pwSaveExtra();}catch(e){}
+      refresh();
+      toast('🌍 Świat został zresetowany!');
+    }catch(e){console.warn('resetWorldOnly',e);toast('⚠️ Nie udało się zresetować świata');}
+  }
+  function resetProgressOnly(){
+    if(!confirm('Zresetować CAŁY progres? Poziom, gemy, questy, osiągnięcia, pety, ryby, farmę i ekwipunek zostaną wyzerowane. Świat pozostanie.'))return;
+    backupGame();
+    try{
+      Object.assign(PW,freshPW());
+      inv=starterInv();selected=0;
+      localStorage.removeItem(EXTRA_KEY);
+      localStorage.removeItem(DAILY_KEY);
+      localStorage.removeItem(ULT_KEY);
+      localStorage.removeItem('pixelWorldNameColor');
+      localStorage.removeItem('pixelWorldPlayerName');
+      resetPlayerAtSpawn();
+      safeSave();
+      refresh();
+      toast('⭐ Progres został zresetowany!');
+    }catch(e){console.warn('resetProgressOnly',e);toast('⚠️ Nie udało się zresetować progresu');}
+  }
+  function resetEverything(){
+    if(!confirm('UWAGA: zresetować CAŁĄ GRĘ? Świat, progres, ustawienia i statystyki zostaną usunięte.'))return;
+    backupGame();
+    try{
+      [SAVE_KEY,EXTRA_KEY,ULT_KEY,SETTINGS_KEY,DAILY_KEY,'pixelWorldPlayerName','pixelWorldNameColor'].forEach(k=>localStorage.removeItem(k));
+      location.reload();
+    }catch(e){console.warn('resetEverything',e);toast('⚠️ Reset nie powiódł się');}
+  }
+  const BACKUP_KEY='PIXEL_WORLD_BACKUP_V1';
+  function backupGame(){
+    try{
+      const data={save:localStorage.getItem(SAVE_KEY),extra:localStorage.getItem(EXTRA_KEY),ultimate:localStorage.getItem(ULT_KEY),settings:localStorage.getItem(SETTINGS_KEY),daily:localStorage.getItem(DAILY_KEY),name:localStorage.getItem('pixelWorldPlayerName'),color:localStorage.getItem('pixelWorldNameColor'),at:new Date().toISOString()};
+      localStorage.setItem(BACKUP_KEY,JSON.stringify(data));
+      toast('📦 Kopia zapasowa gotowa');
+      return true;
+    }catch(e){console.warn('backupGame',e);toast('⚠️ Nie udało się utworzyć kopii');return false;}
+  }
+  function restoreBackup(){
+    if(!confirm('Przywrócić ostatnią kopię zapasową? Bieżący zapis zostanie zastąpiony.'))return;
+    try{
+      const d=JSON.parse(localStorage.getItem(BACKUP_KEY)||'null');if(!d)return toast('📦 Brak kopii zapasowej');
+      const put=(k,v)=>v==null?localStorage.removeItem(k):localStorage.setItem(k,v);
+      put(SAVE_KEY,d.save);put(EXTRA_KEY,d.extra);put(ULT_KEY,d.ultimate);put(SETTINGS_KEY,d.settings);put(DAILY_KEY,d.daily);put('pixelWorldPlayerName',d.name);put('pixelWorldNameColor',d.color);
+      location.reload();
+    }catch(e){console.warn('restoreBackup',e);toast('⚠️ Kopia jest uszkodzona');}
+  }
+  window.pwBackupGame=backupGame;window.pwRestoreBackup=restoreBackup;
+  window.pwResetWorld=resetWorldOnly;
+  window.pwResetProgress=resetProgressOnly;
+  window.pwResetEverything=resetEverything;
+
+  /* ---- Hook reset buttons safely ---- */
+  $('pwResetWorld')?.addEventListener('click',resetWorldOnly);
+  $('pwResetProgress')?.addEventListener('click',resetProgressOnly);
+  $('pwResetAll')?.addEventListener('click',resetEverything);
+  $('pwBackupGame')?.addEventListener('click',backupGame);
+  $('pwRestoreBackup')?.addEventListener('click',restoreBackup);
+
+  /* ---- Disable multiplayer-only UI remnants ---- */
+  ['multi','multiPanel','hostBtn','joinBtn','copyIdBtn','multiBack','pwTrade','chatBox'].forEach(id=>{const e=$(id);if(e)e.remove();});
+  const sub=document.querySelector('.sub');
+  if(sub)sub.textContent='MINI PIXEL SANDBOX • SINGLEPLAYER';
+
+  /* ---- Turn the old profile button into a useful local profile ---- */
+  const playerBtn=$('pwPlayersBtn');
+  if(playerBtn){playerBtn.textContent='🧑 PROFIL';}
+  const pp=document.getElementById('pwPlayerPanel');
+  if(pp){
+    const h=pp.querySelector('b');if(h)h.textContent='🧑 PROFIL GRACZA';
+    const list=$('pwPlayerList');
+    if(list){
+      const nm=localStorage.getItem('pixelWorldPlayerName')||'PIXEL PLAYER';
+      list.innerHTML='<div class="pwPlayerRow"><span>⭐</span><span>'+String(nm).replace(/[<>]/g,'')+'</span><span style="margin-left:auto;font-size:10px;opacity:.7">OFFLINE</span></div>';
+    }
+  }
+
+  /* ---- Local-only chat remnants become hidden, not interactive ---- */
+  const chat=$('chatBox');if(chat)chat.remove();
+
+  /* ---- Stronger save validation ---- */
+  function repairInventory(){
+    const keys=Object.keys(starterInv());
+    if(!inv||typeof inv!=='object')inv=starterInv();
+    for(const k of keys){const n=Number(inv[k]);inv[k]=Number.isFinite(n)&&n>=0?Math.floor(n):0;}
+  }
+  function deepRepair(){
+    try{
+      repairInventory();
+      if(!Array.isArray(world)||world.length!==WORLD_H){generate();}
+      for(let y=0;y<WORLD_H;y++){
+        if(!(world[y] instanceof Uint8Array)||world[y].length!==WORLD_W){
+          const row=new Uint8Array(WORLD_W);if(world[y])row.set(Array.from(world[y]).slice(0,WORLD_W));world[y]=row;
+        }
+      }
+      if(!Number.isFinite(me.x)||!Number.isFinite(me.y))resetPlayerAtSpawn();
+      if(me.x<0||me.x>WORLD_W*T||me.y<-T*4||me.y>WORLD_H*T+T*4)resetPlayerAtSpawn();
+      if(typeof PW==='object'){
+        PW.gems=Math.max(0,Number(PW.gems)||0);PW.xp=Math.max(0,Number(PW.xp)||0);PW.level=Math.max(1,Math.floor(Number(PW.level)||1));
+        PW.seeds=PW.seeds&&typeof PW.seeds==='object'?PW.seeds:freshPW().seeds;
+        PW.crops=PW.crops&&typeof PW.crops==='object'?PW.crops:{};
+        PW.locks=Array.isArray(PW.locks)?PW.locks:[];
+        PW.worlds=PW.worlds&&typeof PW.worlds==='object'?PW.worlds:{};
+        PW.quests=PW.quests&&typeof PW.quests==='object'?PW.quests:freshPW().quests;
+        PW.completed=PW.completed&&typeof PW.completed==='object'?PW.completed:{};
+        PW.achievements=PW.achievements&&typeof PW.achievements==='object'?PW.achievements:{};
+        PW.pets=Array.isArray(PW.pets)?PW.pets:[];
+        PW.bait=Math.max(0,Math.floor(Number(PW.bait)||0));
+      }
+      refresh();
+      return true;
+    }catch(e){console.warn('deepRepair',e);return false;}
+  }
+  window.pwDeepRepair=deepRepair;
+
+  /* ---- Add extra quality-of-life tools to HUB ---- */
+  const hub=$('pwHub');
+  if(hub&&!$('pwSingleTools')){
+    const box=document.createElement('div');box.id='pwSingleTools';box.className='pwGrid';
+    box.innerHTML='<button id="pwQuickSave2">💾 ZAPISZ</button><button id="pwRespawn2">↩️ ODRODŹ</button><button id="pwRepair2">🛠️ NAPRAW</button><button id="pwTime2">🌙 DZIEŃ/NOC</button><button id="pwInfo2">🧭 INFO ŚWIATA</button><button id="pwShot2">📸 ZRÓB SCREENSHOT</button>';
+    hub.querySelector('.box')?.appendChild(box);
+    $('pwQuickSave2').onclick=()=>{deepRepair();safeSave();toast('💾 Gra zapisana')};
+    $('pwRespawn2').onclick=()=>{resetPlayerAtSpawn();toast('↩️ Odrodzono bezpiecznie')};
+    $('pwRepair2').onclick=()=>{deepRepair();toast('🛠️ Świat naprawiony')};
+    $('pwTime2').onclick=()=>{dayTime=(dayTime+DAY_LENGTH/2)%DAY_LENGTH;toast('🌙 Zmieniono porę dnia')};
+    $('pwInfo2').onclick=()=>{const bx=Math.floor((me.x+me.w/2)/T),by=Math.floor((me.y+me.h/2)/T),b=getB(bx,by);pwOpen('🧭 INFO ŚWIATA',`<p><b>Tryb:</b> Singleplayer</p><p><b>Mapa:</b> ${WORLD_W} × ${WORLD_H}</p><p><b>Pozycja:</b> X ${bx} • Y ${by}</p><p><b>Blok:</b> ${String(b)}</p><p><b>Świat:</b> ${typeof PW!=='undefined'?(PW.currentWorld||'MAIN'):'MAIN'}</p><p><b>Poziom:</b> ${typeof PW!=='undefined'?PW.level:1} • 💎 ${typeof PW!=='undefined'?Math.floor(PW.gems):0}</p>`)};
+    $('pwShot2').onclick=()=>{try{const a=document.createElement('a');a.download='pixel-world-screenshot.png';a.href=canvas.toDataURL('image/png');a.click();toast('📸 Screenshot zapisany')}catch(e){toast('⚠️ Nie udało się zrobić screenshota')}};
+  }
+
+  /* ---- Extra hotkeys ---- */
+  document.addEventListener('keydown',e=>{
+    if(e.repeat)return;
+    if(e.key==='F9'){safeSave();toast('💾 Zapisano grę');e.preventDefault();}
+    if(e.key==='F10'){deepRepair();toast('🛠️ Naprawiono świat');e.preventDefault();}
+    if(e.key==='F11'){try{document.documentElement.requestFullscreen?.()}catch(x){}e.preventDefault();}
+  });
+
+  /* ---- Continuous low-cost integrity watchdog ---- */
+  setInterval(()=>{
+    try{
+      deepRepair();
+      if(S.auto)safeSave();
+    }catch(e){}
+  },45000);
+
+  /* ---- Initial repair after all previous patches initialize ---- */
+  setTimeout(()=>{deepRepair();},250);
+})();
+</script>\n</body>
 </html>
