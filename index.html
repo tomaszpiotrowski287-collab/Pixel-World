@@ -359,10 +359,21 @@ select{
 .pwEqSlot span{font-size:8px;font-weight:900;color:#d9e8ed;margin-top:7px;letter-spacing:.6px}
 .pwInvStat{margin-top:12px;padding:9px;background:#081116;border:2px solid #3c5662;font-size:10px;line-height:1.8;text-align:left;color:#aebfc7;display:grid;grid-template-columns:1fr 1fr;gap:3px 10px}
 .pwInvStat div{display:flex;justify-content:space-between;gap:6px}.pwInvStat b{color:#fff}
-.pwInvGrid{display:grid;grid-template-columns:repeat(6,minmax(58px,1fr));gap:7px;padding:10px;background:#091218;border:3px solid #405965;box-shadow:inset 0 0 0 2px #05090c}
-.pwInvSlot{min-height:66px!important;border:3px solid #425965!important;background:linear-gradient(145deg,#1b303b,#0c151a)!important;box-shadow:inset 2px 2px 0 rgba(255,255,255,.06),3px 3px 0 #05080a!important}
-.pwInvSlot:hover{border-color:#8feaff!important;transform:translateY(-1px)}
-@media(max-width:700px){.pwInvBody{grid-template-columns:1fr}.pwInvSide{display:none}.pwInvGrid{grid-template-columns:repeat(4,minmax(58px,1fr))}.pwInvBox{max-height:94vh}.pwInvTitle{font-size:16px}}
+.pwInvGrid{display:grid;grid-template-columns:repeat(9,minmax(54px,1fr));grid-auto-rows:70px;gap:6px;padding:12px;background:linear-gradient(180deg,#071016,#0c171e);border:3px solid #405965;box-shadow:inset 0 0 0 2px #05090c;align-content:start}
+.pwInvSlot{min-width:0!important;min-height:0!important;height:70px!important;border:3px solid #425965!important;background:linear-gradient(145deg,#263d49,#111c23)!important;box-shadow:inset 2px 2px 0 rgba(255,255,255,.07),inset -3px -3px 0 rgba(0,0,0,.38),3px 3px 0 #05080a!important;position:relative;display:grid!important;place-items:center!important;cursor:pointer;transition:transform .08s,border-color .08s,filter .08s}
+.pwInvSlot:before{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.08);pointer-events:none}
+.pwInvSlot:hover{border-color:#8feaff!important;transform:translateY(-2px);filter:brightness(1.12)}
+.pwInvSlot.selected{border-color:#fff!important;box-shadow:0 0 0 2px #00d9ff, inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 #05080a!important;transform:translateY(-1px)}
+.pwInvSlot .pwInvName{display:none!important}
+.pwInvIcon{width:34px!important;height:34px!important;border:3px solid #10161a;box-shadow:inset 3px 3px 0 rgba(255,255,255,.16),inset -3px -3px 0 rgba(0,0,0,.28),2px 2px 0 #05080a;image-rendering:pixelated}
+.pwInvCount{position:absolute!important;right:5px!important;bottom:3px!important;font-size:13px!important;font-weight:900!important;line-height:1!important;color:#fff!important;text-shadow:2px 2px #000!important}
+.pwInvFooter{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#182a34;border-top:3px solid #0a0f13;min-height:58px}
+.pwInvSelected{flex:1;min-width:0;background:#0a141a;border:2px solid #405965;padding:9px 11px;color:#bdefff;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:2px 2px #000}
+.pwInvSelected:before{content:"WYBRANO: ";color:#7897a5;font-size:10px}
+.pwInvActions{display:flex;gap:6px}.pwInvActions button{padding:8px 12px}
+@media(max-width:1100px){.pwInvGrid{grid-template-columns:repeat(7,minmax(54px,1fr))}}
+@media(max-width:850px){.pwInvGrid{grid-template-columns:repeat(6,minmax(52px,1fr))}}
+@media(max-width:700px){.pwInvBody{grid-template-columns:1fr}.pwInvSide{display:none}.pwInvGrid{grid-template-columns:repeat(5,minmax(52px,1fr));grid-auto-rows:64px;gap:5px;padding:9px}.pwInvSlot{height:64px!important}.pwInvIcon{width:30px!important;height:30px!important}.pwInvBox{max-height:94vh}.pwInvTitle{font-size:16px}.pwInvFooter{padding:8px}.pwInvActions button{padding:7px 8px;font-size:11px}}
 
 /* =========================
    HOTBAR
@@ -5073,7 +5084,7 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
       const el=document.createElement('div'); el.className='pwInvSlot'+(invPick===x.key?' selected':'');
       el.title=x.name+' × '+x.count;
       el.innerHTML='<div class="pwInvName">'+x.name+'</div><div class="pwInvIcon" style="background:'+iconColor(x.key)+'"></div><div class="pwInvCount">'+x.count+'</div>';
-      el.onclick=()=>{invPick=x.key;updateInvFooter();renderInv()};
+      el.onclick=()=>{invPick=x.key;updateInvFooter();renderInv();};
       el.ondblclick=()=>{invPick=x.key;equipPicked()};
       invGrid.appendChild(el);
     });
@@ -5085,8 +5096,9 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   }
   function updateInvFooter(){
     const d=data().find(x=>x.key===invPick);
-    if(!d){invSelected.textContent='Wybierz przedmiot';return;}
-    invSelected.innerHTML='<b>'+d.name+'</b> × '+d.count;
+    if(!d){invSelected.textContent='Kliknij blok lub przedmiot';return;}
+    const type=d.kind==='block'?'BLOK':d.kind==='seed'?'NASIONO':d.kind==='fish'?'RYBA':'PRZEDMIOT';
+    invSelected.innerHTML='<b>'+d.name+'</b> <span style=\"color:#7897a5;font-size:10px;margin-left:8px\">'+type+' • ILOŚĆ: '+d.count+'</span>';
   }
   function equipPicked(){
     const d=data().find(x=>x.key===invPick); if(!d)return;
