@@ -334,46 +334,27 @@ select{
 ========================================================= */
 #inventoryBtn{min-width:38px}
 #pwInventory{z-index:80}
-.pwInvBox{width:min(980px,95vw);max-height:92vh;overflow:hidden;background:linear-gradient(180deg,#1d2d36 0%,#10191f 52%,#0b1217 100%);border:4px solid #718997;box-shadow:0 0 0 3px #0a0f13,10px 10px 0 #000,0 0 28px rgba(0,0,0,.45);image-rendering:pixelated;border-radius:8px}
-.pwInvHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#243541;border-bottom:3px solid #111}
-.pwInvTitle{font-size:20px;font-weight:900;letter-spacing:1px;text-shadow:2px 2px #000}
-.pwInvTabs{display:flex;gap:5px;padding:7px;background:#10191f;border-bottom:3px solid #0a0f13;overflow:auto}
-.pwInvTab{flex:0 0 auto;background:#263842;border:2px solid #5d7280;color:#fff;padding:7px 12px;font-weight:800;cursor:pointer}
-.pwInvTab.active{background:#3f5967;border-color:#fff;box-shadow:inset 0 -3px #00d9ff}
- .pwInvBody{display:grid;grid-template-columns:340px 1fr;gap:14px;padding:14px;min-height:460px;overflow:auto;background:linear-gradient(180deg,#0b151c,#101d25)}
-.pwInvSide{background:linear-gradient(180deg,#172a35,#0b151b);border:3px solid #6d8794;padding:12px;text-align:center;box-shadow:inset 0 0 0 2px #080d11,5px 5px 0 #05080a;position:relative}
-.pwInvSide:before{content:"POSTAĆ";display:block;font-size:10px;letter-spacing:3px;color:#8feaff;margin-bottom:8px;text-shadow:2px 2px #000}
-.pwInvChar{height:235px;display:grid;place-items:center;background:repeating-conic-gradient(#1b2d36 0 25%,#14232b 0 50%) 50%/18px 18px;border:3px solid #0a1014;margin:0 0 12px;box-shadow:inset 0 0 20px rgba(0,0,0,.5)}
-.pwInvChar>div{transform:scale(1.18);filter:drop-shadow(4px 4px 0 #05080a)}
-.pwInvChar .head{width:42px;height:42px;background:#d99b70;border:3px solid #171717;position:relative;box-shadow:0 0 0 3px #513625}
-.pwInvChar .head:before{content:"";position:absolute;left:-3px;top:-8px;width:42px;height:12px;background:#3b2418;border:3px solid #171717}
-.pwInvChar .body{width:48px;height:60px;background:#2674a8;border:3px solid #171717;margin-top:-3px}
-.pwInvChar .legs{width:44px;height:48px;border-left:10px solid #292d35;border-right:10px solid #292d35;margin-top:-3px}
-.pwEqTitle{font-size:14px;font-weight:900;letter-spacing:3px;color:#fff;margin:0 0 8px;text-shadow:2px 2px #000}
-.pwEqLayout{display:grid;grid-template-columns:82px 1fr 82px;gap:9px;align-items:center}
-.pwEqCol{display:grid;gap:9px}
-.pwEqSlot{height:76px;background:linear-gradient(145deg,#304b59,#101a20);border:3px solid #718b98;box-shadow:inset 2px 2px 0 rgba(255,255,255,.10),inset -4px -4px 0 rgba(0,0,0,.45),3px 3px 0 #05080a;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;border-radius:5px}
-.pwEqSlot:after{content:"";position:absolute;inset:5px;border:1px solid rgba(255,255,255,.08);pointer-events:none}
-.pwEqSlot:hover{border-color:#8feaff;box-shadow:0 0 10px rgba(80,220,255,.25),inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 #05080a}
-.pwEqIcon{font-size:27px;line-height:1;color:#b8f4ff;text-shadow:2px 2px #000}
-.pwEqSlot span{font-size:8px;font-weight:900;color:#d9e8ed;margin-top:7px;letter-spacing:.6px}
-.pwInvStat{margin-top:12px;padding:9px;background:#081116;border:2px solid #3c5662;font-size:10px;line-height:1.8;text-align:left;color:#aebfc7;display:grid;grid-template-columns:1fr 1fr;gap:3px 10px}
-.pwInvStat div{display:flex;justify-content:space-between;gap:6px}.pwInvStat b{color:#fff}
-.pwInvGrid{display:grid;grid-template-columns:repeat(9,minmax(54px,1fr));grid-auto-rows:70px;gap:6px;padding:12px;background:linear-gradient(180deg,#071016,#0c171e);border:3px solid #405965;box-shadow:inset 0 0 0 2px #05090c;align-content:start}
-.pwInvSlot{min-width:0!important;min-height:0!important;height:70px!important;border:3px solid #425965!important;background:linear-gradient(145deg,#263d49,#111c23)!important;box-shadow:inset 2px 2px 0 rgba(255,255,255,.07),inset -3px -3px 0 rgba(0,0,0,.38),3px 3px 0 #05080a!important;position:relative;display:grid!important;place-items:center!important;cursor:pointer;transition:transform .08s,border-color .08s,filter .08s}
-.pwInvSlot:before{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.08);pointer-events:none}
-.pwInvSlot:hover{border-color:#8feaff!important;transform:translateY(-2px);filter:brightness(1.12)}
-.pwInvSlot.selected{border-color:#fff!important;box-shadow:0 0 0 2px #00d9ff, inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 #05080a!important;transform:translateY(-1px)}
+#inventoryBtn{min-width:38px}
+#pwInventory{z-index:80}
+/* Kompaktowy ekwipunek w stylu pokazanego screena */
+.pwInvBox{width:430px;max-width:94vw;max-height:92vh;overflow:hidden;background:#080808;border:0;border-radius:4px;box-shadow:0 8px 30px rgba(0,0,0,.65);image-rendering:pixelated}
+.pwInvHead,.pwInvTabs{display:none!important}
+.pwInvBody{display:block;padding:10px;background:#090909;min-height:0;overflow:hidden}
+.pwInvSide{display:none!important}
+.pwInvGrid{display:grid;grid-template-columns:repeat(7,54px);grid-auto-rows:54px;gap:6px;padding:0;background:#090909;border:0;box-shadow:none;align-content:start;justify-content:start;width:max-content;max-width:100%;max-height:285px;overflow-y:auto;overflow-x:hidden}
+.pwInvGrid::-webkit-scrollbar{width:11px}.pwInvGrid::-webkit-scrollbar-track{background:#161616;border-left:2px solid #050505}.pwInvGrid::-webkit-scrollbar-thumb{background:#777;border:2px solid #242424;box-shadow:inset 1px 1px 0 #aaa}
+.pwInvSlot{width:54px!important;height:54px!important;box-sizing:border-box;min-width:54px!important;min-height:54px!important;border:3px solid #f4f4f4!important;border-radius:8px!important;background:#111!important;box-shadow:inset 0 0 0 1px #303030!important;position:relative;display:grid!important;place-items:center!important;cursor:pointer;transition:filter .08s,transform .08s,border-color .08s}
+.pwInvSlot:before{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.04);border-radius:4px;pointer-events:none}
+.pwInvSlot:hover{border-color:#fff!important;filter:brightness(1.16);transform:translateY(-1px)}
+.pwInvSlot.selected{border-color:#35d9ff!important;box-shadow:0 0 0 2px #fff,inset 0 0 0 1px #35d9ff!important;transform:none}
 .pwInvSlot .pwInvName{display:none!important}
-.pwInvIcon{width:34px!important;height:34px!important;border:3px solid #10161a;box-shadow:inset 3px 3px 0 rgba(255,255,255,.16),inset -3px -3px 0 rgba(0,0,0,.28),2px 2px 0 #05080a;image-rendering:pixelated}
-.pwInvCount{position:absolute!important;right:5px!important;bottom:3px!important;font-size:13px!important;font-weight:900!important;line-height:1!important;color:#fff!important;text-shadow:2px 2px #000!important}
-.pwInvFooter{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#182a34;border-top:3px solid #0a0f13;min-height:58px}
-.pwInvSelected{flex:1;min-width:0;background:#0a141a;border:2px solid #405965;padding:9px 11px;color:#bdefff;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:2px 2px #000}
-.pwInvSelected:before{content:"WYBRANO: ";color:#7897a5;font-size:10px}
-.pwInvActions{display:flex;gap:6px}.pwInvActions button{padding:8px 12px}
-@media(max-width:1100px){.pwInvGrid{grid-template-columns:repeat(7,minmax(54px,1fr))}}
-@media(max-width:850px){.pwInvGrid{grid-template-columns:repeat(6,minmax(52px,1fr))}}
-@media(max-width:700px){.pwInvBody{grid-template-columns:1fr}.pwInvSide{display:none}.pwInvGrid{grid-template-columns:repeat(5,minmax(52px,1fr));grid-auto-rows:64px;gap:5px;padding:9px}.pwInvSlot{height:64px!important}.pwInvIcon{width:30px!important;height:30px!important}.pwInvBox{max-height:94vh}.pwInvTitle{font-size:16px}.pwInvFooter{padding:8px}.pwInvActions button{padding:7px 8px;font-size:11px}}
+.pwInvIcon{width:35px!important;height:35px!important;border:2px solid #111!important;box-shadow:inset 2px 2px 0 rgba(255,255,255,.16),inset -2px -2px 0 rgba(0,0,0,.3),2px 2px 0 #050505;image-rendering:pixelated}
+.pwInvCount{position:absolute!important;right:4px!important;bottom:2px!important;font-size:13px!important;font-weight:900!important;line-height:1!important;color:#fff!important;text-shadow:2px 2px #000!important}
+.pwInvFooter{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#101010;border-top:2px solid #222;min-height:40px}
+.pwInvSelected{flex:1;min-width:0;background:#0b0b0b;border:1px solid #444;padding:6px 8px;color:#fff;font-weight:900;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:2px 2px #000}
+.pwInvSelected:before{content:""}
+.pwInvActions{display:flex;gap:5px}.pwInvActions button{padding:6px 8px;font-size:10px}
+@media(max-width:700px){.pwInvGrid{grid-template-columns:repeat(6,54px);max-height:48vh}.pwInvBox{max-width:94vw}.pwInvFooter{padding:6px}.pwInvActions button{padding:6px;font-size:9px}}
 
 /* =========================
    HOTBAR
