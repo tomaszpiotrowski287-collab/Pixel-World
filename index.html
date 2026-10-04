@@ -340,14 +340,14 @@ select{
 .pwInvTabs{display:flex;gap:5px;padding:7px;background:#10191f;border-bottom:3px solid #0a0f13;overflow:auto}
 .pwInvTab{flex:0 0 auto;background:#263842;border:2px solid #5d7280;color:#fff;padding:7px 12px;font-weight:800;cursor:pointer}
 .pwInvTab.active{background:#3f5967;border-color:#fff;box-shadow:inset 0 -3px #00d9ff}
-.pwInvBody{display:grid;grid-template-columns:180px 1fr;gap:10px;padding:10px;min-height:430px;overflow:auto}
-.pwInvSide{background:#111b21;border:3px solid #465c68;padding:10px;text-align:center}
+.pwInvBody{display:grid;grid-template-columns:270px 1fr;gap:12px;padding:12px;min-height:450px;overflow:auto}
+.pwInvSide{background:linear-gradient(180deg,#16252e,#0d171d);border:3px solid #4d6875;padding:10px;text-align:center;box-shadow:inset 0 0 0 2px #0a1014,4px 4px 0 #070b0e}
 .pwInvChar{height:190px;display:grid;place-items:center;background:repeating-conic-gradient(#18252d 0 25%,#142028 0 50%) 50%/16px 16px;border:3px solid #0b1014;margin-bottom:10px}
 .pwInvChar .head{width:38px;height:38px;background:#d99b70;border:3px solid #171717;position:relative;box-shadow:0 0 0 3px #513625}
 .pwInvChar .head:before{content:"";position:absolute;left:-3px;top:-7px;width:38px;height:11px;background:#3b2418;border:3px solid #171717}
 .pwInvChar .body{width:44px;height:55px;background:#2674a8;border:3px solid #171717;margin-top:-3px}
 .pwInvChar .legs{width:42px;height:45px;border-left:9px solid #292d35;border-right:9px solid #292d35;margin-top:-3px}
-.pwInvStat{font-size:12px;line-height:1.7;text-align:left;color:#c9d6dc}
+.pwEqTitle{font-size:13px;font-weight:900;letter-spacing:2px;color:#eaf8ff;margin-bottom:8px;text-shadow:2px 2px #000}.pwEqLayout{display:grid;grid-template-columns:58px 1fr 58px;gap:6px;align-items:center}.pwEqCol{display:grid;gap:7px}.pwEqSlot{height:62px;background:linear-gradient(145deg,#263d49,#101b21);border:3px solid #5c7784;box-shadow:inset 2px 2px 0 rgba(255,255,255,.08),inset -3px -3px 0 rgba(0,0,0,.4),2px 2px 0 #05080a;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}.pwEqSlot:hover{border-color:#8feaff;filter:brightness(1.15)}.pwEqIcon{font-size:20px;line-height:1;color:#9eeeff;text-shadow:2px 2px #000}.pwEqSlot span{font-size:7px;font-weight:900;color:#cbd9de;margin-top:5px}.pwInvStat{margin-top:10px;padding:8px;background:#0a1217;border:2px solid #334b57;font-size:11px;line-height:1.8;text-align:left;color:#9fb0b8}.pwInvStat div{display:flex;justify-content:space-between}.pwInvStat b{color:#fff}
 .pwInvStat b{color:#fff}
 .pwInvGrid{display:grid;grid-template-columns:repeat(6,minmax(60px,1fr));gap:6px;align-content:start}
 .pwInvSlot{aspect-ratio:1;background:linear-gradient(145deg,#243640,#111b21);border:3px solid #536c79;position:relative;display:grid;place-items:center;cursor:pointer;image-rendering:pixelated;box-shadow:inset 2px 2px 0 rgba(255,255,255,.08),inset -3px -3px 0 rgba(0,0,0,.38),0 2px 0 #070b0e;transition:transform .08s,border-color .08s,filter .08s}
@@ -361,13 +361,6 @@ select{
 .pwInvActions{display:flex;gap:6px}.pwInvActions button{padding:7px 12px}
 @media(max-width:700px){.pwInvBody{grid-template-columns:1fr}.pwInvSide{display:none}.pwInvGrid{grid-template-columns:repeat(4,minmax(58px,1fr))}.pwInvBox{max-height:94vh}.pwInvTitle{font-size:16px}}
 
-
-/* NOWY PANEL EKWIPUNKU — czytelny, nie jest jednym ciągiem */
-.pwEqExtra{display:grid;grid-template-columns:repeat(2,72px);gap:8px;margin-top:12px;justify-content:center}
-.pwEqExtra .eqSlot{height:62px;background:linear-gradient(145deg,#304650,#111a20);border:3px solid #607985;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:23px;box-shadow:inset 2px 2px 0 rgba(255,255,255,.08),0 3px 0 #070b0e}
-.pwEqExtra .eqSlot span{font-size:8px;font-weight:900;color:#dce8ed;letter-spacing:.5px}
-.pwInvSide{border-radius:10px}
-.pwInvGrid{background:#0b1217;padding:8px;border:2px solid #314650;border-radius:8px}
 /* =========================
    HOTBAR
 ========================= */
@@ -847,8 +840,19 @@ input,textarea{user-select:text;-webkit-user-select:text}
     </div>
     <div class="pwInvBody">
       <div class="pwInvSide">
-        <div class="pwInvChar"><div><div class="head"></div><div class="body"></div><div class="legs"></div></div></div>
-        <div class="pwInvStat">Gracz: <b>PIXEL PLAYER</b><br>Poziom: <b id="pwInvLevel">1</b><br>💎 Gemy: <b id="pwInvGems">0</b><br>📦 Sloty: <b id="pwInvUsed">0/36</b></div>
+        <div class="pwEqTitle">WYPOSAŻENIE</div>
+        <div class="pwEqLayout">
+          <div class="pwEqCol">
+            <div class="pwEqSlot" data-eq="head"><div class="pwEqIcon">◆</div><span>GŁOWA</span></div>
+            <div class="pwEqSlot" data-eq="back"><div class="pwEqIcon">◇</div><span>PLECY</span></div>
+          </div>
+          <div class="pwInvChar"><div><div class="head"></div><div class="body"></div><div class="legs"></div></div></div>
+          <div class="pwEqCol">
+            <div class="pwEqSlot" data-eq="tool"><div class="pwEqIcon">✦</div><span>NARZĘDZIE</span></div>
+            <div class="pwEqSlot" data-eq="boots"><div class="pwEqIcon">◆</div><span>BUTY</span></div>
+          </div>
+        </div>
+        <div class="pwInvStat"><div>GRACZ <b>PIXEL PLAYER</b></div><div>POZIOM <b id="pwInvLevel">1</b></div><div>GEMY <b id="pwInvGems">0</b></div><div>SLOTY <b id="pwInvUsed">0/36</b></div></div>
       </div>
       <div>
         <div id="pwInvGrid" class="pwInvGrid"></div>
@@ -4192,7 +4196,7 @@ function loop(now){
 
         /* Physical block drops must be simulated every frame so the items
            fall, bounce and can actually be collected by the player. */
-        if(typeof window.__pwUpdateDrops === "function") window.__pwUpdateDrops(dt);
+        if(typeof updateDrops === "function") updateDrops(dt);
 
         updateParticles(dt);
 
@@ -5548,17 +5552,6 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
     }
   };
 
-  /* ---------- Better inventory equipment strip ---------- */
-  const body=document.querySelector('.pwInvBody');
-  if(body&&!document.getElementById('pwEqExtra')){
-    const side=body.querySelector('.pwInvSide');
-    if(side){
-      const eq=document.createElement('div');eq.id='pwEqExtra';eq.className='pwEqExtra';
-      eq.innerHTML='<div class="eqSlot">🪖<span>GŁOWA</span></div><div class="eqSlot">🛡️<span>PLECY</span></div><div class="eqSlot">⛏️<span>NARZĘDZIE</span></div><div class="eqSlot">👟<span>BUTY</span></div>';
-      side.appendChild(eq);
-    }
-  }
-
   /* ---------- More defensive input handling ---------- */
   function clearAll(){keys={};leftHeld=false;rightHeld=false;jumpRequest=false;mineHeld=false;placeHeld=false;resetBreak()}
   addEventListener('blur',clearAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearAll()});
@@ -5901,15 +5894,11 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
          - szeroki zasięg poziomy,
          - osobny zasięg pionowy,
          - działa również wtedy, gdy item leży kilka pikseli obok nóg. */
-      /* Pewne podnoszenie: liczymy odległość od całego prostokąta gracza,
-         a nie tylko od jego środka. Dzięki temu blok ziemi leżący pod nogami
-         albo tuż obok gracza można normalnie zebrać. */
-      const dropW=10, dropH=10;
-      const px1=me.x-T*.8, px2=me.x+me.w+T*.8;
-      const py1=me.y-T*.8, py2=me.y+me.h+T*.8;
-      const dx=Math.max(px1-(d.x+dropW), d.x-px2, 0);
-      const dy=Math.max(py1-(d.y+dropH), d.y-py2, 0);
-      const near=(dx===0 && dy===0) || (dx*dx+dy*dy)<=T*T;
+      const pcx=me.x+me.w/2, pcy=me.y+me.h*.58;
+      const dx=pcx-cx, dy=pcy-(d.y+5);
+      const pickupX=Math.max(T*1.85, me.w+12);
+      const pickupY=Math.max(T*1.55, me.h*.95+12);
+      const near=Math.abs(dx)<=pickupX && Math.abs(dy)<=pickupY;
 
       if(near){
         inv[d.item]=(inv[d.item]||0)+d.count;
@@ -5928,10 +5917,6 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
          dopóki gracz nie zbierze ich albo nie wykona resetu świata. */
     }
   }
-
-  /* Udostępnij system dropów głównej pętli gry. Wcześniej funkcja była
-     zamknięta w tym skrypcie, więc pętla gry jej nie wywoływała. */
-  window.__pwUpdateDrops=updateDrops;
 
   function drawDrops(){
     for(const d of drops){
@@ -6015,10 +6000,10 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
     ctx.save();
     ctx.imageSmoothingEnabled=false;
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='900 9px Arial, sans-serif';
+    ctx.font='900 11px Arial, sans-serif';
     ctx.textRendering='geometricPrecision';
     const tw=Math.ceil(ctx.measureText(nick).width);
-    const bw=tw+8,bh=14,bx=Math.round(nx-bw/2),by=Math.round(ny-bh);
+    const bw=tw+10,bh=16,bx=Math.round(nx-bw/2),by=Math.round(ny-bh);
     /* ciemna plakietka zamiast dużej półprzezroczystej plamy */
     ctx.fillStyle='rgba(12,18,24,.92)';ctx.fillRect(bx,by,bw,bh);
     ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;ctx.strokeRect(bx+.5,by+.5,bw-1,bh-1);
@@ -6063,19 +6048,31 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
     }
   });
 
-  /* ---------- Fall damage ---------- */
-  let falling=false,fallStartY=0;
+  /* ---------- Fall damage: only real, higher falls hurt ---------- */
+  let falling=false,fallStartY=0,fallHighestY=0;
   const oldUpdateMeFall=updateMe;
   updateMe=function(dt){
     const wasGround=me.ground;
-    const beforeY=me.y;
-    const beforeVy=me.vy;
-    if(!me.ground && me.vy>=0 && !falling){falling=true;fallStartY=me.y}
+    if(wasGround){
+      falling=false;
+    }else if(!falling){
+      falling=true;
+      fallStartY=me.y;
+      fallHighestY=me.y;
+    }else{
+      fallHighestY=Math.min(fallHighestY,me.y);
+    }
     oldUpdateMeFall(dt);
-    if(!wasGround && falling && me.ground){
+    if(wasGround && !me.ground){
+      falling=true;
+      fallStartY=me.y;
+      fallHighestY=me.y;
+    }
+    if(!wasGround && me.ground && falling){
       const dist=Math.max(0,me.y-fallStartY)/T;
-      if(dist>3.5){
-        const dmg=Math.min(100,Math.floor((dist-3.0)*10));
+      /* 4.5 blocks or less: completely safe. */
+      if(dist>4.5){
+        const dmg=Math.min(100,Math.max(1,Math.floor((dist-4.5)*8)));
         me.hp=Math.max(0,(Number(me.hp)||100)-dmg);
         if(typeof pwToast==='function')pwToast('💥 Obrażenia od upadku: -'+dmg+' HP');
         if(typeof pwAch==='function'){
@@ -6089,7 +6086,6 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
       }
       falling=false;
     }
-    if(me.ground&&beforeY===me.y&&beforeVy===0) falling=false;
     const hf=$('hpFill'),ht=$('hpText');
     if(hf)hf.style.width=Math.max(0,Math.min(100,me.hp||0))+'%';
     if(ht)ht.textContent=Math.max(0,Math.floor(me.hp||0))+' / 100';
