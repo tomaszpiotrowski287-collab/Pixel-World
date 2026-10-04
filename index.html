@@ -340,25 +340,28 @@ select{
 .pwInvTabs{display:flex;gap:5px;padding:7px;background:#10191f;border-bottom:3px solid #0a0f13;overflow:auto}
 .pwInvTab{flex:0 0 auto;background:#263842;border:2px solid #5d7280;color:#fff;padding:7px 12px;font-weight:800;cursor:pointer}
 .pwInvTab.active{background:#3f5967;border-color:#fff;box-shadow:inset 0 -3px #00d9ff}
-.pwInvBody{display:grid;grid-template-columns:270px 1fr;gap:12px;padding:12px;min-height:450px;overflow:auto}
-.pwInvSide{background:linear-gradient(180deg,#16252e,#0d171d);border:3px solid #4d6875;padding:10px;text-align:center;box-shadow:inset 0 0 0 2px #0a1014,4px 4px 0 #070b0e}
-.pwInvChar{height:190px;display:grid;place-items:center;background:repeating-conic-gradient(#18252d 0 25%,#142028 0 50%) 50%/16px 16px;border:3px solid #0b1014;margin-bottom:10px}
-.pwInvChar .head{width:38px;height:38px;background:#d99b70;border:3px solid #171717;position:relative;box-shadow:0 0 0 3px #513625}
-.pwInvChar .head:before{content:"";position:absolute;left:-3px;top:-7px;width:38px;height:11px;background:#3b2418;border:3px solid #171717}
-.pwInvChar .body{width:44px;height:55px;background:#2674a8;border:3px solid #171717;margin-top:-3px}
-.pwInvChar .legs{width:42px;height:45px;border-left:9px solid #292d35;border-right:9px solid #292d35;margin-top:-3px}
-.pwEqTitle{font-size:13px;font-weight:900;letter-spacing:2px;color:#eaf8ff;margin-bottom:8px;text-shadow:2px 2px #000}.pwEqLayout{display:grid;grid-template-columns:58px 1fr 58px;gap:6px;align-items:center}.pwEqCol{display:grid;gap:7px}.pwEqSlot{height:62px;background:linear-gradient(145deg,#263d49,#101b21);border:3px solid #5c7784;box-shadow:inset 2px 2px 0 rgba(255,255,255,.08),inset -3px -3px 0 rgba(0,0,0,.4),2px 2px 0 #05080a;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}.pwEqSlot:hover{border-color:#8feaff;filter:brightness(1.15)}.pwEqIcon{font-size:20px;line-height:1;color:#9eeeff;text-shadow:2px 2px #000}.pwEqSlot span{font-size:7px;font-weight:900;color:#cbd9de;margin-top:5px}.pwInvStat{margin-top:10px;padding:8px;background:#0a1217;border:2px solid #334b57;font-size:11px;line-height:1.8;text-align:left;color:#9fb0b8}.pwInvStat div{display:flex;justify-content:space-between}.pwInvStat b{color:#fff}
-.pwInvStat b{color:#fff}
-.pwInvGrid{display:grid;grid-template-columns:repeat(6,minmax(60px,1fr));gap:6px;align-content:start}
-.pwInvSlot{aspect-ratio:1;background:linear-gradient(145deg,#243640,#111b21);border:3px solid #536c79;position:relative;display:grid;place-items:center;cursor:pointer;image-rendering:pixelated;box-shadow:inset 2px 2px 0 rgba(255,255,255,.08),inset -3px -3px 0 rgba(0,0,0,.38),0 2px 0 #070b0e;transition:transform .08s,border-color .08s,filter .08s}
-.pwInvSlot:hover{border-color:#dcecf2;transform:translateY(-2px);filter:brightness(1.12)}
-.pwInvSlot.selected{border-color:#fff;box-shadow:0 0 0 3px #56e8ff,0 0 14px rgba(86,232,255,.28),inset 0 0 0 2px #101820;transform:translateY(-2px)}
-.pwInvIcon{width:34px;height:34px;border:3px solid #111;box-shadow:inset 4px 4px rgba(255,255,255,.18),inset -4px -4px rgba(0,0,0,.25);image-rendering:pixelated}
-.pwInvCount{position:absolute;right:3px;bottom:2px;background:#080d10;color:#fff;font-weight:900;font-size:12px;padding:1px 4px;border:1px solid #53636b}
-.pwInvName{position:absolute;left:3px;right:3px;top:3px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;text-shadow:1px 1px #000;color:#dce8ed;pointer-events:none}
-.pwInvFooter{padding:9px 10px;background:#111b21;border-top:3px solid #05090c;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
-.pwInvSelected{font-size:13px;color:#d9e4e8}.pwInvSelected b{color:#fff}
-.pwInvActions{display:flex;gap:6px}.pwInvActions button{padding:7px 12px}
+ .pwInvBody{display:grid;grid-template-columns:340px 1fr;gap:14px;padding:14px;min-height:460px;overflow:auto;background:linear-gradient(180deg,#0b151c,#101d25)}
+.pwInvSide{background:linear-gradient(180deg,#172a35,#0b151b);border:3px solid #6d8794;padding:12px;text-align:center;box-shadow:inset 0 0 0 2px #080d11,5px 5px 0 #05080a;position:relative}
+.pwInvSide:before{content:"POSTAĆ";display:block;font-size:10px;letter-spacing:3px;color:#8feaff;margin-bottom:8px;text-shadow:2px 2px #000}
+.pwInvChar{height:235px;display:grid;place-items:center;background:repeating-conic-gradient(#1b2d36 0 25%,#14232b 0 50%) 50%/18px 18px;border:3px solid #0a1014;margin:0 0 12px;box-shadow:inset 0 0 20px rgba(0,0,0,.5)}
+.pwInvChar>div{transform:scale(1.18);filter:drop-shadow(4px 4px 0 #05080a)}
+.pwInvChar .head{width:42px;height:42px;background:#d99b70;border:3px solid #171717;position:relative;box-shadow:0 0 0 3px #513625}
+.pwInvChar .head:before{content:"";position:absolute;left:-3px;top:-8px;width:42px;height:12px;background:#3b2418;border:3px solid #171717}
+.pwInvChar .body{width:48px;height:60px;background:#2674a8;border:3px solid #171717;margin-top:-3px}
+.pwInvChar .legs{width:44px;height:48px;border-left:10px solid #292d35;border-right:10px solid #292d35;margin-top:-3px}
+.pwEqTitle{font-size:14px;font-weight:900;letter-spacing:3px;color:#fff;margin:0 0 8px;text-shadow:2px 2px #000}
+.pwEqLayout{display:grid;grid-template-columns:82px 1fr 82px;gap:9px;align-items:center}
+.pwEqCol{display:grid;gap:9px}
+.pwEqSlot{height:76px;background:linear-gradient(145deg,#304b59,#101a20);border:3px solid #718b98;box-shadow:inset 2px 2px 0 rgba(255,255,255,.10),inset -4px -4px 0 rgba(0,0,0,.45),3px 3px 0 #05080a;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;border-radius:5px}
+.pwEqSlot:after{content:"";position:absolute;inset:5px;border:1px solid rgba(255,255,255,.08);pointer-events:none}
+.pwEqSlot:hover{border-color:#8feaff;box-shadow:0 0 10px rgba(80,220,255,.25),inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 #05080a}
+.pwEqIcon{font-size:27px;line-height:1;color:#b8f4ff;text-shadow:2px 2px #000}
+.pwEqSlot span{font-size:8px;font-weight:900;color:#d9e8ed;margin-top:7px;letter-spacing:.6px}
+.pwInvStat{margin-top:12px;padding:9px;background:#081116;border:2px solid #3c5662;font-size:10px;line-height:1.8;text-align:left;color:#aebfc7;display:grid;grid-template-columns:1fr 1fr;gap:3px 10px}
+.pwInvStat div{display:flex;justify-content:space-between;gap:6px}.pwInvStat b{color:#fff}
+.pwInvGrid{display:grid;grid-template-columns:repeat(6,minmax(58px,1fr));gap:7px;padding:10px;background:#091218;border:3px solid #405965;box-shadow:inset 0 0 0 2px #05090c}
+.pwInvSlot{min-height:66px!important;border:3px solid #425965!important;background:linear-gradient(145deg,#1b303b,#0c151a)!important;box-shadow:inset 2px 2px 0 rgba(255,255,255,.06),3px 3px 0 #05080a!important}
+.pwInvSlot:hover{border-color:#8feaff!important;transform:translateY(-1px)}
 @media(max-width:700px){.pwInvBody{grid-template-columns:1fr}.pwInvSide{display:none}.pwInvGrid{grid-template-columns:repeat(4,minmax(58px,1fr))}.pwInvBox{max-height:94vh}.pwInvTitle{font-size:16px}}
 
 /* =========================
@@ -555,7 +558,7 @@ input,textarea{user-select:text;-webkit-user-select:text}
 .pwEqExtra{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px}
 .pwEqExtra .eqSlot{min-height:48px;background:#0e171d;border:3px solid #4d6470;display:grid;place-items:center;font-size:11px;position:relative}
 .pwEqExtra .eqSlot span{position:absolute;bottom:2px;font-size:8px;color:#b8c8cf}
-@media(max-width:700px){.pwEqExtra{grid-template-columns:repeat(4,1fr)}.pwEqExtra .eqSlot{min-height:42px}}
+@media(max-width:700px){.pwInvBody{grid-template-columns:1fr}.pwEqLayout{grid-template-columns:72px 1fr 72px}.pwInvGrid{grid-template-columns:repeat(4,minmax(55px,1fr))}.pwEqSlot{height:68px}.pwInvChar{height:190px}.pwEqExtra{grid-template-columns:repeat(4,1fr)}.pwEqExtra .eqSlot{min-height:42px}}
 
 </style>
 <style>
@@ -4196,7 +4199,7 @@ function loop(now){
 
         /* Physical block drops must be simulated every frame so the items
            fall, bounce and can actually be collected by the player. */
-        if(typeof updateDrops === "function") updateDrops(dt);
+        if(typeof window.__pwUpdateDrops === "function") window.__pwUpdateDrops(dt);
 
         updateParticles(dt);
 
@@ -5917,6 +5920,9 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
          dopóki gracz nie zbierze ich albo nie wykona resetu świata. */
     }
   }
+
+  /* Udostępnij fizykę dropów globalnej pętli gry. */
+  window.__pwUpdateDrops=updateDrops;
 
   function drawDrops(){
     for(const d of drops){
