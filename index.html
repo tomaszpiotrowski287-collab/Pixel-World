@@ -589,6 +589,99 @@ input,textarea{user-select:text;-webkit-user-select:text}
 @media(max-width:700px){#pwMiniMap{width:145px;height:70px;top:54px}#pwOnline{top:130px;min-width:145px;font-size:10px}#pwQuick{bottom:150px;right:8px;flex-direction:column}.pwHideMobile{display:none!important}}
 </style>
 
+
+<style id="pwHudArrange">
+/* =========================
+   UPORZĄDKOWANY HUD
+========================= */
+#gameUI .top{
+  left:12px;right:12px;top:10px;
+  display:flex;align-items:center;
+  pointer-events:none;
+}
+#gameUI .top>b{
+  font-size:13px;letter-spacing:1px;
+  background:rgba(6,13,19,.78);
+  border:2px solid #456477;
+  padding:7px 9px;
+  box-shadow:3px 3px 0 #000;
+}
+#gameUI .hp{width:150px;height:20px;margin-left:6px;box-shadow:3px 3px 0 #000}
+#gameUI .topRight{
+  margin-left:auto;display:flex;gap:5px;
+  padding:4px;background:rgba(6,13,19,.82);
+  border:2px solid #456477;box-shadow:3px 3px 0 #000;
+}
+#gameUI .topRight .small{
+  width:38px;height:34px;padding:0;
+  display:grid;place-items:center;
+  background:#172a35;border:2px solid #5d7b8c;
+}
+#gameUI .topRight .small:hover{border-color:#8feaff;background:#214252}
+#netStatus{display:none!important}
+#pwCoords{left:12px;top:45px;background:rgba(6,13,19,.72);border:1px solid #385363}
+#pwHubBtn{
+  right:12px;top:62px;
+  padding:8px 12px;
+  min-width:92px;
+  text-align:center;
+  background:#17384b;border:2px solid #59cfff;
+  box-shadow:3px 3px 0 #000;
+}
+#pwOnline{
+  right:12px;top:106px;
+  min-width:0;width:178px;box-sizing:border-box;
+  text-align:center;padding:7px 8px;
+  border:2px solid #456477;
+  background:rgba(5,10,15,.90);
+  box-shadow:3px 3px 0 #000;
+}
+#pwUltimateBar{
+  right:12px;top:148px;
+  width:178px;max-width:none;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:5px;
+  justify-content:stretch;
+}
+#pwUltimateBar button{
+  width:100%;min-width:0;
+  padding:7px 5px;
+  background:#162832;
+  border:2px solid #547180;
+  box-shadow:2px 2px 0 #000;
+  font-size:10px;
+}
+#pwUltimateBar button:hover{border-color:#8feaff;background:#214252}
+#pwQuick{
+  right:12px;bottom:10px;
+  background:rgba(5,9,13,.78);
+  padding:4px;border:2px solid #456477;
+  box-shadow:3px 3px 0 #000;
+}
+#pwQuick button{border:1px solid #5d7b8c;background:#172a35}
+#hotbar{
+  bottom:10px;
+  padding:5px;gap:5px;
+  background:rgba(5,9,13,.90);
+  border:2px solid #456477;
+  box-shadow:4px 4px 0 #000;
+}
+@media(max-width:700px){
+  #gameUI .top{left:8px;right:8px;top:7px}
+  #gameUI .top>b{display:none}
+  #gameUI .hp{position:absolute;left:0;top:0;width:142px;height:19px;margin:0}
+  #gameUI .topRight{position:absolute;right:0;top:0;margin:0;gap:4px;padding:3px}
+  #gameUI .topRight .small{width:36px;height:32px}
+  #pwCoords{top:34px;left:8px;font-size:9px}
+  #pwHubBtn{top:51px;right:8px;min-width:88px;padding:7px 9px}
+  #pwOnline{top:94px;right:8px;width:178px;font-size:10px}
+  #pwUltimateBar{top:136px;right:8px;width:178px;gap:4px}
+  #pwUltimateBar button{font-size:9px;padding:6px 3px}
+  #pwQuick{right:8px;bottom:8px}
+  #hotbar{bottom:8px;max-width:calc(100vw - 16px);overflow-x:auto;justify-content:flex-start}
+}
+</style>
+
 </head>
 
 <body>
