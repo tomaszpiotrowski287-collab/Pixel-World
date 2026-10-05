@@ -5703,7 +5703,8 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
 })();
 </script>
 
-\n<script>
+
+<script>
 /* =========================================================
    PIXEL WORLD — SINGLEPLAYER + RESET + EXTRA QUALITY PATCH
 ========================================================= */
@@ -5914,7 +5915,8 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   /* ---- Initial repair after all previous patches initialize ---- */
   setTimeout(()=>{deepRepair();},250);
 })();
-</script>\n<script>
+</script>
+<script>
 /* =========================================================
    PIXEL WORLD — DROPS + 20 BLOCKS + SEEDS + NICK + FALL DAMAGE + ANIMATION
 ========================================================= */
@@ -6516,7 +6518,8 @@ setTimeout(()=>pwToast?.('✨ ANIMATION PACK: nowe rudy • efekty • nowe osi�
 })();
 </script>
 
-\n<script>
+
+<script>
 /* =========================================================
    CUSTOMIZATION + CRAFTING + SHOP UPDATE
 ========================================================= */
@@ -6592,6 +6595,84 @@ pwCharacterUI=function(){
 
 setTimeout(()=>safe(()=>pwToast('🎨 Nowe craftingi • sklep • salon postaci!')),1200);
 })();
-</script>\n
+</script>
+
+
+<style id="pwAdventureStyle">
+.pwAdventureCard{background:#0b151d;border:2px solid #345060;padding:10px;margin:8px 0;box-shadow:3px 3px #000}
+.pwAdventureCard b{color:#62dcff}.pwAdventureProgress{height:10px;background:#05090c;border:2px solid #304a59;margin-top:6px}.pwAdventureProgress i{display:block;height:100%;background:#58d8ff}
+.pwBadge{display:inline-block;padding:3px 6px;margin:2px;border:1px solid #55788b;background:#142631;font-size:10px}
+</style>
+<script>
+/* =========================================================
+   ADVENTURE UPDATE — bonusy, kolekcja, efekty i nowe cele
+========================================================= */
+(function(){
+'use strict';
+const safe=fn=>{try{return fn()}catch(e){console.warn('adventure patch',e)}};
+if(typeof PW!=='object')return;
+PW.adventure=PW.adventure||{claimed:0,streak:0,steps:0,jumps:0,mined:0,placed:0,magic:0};
+
+/* Daily treasure — one reward per calendar day */
+function dayKey(){return new Date().toISOString().slice(0,10)}
+window.pwDailyReward=function(){
+ const A=PW.adventure,k=dayKey();
+ if(A.claimed===k)return pwToast?.('🎁 Dzisiejszy skarb już odebrany');
+ const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+ A.streak=(A.lastDay===yesterday)?(A.streak||0)+1:1; A.lastDay=k; A.claimed=k;
+ const gems=20+Math.min(50,A.streak*5), loot=5+Math.min(15,A.streak);
+ PW.gems=(PW.gems||0)+gems; inv.quartz=(inv.quartz||0)+loot; inv.amethyst=(inv.amethyst||0)+(A.streak>=3?1:0);
+ pwGainXP?.(25); pwSaveExtra?.(); pwRefresh?.(); pwAch?.('daily_first','Pierwszy dzienny skarb',20);
+ if(A.streak>=3)pwAch?.('daily3','Seria poszukiwacza',45);
+ pwToast?.('🎁 +'+gems+' 💎  +'+loot+' kwarcu'+(A.streak>=3?' + ametyst':'')); pwAdventureUI();
+};
+window.pwAdventureUI=function(){
+ const A=PW.adventure, today=A.claimed===dayKey();
+ const ach=Object.keys(PW.achievements||{}).length;
+ pwOpen('✨ PRZYGODA',`<div class="pwAdventureCard"><b>🎁 DZIENNY SKARB</b><p>Seria: ${A.streak||0} dni</p><button style="width:100%" onclick="pwDailyReward()" ${today?'disabled':''}>${today?'✓ ODEBRANO':'OTWÓRZ SKARB'}</button></div>
+ <div class="pwAdventureCard"><b>📊 TWOJA PRZYGODA</b><p>🚶 Dystans: ${Math.floor((A.steps||0)/16)} bloków &nbsp; • &nbsp; 🦘 Skoki: ${A.jumps||0}</p><p>⛏️ Wykopane: ${A.mined||0} &nbsp; • &nbsp; 🧱 Postawione: ${A.placed||0} &nbsp; • &nbsp; 🏆 Osiągnięcia: ${ach}</p></div>
+ <div class="pwAdventureCard"><b>🌟 CELE SPECJALNE</b><br><span class="pwBadge">100 bloków drogi</span><span class="pwBadge">100 wykopanych</span><span class="pwBadge">100 zbudowanych</span><span class="pwBadge">10 poziom</span><span class="pwBadge">500 gemów</span></div>`);
+};
+
+/* Put Adventure inside HUB without cluttering gameplay HUD */
+setTimeout(()=>safe(()=>{const g=document.querySelector('#pwHub .pwGrid');if(g&&!document.getElementById('pwAdventureBtn')){const b=document.createElement('button');b.id='pwAdventureBtn';b.innerHTML='✨ PRZYGODA';b.onclick=pwAdventureUI;g.appendChild(b)}}),100);
+
+/* Track movement and unlock milestone achievements */
+let lastX=me.x,lastGround=me.ground;
+const oldUpdateAdventure=updateMe;
+updateMe=function(dt){
+ const bx=me.x, was=me.ground; oldUpdateAdventure(dt);
+ const A=PW.adventure; A.steps+=(Math.abs(me.x-bx)||0);
+ if(was&&!me.ground&&me.vy<0){A.jumps++; if(A.jumps>=100)pwAch?.('jump100','Mistrz skoków',75)}
+ if(A.steps>=1600)pwAch?.('travel100','Długa wyprawa',60);
+ if((PW.gems||0)>=500)pwAch?.('gem500','Skarbiec pełen gemów',100);
+ if((PW.level||1)>=10)pwAch?.('level10','Weteran świata',120);
+ lastX=me.x;lastGround=me.ground;
+};
+
+/* Count successful mining / building without changing their mechanics */
+const oldMineAdventure=mine;
+mine=function(){const q=target(),x=Math.floor(q.x/T),y=Math.floor(q.y/T),before=getB(x,y);oldMineAdventure();if(before!==B.air&&getB(x,y)===B.air){PW.adventure.mined++;if(PW.adventure.mined>=100)pwAch?.('mine100','Mistrz kilofa',70);pwSaveExtra?.()}};
+const oldPlaceAdventure=place;
+place=function(){const q=target(),x=Math.floor(q.x/T),y=Math.floor(q.y/T),before=getB(x,y);oldPlaceAdventure();if(before===B.air&&getB(x,y)!==B.air){PW.adventure.placed++;if(PW.adventure.placed>=100)pwAch?.('build100','Architekt',70);pwSaveExtra?.()}};
+
+/* More crafting recipes using blocks that already exist in the game */
+setTimeout(()=>safe(()=>{const d=document.getElementById('pwNewCrafts');if(d&&!document.getElementById('pwAdventureCrafts')){const x=document.createElement('div');x.id='pwAdventureCrafts';x.innerHTML=`<h3 style="color:#ffd95a;margin-top:18px">🌟 RECEPTURY PREMIUM</h3>
+<div class="row"><span>3 × bazalt + 1 × rubin → 4 × ciemne drewno</span><button onclick="pwCraftRecipe({basalt:3,ruby:1},'darkwood',4,'Ciemne drewno')">STWÓRZ</button></div>
+<div class="row"><span>2 × marmur + 1 × kwarc → 3 × jasnogłaz</span><button onclick="pwCraftRecipe({marble:2,quartz:1},'glowstone',3,'Jasnogłaz')">STWÓRZ</button></div>
+<div class="row"><span>2 × kamień + 2 × mech → 4 × omszały kamień</span><button onclick="pwCraftRecipe({stone:2,moss:2},'mossstone',4,'Omszały kamień')">STWÓRZ</button></div>
+<div class="row"><span>3 × piasek + 1 × glina → 4 × piaskowiec</span><button onclick="pwCraftRecipe({sand:3,clay:1},'sandstone',4,'Piaskowiec')">STWÓRZ</button></div>`;d.appendChild(x)}}),150);
+
+/* Atmospheric animation: stars/fireflies, intentionally lightweight */
+let motes=Array.from({length:22},()=>({x:Math.random()*VW,y:Math.random()*VH,a:Math.random()*6,s:.4+Math.random()*.8}));
+const oldRenderAdventure=render;
+render=function(){oldRenderAdventure();if(paused)return;const night=typeof nightAmount==='function'?nightAmount():0;ctx.save();for(const m of motes){m.a+=.025;m.x+=Math.sin(m.a)*.05;m.y+=Math.cos(m.a*.7)*.025;if(m.x<0)m.x=VW;if(m.x>VW)m.x=0;const alpha=.10+.55*night*(.5+.5*Math.sin(m.a));ctx.globalAlpha=alpha;ctx.fillStyle=night>.35?'#d8f6ff':'#fff3a0';ctx.fillRect(Math.floor(m.x),Math.floor(m.y),m.s>1?2:1,m.s>1?2:1)}ctx.restore()};
+
+/* Save periodically so adventure counters survive refreshes */
+setInterval(()=>safe(()=>pwSaveExtra?.()),15000);
+setTimeout(()=>pwToast?.('✨ Adventure Update aktywny! Sprawdź HUB → PRZYGODA'),1400);
+})();
+</script>
+
 </body>
 </html>
