@@ -2524,12 +2524,15 @@ function drawSprite(
         7
     );
 
-    /* body */
+    /* body / ubranie */
+    const outfitColors=["#238ce0","#e34b4b","#42b85a","#8c5bd6","#f0a52b","#30343b","#e85fa7","#23b9b1"];
+    const skinColors=["#efb77b","#d99a68","#b97850","#8b573d","#f4c89b","#c88963"];
+    const hairColors=["#351d0e","#171717","#6b3e1f","#d7ad45","#8a3b2f","#d9d9d9"];
+    const skinColor=(local && typeof PW!=="undefined") ? skinColors[(PW.skin||0)%skinColors.length] : "#efb77b";
+    const outfitColor=(local && typeof PW!=="undefined") ? outfitColors[(PW.outfit||0)%outfitColors.length] : (local?"#238ce0":"#d34c66");
+    const hairColor=(local && typeof PW!=="undefined") ? hairColors[(PW.hair||0)%hairColors.length] : "#351d0e";
 
-    ctx.fillStyle =
-        local
-        ? "#238ce0"
-        : "#d34c66";
+    ctx.fillStyle = outfitColor;
 
     ctx.fillRect(
         x+1,
@@ -2540,7 +2543,7 @@ function drawSprite(
 
     /* arms */
 
-    ctx.fillStyle="#efb77b";
+    ctx.fillStyle=skinColor;
 
     ctx.fillRect(
         x,
@@ -2567,7 +2570,7 @@ function drawSprite(
 
     /* hair */
 
-    ctx.fillStyle="#351d0e";
+    ctx.fillStyle=hairColor;
 
     ctx.fillRect(
         x,
@@ -6132,10 +6135,10 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
     ctx.save();
     ctx.imageSmoothingEnabled=false;
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='900 11px Arial, sans-serif';
+    ctx.font='900 6px Arial, sans-serif';
     ctx.textRendering='geometricPrecision';
     const tw=Math.ceil(ctx.measureText(nick).width);
-    const bw=tw+10,bh=16,bx=Math.round(nx-bw/2),by=Math.round(ny-bh);
+    const bw=tw+6,bh=10,bx=Math.round(nx-bw/2),by=Math.round(ny-bh);
     /* ciemna plakietka zamiast dużej półprzezroczystej plamy */
     ctx.fillStyle='rgba(12,18,24,.92)';ctx.fillRect(bx,by,bw,bh);
     ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;ctx.strokeRect(bx+.5,by+.5,bw-1,bh-1);
@@ -6513,5 +6516,82 @@ setTimeout(()=>pwToast?.('✨ ANIMATION PACK: nowe rudy • efekty • nowe osi�
 })();
 </script>
 
+\n<script>
+/* =========================================================
+   CUSTOMIZATION + CRAFTING + SHOP UPDATE
+========================================================= */
+(function(){
+'use strict';
+const safe=fn=>{try{return fn()}catch(e){console.warn('custom patch',e)}};
+
+/* Extra character state */
+if(typeof PW==='object'){ if(typeof PW.hair!=='number')PW.hair=0; if(!PW.cosmetics)PW.cosmetics={}; }
+
+/* Crafting helpers */
+window.pwCraftRecipe=function(costs,out,count=1,label='przedmiot'){
+  for(const [k,n] of Object.entries(costs)) if((inv[k]||0)<n) return pwToast?.('❌ Brakuje materiałów');
+  for(const [k,n] of Object.entries(costs)) inv[k]-=n;
+  inv[out]=(inv[out]||0)+count;
+  sound?.('craft'); updateHotbar?.(); pwQuest?.('craft'); pwGainXP?.(5); pwSaveExtra?.();
+  pwToast?.('🔨 Stworzono: '+label+' ×'+count);
+};
+function addCrafts(){
+ const box=document.querySelector('#craft .box'); if(!box||document.getElementById('pwNewCrafts'))return;
+ const d=document.createElement('div'); d.id='pwNewCrafts';
+ d.innerHTML=`<h3 style="color:#62dcff;margin-top:18px">✨ NOWE RECEPTURY</h3>
+ <div class="row"><span>2 × drewno → 4 × deski</span><button onclick="pwCraftRecipe({wood:2},'plank',4,'Deski')">STWÓRZ</button></div>
+ <div class="row"><span>2 × drewno + 1 × węgiel → 2 × ciemne drewno</span><button onclick="pwCraftRecipe({wood:2,coal:1},'darkwood',2,'Ciemne drewno')">STWÓRZ</button></div>
+ <div class="row"><span>2 × kamień + 1 × mech → 2 × omszały kamień</span><button onclick="pwCraftRecipe({stone:2,moss:1},'mossstone',2,'Omszały kamień')">STWÓRZ</button></div>
+ <div class="row"><span>2 × piasek + 1 × kwarc → 2 × piaskowiec</span><button onclick="pwCraftRecipe({sand:2,quartz:1},'sandstone',2,'Piaskowiec')">STWÓRZ</button></div>
+ <div class="row"><span>2 × glina + 1 × węgiel → 2 × terakota</span><button onclick="pwCraftRecipe({clay:2,coal:1},'terracotta',2,'Terakota')">STWÓRZ</button></div>
+ <div class="row"><span>2 × kwarc + 1 × złoto → 1 × jasnogłaz</span><button onclick="pwCraftRecipe({quartz:2,gold:1},'glowstone',1,'Jasnogłaz')">STWÓRZ</button></div>
+ <div class="row"><span>2 × kwarc + 1 × miedź → 2 × pryzmarin</span><button onclick="pwCraftRecipe({quartz:2,copper:1},'prismarine',2,'Pryzmarin')">STWÓRZ</button></div>`;
+ box.appendChild(d);
+}
+setTimeout(addCrafts,50);
+
+/* Bigger shop */
+const oldBuy=window.pwBuy;
+window.pwBuySpecial=function(cost,type){
+ if(PW.gems<cost)return pwToast('❌ Za mało gemów');
+ PW.gems-=cost;
+ if(type==='blocks'){inv.plank=(inv.plank||0)+20;inv.brick=(inv.brick||0)+10;inv.glass=(inv.glass||0)+10;}
+ if(type==='ores'){inv.iron=(inv.iron||0)+8;inv.copper=(inv.copper||0)+8;inv.quartz=(inv.quartz||0)+6;}
+ if(type==='rare'){inv.amethyst=(inv.amethyst||0)+3;inv.ruby=(inv.ruby||0)+2;inv.glowstone=(inv.glowstone||0)+3;}
+ if(type==='seeds'){for(const k of Object.keys(PW.seeds||{}))PW.seeds[k]=(PW.seeds[k]||0)+3;}
+ if(type==='heal')me.hp=100;
+ pwSaveExtra?.();updateHotbar?.();pwRefresh?.();pwShopUI();pwToast('🛒 Zakup udany!');
+};
+pwShopUI=function(){pwOpen('🛒 SKLEP',`<p>Twoje gemy: <b>${PW.gems}</b> 💎</p>
+ <h3>🎒 PRZEDMIOTY</h3><div class="pwList">
+ <div class="pwItem"><span>🪱 10 przynęt</span><button onclick="pwBuy(20,'bait')">20 💎</button></div>
+ <div class="pwItem"><span>🎣 Ulepszenie wędki</span><button onclick="pwBuy(120,'rod')">120 💎</button></div>
+ <div class="pwItem"><span>🥚 Jajko peta</span><button onclick="pwBuy(80,'pet')">80 💎</button></div>
+ <div class="pwItem"><span>🔒 World Lock</span><button onclick="pwBuy(100,'lock')">100 💎</button></div>
+ <div class="pwItem"><span>🌱 5 nasion kryształu</span><button onclick="pwBuy(75,'seed')">75 💎</button></div></div>
+ <h3>📦 PACZKI</h3><div class="pwList">
+ <div class="pwItem"><span>🏠 Paczka budowniczego<br><small>20 desek, 10 cegieł, 10 szkła</small></span><button onclick="pwBuySpecial(90,'blocks')">90 💎</button></div>
+ <div class="pwItem"><span>⛏️ Paczka górnika<br><small>żelazo, miedź, kwarc</small></span><button onclick="pwBuySpecial(110,'ores')">110 💎</button></div>
+ <div class="pwItem"><span>✨ Paczka skarbów<br><small>ametyst, rubin, jasnogłaz</small></span><button onclick="pwBuySpecial(180,'rare')">180 💎</button></div>
+ <div class="pwItem"><span>🌾 Paczka nasion</span><button onclick="pwBuySpecial(70,'seeds')">70 💎</button></div>
+ <div class="pwItem"><span>❤️ Pełne zdrowie</span><button onclick="pwBuySpecial(25,'heal')">25 💎</button></div></div>
+ <button style="width:100%;margin-top:10px" onclick="pwCharacterUI()">🎨 SALON WYGLĄDU POSTACI</button>`)};
+
+/* Real character customization */
+window.pwSetLook=function(kind,n){PW[kind]=n;pwSaveExtra?.();pwCharacterUI();};
+pwCharacterUI=function(){
+ const skins=['Jasna','Złocista','Brązowa','Ciemna','Brzoskwiniowa','Karmelowa'];
+ const clothes=['Niebieskie','Czerwone','Zielone','Fioletowe','Pomarańczowe','Czarne','Różowe','Turkusowe'];
+ const hairs=['Brązowe','Czarne','Kasztanowe','Blond','Rude','Srebrne'];
+ const btns=(arr,k,cur)=>arr.map((x,i)=>`<button style="${i===cur?'border-color:#59cfff;box-shadow:0 0 0 2px #fff inset':''}" onclick="pwSetLook('${k}',${i})">${i===cur?'✓ ':''}${x}</button>`).join('');
+ pwOpen('🧑 SALON POSTACI',`<div style="text-align:center;padding:8px;background:#0b151d;border:2px solid #345060;margin-bottom:10px"><b>🎨 TWÓJ WYGLĄD</b><br><span class="pwTiny">Zmiany od razu widać na postaci w grze.</span></div>
+ <h3>🖐️ KOLOR SKÓRY</h3><div class="pwGrid">${btns(skins,'skin',(PW.skin||0)%skins.length)}</div>
+ <h3>👕 UBRANIE</h3><div class="pwGrid">${btns(clothes,'outfit',(PW.outfit||0)%clothes.length)}</div>
+ <h3>💇 WŁOSY</h3><div class="pwGrid">${btns(hairs,'hair',(PW.hair||0)%hairs.length)}</div>`);
+};
+
+setTimeout(()=>safe(()=>pwToast('🎨 Nowe craftingi • sklep • salon postaci!')),1200);
+})();
+</script>\n
 </body>
 </html>
