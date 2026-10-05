@@ -6371,5 +6371,147 @@ setTimeout(()=>{try{if(typeof pwToast==='function')pwToast('✨ MEGA UPDATE: I =
 })();
 </script>
 
+
+<script>
+/* =========================================================
+   PIXEL WORLD — ANIMATION PACK + BLOCK BIOMES + ACHIEVEMENTS
+========================================================= */
+(function(){
+'use strict';
+const safe=fn=>{try{return fn()}catch(e){console.warn('PW fun pack',e)}};
+const FX=[];
+let funT=0, wasGround=true, jumpCount=0, walked=0, lastX=0, nightAward=false;
+
+/* ---------- Put the extra blocks into the actual world ---------- */
+function enrichWorld(){
+  if(!window.B || !Array.isArray(world) || !world.length) return;
+  let changed=0;
+  const ore=(id,fromY,chance,vein=1)=>{
+    if(id==null)return;
+    for(let y=fromY;y<WORLD_H-3;y++) for(let x=3;x<WORLD_W-3;x++){
+      if(getB(x,y)===B.stone && Math.random()<chance){
+        setB(x,y,id);changed++;
+        for(let n=0;n<vein;n++){
+          const xx=x+(Math.random()<.5?-1:1), yy=y+(Math.random()<.5?-1:1);
+          if(getB(xx,yy)===B.stone)setB(xx,yy,id);
+        }
+      }
+    }
+  };
+  ore(B.iron,45,.010,2); ore(B.copper,48,.008,2); ore(B.quartz,55,.006,1);
+  ore(B.amethyst,62,.0035,2); ore(B.ruby,68,.0024,1); ore(B.glowstone,58,.0020,1);
+  ore(B.basalt,70,.007,2); ore(B.marble,50,.004,2); ore(B.granite,45,.005,2);
+  /* snowy and muddy surface patches */
+  for(let x=25;x<WORLD_W-25;x++){
+    for(let y=4;y<55;y++) if(getB(x,y)===B.grass){
+      if((x%97)>72 && B.snow!=null)setB(x,y,B.snow);
+      else if((x%83)>68 && B.mud!=null)setB(x,y,B.mud);
+      break;
+    }
+  }
+  /* underwater prismarine surprises */
+  if(B.prismarine!=null) for(let y=5;y<WORLD_H-2;y++) for(let x=2;x<WORLD_W-2;x++){
+    if(getB(x,y)===B.water && getB(x,y+1)!==B.air && Math.random()<.012){setB(x,y+1,B.prismarine);changed++;}
+  }
+  return changed;
+}
+const baseGenerate=generate;
+generate=function(){baseGenerate();enrichWorld();};
+setTimeout(()=>safe(()=>{
+  if(world && world.length && !localStorage.getItem('PW_FUN_WORLD_V2')){
+    enrichWorld();localStorage.setItem('PW_FUN_WORLD_V2','1');saveMaybe?.();updateHotbar?.();
+    pwToast?.('✨ Świat wzbogacony o nowe rudy i bloki!');
+  }
+}),700);
+
+/* ---------- Lightweight pixel particles ---------- */
+function fx(x,y,type='spark',count=5){
+  for(let i=0;i<count;i++)FX.push({x,y,vx:(Math.random()-.5)*55,vy:-15-Math.random()*55,life:.35+Math.random()*.5,type});
+  if(FX.length>180)FX.splice(0,FX.length-180);
+}
+function updateFX(dt){for(let i=FX.length-1;i>=0;i--){const p=FX[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=70*dt;if(p.life<=0)FX.splice(i,1)}}
+function drawFX(){
+  ctx.save();
+  for(const p of FX){const x=Math.round(p.x-cam.x),y=Math.round(p.y-cam.y);ctx.globalAlpha=Math.min(1,p.life*2);
+    ctx.fillStyle=p.type==='dust'?'#d6c09b':p.type==='leaf'?'#79db62':p.type==='magic'?'#d991ff':'#fff4a8';
+    ctx.fillRect(x,y,p.type==='magic'?3:2,p.type==='magic'?3:2);
+  }
+  ctx.restore();ctx.globalAlpha=1;
+}
+
+/* ---------- Animated rare blocks ---------- */
+function drawFunBlocks(){
+  const sx=Math.floor(cam.x/T)-1,ex=Math.ceil((cam.x+VW)/T)+1,sy=Math.floor(cam.y/T)-1,ey=Math.ceil((cam.y+VH)/T)+1;
+  for(let y=Math.max(0,sy);y<Math.min(WORLD_H,ey);y++)for(let x=Math.max(0,sx);x<Math.min(WORLD_W,ex);x++){
+    const t=getB(x,y),px=Math.round(x*T-cam.x),py=Math.round(y*T-cam.y),pulse=(Math.sin(funT*4+x*.8+y*.4)+1)/2;
+    if(t===B.glowstone){ctx.fillStyle=`rgba(255,245,130,${.18+.22*pulse})`;ctx.fillRect(px-2,py-2,T+4,T+4);ctx.fillStyle='#fff7ad';ctx.fillRect(px+3,py+3,2,2);ctx.fillRect(px+11,py+9,2,2)}
+    else if(t===B.amethyst){ctx.fillStyle=`rgba(220,155,255,${.35+.35*pulse})`;ctx.fillRect(px+3,py+2,2,5);ctx.fillRect(px+10,py+7,2,4)}
+    else if(t===B.ruby){ctx.fillStyle=`rgba(255,90,120,${.3+.4*pulse})`;ctx.fillRect(px+7,py+4,3,3)}
+    else if(t===B.prismarine){ctx.fillStyle=`rgba(120,255,235,${.22+.25*pulse})`;ctx.fillRect(px+2+(Math.floor(funT*5+x)%9),py+3,4,1)}
+    else if(t===B.ice){ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(px+2,py+2,7,1)}
+    else if(t===B.snow && Math.random()<.015){ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillRect(px+Math.floor(Math.random()*T),py-2,1,1)}
+  }
+}
+
+/* ---------- Player movement animations ---------- */
+const baseUpdate=updateMe;
+updateMe=function(dt){
+  const beforeGround=me.ground,beforeVy=me.vy,beforeX=me.x;
+  baseUpdate(dt);funT+=dt;updateFX(dt);walked+=Math.abs(me.x-beforeX)/T;
+  if(beforeGround && !me.ground && me.vy<0){jumpCount++;fx(me.x+me.w/2,me.y+me.h,'dust',4);if(jumpCount>=10)pwAch?.('jump10','Skoczek',25);if(jumpCount>=50)pwAch?.('jump50','Król skoków',60)}
+  if(!beforeGround && me.ground && beforeVy>120)fx(me.x+me.w/2,me.y+me.h,'dust',7);
+  if(me.ground && Math.abs(me.vx)>70 && Math.random()<dt*9)fx(me.x+me.w/2,me.y+me.h-1,'dust',1);
+  if(walked>=250)pwAch?.('traveler','Wędrowiec',75);
+  const n=nightAmount?.()||0;if(n>.75&&!nightAward){nightAward=true;pwAch?.('nightowl','Nocny odkrywca',45)}else if(n<.25)nightAward=false;
+};
+
+/* mining burst + achievements for special blocks */
+const baseMine=mine;
+mine=function(){
+  const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T),before=getB(bx,by);
+  baseMine();
+  if(before!==B.air && getB(bx,by)===B.air){
+    fx(bx*T+T/2,by*T+T/2,(before===B.amethyst||before===B.glowstone||before===B.ruby)?'magic':'spark',8);
+    if(before===B.amethyst)pwAch?.('amethyst_hunter','Łowca ametystów',55);
+    if(before===B.ruby)pwAch?.('ruby_hunter','Rubinowy skarb',80);
+    if(before===B.glowstone)pwAch?.('light_hunter','Łowca światła',60);
+    if(before===B.prismarine)pwAch?.('ocean_secret','Sekret oceanu',65);
+  }
+};
+
+/* final visual layer */
+const baseRender=render;
+render=function(){baseRender();drawFunBlocks();drawFX();};
+
+/* ---------- Bigger achievement collection ---------- */
+const FUN_ACH=[
+ ['first_mine','Pierwsze kopanie'],['first_harvest','Pierwsze zbiory'],['goldfish','Złota ryba'],['deep','Głębiny'],['builder','Budowniczy'],['rich','Bogaty'],
+ ['first_drop','Pierwszy wypadający blok'],['collector5','Zbieracz bloków'],['collector20','Pełne kieszenie'],['fall_damage','Pierwszy bolesny upadek'],['long_fall','Twarde lądowanie'],['seedling','Mały ogrodnik'],['block20','Kolekcjoner bloków'],['deep_miner','Górnik głębinowy'],['rich_miner','Skarbnik'],
+ ['jump10','Skoczek'],['jump50','Król skoków'],['traveler','Wędrowiec'],['nightowl','Nocny odkrywca'],['amethyst_hunter','Łowca ametystów'],['ruby_hunter','Rubinowy skarb'],['light_hunter','Łowca światła'],['ocean_secret','Sekret oceanu'],['gem100','Kieszeń pełna gemów'],['level5','Doświadczony gracz'],['allrounder','Poszukiwacz przygód']
+];
+pwAchUI=function(){
+  const unlocked=FUN_ACH.filter(a=>PW.achievements[a[0]]).length;
+  pwOpen('🏆 OSIĄGNIĘCIA — '+unlocked+'/'+FUN_ACH.length,
+    `<div class="pwBar"><i style="width:${Math.round(unlocked/FUN_ACH.length*100)}%"></i></div>`+
+    FUN_ACH.map(x=>`<div class="pwItem"><span>${PW.achievements[x[0]]?'🏆':'⬜'} ${x[1]}</span><span>${PW.achievements[x[0]]?'ODBLOKOWANE':'???'}</span></div>`).join(''));
+};
+setInterval(()=>safe(()=>{
+  if((PW.gems||0)>=100)pwAch('gem100','Kieszeń pełna gemów',35);
+  if((PW.level||1)>=5)pwAch('level5','Doświadczony gracz',75);
+  const core=['first_mine','builder','jump10','nightowl'];if(core.every(k=>PW.achievements[k]))pwAch('allrounder','Poszukiwacz przygód',100);
+}),1800);
+
+/* ambient magic around rare blocks near player */
+setInterval(()=>safe(()=>{
+  if(paused)return;const bx=Math.floor((me.x+me.w/2)/T),by=Math.floor((me.y+me.h/2)/T);
+  for(let yy=by-5;yy<=by+5;yy++)for(let xx=bx-7;xx<=bx+7;xx++){
+    const t=getB(xx,yy);if((t===B.amethyst||t===B.ruby||t===B.glowstone)&&Math.random()<.035)fx(xx*T+8,yy*T+8,'magic',1);
+  }
+}),250);
+
+setTimeout(()=>pwToast?.('✨ ANIMATION PACK: nowe rudy • efekty • nowe osiągnięcia!'),1500);
+})();
+</script>
+
 </body>
 </html>
