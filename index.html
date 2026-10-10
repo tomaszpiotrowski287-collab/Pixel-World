@@ -2486,12 +2486,19 @@ function drawSprite(
             p.y-cam.y
         );
 
+    const animTime=performance.now()/1000;
+    const moving=!!p.ground && Math.abs(p.vx)>8;
+    const step=moving?Math.sin(p.walk*1.35):0;
+    const idleBob=(!moving&&p.ground)?Math.sin(animTime*2.6)*0.5:0;
+    const airborne=!p.ground;
+    const blinkClosed=local ? ((animTime*1000+750)%3900<155 || (animTime*1000+750)%3900>3830) : false;
+    const faceLeft=p.dir<0;
     const walk =
         (
             p.ground &&
             Math.abs(p.vx)>8
         )
-        ? Math.sin(p.walk)*1.5
+        ? Math.sin(p.walk*1.35)*2
         : 0;
 
     /* shadow */
@@ -2512,14 +2519,14 @@ function drawSprite(
 
     ctx.fillRect(
         x+2,
-        y+15+walk,
+        y+15+(airborne?-1:walk),
         3,
         7
     );
 
     ctx.fillRect(
         x+7,
-        y+15-walk,
+        y+15+(airborne?-1:-walk),
         3,
         7
     );
@@ -2536,7 +2543,7 @@ function drawSprite(
 
     ctx.fillRect(
         x+1,
-        y+8,
+        y+8+idleBob,
         9,
         8
     );
@@ -2547,14 +2554,14 @@ function drawSprite(
 
     ctx.fillRect(
         x,
-        y+8+walk,
+        y+8+(airborne?-3:walk*1.4)+idleBob,
         2,
         7
     );
 
     ctx.fillRect(
         x+10,
-        y+8-walk,
+        y+8+(airborne?-3:-walk*1.4)+idleBob,
         2,
         7
     );
@@ -2563,7 +2570,7 @@ function drawSprite(
 
     ctx.fillRect(
         x,
-        y,
+        y+idleBob,
         11,
         9
     );
@@ -2574,35 +2581,41 @@ function drawSprite(
 
     ctx.fillRect(
         x,
-        y,
+        y+idleBob,
         11,
         3
     );
 
     ctx.fillRect(
         x,
-        y+2,
+        y+2+idleBob,
         2,
         3
     );
 
-    /* eyes */
-
+    /* Mruganie co kilka sekund, oczy zgodne z kierunkiem patrzenia */
     ctx.fillStyle="#111";
-
-    ctx.fillRect(
-        x+3,
-        y+5,
-        1,
-        1
-    );
-
-    ctx.fillRect(
-        x+7,
-        y+5,
-        1,
-        1
-    );
+    const eyeY=y+5+idleBob;
+    const eye1=faceLeft?x+2:x+3;
+    const eye2=faceLeft?x+6:x+7;
+    if(blinkClosed){
+        ctx.fillRect(eye1,eyeY,2,1);
+        ctx.fillRect(eye2,eyeY,2,1);
+        ctx.fillStyle=skinColor;
+        ctx.fillRect(eye1,eyeY-1,2,1);
+        ctx.fillRect(eye2,eyeY-1,2,1);
+    }else{
+        ctx.fillRect(eye1,eyeY,1,2);
+        ctx.fillRect(eye2,eyeY,1,2);
+    }
+    /* Uśmiech i subtelne rumieńce */
+    ctx.fillStyle="#a55b49";
+    ctx.fillRect(faceLeft?x+3:x+6,y+7+idleBob,2,1);
+    if(moving && local){
+        ctx.fillStyle="rgba(226,207,162,.55)";
+        const footY=y+p.h-1;
+        ctx.fillRect(x+2-Math.round(step*2),footY,2,1);
+    }
 
     /* mining */
 
