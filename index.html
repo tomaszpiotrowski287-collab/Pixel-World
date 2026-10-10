@@ -7411,5 +7411,22 @@ add(document.querySelector('#pwHub .pwGrid'));
 add(document.querySelector('#pwMobileSheet .pwMobileTiles'));
 })();
 </script>
+
+<style id="pwCleanScreenFix">
+/* Both floating shortcuts are removed from the playing field on all devices. */
+#pwMegaBtn,#pwVisualSettings{display:none!important}
+</style>
+<script id="pwCleanScreenMenu">
+(function(){
+ const desktop=document.querySelector('#pwDesktopMenu .pwDesktopGrid');
+ if(desktop&&!desktop.querySelector('#pwEffectsMenuEntry')){
+  const button=document.createElement('button');button.id='pwEffectsMenuEntry';button.textContent='✨ EFEKTY / ZDJĘCIE';
+  button.addEventListener('click',()=>{
+   const menu=document.getElementById('pwDesktopMenu');if(menu)menu.hidden=true;
+   const panel=document.getElementById('pwVisualPanel');if(panel)panel.hidden=false;
+  });desktop.appendChild(button);
+ }
+})();
+</script>
 </body>
 </html>
