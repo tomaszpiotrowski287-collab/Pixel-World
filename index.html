@@ -7793,5 +7793,141 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)panel
 window.PW2Stage3={settings,open:()=>{panel.hidden=false;show()}};
 })();
 </script>
+
+<style id="pw2Stage7Styles">
+#pw2ArenaOpen{position:fixed;right:9px;top:110px;z-index:80;border:2px solid #d7b76e;background:#1b3446;color:#fff;padding:9px;font:11px monospace;cursor:pointer;box-shadow:3px 3px #08111b}
+#pw2ArenaPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:230;width:min(520px,94vw);max-height:82dvh;overflow:auto;box-sizing:border-box;border:3px solid #e2bd71;background:#102331;color:white;padding:16px;font:12px monospace;box-shadow:7px 7px #071018}
+#pw2ArenaPanel[hidden]{display:none!important}
+#pw2ArenaPanel h2{color:#ffde94;font-size:17px;margin:0 0 8px}
+#pw2ArenaPanel p{line-height:1.7}
+#pw2ArenaPanel button,#pw2ArenaTouch button{border:2px solid #83b6ca;background:#25485b;color:#fff;padding:9px;font:11px monospace;cursor:pointer}
+#pw2ArenaPanel .pw2ArenaActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+#pw2ArenaHUD{position:fixed;left:50%;top:9px;transform:translateX(-50%);z-index:81;color:white;background:#122b3b;border:2px solid #e4bf7c;padding:7px 12px;font:11px monospace;pointer-events:none;text-align:center;max-width:65vw}
+#pw2ArenaHUD[hidden]{display:none!important}
+#pw2ArenaTouch{position:fixed;right:10px;bottom:158px;z-index:81;display:none;gap:6px}
+#pw2ArenaTouch[hidden]{display:none!important}
+#pw2ArenaTouch button{font-size:12px;min-width:55px;min-height:43px}
+@media(pointer:coarse){#pw2ArenaTouch:not([hidden]){display:flex}}
+@media(max-width:700px){#pw2ArenaOpen{top:86px;padding:7px;font-size:10px}#pw2ArenaHUD{top:45px;font-size:9px}#pw2ArenaPanel{padding:10px}#pw2ArenaTouch{right:6px;bottom:calc(128px + env(safe-area-inset-bottom))}}
+</style>
+<script id="pw2Stage7Combat">
+(function(){
+'use strict';
+const KEY='PIXEL_WORLD_2_STAGE7_ARENA_V1';
+let record={best:0,wins:0,coins:0,upgrades:0};
+try{Object.assign(record,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(record))}catch(e){}};
+const button=document.createElement('button');button.id='pw2ArenaOpen';button.textContent='⚔️ ARENA';document.body.append(button);
+const panel=document.createElement('section');panel.id='pw2ArenaPanel';panel.hidden=true;document.body.append(panel);
+const hud=document.createElement('div');hud.id='pw2ArenaHUD';hud.hidden=true;document.body.append(hud);
+const touch=document.createElement('div');touch.id='pw2ArenaTouch';touch.hidden=true;document.body.append(touch);
+const attackButton=document.createElement('button');attackButton.textContent='⚔️ ATAK';
+const dodgeButton=document.createElement('button');dodgeButton.textContent='💨 UNIK';
+touch.append(attackButton,dodgeButton);
+let active=false,wave=0,spawned=0,defeated=0,foes=[],effects=[],cooldown=0,dodgeCooldown=0,invulnerable=0,between=0,initialHP=100,gameClock=0,notice='';
+function announce(s){notice=s;if(typeof pwToast==='function')pwToast(s)}
+function stop(won){
+ active=false;hud.hidden=true;touch.hidden=true;foes=[];
+ if(won){record.wins++;record.coins+=100;announce('🏆 ARENA UKOŃCZONA! +100 monet areny');if(typeof pwGainXP==='function')pwGainXP(200)}
+ else announce('🏁 Koniec próby. Możesz spróbować ponownie.');
+ persist();show();
+}
+function start(){
+ if(!gameStarted){announce('Najpierw rozpocznij grę');return}
+ active=true;wave=1;spawned=0;defeated=0;foes=[];effects=[];cooldown=0;dodgeCooldown=0;invulnerable=2;between=1.5;gameClock=0;initialHP=me.hp;
+ hud.hidden=false;touch.hidden=false;panel.hidden=true;announce('⚔️ ARENA: fala 1 z 5!');
+}
+function spawn(){
+ const dir=Math.random()<.5?-1:1;
+ const x=Math.max(20,Math.min(WORLD_W*T-30,me.x+dir*(105+Math.random()*60)));
+ let y=me.y;
+ for(let ty=3;ty<WORLD_H-3;ty++){if(getB(Math.floor(x/T),ty)===B.grass){y=ty*T-15;break}}
+ foes.push({x,y,hp:26+wave*12,maxHP:26+wave*12,dir:-dir,hit:0,attack:0});spawned++;
+}
+function hitEnemy(e,power){
+ e.hp-=power;e.hit=.2;effects.push({x:e.x,y:e.y,t:.25,c:'#fff1a0'});
+ if(e.hp<=0){foes.splice(foes.indexOf(e),1);defeated++;record.coins+=6+wave*2;persist();if(typeof pwGainXP==='function')pwGainXP(10)}
+}
+function attack(){
+ if(!active||paused||cooldown>0)return;
+ cooldown=.33;const dir=me.dir||1;
+ effects.push({x:me.x+dir*23,y:me.y+7,t:.18,c:'#d6f6ff'});
+ const nearby=foes.filter(e=>Math.abs(e.x-me.x)<46&&Math.abs(e.y-me.y)<35&&(e.x-me.x)*dir>-8);
+ nearby.sort((a,b)=>Math.abs(a.x-me.x)-Math.abs(b.x-me.x));
+ if(nearby[0])hitEnemy(nearby[0],24+record.upgrades*12);
+}
+function dodge(){
+ if(!active||paused||dodgeCooldown>0)return;
+ dodgeCooldown=2.3;invulnerable=.65;me.vx=(me.dir||1)*240;
+ effects.push({x:me.x,y:me.y,t:.45,c:'#8be4ff'});
+}
+function tick(dt){
+ if(!active||paused||!gameStarted)return;
+ dt=Math.min(dt,.06);gameClock+=dt;
+ cooldown=Math.max(0,cooldown-dt);dodgeCooldown=Math.max(0,dodgeCooldown-dt);invulnerable=Math.max(0,invulnerable-dt);
+ if(me.hp<=1){stop(false);return}
+ const quota=wave+2;
+ if(between>0){between-=dt}
+ else if(spawned<quota&&foes.length<3&&Math.random()<dt*.9)spawn();
+ if(spawned>=quota&&foes.length===0){
+  record.best=Math.max(record.best,wave);persist();
+  if(wave===5){stop(true);return}
+  wave++;spawned=0;defeated=0;between=2.4;me.hp=Math.min(initialHP,me.hp+15);announce('🌟 FALA '+wave+' / 5 — +15 HP');
+ }
+ for(const e of foes){
+  e.hit=Math.max(0,e.hit-dt);e.attack=Math.max(0,e.attack-dt);
+  const dx=me.x-e.x,dir=Math.sign(dx)||1;e.dir=dir;
+  if(Math.abs(dx)>17)e.x+=dir*(27+wave*3)*dt;
+  if(Math.abs(dx)<20&&Math.abs(me.y-e.y)<35&&e.attack===0){
+   e.attack=1.5;
+   if(invulnerable<=0){me.hp=Math.max(1,me.hp-(5+wave));invulnerable=.45;effects.push({x:me.x,y:me.y,t:.3,c:'#ff6767'})}
+  }
+ }
+ for(let i=effects.length-1;i>=0;i--){effects[i].t-=dt;if(effects[i].t<=0)effects.splice(i,1)}
+ hud.textContent=`⚔️ FALA ${wave}/5 • WROGOWIE ${foes.length} • ❤️ ${Math.ceil(me.hp)} • 🪙 ${record.coins}`;
+}
+function draw(){
+ if(!active)return;
+ ctx.save();
+ for(const e of foes){
+  const x=Math.round(e.x-cam.x),y=Math.round(e.y-cam.y);if(x<-40||x>VW+40||y<-45||y>VH+40)continue;
+  const w=14,h=15;
+  ctx.fillStyle=e.hit?'#fff':'#b96062';ctx.fillRect(x,y,w,h);
+  ctx.fillStyle='#161b26';ctx.fillRect(x+3,y+5,3,3);ctx.fillRect(x+w-6,y+5,3,3);
+  ctx.fillStyle='#121b24';ctx.fillRect(x,y-9,w,3);ctx.fillStyle='#f4756e';ctx.fillRect(x,y-9,w*Math.max(0,e.hp/e.maxHP),3);
+ }
+ for(const p of effects){ctx.globalAlpha=Math.min(1,p.t*4);ctx.fillStyle=p.c;ctx.fillRect(Math.round(p.x-cam.x),Math.round(p.y-cam.y),8,8)}
+ ctx.restore();
+}
+function show(){
+ panel.hidden=false;panel.replaceChildren();
+ const heading=document.createElement('h2');heading.textContent='⚔️ PIXEL WORLD 2 — ARENA';panel.append(heading);
+ const description=document.createElement('p');description.textContent='Nowy tryb walki w istniejącym świecie: 5 fal zwykłych przeciwników (bez bossów), unik, atak mieczem, nagrody i trwały rekord. Przeciwnicy pojawiają się blisko postaci. Arena nie niszczy bloków świata.';panel.append(description);
+ const info=document.createElement('p');info.textContent=`🏆 Najlepsza fala: ${record.best}/5   •   Zwycięstwa: ${record.wins}   •   Monety areny: ${record.coins}   •   Miecz: ${record.upgrades+1}/4`;panel.append(info);
+ const instructions=document.createElement('p');instructions.textContent='Sterowanie: F — atak • Shift — unik • telefon: przyciski ATAK i UNIK. Podczas walki możesz nadal chodzić i skakać.';panel.append(instructions);
+ const row=document.createElement('div');row.className='pw2ArenaActions';panel.append(row);
+ const mk=(text,fn)=>{const b=document.createElement('button');b.textContent=text;b.onclick=fn;row.append(b)};
+ mk(active?'↩️ WRÓĆ DO GRY':'▶️ ROZPOCZNIJ 5 FAL',()=>{if(active)panel.hidden=true;else start()});
+ mk(`🗡️ ULEPSZ MIECZ (${40+record.upgrades*35} 🪙)`,()=>{
+  if(record.upgrades>=3)return announce('Miecz już jest maksymalny');
+  const price=40+record.upgrades*35;if(record.coins<price)return announce('Za mało monet areny');
+  record.coins-=price;record.upgrades++;persist();show();announce('🗡️ Miecz ulepszony!');
+ });
+ mk('⛔ ZAKOŃCZ PRÓBĘ',()=>{if(active)stop(false);else panel.hidden=true});
+ mk('✕ ZAMKNIJ',()=>panel.hidden=true);
+}
+button.onclick=show;attackButton.onclick=attack;dodgeButton.onclick=dodge;
+document.addEventListener('keydown',e=>{
+ if(!active||e.repeat||/INPUT|TEXTAREA/.test(e.target.tagName))return;
+ if(e.key.toLowerCase()==='f')attack();if(e.key==='Shift')dodge();
+});
+const oldUpdate=updateMe;updateMe=function(dt){oldUpdate(dt);tick(dt)};
+const oldRender=render;render=function(){oldRender();draw()};
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const parent=document.querySelector(sel);if(parent){const b=document.createElement('button');b.textContent='⚔️ ARENA';b.onclick=show;parent.append(b)}
+}
+window.PW2Stage7={open:show};
+})();
+</script>
 </body>
 </html>
