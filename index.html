@@ -6945,5 +6945,55 @@ craft.onclick=()=>run('craftBtn');
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){sheet.hidden=true;menu.textContent='☰ MENU'}});
 })();
 </script>
+
+<script id="pwActualCharacterAnimation">
+/* Final renderer override: previous animation module replaced drawSprite. */
+(function(){
+'use strict';
+if(typeof drawSprite!=='function')return;
+drawSprite=function(p,local){
+ const x=Math.round(p.x-cam.x), y=Math.round(p.y-cam.y);
+ const t=performance.now()/1000, moving=p.ground&&Math.abs(p.vx)>8;
+ const phase=moving?p.walk*1.7:0;
+ const stride=moving?Math.sin(phase)*3.5:0;
+ const bob=moving?Math.abs(Math.sin(phase))*1.4:(!p.ground?-2:Math.sin(t*2.5)*.55);
+ const airborne=!p.ground;
+ const skins=['#efb77b','#d99a68','#b97850','#8b573d','#f4c89b','#c88963'];
+ const clothes=['#238ce0','#e34b4b','#42b85a','#8c5bd6','#f0a52b','#30343b','#e85fa7','#23b9b1'];
+ const hairs=['#351d0e','#171717','#6b3e1f','#d7ad45','#8a3b2f','#d9d9d9'];
+ const skin=local&&typeof PW!=='undefined'?skins[(PW.skin||0)%skins.length]:'#efb77b';
+ const shirt=local&&typeof PW!=='undefined'?clothes[(PW.outfit||0)%clothes.length]:'#d34c66';
+ const hair=local&&typeof PW!=='undefined'?hairs[(PW.hair||0)%hairs.length]:'#351d0e';
+ const rect=(xx,yy,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(xx),Math.round(yy),w,h)};
+ ctx.save();
+ // Strong, clearly visible arm and leg swings with jump pose.
+ rect(x-2,y+22,15,2,'rgba(0,0,0,.24)');
+ rect(x+2,y+15+(airborne?-3:stride),3,8,'#22242b');
+ rect(x+7,y+15+(airborne?-3:-stride),3,8,'#22242b');
+ rect(x+1,y+8+bob,9,9,shirt);
+ rect(x,y+9+bob+(airborne?-5:-stride*1.1),2,7,skin);
+ rect(x+10,y+9+bob+(airborne?-5:stride*1.1),2,7,skin);
+ rect(x,y+bob,11,9,skin);
+ rect(x,y+bob,11,3,hair);
+ rect(x,y+2+bob,2,3,hair);
+ const blink=local?((t+0.5)%2.8<0.23):((t+p.x/30)%3.3<.16);
+ const faceLeft=p.dir<0;
+ const eyeA=faceLeft?2:3,eyeB=faceLeft?6:7;
+ if(blink){
+   rect(x+eyeA,y+5+bob,2,1,'#34251e');
+   rect(x+eyeB,y+5+bob,2,1,'#34251e');
+ }else{
+   rect(x+eyeA,y+4+bob,1,2,'#151515');
+   rect(x+eyeB,y+4+bob,1,2,'#151515');
+ }
+ rect(x+(faceLeft?3:6),y+7+bob,2,1,'#9f5749');
+ if(p.mine>0){rect(x+(faceLeft?-5:11),y+8+bob,6,2,'#85562a');rect(x+(faceLeft?-7:16),y+5+bob,3,6,'#bfc7cc')}
+ if(moving && local){
+   rect(x+2-stride,y+22,3,1,'rgba(232,220,181,.75)');
+ }
+ ctx.restore();
+};
+})();
+</script>
 </body>
 </html>
