@@ -7592,5 +7592,206 @@ const logo=document.querySelector('#menu .logo');if(logo)logo.textContent='PIXEL
 const subtitle=document.querySelector('#menu .sub');if(subtitle)subtitle.textContent='REBUILT EDITION';
 })();
 </script>
+
+<style id="pw2Stage2Style">
+#pw2ToolIndicator{position:fixed;z-index:35;left:50%;bottom:79px;transform:translateX(-50%);pointer-events:none;background:rgba(7,25,37,.88);color:#dff8ff;border:1px solid #6a9eb5;padding:5px 9px;font:10px monospace;white-space:nowrap}
+#pw2MobileActions{position:fixed;right:9px;bottom:90px;z-index:85;display:flex;gap:5px}
+#pw2MobileActions button{border:2px solid #8dc7d7;background:#14364b;color:white;font:12px monospace;padding:11px;min-width:43px;touch-action:none}
+#pw2MobileActions button.active{border-color:#ffe4a1;background:#655335}
+@media(min-width:800px) and (pointer:fine){#pw2MobileActions{display:none}}
+@media(max-width:700px){#pw2ToolIndicator{bottom:59px;font-size:9px}#pw2MobileActions{right:4px;bottom:122px}#pw2MobileActions button{padding:8px}}
+</style>
+<script id="pw2Stage2Engine">
+(function(){
+'use strict';
+let lastGroundTime=0,lastJumpPress=-99,lastCameraTime=performance.now(),miningCooldown=0,placingCooldown=0;
+let particles2=[],mode='mine',lastModeMessage=0;
+const stage2Panel=document.createElement('div');stage2Panel.id='pw2ToolIndicator';stage2Panel.textContent='⛏️ KOPANIE  •  PRAWY KLIK: BUDOWANIE';document.body.append(stage2Panel);
+const actions=document.createElement('div');actions.id='pw2MobileActions';document.body.append(actions);
+function addAction(label,fn){const b=document.createElement('button');b.textContent=label;b.type='button';b.onclick=fn;actions.append(b);return b}
+const miningButton=addAction('⛏️',()=>{mode='mine';setMode()});
+const placingButton=addAction('🧱',()=>{mode='place';setMode()});
+const jumpButton=addAction('⬆️',()=>{jumpRequest=true;lastJumpPress=performance.now()/1000});
+function setMode(){miningButton.classList.toggle('active',mode==='mine');placingButton.classList.toggle('active',mode==='place');stage2Panel.textContent=mode==='mine'?'⛏️ KOPANIE  •  PRAWY KLIK: BUDOWANIE':'🧱 BUDOWANIE  •  LEWY KLIK: KOPANIE'}
+setMode();
+const oldUpdate=updateMe;
+updateMe=function(dt){
+ const now=performance.now()/1000;
+ const wasGround=me.ground;
+ if(wasGround)lastGroundTime=now;
+ if(jumpRequest)lastJumpPress=now;
+ // Grace period: a jump remains possible for a fraction of a second after stepping off a ledge.
+ if(jumpRequest&&!me.ground&&now-lastGroundTime<.11){me.ground=true}
+ // Buffer a jump slightly before landing.
+ if(!jumpRequest&&me.ground&&now-lastJumpPress<.11){jumpRequest=true;lastJumpPress=-99}
+ oldUpdate(dt);
+ if(me.ground)lastGroundTime=now;
+ // Limit very high falling speeds for steadier collision behavior.
+ me.vy=Math.min(me.vy,500);
+ if(!wasGround&&me.ground&&Math.abs(me.vy)<500){particles2.push({x:me.x+me.w/2,y:me.y+me.h,t:.25,color:'#d7c7a1'})}
+};
+// Smooth tracking without modifying the world's collision coordinates.
+camera=function(){
+ const now=performance.now(),dt=Math.min(.05,(now-lastCameraTime)/1000);lastCameraTime=now;
+ const tx=Math.max(0,Math.min(WORLD_W*T-VW,me.x+me.w/2-VW/2+(me.dir||1)*24));
+ const ty=Math.max(0,Math.min(WORLD_H*T-VH,me.y+me.h/2-VH/2-15));
+ const blend=1-Math.exp(-9*Math.max(dt,.001));
+ cam.x+=(tx-cam.x)*blend;cam.y+=(ty-cam.y)*blend;
+ if(Math.abs(tx-cam.x)<.12)cam.x=tx;
+ if(Math.abs(ty-cam.y)<.12)cam.y=ty;
+};
+const oldMine=mine;
+mine=function(){
+ if(miningCooldown>0)return;
+ const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T),before=getB(bx,by);
+ oldMine();
+ if(before!==B.air&&getB(bx,by)===B.air){miningCooldown=.10;particles2.push({x:bx*T+T/2,y:by*T+T/2,t:.30,color:'#d6d2a5'});}
+};
+const oldPlace=place;
+place=function(){
+ if(placingCooldown>0)return;
+ const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T),before=getB(bx,by);
+ oldPlace();
+ if(before===B.air&&getB(bx,by)!==B.air){placingCooldown=.10;particles2.push({x:bx*T+T/2,y:by*T+T/2,t:.23,color:'#9ce5ff'});}
+};
+// Drawing is layered over the existing game, leaving original art intact.
+const oldRender=render;
+render=function(){
+ oldRender();
+ if(!gameStarted)return;
+ const now=performance.now();
+ ctx.save();
+ const q=target(),bx=Math.floor(q.x/T),by=Math.floor(q.y/T);
+ if(bx>=0&&by>=0&&bx<WORLD_W&&by<WORLD_H){
+  const reachable=inRange(bx,by),x=Math.round(bx*T-cam.x),y=Math.round(by*T-cam.y);
+  ctx.strokeStyle=reachable?'#ffdf86':'#ef7777';ctx.lineWidth=1.5;
+  ctx.strokeRect(x+.75,y+.75,T-1.5,T-1.5);
+  ctx.fillStyle=reachable?'rgba(255,232,149,.13)':'rgba(255,70,70,.12)';ctx.fillRect(x+1,y+1,T-2,T-2);
+ }
+ for(const p of particles2){ctx.globalAlpha=Math.max(0,p.t/.3);ctx.fillStyle=p.color;ctx.fillRect(Math.round(p.x-cam.x)-2,Math.round(p.y-cam.y)-2,4,4)}
+ ctx.restore();
+};
+let tickLast=performance.now();
+const oldCamera=camera;
+camera=function(){const now=performance.now(),dt=Math.min(.05,(now-tickLast)/1000);tickLast=now;miningCooldown=Math.max(0,miningCooldown-dt);placingCooldown=Math.max(0,placingCooldown-dt);for(let i=particles2.length-1;i>=0;i--){particles2[i].t-=dt;if(particles2[i].t<=0)particles2.splice(i,1)}oldCamera()};
+// Correct mouse coordinates when the canvas is resized or letterboxed.
+function pointerToCanvas(e){const rect=canvas.getBoundingClientRect();mouse.x=(e.clientX-rect.left)/rect.width*VW;mouse.y=(e.clientY-rect.top)/rect.height*VH}
+canvas.addEventListener('pointermove',pointerToCanvas,{capture:true});
+canvas.addEventListener('pointerdown',e=>{pointerToCanvas(e);if(e.pointerType==='touch'){
+ // Touch controls select mining or building; avoid accidental dual action.
+ if(mode==='place'){mineHeld=false;placeHeld=true;setTimeout(()=>{placeHeld=false},130)}
+ }},{capture:true});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA/.test(e.target.tagName))return;
+ if(e.key==='1'&&e.altKey){mode='mine';setMode()}
+ if(e.key==='2'&&e.altKey){mode='place';setMode()}
+});
+// Re-center on teleports and new worlds to avoid a long camera pan.
+// Keep original spawn function and world generation behavior unchanged.
+window.PW2Stage2={version:'2.0-stage-2',setTool(m){if(m==='mine'||m==='place'){mode=m;setMode()}},resetCamera(){cam.x=me.x-VW/2;cam.y=me.y-VH/2}};
+})();
+</script>
+<style id="pw2Stage3Style">
+#pw2VisualBtn{position:fixed;z-index:178;top:56px;right:10px;background:#16364a;border:2px solid #76abc3;color:#e8f8ff;padding:7px 9px;font:10px monospace;cursor:pointer}
+#pw2VisualPanel{position:fixed;z-index:190;top:92px;right:10px;width:min(305px,calc(100vw - 20px));background:#102433;border:3px solid #7dbbd4;color:#f1f9ff;padding:12px;box-shadow:4px 4px #03090d;font:12px monospace;box-sizing:border-box}
+#pw2VisualPanel[hidden]{display:none!important}
+#pw2VisualPanel label{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #315368}
+#pw2VisualPanel input{width:19px;height:19px;accent-color:#f2ce8d}
+#pw2VisualPanel button{background:#25485e;color:white;border:2px solid #86b7c9;padding:7px;margin-top:10px}
+@media(max-width:700px){#pw2VisualBtn{top:45px;right:5px;padding:5px;font-size:9px}#pw2VisualPanel{top:75px;right:5px}}
+</style>
+<script id="pw2Stage3VisualEngine">
+(function(){
+'use strict';
+const STORAGE='PIXEL_WORLD_2_STAGE_3_GRAPHICS';
+let settings={textures:true,background:true,character:true,ambient:true};
+try{Object.assign(settings,JSON.parse(localStorage.getItem(STORAGE)||'{}'))}catch(e){}
+const persist=()=>{try{localStorage.setItem(STORAGE,JSON.stringify(settings))}catch(e){}};
+const textures={};
+function hash(x,y,k){let h=(Math.imul(x+17,374761393)^Math.imul(y+31,668265263)^Math.imul(k+13,1274126177))|0;h=Math.imul(h^(h>>>13),1274126177);return (h^(h>>>16))>>>0}
+function makeTexture(type){
+ const c=document.createElement('canvas');c.width=c.height=16;const g=c.getContext('2d');
+ const p={1:['#4c9334','#5eae42','#34762a'],2:['#774424','#9e6035','#603b25'],3:['#68747b','#929da2','#4c5962'],4:['#7a4726','#ad7541','#59321f'],5:['#397d37','#57a74a','#2d642e'],6:['#d5bb78','#f2d991','#b89b59'],7:['#358bd0','#75c2ed','#2467aa'],8:['#9cdeeb','#d5faff','#64a5c4'],9:['#aa5548','#cb7660','#80443c'],10:['#5c6066','#393e44','#9a9ca2'],11:['#ad8b36','#ffe27a','#705b32'],12:['#3465b7','#71a2f2','#243e77'],13:['#33886c','#6ce9ae','#1b5648'],14:['#4caeb7','#a1fbff','#277d8a'],15:['#332c48','#574d6d','#1b1929'],16:['#8e58ba','#dba4fa','#513778']}[type]||['#777','#999','#555'];
+ g.clearRect(0,0,16,16);
+ for(let y=0;y<16;y+=4)for(let x=0;x<16;x+=4){const h=hash(x,y,type);g.fillStyle=p[h%3];g.globalAlpha=.16+(h%3)*.045;g.fillRect(x+(h%2),y+(h%3===0?1:0),2+(h%2),2)}g.globalAlpha=1;
+ if(type===B.grass){g.fillStyle='#9fe16a';g.fillRect(0,0,16,2);g.fillStyle='#3e812d';for(let x=0;x<16;x+=4)g.fillRect(x,2,2,1)}
+ if(type===B.wood){g.fillStyle='rgba(40,20,9,.3)';g.fillRect(3,0,1,16);g.fillRect(11,0,1,16);g.fillRect(0,7,16,1)}
+ if(type===B.brick){g.fillStyle='rgba(29,20,23,.5)';g.fillRect(0,7,16,1);g.fillRect(7,0,1,7);g.fillRect(3,8,1,8)}
+ if(type===B.glass){g.fillStyle='rgba(245,255,255,.48)';g.fillRect(3,2,2,9);g.fillRect(6,2,5,2);g.strokeStyle='rgba(220,252,255,.5)';g.strokeRect(.5,.5,15,15)}
+ if(type===B.water){g.fillStyle='rgba(216,250,255,.4)';g.fillRect(2,5,7,1);g.fillRect(9,12,5,1)}
+ return c;
+}
+for(let i=1;i<=16;i++)textures[i]=makeTexture(i);
+const previousSky=sky;
+sky=function(){previousSky();if(!settings.background)return;
+ const n=typeof nightAmount==='function'?nightAmount():0;
+ ctx.save();
+ // Parallax silhouettes scroll more slowly than the foreground world.
+ for(let layer=0;layer<2;layer++){
+  const par=layer===0?.12:.24,base=VH*(layer===0?.64:.79);
+  ctx.fillStyle=layer===0?(n>.55?'rgba(74,86,115,.24)':'rgba(97,158,180,.20)'):(n>.55?'rgba(34,56,78,.37)':'rgba(58,122,129,.23)');
+  ctx.beginPath();ctx.moveTo(0,VH);
+  for(let x=0;x<=VW+12;x+=12){const world=(x+cam.x*par)/75;const h=Math.sin(world+layer*3)*12+Math.sin(world*2.1+layer)*7;const y=base+h;ctx.lineTo(x,y)}
+  ctx.lineTo(VW,VH);ctx.closePath();ctx.fill();
+ }
+ if(n<.65){const sunX=VW*.77-cam.x*.008%30,sunY=37;ctx.fillStyle='rgba(255,246,180,.85)';ctx.fillRect(Math.round(sunX),sunY,16,16);ctx.fillStyle='rgba(255,250,194,.16)';ctx.fillRect(Math.round(sunX)-7,sunY-7,30,30)}
+ ctx.restore();
+};
+const previousWorld=drawWorld;
+drawWorld=function(){previousWorld();if(!settings.textures)return;
+ const sx=Math.max(0,Math.floor(cam.x/T)-1),ex=Math.min(WORLD_W,Math.ceil((cam.x+VW)/T)+1);
+ const sy=Math.max(0,Math.floor(cam.y/T)-1),ey=Math.min(WORLD_H,Math.ceil((cam.y+VH)/T)+1);
+ ctx.save();ctx.imageSmoothingEnabled=false;
+ for(let y=sy;y<ey;y++)for(let x=sx;x<ex;x++){
+  const block=getB(x,y),tile=textures[block];if(!tile)continue;
+  const px=Math.round(x*T-cam.x),py=Math.round(y*T-cam.y);
+  ctx.drawImage(tile,px,py);
+  if(block===B.stone&&hash(x,y,41)%7===0){ctx.fillStyle='rgba(16,29,38,.23)';ctx.fillRect(px+4,py+7,7,1);ctx.fillRect(px+9,py+8,1,4)}
+ }
+ ctx.restore();
+};
+const previousSprite=drawSprite;
+let footDust=[],lastStep=0,lastX=0;
+drawSprite=function(p,local=false){
+ if(local&&settings.character){
+  const px=Math.round(p.x-cam.x),py=Math.round(p.y-cam.y);
+  ctx.save();ctx.fillStyle='rgba(0,0,0,.16)';ctx.fillRect(px-4,py+p.h-1,19,3);
+  if(!p.ground){ctx.fillStyle='rgba(215,245,255,.42)';ctx.fillRect(px+2,py+p.h+3,7,2)}
+  ctx.restore();
+ }
+ previousSprite(p,local);
+ if(local&&settings.character){
+  const px=Math.round(p.x-cam.x),py=Math.round(p.y-cam.y);
+  ctx.save();ctx.fillStyle='rgba(255,255,255,.30)';ctx.fillRect(px+3,py+3,2,2);
+  if(!p.ground&&p.vy<0){ctx.fillStyle='#d7f3ff';ctx.fillRect(px+4,py+p.h+2,3,2)}
+  ctx.restore();
+ }
+};
+const previousRender=render;
+render=function(){previousRender();if(!gameStarted||!settings.ambient)return;
+ const now=performance.now()/1000;
+ ctx.save();
+ // Gentle ambient pixels, deterministic across frames and worlds.
+ for(let i=0;i<17;i++){
+  const worldX=(i*397+131)% (WORLD_W*T),worldY= (i*181+70)%(WORLD_H*T);
+  const px=worldX-cam.x+Math.sin(now*.7+i)*4,py=worldY-cam.y+Math.cos(now*.9+i)*5;
+  if(px<0||px>VW||py<0||py>VH)continue;
+  ctx.globalAlpha=.18+.14*(1+Math.sin(now*1.5+i));ctx.fillStyle=i%3===0?'#fff3aa':'#e4f7ff';ctx.fillRect(Math.round(px),Math.round(py),2,2);
+ }
+ ctx.restore();
+};
+const button=document.createElement('button');button.id='pw2VisualBtn';button.textContent='🎨 GRAFIKA';button.title='Ustawienia grafiki Pixel World 2';document.body.append(button);
+const panel=document.createElement('section');panel.id='pw2VisualPanel';panel.hidden=true;document.body.append(panel);
+function show(){panel.replaceChildren();const h=document.createElement('strong');h.textContent='🎨 PIXEL WORLD 2 — GRAFIKA';panel.append(h);
+ for(const [key,name] of [['textures','🧱 Nowe tekstury bloków'],['background','🏞️ Tło z paralaksą'],['character','🧍 Detale postaci'],['ambient','✨ Świetliki i drobne efekty']]){
+  const label=document.createElement('label');label.textContent=name;const input=document.createElement('input');input.type='checkbox';input.checked=!!settings[key];input.onchange=()=>{settings[key]=input.checked;persist()};label.append(input);panel.append(label)
+ }
+ const close=document.createElement('button');close.textContent='✓ GOTOWE';close.onclick=()=>panel.hidden=true;panel.append(close);
+}
+button.onclick=()=>{panel.hidden=!panel.hidden;if(!panel.hidden)show()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)panel.hidden=true});
+window.PW2Stage3={settings,open:()=>{panel.hidden=false;show()}};
+})();
+</script>
 </body>
 </html>
