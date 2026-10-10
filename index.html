@@ -7114,5 +7114,80 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden){pane
 document.addEventListener('pointerdown',e=>{if(!panel.hidden&&!panel.contains(e.target)&&!bar.contains(e.target)){panel.hidden=true;toggle.textContent='☰ MENU';toggle.setAttribute('aria-expanded','false')}});
 })();
 </script>
+
+<style id="pwCompactHotbarStyle">
+/* Compact quickbar: eight slots and a proper scrollable item drawer. */
+#hotbar{width:auto!important;max-width:min(570px,calc(100vw - 230px))!important;overflow:visible!important;display:flex!important;align-items:center!important;gap:5px!important;box-sizing:border-box!important}
+#hotbar .pwQuickSlots{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;min-width:0}
+#hotbar .slot{width:clamp(30px,3.1vw,44px)!important;height:clamp(30px,3.1vw,44px)!important;flex:none!important;cursor:pointer}
+#hotbar .slot .icon{max-width:65%;max-height:65%}
+#hotbar .pwBagToggle{display:grid;place-items:center;flex:0 0 44px;min-width:0;height:44px;border:2px solid #e9ba60;background:#403020;color:#fff;cursor:pointer;font-size:20px;box-shadow:inset 0 0 0 2px #8a6333}
+#pwQuickDrawer{position:fixed;bottom:77px;left:50%;transform:translateX(-50%);width:min(620px,calc(100vw - 20px));max-height:min(58vh,440px);z-index:105;background:#0b1a26;border:3px solid #7ba3b8;box-shadow:5px 5px 0 #05090d;padding:10px;box-sizing:border-box;pointer-events:auto}
+#pwQuickDrawer[hidden]{display:none!important}
+#pwQuickDrawer .pwDrawerHead{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#f8e5a8;font-size:13px;margin-bottom:9px;font-weight:bold}
+#pwQuickDrawer .pwDrawerClose{padding:5px 10px;background:#263d4c;color:white;border:2px solid #7ba3b8}
+#pwQuickDrawer .pwDrawerGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px;max-height:min(44vh,335px);overflow-y:auto}
+#pwQuickDrawer .pwDrawerItem{min-width:0;min-height:67px;position:relative;background:#1a2d39;border:2px solid #486474;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:5px 2px}
+#pwQuickDrawer .pwDrawerItem.active{border-color:#ffe081;background:#37443b}
+#pwQuickDrawer .pwDrawerSwatch{height:23px;width:23px;border:2px solid #0a1017;box-shadow:inset 2px 2px rgba(255,255,255,.25)}
+#pwQuickDrawer .pwDrawerName{font-size:9px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pwQuickDrawer .pwDrawerCount{position:absolute;right:3px;top:2px;font-size:9px;color:#f8e5a8}
+@media(max-width:700px){
+ #hotbar{bottom:calc(76px + env(safe-area-inset-bottom))!important;max-width:calc(100vw - 12px)!important;width:calc(100vw - 12px)!important;gap:3px!important;padding:4px!important}
+ #hotbar .pwQuickSlots{flex:1;gap:2px}
+ #hotbar .slot{width:100%!important;height:clamp(29px,8vw,40px)!important}
+ #hotbar .pwBagToggle{flex:0 0 39px;height:39px;font-size:17px}
+ #pwQuickDrawer{bottom:calc(130px + env(safe-area-inset-bottom));width:calc(100vw - 12px);max-height:50dvh}
+ #pwQuickDrawer .pwDrawerGrid{grid-template-columns:repeat(5,minmax(0,1fr));max-height:34dvh}
+}
+</style>
+<script id="pwCompactHotbarScript">
+(function(){
+'use strict';
+const hot=document.getElementById('hotbar');
+if(!hot)return;
+const drawer=document.createElement('div');drawer.id='pwQuickDrawer';drawer.hidden=true;
+drawer.innerHTML='<div class="pwDrawerHead"><span>🎒 BLOKI I PRZEDMIOTY</span><button class="pwDrawerClose" type="button">✕</button></div><div class="pwDrawerGrid"></div>';
+document.body.appendChild(drawer);
+const grid=drawer.querySelector('.pwDrawerGrid');
+drawer.querySelector('.pwDrawerClose').onclick=()=>{drawer.hidden=true};
+const oldUpdate=updateHotbar;
+function renderDrawer(){
+ grid.replaceChildren();
+ items.forEach((it,i)=>{
+  const b=document.createElement('button');b.className='pwDrawerItem'+(i===selected?' active':'');
+  b.type='button';b.title=String(it);
+  const count=document.createElement('span');count.className='pwDrawerCount';count.textContent=String(inv[it]||0);
+  const swatch=document.createElement('span');swatch.className='pwDrawerSwatch';swatch.style.background=color(slots[i]);
+  const name=document.createElement('span');name.className='pwDrawerName';name.textContent=String(it);
+  b.append(count,swatch,name);
+  b.onclick=()=>{selected=i;drawer.hidden=true;updateHotbar()};
+  grid.appendChild(b);
+ });
+}
+updateHotbar=function(){
+ oldUpdate();
+ const originals=Array.from(hot.querySelectorAll(':scope > .slot'));
+ if(!originals.length)return;
+ const quick=document.createElement('div');quick.className='pwQuickSlots';
+ const total=originals.length;
+ // The currently selected block remains visible even when it is outside the first eight.
+ const visible=Array.from({length:Math.min(8,total)},(_,i)=>i);
+ if(selected>=8 && total>8)visible[7]=selected;
+ for(const i of visible){
+  const slot=originals[i];if(!slot)continue;
+  const label=document.createElement('span');label.style.cssText='position:absolute;left:2px;top:0;font-size:8px;color:#c9e6ee';label.textContent=String(i+1);
+  slot.appendChild(label);quick.appendChild(slot);
+ }
+ hot.replaceChildren(quick);
+ const toggle=document.createElement('button');toggle.className='pwBagToggle';toggle.type='button';toggle.textContent='🎒';toggle.title='Pokaż wszystkie bloki i przedmioty';
+ toggle.onclick=()=>{drawer.hidden=!drawer.hidden;if(!drawer.hidden)renderDrawer()};
+ hot.appendChild(toggle);
+ if(!drawer.hidden)renderDrawer();
+};
+updateHotbar();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!drawer.hidden)drawer.hidden=true});
+})();
+</script>
 </body>
 </html>
