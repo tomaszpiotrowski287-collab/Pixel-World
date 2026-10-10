@@ -6995,5 +6995,85 @@ drawSprite=function(p,local){
 };
 })();
 </script>
+
+<style id="pwActionAnimStyles">
+#pwEmotePanel{position:fixed;left:50%;bottom:155px;transform:translateX(-50%);z-index:105;background:rgba(8,19,29,.97);border:2px solid #69dbf5;padding:10px;width:min(390px,95vw);box-shadow:4px 4px #000}
+#pwEmotePanel[hidden]{display:none!important}
+#pwEmotePanel .pwAnimGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#pwEmotePanel button{padding:8px 3px;font-size:11px;min-width:0}
+#pwAnimBtn{position:fixed;left:14px;top:195px;z-index:90;background:#1d3d4c;border:2px solid #75dcf5;padding:8px;font-size:11px}
+@media(max-width:700px){#pwAnimBtn{left:7px;top:96px;font-size:10px;padding:6px}#pwEmotePanel{bottom:140px;max-height:50dvh;overflow:auto}}
+</style>
+<script id="pwFullCharacterAnimations">
+(function(){
+'use strict';
+if(typeof drawSprite!=='function'||typeof me==='undefined')return;
+const state={action:'',until:0,started:0,face:'normal',faceUntil:0,hitUntil:0,mineUntil:0};
+window.pwAnimState=state;
+function action(name,duration){const now=performance.now();state.action=name;state.started=now;state.until=now+duration; if(typeof pwToast==='function')pwToast('🎭 '+({dance:'Taniec',sit:'Siadanie',wave:'Machanie',swim:'Pływanie',hit:'Uderzenie',mine:'Kopanie'}[name]||name));}
+window.pwPlayAnimation=function(name){
+ if(name==='happy'||name==='sad'||name==='surprised'||name==='angry'){state.face=name;state.faceUntil=performance.now()+3500;return}
+ action(name,name==='dance'?7000:name==='sit'?10000:name==='swim'?5000:name==='wave'?3000:900);
+};
+const panel=document.createElement('div');panel.id='pwEmotePanel';panel.hidden=true;
+panel.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>🎭 ANIMACJE POSTACI</b><button id="pwAnimClose">✕</button></div><div class="pwAnimGrid"></div>';
+const opts=[['⛏️ KOP','mine'],['👊 UDERZ','hit'],['🏊 PŁYWAJ','swim'],['💃 TAŃCZ','dance'],['🪑 USIĄDŹ','sit'],['👋 MACHAJ','wave'],['😄 RADOŚĆ','happy'],['😢 SMUTEK','sad'],['😮 ZDZIWIENIE','surprised'],['😠 ZŁOŚĆ','angry']];
+for(const [label,key] of opts){const b=document.createElement('button');b.textContent=label;b.onclick=()=>{window.pwPlayAnimation(key);panel.hidden=true};panel.querySelector('.pwAnimGrid').appendChild(b)}
+panel.querySelector('#pwAnimClose').onclick=()=>panel.hidden=true;
+const btn=document.createElement('button');btn.id='pwAnimBtn';btn.textContent='🎭 ANIMACJE';btn.onclick=()=>panel.hidden=!panel.hidden;document.body.append(btn,panel);
+const dock=document.querySelector('#pwMobileSheet .pwMobileTiles');if(dock){const b=document.createElement('button');b.textContent='🎭 ANIMACJE';b.onclick=()=>{document.getElementById('pwMobileSheet').hidden=true;panel.hidden=false};dock.appendChild(b)}
+const hub=document.querySelector('#pwHub .pwGrid');if(hub){const b=document.createElement('button');b.textContent='🎭 ANIMACJE';b.onclick=()=>{document.getElementById('pwHub').classList.add('hidden');panel.hidden=false};hub.appendChild(b)}
+document.addEventListener('keydown',e=>{if(e.code==='KeyG'&&!e.repeat&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){panel.hidden=!panel.hidden}});
+const originalMine=typeof mine==='function'?mine:null;
+if(originalMine){mine=function(...args){state.mineUntil=performance.now()+480;return originalMine.apply(this,args)}}
+const originalDraw=drawSprite;
+drawSprite=function(p,local){
+ if(!local){originalDraw(p,local);return}
+ const now=performance.now(), t=now/1000;
+ let act=now<state.until?state.action:'';
+ if(mineHeld||now<state.mineUntil)act='mine';
+ if(act==='sit'&&(Math.abs(p.vx)>10||!p.ground)){state.until=0;act=''}
+ const x=Math.round(p.x-cam.x),y=Math.round(p.y-cam.y);
+ const skinColors=['#efb77b','#d99a68','#b97850','#8b573d','#f4c89b','#c88963'];
+ const clothes=['#238ce0','#e34b4b','#42b85a','#8c5bd6','#f0a52b','#30343b','#e85fa7','#23b9b1'];
+ const hairs=['#351d0e','#171717','#6b3e1f','#d7ad45','#8a3b2f','#d9d9d9'];
+ const skin=skinColors[Math.abs(PW.skin||0)%skinColors.length],shirt=clothes[Math.abs(PW.outfit||0)%clothes.length],hair=hairs[Math.abs(PW.hair||0)%hairs.length];
+ const draw=(xx,yy,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(xx),Math.round(yy),w,h)};
+ const moving=p.ground&&Math.abs(p.vx)>8,phase=p.walk*1.65;
+ const stride=moving?Math.sin(phase)*3.6:0;
+ const elapsed=(now-state.started)/1000;
+ const swim=act==='swim'||(typeof getB==='function'&&getB(Math.floor((p.x+p.w/2)/T),Math.floor((p.y+p.h/2)/T))===B.water);
+ const sit=act==='sit',dance=act==='dance';
+ const bounce=dance?Math.abs(Math.sin(t*10))*3:moving?Math.abs(Math.sin(phase))*1.5:Math.sin(t*2.5)*.55;
+ const headY=y+bounce+(sit?7:0)+(swim?3:0);
+ const torsoY=headY+8;
+ let legL=15+stride,legR=15-stride,armL=9-stride*1.2,armR=9+stride*1.2;
+ if(!p.ground){legL=13;legR=13;armL=3;armR=3}
+ if(swim){legL=17+Math.sin(t*12)*3;legR=17-Math.sin(t*12)*3;armL=7+Math.sin(t*12)*5;armR=7-Math.sin(t*12)*5}
+ if(dance){legL=15+Math.sin(t*11)*4;legR=15-Math.sin(t*11)*4;armL=2+Math.sin(t*9)*3;armR=2-Math.sin(t*9)*3}
+ if(act==='wave'){armR=1+Math.sin(t*14)*3}
+ if(act==='hit'||act==='mine'){armR=4+Math.sin(elapsed*22)*4}
+ ctx.save();
+ if(sit){draw(x+1,y+20,11,3,'#40342e');draw(x+2,y+18,3,4,'#262b35');draw(x+7,y+18,3,4,'#262b35')}
+ else{draw(x+2,y+legL,3,8,'#262b35');draw(x+7,y+legR,3,8,'#262b35')}
+ draw(x+1,torsoY,9,sit?7:9,shirt);
+ draw(x,headY+armL,2,7,skin);draw(x+10,headY+armR,2,7,skin);
+ draw(x,headY,11,9,skin);draw(x,headY,11,3,hair);draw(x,headY+2,2,3,hair);
+ const blink=((now+500)%3100)<170;
+ const face=now<state.faceUntil?state.face:'normal';
+ if(face==='happy'){draw(x+3,headY+4,2,1,'#292018');draw(x+7,headY+4,2,1,'#292018');draw(x+4,headY+7,4,1,'#9b453b')}
+ else if(face==='sad'){draw(x+3,headY+4,1,2,'#222');draw(x+7,headY+4,1,2,'#222');draw(x+4,headY+8,4,1,'#773d3b');draw(x+3,headY+6,1,2,'#6dd7f2')}
+ else if(face==='surprised'){draw(x+3,headY+4,2,2,'#222');draw(x+7,headY+4,2,2,'#222');draw(x+5,headY+7,2,2,'#552b27')}
+ else if(face==='angry'){draw(x+2,headY+3,3,1,'#42231d');draw(x+7,headY+3,3,1,'#42231d');draw(x+3,headY+5,1,2,'#222');draw(x+8,headY+5,1,2,'#222');draw(x+4,headY+8,4,1,'#552b27')}
+ else if(blink){draw(x+3,headY+5,2,1,'#32251e');draw(x+7,headY+5,2,1,'#32251e');draw(x+5,headY+7,2,1,'#9f5749')}
+ else{draw(x+3,headY+4,1,2,'#171717');draw(x+7,headY+4,1,2,'#171717');draw(x+5,headY+7,2,1,'#9f5749')}
+ if(act==='mine'){const swing=Math.sin(elapsed*22);const dir=p.dir<0?-1:1;draw(x+5+dir*7,headY+armR-3+swing*4,2,10,'#8e6743');draw(x+2+dir*9,headY+armR-5+swing*4,8,3,'#bac6d2')}
+ if(act==='hit'){const dir=p.dir<0?-1:1;draw(x+5+dir*8,headY+armR+1,5,4,skin);draw(x+5+dir*10,headY+armR-1,3,2,'#f4d4a6')}
+ if(swim){for(let i=0;i<3;i++){const bx=x-7+i*5+Math.sin(t*4+i)*2;draw(bx,y+19+Math.sin(t*8+i)*3,2,2,'rgba(142,227,255,.85)')}}
+ if(dance){draw(x-5,y+3+Math.sin(t*8)*2,2,2,'#ffe86c');draw(x+14,y+8+Math.cos(t*8)*3,2,2,'#a6ffbc')}
+ ctx.restore();
+};
+})();
+</script>
 </body>
 </html>
