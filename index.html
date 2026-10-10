@@ -7075,5 +7075,44 @@ drawSprite=function(p,local){
 };
 })();
 </script>
+
+<style id="pwOrganizedDesktopHUD">
+@media(min-width:701px){
+ #gameUI .topRight,#pwHubBtn,#pwExplorerButton,#pwTreasureGuide,#pwAnimBtn,#pwUltimateBar{display:none!important}
+ #pwOnline{top:58px!important;right:12px!important;width:215px!important;min-width:0!important;padding:5px!important;font-size:9px!important;opacity:.87}
+ #pwDesktopBar{display:flex!important;position:fixed!important;top:10px!important;right:12px!important;z-index:160!important;gap:5px!important;padding:5px!important;background:rgba(7,16,24,.94)!important;border:2px solid #547c91!important;box-shadow:3px 3px #000!important;pointer-events:auto!important}
+ #pwDesktopBar button{position:static!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:39px!important;height:35px!important;padding:5px 9px!important;font-size:12px!important;border:1px solid #5c8194!important;background:#142e3d!important;color:white!important;box-shadow:none!important}
+ #pwDesktopBar button:hover,#pwDesktopMenu button:hover{background:#22566d!important;border-color:#79e7ff!important}
+ #pwDesktopBar #pwDesktopMenuToggle{min-width:106px!important;border-color:#6cdef5!important;font-size:11px!important}
+ #pwDesktopMenu{position:fixed!important;top:91px!important;right:12px!important;z-index:159!important;width:310px!important;max-height:calc(100dvh - 120px)!important;overflow-y:auto!important;background:rgba(7,17,26,.98)!important;border:2px solid #68d9f5!important;box-shadow:5px 5px #000!important;padding:12px!important;pointer-events:auto!important}
+ #pwDesktopMenu[hidden]{display:none!important}
+ #pwDesktopMenu h3{font-size:12px!important;color:#88e8ff!important;margin:10px 0 7px!important;letter-spacing:.5px!important}
+ #pwDesktopMenu .pwDesktopGrid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+ #pwDesktopMenu button{position:static!important;min-width:0!important;width:100%!important;min-height:40px!important;padding:8px 5px!important;font-size:10px!important;white-space:normal!important;background:#152b39!important;border:1px solid #587a8e!important;box-shadow:none!important;color:white!important}
+ #hotbar{max-width:calc(100vw - 230px)!important}
+}
+@media(max-width:700px){#pwDesktopBar,#pwDesktopMenu{display:none!important}}
+</style>
+<script id="pwOrganizedDesktopHUDScript">
+(function(){
+'use strict';
+const bar=document.createElement('nav');bar.id='pwDesktopBar';bar.setAttribute('aria-label','Szybkie akcje gry');
+const panel=document.createElement('section');panel.id='pwDesktopMenu';panel.hidden=true;panel.setAttribute('aria-label','Menu funkcji gry');
+const quick=[['🎒','inventoryBtn','Ekwipunek'],['🔨','craftBtn','Crafting'],['💾','save','Zapisz'],['⚙️','gameSettingsBtn','Ustawienia']];
+const sections=[
+ ['🌍 ŚWIAT I PRZYGODA',[['🌎 HUB','pwHubBtn'],['📖 MISJE','pwExplorerButton'],['🗝️ SKARBY','pwTreasureGuide'],['🎭 ANIMACJE','pwAnimBtn'],['🗺️ MAPA','pwMapToggle']]],
+ ['👤 POSTAĆ I SPOŁECZNOŚĆ',[['👤 PROFIL','pwPlayersBtn'],['📊 STATYSTYKI','pwStatsBtn'],['💬 CZAT','chatBtn']]],
+ ['⚙️ NARZĘDZIA',[['📍 CHECKPOINT','pwCPBtn'],['🛠️ NAPRAW','pwFixBtn'],['⏸️ PAUZA','pauseBtn'],['💾 ZAPISZ','pwSaveQuick']]]
+];
+function activate(id){const el=document.getElementById(id);if(el)el.click();panel.hidden=true;toggle.textContent='☰ MENU';toggle.setAttribute('aria-expanded','false')}
+function make(label,id,title){const b=document.createElement('button');b.textContent=label;b.title=title||label;b.addEventListener('click',()=>activate(id));return b}
+for(const [label,id,title] of quick)bar.appendChild(make(label,id,title));
+const toggle=document.createElement('button');toggle.id='pwDesktopMenuToggle';toggle.textContent='☰ MENU';toggle.setAttribute('aria-expanded','false');toggle.onclick=()=>{panel.hidden=!panel.hidden;toggle.textContent=panel.hidden?'☰ MENU':'✕ ZAMKNIJ';toggle.setAttribute('aria-expanded',String(!panel.hidden))};bar.appendChild(toggle);
+for(const [title,items] of sections){const h=document.createElement('h3');h.textContent=title;panel.appendChild(h);const grid=document.createElement('div');grid.className='pwDesktopGrid';for(const [label,id] of items)grid.appendChild(make(label,id));panel.appendChild(grid)}
+document.body.append(bar,panel);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden){panel.hidden=true;toggle.textContent='☰ MENU';toggle.setAttribute('aria-expanded','false')}});
+document.addEventListener('pointerdown',e=>{if(!panel.hidden&&!panel.contains(e.target)&&!bar.contains(e.target)){panel.hidden=true;toggle.textContent='☰ MENU';toggle.setAttribute('aria-expanded','false')}});
+})();
+</script>
 </body>
 </html>
