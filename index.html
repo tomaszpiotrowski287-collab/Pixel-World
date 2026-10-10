@@ -7428,5 +7428,214 @@ add(document.querySelector('#pwMobileSheet .pwMobileTiles'));
  }
 })();
 </script>
+
+<style id="pwGameplay15CSS">
+#pwGame15Button{position:fixed;right:8px;top:58px;z-index:80;background:#19354b;color:white;border:2px solid #8ac5db;padding:8px;font-size:11px;cursor:pointer}
+#pwGame15Panel{position:fixed;z-index:220;left:50%;top:50%;transform:translate(-50%,-50%);width:min(650px,94vw);max-height:80dvh;overflow:auto;background:#0c1b2a;border:3px solid #7ebcda;color:white;box-shadow:5px 5px #000;padding:12px;box-sizing:border-box;font-size:12px}
+#pwGame15Panel[hidden]{display:none!important}
+#pwGame15Panel button,#pwGame15Touch button{background:#24475e;color:white;border:2px solid #85b6cf;padding:8px;cursor:pointer;font-size:11px}
+#pwGame15Panel .g15Grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px}
+#pwGame15Panel .g15Card{background:#193346;border:1px solid #456c81;padding:9px;line-height:1.6}
+#pwGame15Panel .g15Card button{width:100%;margin-top:5px}
+#pwGame15Panel .g15Head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+#pwGame15Touch{position:fixed;z-index:70;right:8px;bottom:145px;display:flex;gap:4px}
+#pwGame15Touch button{min-width:38px}
+#pwGame15Status{position:fixed;z-index:40;left:8px;top:265px;background:rgba(5,20,30,.85);border:1px solid #426478;color:#e6f5fc;padding:5px;font-size:9px;pointer-events:none}
+@media(max-width:700px){#pwGame15Button{display:none}#pwGame15Touch{right:5px;bottom:calc(135px + env(safe-area-inset-bottom))}#pwGame15Touch button{padding:6px;font-size:10px}#pwGame15Status{top:113px;left:6px;max-width:130px}#pwGame15Panel .g15Grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<script id="pwRealGameplay15">
+(function(){
+'use strict';
+const KEY='PW_REAL_GAMEPLAY_15';
+const fresh={coins:0,kills:0,bosses:0,sword:1,bow:false,shield:false,armor:false,boots:false,arrows:12,wood:0,stone:0,crystals:0,bounty:0,decor:[],fires:[],bench:[],weather:'sun',weatherUntil:0,visited:{},lastGift:0};
+let st={...fresh};try{Object.assign(st,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const toast=t=>pwToast(t);
+const entities=[],shots=[],effects=[];
+let cooldown=0,shieldTime=0,dashTime=0,secondJump=false,spawnClock=0,weatherClock=0,healClock=0;
+let boss=null;
+const worldKey=()=>PW.currentWorld||'MAIN';
+const colors=['#6db64a','#dbb760','#8c91a4','#6ab8e5'];
+const zone=x=>Math.max(0,Math.min(3,Math.floor(x/(WORLD_W*T/4))));
+const zoneName=['🌳 Zielony las','🏜️ Pustynia','⛰️ Skaliste góry','❄️ Lodowa kraina'];
+const ySurface=x=>{let xx=Math.max(1,Math.min(WORLD_W-2,Math.floor(x/T)));for(let y=2;y<WORLD_H-2;y++){if(getB(xx,y)===B.grass)return y*T}return 42*T};
+const near=(a,b,d)=>Math.abs(a-b)<d;
+const btn=document.createElement('button');btn.id='pwGame15Button';btn.textContent='⚔️ PRZYGODA';document.body.append(btn);
+const panel=document.createElement('section');panel.id='pwGame15Panel';panel.hidden=true;document.body.append(panel);
+const touch=document.createElement('div');touch.id='pwGame15Touch';document.body.append(touch);
+const status=document.createElement('div');status.id='pwGame15Status';document.body.append(status);
+const defs=[
+ ['⚔️ Miecz','Atakuj wrogów [F]',()=>attack()],
+ ['🏹 Łuk','Strzelaj strzałami [R]',()=>shoot()],
+ ['🛡️ Tarcza','Blokuj obrażenia [Q]',()=>guard()],
+ ['💨 Dash','Szybki unik [Shift]',()=>dash()],
+ ['🔥 Ognisko','Ustaw ognisko [H]',()=>place('fire')],
+ ['🪑 Meble','Postaw ławkę [N]',()=>place('chair')],
+ ['⚒️ Warsztat','Postaw warsztat [B]',()=>place('bench')]
+];
+function button(label,action){const b=document.createElement('button');b.textContent=label;b.onclick=action;return b}
+touch.append(button('⚔️',()=>attack()),button('🏹',()=>shoot()),button('🛡️',()=>guard()),button('💨',()=>dash()));
+const cost=(coins,wood=0,stone=0)=>st.coins>=coins&&st.wood>=wood&&st.stone>=stone;
+function buy(type){
+ const options={sword:[50,3,2],bow:[70,5,0],shield:[60,3,3],armor:[110,4,6],boots:[90,3,3],arrows:[10,0,0]};
+ const c=options[type];if(!c||!cost(...c))return toast('Za mało monet lub materiałów!');
+ if(type==='sword'&&st.sword>=4)return toast('Miecz ma maksymalny poziom');
+ if(type!=='sword'&&type!=='arrows'&&st[type])return toast('Już posiadasz');
+ st.coins-=c[0];st.wood-=c[1];st.stone-=c[2];
+ if(type==='sword')st.sword++;else if(type==='arrows')st.arrows+=10;else st[type]=true;
+ save();toast('🛠️ Ulepszenie zakupione!');show();
+}
+function show(){
+ panel.hidden=false;
+ const progress=Math.min(st.bounty,10);
+ panel.innerHTML='<div class="g15Head"><b>⚔️ WIELKA PRZYGODA — 15 NOWYCH SYSTEMÓW</b><button id="g15close">✕</button></div><div class="g15Grid">'+
+ `<div class="g15Card"><b>💰 ZASOBY</b><br>Monety: ${st.coins} 🪙<br>Drewno: ${st.wood} 🪵<br>Kamień: ${st.stone} 🪨<br>Strzały: ${st.arrows} 🏹<br>Zabici wrogowie: ${st.kills}</div>`+
+ `<div class="g15Card"><b>⚔️ BROŃ I WALKA</b><br>Miecz poziom ${st.sword}/4<br>Łuk: ${st.bow?'✓':'🔒'}<br>Tarcza: ${st.shield?'✓':'🔒'}<br>Zbroja: ${st.armor?'✓':'🔒'}<br>Buty: ${st.boots?'✓':'🔒'}</div>`+
+ `<div class="g15Card"><b>🎯 ZLECENIE ŁOWCY</b><br>Pokonaj 10 przeciwników: ${progress}/10<br>Za każde 10: +100 monet i 100 XP<br><b>👹 Bossowie: ${st.bosses}</b><br><button id="g15boss">👹 PRZYWOŁAJ BOSSA (80 🪙)</button></div>`+
+ `<div class="g15Card"><b>🏕️ BUDOWANIE</b><br>Ognisko: 10 🪙 + 2 🪵<br>Ławka: 12 🪙 + 3 🪵<br>Warsztat: 20 🪙 + 4 🪵 + 3 🪨<br><button id="g15fire">🔥 OGNISKO</button><button id="g15chair">🪑 ŁAWKA</button><button id="g15bench">⚒️ WARSZTAT</button></div>`+
+ `<div class="g15Card"><b>🛠️ ULEPSZENIA</b><br><button data-buy="sword">⚔️ Miecz +1 (50 🪙, 3 🪵, 2 🪨)</button><button data-buy="bow">🏹 Łuk (70 🪙, 5 🪵)</button><button data-buy="shield">🛡️ Tarcza (60 🪙, 3 🪵, 3 🪨)</button><button data-buy="armor">🥋 Zbroja (110 🪙, 4 🪵, 6 🪨)</button><button data-buy="boots">👢 Buty (90 🪙, 3 🪵, 3 🪨)</button><button data-buy="arrows">🏹 10 strzał (10 🪙)</button></div>`+
+ `<div class="g15Card"><b>🌍 ŚWIAT I POGODA</b><br>${zoneName[zone(me.x)]}<br>Pogoda: ${st.weather==='rain'?'🌧️ deszcz':st.weather==='snow'?'❄️ śnieg':'☀️ słonecznie'}<br>Odkryte biomy: ${Object.keys(st.visited).length}/4<br><button id="g15gift">🎁 DZIENNA PACZKA</button></div>`+
+ '</div><p style="font-size:10px">15 systemów: 3 gatunki wrogów, boss, miecz, łuk, tarcza, zbroja, dash, podwójny skok, 4 biomy, pogoda, ogniska, meble i warsztat, zlecenia łowcy, dzienne paczki.</p>';
+ panel.querySelector('#g15close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#g15boss').onclick=summonBoss;
+ panel.querySelector('#g15fire').onclick=()=>place('fire');
+ panel.querySelector('#g15chair').onclick=()=>place('chair');
+ panel.querySelector('#g15bench').onclick=()=>place('bench');
+ panel.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));
+ panel.querySelector('#g15gift').onclick=gift;
+}
+function gift(){
+ const d=new Date().toLocaleDateString('sv-SE');
+ if(st.lastGift===d)return toast('🎁 Paczka została już dziś odebrana');
+ st.lastGift=d;st.coins+=35;st.wood+=5;st.stone+=4;st.arrows+=5;save();toast('🎁 +35 monet, +5 drewna, +4 kamienie, +5 strzał');show();
+}
+function place(type){
+ const costs={fire:[10,2,0],chair:[12,3,0],bench:[20,4,3]};
+ const c=costs[type];if(!cost(...c))return toast('Za mało materiałów do budowy');
+ const x=Math.round(me.x/T)*T,y=ySurface(me.x)-16;
+ const ob={x,y,type,world:worldKey()};
+ if(type==='fire')st.fires.push(ob);else if(type==='chair')st.decor.push(ob);else st.bench.push(ob);
+ st.coins-=c[0];st.wood-=c[1];st.stone-=c[2];save();toast('🏗️ Obiekt postawiony!');if(!panel.hidden)show();
+}
+function summonBoss(){
+ if(boss)return toast('👹 Boss już jest w świecie');
+ if(st.coins<80)return toast('Potrzebujesz 80 monet');
+ st.coins-=80;save();
+ const x=Math.max(30,Math.min(WORLD_W*T-30,me.x+(me.dir||1)*140));
+ boss={x,y:ySurface(x)-34,hp:220,maxHp:220,dir:-1,hit:0,world:worldKey()};panel.hidden=true;toast('👹 BOSS: KAMIENNY GOLEM!');
+}
+function enemy(type,x){
+ const hp=[35,55,75][type],y=ySurface(x)-16;
+ return {type,x,y,hp,maxHp:hp,dir:Math.random()<.5?-1:1,hit:0,world:worldKey(),cool:0};
+}
+function damageEnemy(e,dmg){
+ e.hp-=dmg;e.hit=.18;
+ effects.push({x:e.x,y:e.y-7,t:.45,c:'#ffde83'});
+ if(e.hp<=0){
+  const bossKill=e===boss;
+  st.coins+=bossKill?250:10+e.type*8;st.kills++;st.bounty++;
+  st.wood+=bossKill?8:Math.random()<.5?1:0;
+  st.stone+=bossKill?10:Math.random()<.5?1:0;
+  pwGainXP(bossKill?250:15+e.type*10);
+  if(bossKill){boss=null;st.bosses++;toast('🏆 GOLEM POKONANY! +250 monet')}
+  else{const i=entities.indexOf(e);if(i>=0)entities.splice(i,1)}
+  if(st.bounty>=10){st.bounty-=10;st.coins+=100;pwGainXP(100);toast('🎯 ZLECENIE: +100 monet i 100 XP')}
+  save();
+ }
+}
+function attack(){
+ if(!gameStarted||paused||cooldown>0)return;
+ cooldown=.28;
+ const targets=[...entities,...(boss?[boss]:[])].filter(e=>e.world===worldKey()&&Math.abs(e.x-me.x)<45&&Math.abs(e.y-me.y)<45&&(e.x-me.x)*(me.dir||1)>-12);
+ targets.sort((a,b)=>Math.abs(a.x-me.x)-Math.abs(b.x-me.x));
+ if(targets.length)damageEnemy(targets[0],16+st.sword*16);
+ effects.push({x:me.x+(me.dir||1)*19,y:me.y+7,t:.2,c:'#eafaff'});
+ me.mine=.25;
+}
+function shoot(){
+ if(!gameStarted||paused||cooldown>0)return;
+ if(!st.bow)return toast('🏹 Kup łuk w menu PRZYGODA');
+ if(st.arrows<=0)return toast('Brak strzał');
+ st.arrows--;cooldown=.45;save();
+ shots.push({x:me.x+5,y:me.y+9,v:(me.dir||1)*245,t:2.4,world:worldKey()});
+}
+function guard(){if(st.shield){shieldTime=1.4;toast('🛡️ Blokujesz obrażenia')}else toast('Kup tarczę w menu PRZYGODA')}
+function dash(){if(!gameStarted||paused||dashTime>0)return;dashTime=1.6;me.vx=(me.dir||1)*(st.boots?340:260);effects.push({x:me.x,y:me.y+10,t:.4,c:'#9ee9ff'})}
+function tick(dt){
+ if(!gameStarted||paused)return;
+ dt=Math.min(dt,.06);cooldown=Math.max(0,cooldown-dt);shieldTime=Math.max(0,shieldTime-dt);dashTime=Math.max(0,dashTime-dt);
+ const z=zone(me.x);if(!st.visited[z]){st.visited[z]=1;st.coins+=25;save();toast('🌍 Odkryto: '+zoneName[z]+' +25 monet')}
+ spawnClock+=dt;weatherClock+=dt;healClock+=dt;
+ if(spawnClock>5&&entities.length<9){spawnClock=0;const x=Math.max(20,Math.min(WORLD_W*T-30,me.x+(Math.random()<.5?-1:1)*(160+Math.random()*130)));entities.push(enemy(Math.floor(Math.random()*3),x))}
+ if(weatherClock>35){weatherClock=0;st.weather=['sun','rain','snow'][Math.floor(Math.random()*3)];save()}
+ for(const e of [...entities,...(boss?[boss]:[])]){
+  if(e.world!==worldKey())continue;
+  const dist=me.x-e.x;
+  if(Math.abs(dist)<190)e.dir=Math.sign(dist)||1;
+  e.x=Math.max(15,Math.min(WORLD_W*T-20,e.x+e.dir*(e===boss?15:13+e.type*6)*dt));
+  e.y=ySurface(e.x)-(e===boss?34:16);e.hit=Math.max(0,e.hit-dt);e.cool=Math.max(0,e.cool-dt);
+  if(Math.abs(dist)<(e===boss?24:14)&&Math.abs(me.y-e.y)<38&&e.cool===0){
+   e.cool=1.1;if(shieldTime<=0){me.hp=Math.max(1,me.hp-(st.armor?3:e===boss?16:8));effects.push({x:me.x,y:me.y,t:.35,c:'#ff6464'})}
+  }
+ }
+ for(let i=shots.length-1;i>=0;i--){
+  const p=shots[i];p.x+=p.v*dt;p.t-=dt;
+  const hit=[...entities,...(boss?[boss]:[])].find(e=>e.world===p.world&&Math.abs(e.x-p.x)<14&&Math.abs(e.y-p.y)<30);
+  if(hit){damageEnemy(hit,35);p.t=0}
+  if(p.t<=0)shots.splice(i,1);
+ }
+ for(let i=effects.length-1;i>=0;i--){effects[i].t-=dt;if(effects[i].t<=0)effects.splice(i,1)}
+ if(healClock>1){healClock=0;for(const f of st.fires){if(f.world===worldKey()&&Math.abs(f.x-me.x)<55)me.hp=Math.min(100,me.hp+2)}}
+ status.textContent=`⚔️ ${st.coins} 🪙 | 🏹 ${st.arrows} | ${zoneName[z]} | ${st.weather==='rain'?'🌧️':st.weather==='snow'?'❄️':'☀️'}`;
+}
+function draw(){
+ if(!gameStarted)return;
+ const t=performance.now()/1000;
+ ctx.save();
+ for(const ob of [...st.fires,...st.decor,...st.bench]){
+  if(ob.world!==worldKey())continue;
+  const x=Math.round(ob.x-cam.x),y=Math.round(ob.y-cam.y);
+  if(x<-25||x>VW+25)continue;
+  if(ob.type==='fire'){ctx.fillStyle='#885235';ctx.fillRect(x,y+10,15,5);ctx.fillStyle='#ffb12d';ctx.fillRect(x+5,y+2+Math.sin(t*8)*2,6,10);ctx.fillStyle='#ffec7a';ctx.fillRect(x+7,y+6,2,5)}
+  if(ob.type==='chair'){ctx.fillStyle='#9b643f';ctx.fillRect(x,y+4,15,5);ctx.fillRect(x+2,y+9,3,7);ctx.fillRect(x+11,y+9,3,7);ctx.fillRect(x,y,3,12)}
+  if(ob.type==='bench'){ctx.fillStyle='#805737';ctx.fillRect(x,y+4,16,9);ctx.fillStyle='#b9c9d1';ctx.fillRect(x+3,y,10,5);ctx.fillStyle='#e8ba66';ctx.fillRect(x+6,y+6,4,4)}
+ }
+ for(const e of [...entities,...(boss?[boss]:[])]){
+  if(e.world!==worldKey())continue;
+  const x=Math.round(e.x-cam.x),y=Math.round(e.y-cam.y);
+  if(x<-40||x>VW+40||y<-40||y>VH+40)continue;
+  const big=e===boss,w=big?27:13,h=big?31:14;
+  ctx.fillStyle=e.hit?'#fff':big?'#767a91':['#80c54d','#d56a7c','#a48dd5'][e.type];
+  ctx.fillRect(x,y,w,h);ctx.fillStyle='#1b2433';ctx.fillRect(x+3,y+5,3,3);ctx.fillRect(x+w-6,y+5,3,3);
+  if(big){ctx.fillStyle='#424c5b';ctx.fillRect(x+4,y+17,19,4)}
+  ctx.fillStyle='#161c26';ctx.fillRect(x,y-5,w,3);ctx.fillStyle='#ed6265';ctx.fillRect(x,y-5,w*Math.max(0,e.hp/e.maxHp),3);
+ }
+ ctx.fillStyle='#ffe2a0';
+ for(const p of shots){if(p.world===worldKey())ctx.fillRect(Math.round(p.x-cam.x),Math.round(p.y-cam.y),6,2)}
+ for(const p of effects){ctx.globalAlpha=Math.min(1,p.t*3);ctx.fillStyle=p.c;ctx.fillRect(Math.round(p.x-cam.x),Math.round(p.y-cam.y),9,9)}ctx.globalAlpha=1;
+ if(st.weather!=='sun'){
+  ctx.fillStyle=st.weather==='rain'?'rgba(170,218,255,.55)':'rgba(255,255,255,.75)';
+  for(let i=0;i<45;i++){const x=(i*97+t*(st.weather==='rain'?110:17))%VW,y=(i*41+t*(st.weather==='rain'?160:25))%VH;ctx.fillRect(x,y,st.weather==='rain'?1:2,st.weather==='rain'?7:2)}
+ }
+ ctx.restore();
+}
+const oldUpdate=updateMe;updateMe=function(dt){const wasGround=me.ground;oldUpdate(dt);if(me.ground)secondJump=false;tick(dt)};
+const oldRender=render;render=function(){oldRender();draw()};
+document.addEventListener('keydown',e=>{
+ if(/INPUT|TEXTAREA/.test(e.target.tagName)||e.repeat)return;
+ const k=e.key.toLowerCase();
+ if(k==='f')attack();if(k==='r')shoot();if(k==='q')guard();if(k==='shift')dash();
+ if(k==='h')place('fire');if(k==='n')place('chair');if(k==='b')place('bench');
+ if(k==='j'){panel.hidden=!panel.hidden;if(!panel.hidden)show()}
+ if((k===' '||k==='arrowup'||k==='w')&&!me.ground&&!secondJump){secondJump=true;me.vy=-245;effects.push({x:me.x,y:me.y+20,t:.35,c:'#d1efff'})}
+ if(k==='escape')panel.hidden=true;
+});
+btn.onclick=show;
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const parent=document.querySelector(sel);if(parent)parent.append(button('⚔️ PRZYGODA',show));
+}
+window.pwAdventure15Open=show;
+})();
+</script>
 </body>
 </html>
