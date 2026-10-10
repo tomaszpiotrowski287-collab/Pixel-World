@@ -6674,5 +6674,146 @@ setTimeout(()=>pwToast?.('✨ Adventure Update aktywny! Sprawdź HUB → PRZYGOD
 })();
 </script>
 
+
+<style id="pwExplorerStyles">
+#pwExplorerButton{position:fixed;left:14px;top:114px;z-index:14;background:#153a42;border:2px solid #65e9d4;padding:7px 12px;box-shadow:3px 3px #000;font-size:11px}
+.pwExplorerMission{border:2px solid #3b6170;background:#101f2a;margin:8px 0;padding:10px}
+.pwExplorerMission.done{border-color:#7bdd95}
+.pwExplorerMeter{height:10px;background:#060d12;border:1px solid #456477;margin:8px 0}
+.pwExplorerMeter>i{display:block;height:100%;background:#4ad2a9}
+.pwExplorerRewards{color:#f5d878;font-size:11px}
+@media(max-width:900px){#pwExplorerButton{top:96px;left:8px;padding:6px}}
+</style>
+<script id="pwExplorerUpdate">
+/* Explorer Update: journal, repeatable milestones, optional accessibility controls */
+(function(){
+'use strict';
+if(typeof PW!=='object'||typeof me==='undefined')return;
+const $=id=>document.getElementById(id);
+const notify=s=>{if(typeof pwToast==='function')pwToast(s)};
+const save=()=>{try{if(typeof pwSaveExtra==='function')pwSaveExtra()}catch(e){console.warn(e)}};
+PW.explorer=PW.explorer||{claimed:{}};
+if(!PW.explorer.claimed||typeof PW.explorer.claimed!=='object')PW.explorer.claimed={};
+const missions=[
+ {id:'walk',name:'🌲 Leśny wędrowiec',desc:'Przemierz 200 bloków',goal:200,get:()=>Math.floor((PW.adventure?.steps||0)/16),gems:40,xp:45},
+ {id:'dig',name:'⛏️ Poszukiwacz',desc:'Wykop 75 bloków',goal:75,get:()=>PW.adventure?.mined||0,gems:35,xp:50},
+ {id:'build',name:'🏡 Budowniczy',desc:'Postaw 50 bloków',goal:50,get:()=>PW.adventure?.placed||0,gems:35,xp:50},
+ {id:'jump',name:'🦘 Akrobata',desc:'Wykonaj 60 skoków',goal:60,get:()=>PW.adventure?.jumps||0,gems:30,xp:40},
+ {id:'wealth',name:'💎 Kolekcjoner',desc:'Zgromadź 250 gemów',goal:250,get:()=>PW.gems||0,gems:50,xp:65}
+];
+window.pwExplorerClaim=function(id){
+ const m=missions.find(x=>x.id===id);if(!m||PW.explorer.claimed[id]||m.get()<m.goal)return;
+ PW.explorer.claimed[id]=true;PW.gems=(PW.gems||0)+m.gems;
+ if(typeof pwGainXP==='function')pwGainXP(m.xp);
+ if(typeof pwAch==='function')pwAch('explorer_'+id,m.name.replace(/^[^ ]+ /,''),20);
+ save();if(typeof pwRefresh==='function')pwRefresh();notify('🏆 Misja ukończona! +'+m.gems+' gemów');
+ window.pwExplorerOpen();
+};
+window.pwExplorerOpen=function(){
+ if(typeof pwOpen!=='function')return;
+ const cards=missions.map(m=>{
+  const val=Math.max(0,Number(m.get())||0),progress=Math.min(100,Math.round(val/m.goal*100));
+  const done=!!PW.explorer.claimed[m.id];
+  return `<div class="pwExplorerMission ${done?'done':''}"><b>${m.name}</b><p class="pwTiny">${m.desc} • ${Math.min(val,m.goal)} / ${m.goal}</p><div class="pwExplorerMeter"><i style="width:${progress}%"></i></div><span class="pwExplorerRewards">💎 ${m.gems} gemów + ⭐ ${m.xp} XP</span><button style="float:right;padding:6px" onclick="pwExplorerClaim('${m.id}')" ${done||val<m.goal?'disabled':''}>${done?'✓ ODEBRANO':val>=m.goal?'ODBIERZ':'W TRAKCIE'}</button><div style="clear:both"></div></div>`;
+ }).join('');
+ pwOpen('📖 DZIENNIK ODKRYWCY',`<p class="pwTiny">Realizuj cele podczas zwykłej gry. Nagrody odbierasz ręcznie, tylko raz.</p>${cards}<p class="pwTiny">Skrót klawiaturowy: J • Ekwipunek: I • Sprint: SHIFT</p>`);
+};
+const b=document.createElement('button');b.id='pwExplorerButton';b.textContent='📖 MISJE [J]';b.title='Dziennik odkrywcy';b.addEventListener('click',window.pwExplorerOpen);document.body.appendChild(b);
+document.addEventListener('keydown',e=>{
+ if(e.code!=='KeyJ'||e.repeat||e.ctrlKey||e.altKey||e.metaKey)return;
+ if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)||document.activeElement?.isContentEditable)return;
+ e.preventDefault();window.pwExplorerOpen();
+});
+const hub=document.querySelector('#pwHub .pwGrid');
+if(hub){const h=document.createElement('button');h.textContent='📖 DZIENNIK MISJI';h.onclick=window.pwExplorerOpen;hub.appendChild(h)}
+})();
+</script>
+
+
+<style id="pwTreasureStyles">
+#pwTreasureHint{position:fixed;left:50%;bottom:85px;transform:translateX(-50%);z-index:15;padding:8px 12px;background:#13262b;border:2px solid #e7c66b;color:#ffe9a5;font:bold 12px monospace;pointer-events:none;display:none;box-shadow:3px 3px #000}
+#pwTreasureGuide{position:fixed;left:14px;top:154px;z-index:14;padding:7px 10px;background:#3a2b1b;border:2px solid #e6b95b;font-size:11px}
+@media(max-width:900px){#pwTreasureGuide{top:132px;left:8px}}
+</style>
+<script id="pwTreasureHunt">
+(function(){
+'use strict';
+if(typeof PW==='undefined'||typeof me==='undefined'||typeof T==='undefined')return;
+const state=PW.treasureHunt=PW.treasureHunt||{opened:{},found:0};
+if(!state.opened||typeof state.opened!=='object')state.opened={};
+const hint=document.createElement('div');hint.id='pwTreasureHint';document.body.appendChild(hint);
+const guide=document.createElement('button');guide.id='pwTreasureGuide';guide.textContent='🗝️ SKARBY [K]';document.body.appendChild(guide);
+function positions(){
+ const xs=[17,42,69,96,125,157,191,226,265,309,352,393];
+ return xs.map((x,i)=>{
+  let y=34;
+  for(let j=4;j<Math.min(WORLD_H-2,65);j++){
+   if(getB(x,j)===B.grass){y=j;break}
+  }
+  return {x:x*T+T/2,y:y*T-9,id:String(i)};
+ });
+}
+function nearby(){
+ const cx=me.x+me.w/2,cy=me.y+me.h/2;
+ return positions().find(t=>!state.opened[t.id]&&Math.hypot(cx-t.x,cy-t.y)<T*3.5);
+}
+function openChest(){
+ if(!gameStarted||paused)return;
+ const chest=nearby();
+ if(!chest){if(typeof pwToast==='function')pwToast('🧭 Poszukaj skrzyni w świecie!');return}
+ state.opened[chest.id]=1;state.found=Object.keys(state.opened).length;
+ const gems=20+Math.floor(Math.random()*36);
+ PW.gems=(PW.gems||0)+gems;
+ if(typeof pwGainXP==='function')pwGainXP(30);
+ if(typeof pwAch==='function'&&state.found===1)pwAch('treasure_first','Odkrywca skarbów',25);
+ if(typeof pwAch==='function'&&state.found===12)pwAch('treasure_master','Mistrz skarbów',120);
+ if(typeof pwSaveExtra==='function')pwSaveExtra();
+ if(typeof pwRefresh==='function')pwRefresh();
+ if(typeof pwToast==='function')pwToast('🎁 Skrzynia! +'+gems+' 💎 i 30 XP');
+}
+window.pwTreasureOpen=openChest;
+guide.onclick=()=>{
+ const n=12-Object.keys(state.opened).length;
+ if(typeof pwOpen==='function')pwOpen('🗝️ POSZUKIWANIE SKARBÓW',`<p>Na powierzchni świata ukryto <b>12 skrzyń</b>. Podejdź do skrzyni i naciśnij <b>K</b> lub kliknij przycisk SKARBY.</p><p>Odkryte skrzynie: <b>${12-n}/12</b></p><p class="pwTiny">Każda skrzynia daje losowe gemy i doświadczenie. Skrzynie zapamiętują, czy zostały otwarte.</p><button onclick="pwTreasureOpen()">🎁 OTWÓRZ POBLISKĄ SKRZYNIĘ</button>`);
+};
+document.addEventListener('keydown',e=>{
+ if(e.code!=='KeyK'||e.repeat||e.ctrlKey||e.altKey||e.metaKey)return;
+ if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)||document.activeElement?.isContentEditable)return;
+ e.preventDefault();openChest();
+});
+const hub=document.querySelector('#pwHub .pwGrid');
+if(hub){const b=document.createElement('button');b.textContent='🗝️ SKARBY';b.onclick=()=>guide.click();hub.appendChild(b)}
+// Draw chests using the game's own world camera, so they scroll with terrain.
+if(typeof drawWorld==='function'){
+ const original=drawWorld;
+ drawWorld=function(...args){
+  const result=original.apply(this,args);
+  if(!gameStarted)return result;
+  const cx=me.x+me.w/2,cy=me.y+me.h/2;
+  const cameraX=Math.max(0,Math.min(WORLD_W*T-VW,cx-VW/2));
+  const cameraY=Math.max(0,Math.min(WORLD_H*T-VH,cy-VH/2));
+  const now=performance.now()/500;
+  ctx.save();
+  for(const t of positions()){
+   if(state.opened[t.id])continue;
+   const x=Math.round(t.x-cameraX-7),y=Math.round(t.y-cameraY-5);
+   if(x< -20||x>VW+20||y< -20||y>VH+20)continue;
+   ctx.fillStyle='#4d2a12';ctx.fillRect(x,y,14,11);
+   ctx.fillStyle='#b98239';ctx.fillRect(x+1,y+1,12,4);
+   ctx.fillStyle='#f8d35d';ctx.fillRect(x+6,y+3,3,6);
+   ctx.fillStyle='rgba(255,234,115,.7)';ctx.fillRect(x+6,y-4+Math.sin(now+t.x)*2,2,2);
+  }
+  ctx.restore();
+  return result;
+ };
+}
+setInterval(()=>{
+ if(!gameStarted||paused){hint.style.display='none';return}
+ const chest=nearby();
+ hint.style.display=chest?'block':'none';
+ if(chest)hint.textContent='🎁 SKRZYNIA W POBLIŻU — NACIŚNIJ K';
+},250);
+})();
+</script>
 </body>
 </html>
