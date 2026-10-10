@@ -7189,5 +7189,210 @@ updateHotbar();
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!drawer.hidden)drawer.hidden=true});
 })();
 </script>
+
+<style id="pwMegaStyles">
+#pwMegaBtn{position:fixed;left:8px;top:215px;z-index:55;background:linear-gradient(135deg,#54338e,#17647e);color:white;border:2px solid #d5aaff;box-shadow:3px 3px #000;padding:8px 10px;font-weight:bold;font-size:11px;cursor:pointer}
+#pwMegaRadar{position:fixed;left:8px;top:250px;z-index:30;background:rgba(6,20,30,.83);border:1px solid #50788b;padding:5px 8px;font-size:10px;color:#dcfaff;pointer-events:none;max-width:205px}
+#pwMegaPanel{position:fixed;inset:7% auto auto 50%;transform:translateX(-50%);width:min(720px,95vw);max-height:82dvh;overflow:auto;background:#0a1b2a;color:#e8f8ff;border:3px solid #7ad9ef;box-shadow:8px 8px #03080d;z-index:180;padding:15px;box-sizing:border-box;font-family:inherit}
+#pwMegaPanel[hidden]{display:none!important}
+#pwMegaPanel h2{font-size:17px;color:#ffda82;margin:0 0 12px}
+#pwMegaPanel h3{font-size:13px;color:#89dffc;margin:12px 0 7px}
+#pwMegaPanel .megaNav{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+#pwMegaPanel button{background:#183c51;color:#fff;border:2px solid #568ca7;padding:9px 10px;font:inherit;font-size:11px;cursor:pointer}
+#pwMegaPanel button:hover{background:#2b6680}
+#pwMegaPanel .megaGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+#pwMegaPanel .megaCard{background:#152c3b;border:1px solid #496c80;padding:10px;line-height:1.6;font-size:11px}
+#pwMegaPanel .megaCard button{width:100%;margin-top:8px}
+#pwMegaPanel .megaBar{height:9px;background:#07111c;margin-top:6px;border:1px solid #52778b}
+#pwMegaPanel .megaBar i{display:block;background:#5cdb9c;height:100%}
+#pwMegaPanel .megaClose{float:right}
+#pwMegaToast{position:fixed;left:50%;top:20%;transform:translateX(-50%);background:#15283d;color:#ffe6a3;border:2px solid #e6bd72;padding:10px 16px;z-index:200;font-size:12px;pointer-events:none;display:none;text-align:center}
+@media(max-width:700px){#pwMegaBtn{top:90px;left:auto;right:8px;padding:6px 8px;font-size:10px}#pwMegaRadar{top:91px;left:7px;font-size:9px;max-width:135px}#pwMegaPanel{top:4%;max-height:83dvh;padding:9px}#pwMegaPanel .megaGrid{grid-template-columns:repeat(2,minmax(0,1fr))}#pwMegaPanel .megaCard{padding:7px;font-size:10px}}
+</style>
+<script id="pwMegaUpdate">
+(function(){
+'use strict';
+const KEY='PIXEL_WORLD_MEGA_V1';
+const defaults={claimed:{},daily:{},dailyDate:'',relics:{},waypoints:[],titles:{},title:'ODKRYWCA',challenges:{},eventsSeen:0};
+let st;
+try{st=Object.assign({},defaults,JSON.parse(localStorage.getItem(KEY)||'null')||{})}catch(e){st={...defaults}}
+const saveMega=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const day=()=>new Date().toLocaleDateString('sv-SE');
+const reward=(g,x)=>{PW.gems+=g;pwGainXP(x);pwSaveExtra();saveMega();pwRefresh()};
+const btn=document.createElement('button');btn.id='pwMegaBtn';btn.textContent='✨ MEGA UPDATE';document.body.append(btn);
+const radar=document.createElement('div');radar.id='pwMegaRadar';document.body.append(radar);
+const panel=document.createElement('section');panel.id='pwMegaPanel';panel.hidden=true;panel.innerHTML='<button class="megaClose">✕</button><h2>✨ PIXEL WORLD — MEGA UPDATE</h2><div class="megaNav"></div><div id="pwMegaContent"></div>';document.body.append(panel);
+const toast=document.createElement('div');toast.id='pwMegaToast';document.body.append(toast);
+let toastTimer;
+function msg(t){toast.textContent=t;toast.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.style.display='none',2400);pwToast(t)}
+const nav=panel.querySelector('.megaNav'),content=panel.querySelector('#pwMegaContent');
+let tab='home';
+const tabs=[['home','🏠 START'],['quests','📜 WYZWANIA'],['relics','💎 RELIKTY'],['travel','🧭 PODRÓŻE'],['titles','🏆 TYTUŁY'],['events','🌠 WYDARZENIA']];
+for(const [id,label] of tabs){const b=document.createElement('button');b.textContent=label;b.onclick=()=>show(id);nav.append(b)}
+panel.querySelector('.megaClose').onclick=()=>panel.hidden=true;
+btn.onclick=()=>{panel.hidden=false;show(tab)};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')panel.hidden=true;if(e.key.toLowerCase()==='u'&&!e.repeat&&!(e.target instanceof HTMLInputElement)){panel.hidden=!panel.hidden;if(!panel.hidden)show(tab)}});
+const quests=[
+ ['steps','🚶 Wielka wyprawa',()=>Math.floor((PW.adventure?.steps||0)/16),400,110,90],
+ ['mined','⛏️ Mistrz kopania',()=>PW.adventure?.mined||0,150,140,110],
+ ['placed','🏗️ Architekt',()=>PW.adventure?.placed||0,100,130,100],
+ ['jumps','🦘 Akrobata',()=>PW.adventure?.jumps||0,120,90,100],
+ ['wealth','💎 Kolekcjoner',()=>PW.gems||0,600,120,120],
+ ['fish','🎣 Rybak',()=>PW.fish||0,25,100,110],
+ ['level','⭐ Weteran',()=>PW.level||1,10,180,150],
+ ['relics','🗝️ Łowca reliktów',()=>Object.keys(st.relics).length,8,180,160]
+];
+const relics=[
+ {x:26,name:'Szmaragdowa iskra',g:35},{x:55,name:'Starożytna moneta',g:40},
+ {x:86,name:'Bursztynowe serce',g:45},{x:117,name:'Kryształ księżyca',g:50},
+ {x:151,name:'Runiczny kamień',g:55},{x:184,name:'Złota gwiazda',g:60},
+ {x:217,name:'Zaginiona korona',g:70},{x:253,name:'Srebrny liść',g:75},
+ {x:287,name:'Diamentowy pył',g:80},{x:320,name:'Serce dżungli',g:90},
+ {x:354,name:'Płomień pustyni',g:95},{x:391,name:'Kosmiczny odłamek',g:120}
+];
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pos=()=>Math.floor((me.x+me.w/2)/T);
+const activeRelic=()=>relics.find((r,i)=>!st.relics[i]&&Math.abs(pos()-r.x)<=3);
+function renderRelic(){
+ if(paused||!gameStarted)return;
+ const now=performance.now()/1000;
+ ctx.save();
+ for(let i=0;i<relics.length;i++){
+  if(st.relics[i])continue;
+  const r=relics[i],x=r.x*T-cam.x+3;
+  if(x<-25||x>VW+25)continue;
+  let surface=40;
+  for(let y=2;y<WORLD_H-1;y++){if(getB(r.x,y)===B.grass){surface=y;break}}
+  const yy=surface*T-cam.y-17+Math.sin(now*2.5+i)*3;
+  if(yy<-30||yy>VH+20)continue;
+  ctx.globalAlpha=.25+Math.sin(now*3+i)*.1;
+  ctx.fillStyle='#a4ffff';ctx.fillRect(x-4,yy-4,18,18);
+  ctx.globalAlpha=1;
+  ctx.fillStyle=['#66f7d2','#ffd86b','#ff9a6a','#c49bff'][i%4];
+  ctx.beginPath();ctx.moveTo(x+5,yy);ctx.lineTo(x+11,yy+7);ctx.lineTo(x+5,yy+14);ctx.lineTo(x-1,yy+7);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(x+4,yy+3,2,3);
+ }
+ ctx.restore();
+}
+const oldRender=render;
+render=function(){oldRender();renderRelic()};
+function collect(){
+ const r=activeRelic();if(!r)return msg('🧭 Podejdź bliżej świecącego reliktu');
+ const i=relics.indexOf(r);st.relics[i]=true;
+ reward(r.g,45);msg('💎 '+r.name+'! +'+r.g+' gemów i +45 XP');show(tab);
+ if(Object.keys(st.relics).length===relics.length&&!st.claimed.allRelics){st.claimed.allRelics=1;reward(350,250);msg('🏆 Wszystkie relikty! +350 gemów')}
+}
+const pick=document.createElement('button');pick.id='pwMegaPick';pick.textContent='💎 PODNIEŚ';pick.style.cssText='position:fixed;left:50%;bottom:140px;transform:translateX(-50%);z-index:65;display:none;padding:8px 12px;background:#254f5d;border:2px solid #91e6ef;color:white;font-size:11px';document.body.append(pick);
+pick.onclick=collect;
+document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='e'&&!e.repeat&&!panel.contains(document.activeElement))collect()});
+function sync(){
+ const r=activeRelic();
+ pick.style.display=r&&!paused?'block':'none';
+ const remaining=relics.length-Object.keys(st.relics).length;
+ radar.textContent=r?'💎 Relikt blisko! [E]':`✨ Relikty: ${relics.length-remaining}/${relics.length} • [U] MEGA`;
+}
+setInterval(sync,400);
+const daily=[
+ ['walk','🚶 Spacer',()=>Math.floor((PW.adventure?.steps||0)/16),40,35,30],
+ ['mine','⛏️ Kopanie',()=>PW.adventure?.mined||0,15,45,40],
+ ['build','🧱 Budowanie',()=>PW.adventure?.placed||0,12,45,40],
+ ['jump','🦘 Skoki',()=>PW.adventure?.jumps||0,15,35,30]
+];
+let baseline={};
+function refreshDay(){
+ if(st.dailyDate!==day()){
+  st.dailyDate=day();st.daily={};baseline={};
+  for(const [id,,get] of daily)baseline[id]=get();
+  st.dailyBaseline=baseline;saveMega();
+ }else baseline=st.dailyBaseline||{};
+}
+refreshDay();
+function claimQuest(id){
+ const q=quests.find(x=>x[0]===id);if(!q||st.claimed[id])return;
+ if(q[2]()<q[3])return msg('Jeszcze nie ukończono wyzwania');
+ st.claimed[id]=1;reward(q[4],q[5]);msg('🏆 Wyzwanie ukończone!');show('quests')
+}
+function claimDaily(id){
+ refreshDay();const q=daily.find(x=>x[0]===id);if(!q||st.daily[id])return;
+ if(q[2]()-(baseline[id]||0)<q[3])return msg('Wyzwanie dzienne jeszcze trwa');
+ st.daily[id]=1;reward(q[4],q[5]);msg('🎁 Dzienna nagroda odebrana!');show('quests')
+}
+const titles=[
+ ['ODKRYWCA','Od początku',()=>true],
+ ['GÓRNIK','Wykop 100 bloków',()=>((PW.adventure?.mined||0)>=100)],
+ ['BUDOWNICZY','Postaw 75 bloków',()=>((PW.adventure?.placed||0)>=75)],
+ ['SKARBNIK','Zdobądź 500 gemów',()=>PW.gems>=500],
+ ['ŁOWCA RELIKTÓW','Znajdź 6 reliktów',()=>Object.keys(st.relics).length>=6],
+ ['LEGENDA','Osiągnij poziom 15',()=>PW.level>=15]
+];
+function setTitle(id){const t=titles.find(x=>x[0]===id);if(!t||!t[2]())return msg('🔒 Ten tytuł jest zablokowany');st.title=id;saveMega();msg('🏆 Nowy tytuł: '+id);show('titles')}
+function addWaypoint(){
+ if(st.waypoints.length>=8)return msg('Maksymalnie 8 punktów podróży');
+ const name=prompt('Nazwa punktu podróży:','Baza '+(st.waypoints.length+1));if(!name)return;
+ st.waypoints.push({name:name.slice(0,24),x:me.x,y:me.y,world:PW.currentWorld||'MAIN'});
+ saveMega();msg('📍 Zapisano punkt podróży');show('travel');
+}
+function travel(i){
+ const w=st.waypoints[i];if(!w)return;
+ if(w.world!==(PW.currentWorld||'MAIN'))return msg('🌍 Najpierw przejdź do świata: '+w.world);
+ me.x=Math.max(0,Math.min(WORLD_W*T-20,w.x));me.y=Math.max(0,Math.min(WORLD_H*T-40,w.y));me.vx=0;me.vy=0;panel.hidden=true;msg('🧭 Teleport: '+w.name);
+}
+function deleteWaypoint(i){st.waypoints.splice(i,1);saveMega();show('travel')}
+let nextEvent=performance.now()+45000, event=null;
+function eventTick(){
+ if(!gameStarted||paused)return;
+ const now=performance.now();
+ if(!event&&now>=nextEvent){
+  event={type:Math.random()<.5?'meteor':'bonus',end:now+22000};
+  st.eventsSeen++;saveMega();
+  msg(event.type==='meteor'?'🌠 DESZCZ GWIAZD! Zbierz premię w MEGA UPDATE':'🌈 SZCZĘŚLIWA GODZINA! Odbierz premię');
+ }
+ if(event&&now>=event.end){event=null;nextEvent=now+60000+Math.random()*40000}
+}
+setInterval(eventTick,800);
+function claimEvent(){
+ if(!event)return msg('Poczekaj na następne wydarzenie');
+ const g=event.type==='meteor'?70:45;reward(g,40);msg('🌠 Nagroda wydarzenia: +'+g+' gemów');event=null;nextEvent=performance.now()+70000;show('events')
+}
+function bar(n,max){return `<div class="megaBar"><i style="width:${Math.max(0,Math.min(100,n/max*100))}%"></i></div>`}
+function show(next){
+ tab=next;refreshDay();
+ if(tab==='home'){
+  content.innerHTML=`<div class="megaGrid">
+  <div class="megaCard">⭐ POZIOM<br><b>${PW.level}</b><br>XP: ${PW.xp}</div>
+  <div class="megaCard">💎 GEMY<br><b>${Math.floor(PW.gems)}</b></div>
+  <div class="megaCard">🏆 TYTUŁ<br><b>${esc(st.title)}</b></div>
+  <div class="megaCard">🗝️ RELIKTY<br><b>${Object.keys(st.relics).length}/${relics.length}</b></div>
+  <div class="megaCard">📜 WYZWANIA<br><b>${quests.filter(q=>st.claimed[q[0]]).length}/${quests.length}</b></div>
+  <div class="megaCard">📍 PUNKTY PODRÓŻY<br><b>${st.waypoints.length}/8</b></div>
+  </div><h3>🌟 NOWOŚCI</h3><p>12 świecących reliktów na mapie • 8 wielkich wyzwań • 4 codzienne zadania • szybka podróż • 6 tytułów • losowe wydarzenia. Relikty zbierasz klawiszem E albo przyciskiem na ekranie.</p>`;
+ }else if(tab==='quests'){
+  content.innerHTML='<h3>🏆 WIELKIE WYZWANIA</h3><div class="megaGrid">'+quests.map(q=>{const n=q[2]();return `<div class="megaCard"><b>${q[1]}</b><div>${Math.min(n,q[3])}/${q[3]}</div>${bar(n,q[3])}<button data-quest="${q[0]}" ${st.claimed[q[0]]||n<q[3]?'disabled':''}>${st.claimed[q[0]]?'✓ ODEBRANO':'🎁 '+q[4]+' 💎 / '+q[5]+' XP'}</button></div>`}).join('')+'</div><h3>📅 CODZIENNE MISJE</h3><div class="megaGrid">'+daily.map(q=>{const n=Math.max(0,q[2]()-(baseline[q[0]]||0));return `<div class="megaCard"><b>${q[1]}</b><div>${Math.min(n,q[3])}/${q[3]}</div>${bar(n,q[3])}<button data-daily="${q[0]}" ${st.daily[q[0]]||n<q[3]?'disabled':''}>${st.daily[q[0]]?'✓ ODEBRANO':'🎁 '+q[4]+' 💎'}</button></div>`}).join('')+'</div>';
+  content.querySelectorAll('[data-quest]').forEach(b=>b.onclick=()=>claimQuest(b.dataset.quest));
+  content.querySelectorAll('[data-daily]').forEach(b=>b.onclick=()=>claimDaily(b.dataset.daily));
+ }else if(tab==='relics'){
+  content.innerHTML=`<p>W świecie ukryto 12 świecących reliktów. Podejdź do nich i naciśnij <b>E</b> albo <b>💎 PODNIEŚ</b>. Każdy daje gemy i XP. Po zebraniu wszystkich dostaniesz wielką nagrodę.</p><div class="megaGrid">`+relics.map((r,i)=>`<div class="megaCard">${st.relics[i]?'✅':'💠'} <b>${st.relics[i]?esc(r.name):'Nieodkryty relikt'}</b><br>Rejon X: ${r.x}<br>${st.relics[i]?'Zebrany':'Do odnalezienia'}</div>`).join('')+'</div>';
+ }else if(tab==='travel'){
+  content.innerHTML='<p>Zapisz miejsce, w którym stoisz, i wracaj do niego jednym kliknięciem. Punkty są przypisane do konkretnego świata.</p><button id="megaAddWaypoint">📍 ZAPISZ OBECNE MIEJSCE</button><div class="megaGrid" style="margin-top:10px">'+st.waypoints.map((w,i)=>`<div class="megaCard"><b>📍 ${esc(w.name)}</b><br>X: ${Math.floor(w.x/T)} • Świat: ${esc(w.world)}<br><button data-travel="${i}">🧭 TELEPORT</button><button data-delete="${i}">🗑️ USUŃ</button></div>`).join('')+'</div>';
+  content.querySelector('#megaAddWaypoint').onclick=addWaypoint;
+  content.querySelectorAll('[data-travel]').forEach(b=>b.onclick=()=>travel(+b.dataset.travel));
+  content.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteWaypoint(+b.dataset.delete));
+ }else if(tab==='titles'){
+  content.innerHTML='<p>Odblokowuj tytuły i wybierz ten, który najbardziej Ci pasuje.</p><div class="megaGrid">'+titles.map(t=>`<div class="megaCard"><b>${esc(t[0])}</b><br>${esc(t[1])}<br><button data-title="${esc(t[0])}" ${t[2]()?'':'disabled'}>${st.title===t[0]?'✓ AKTYWNY':t[2]()?'WYBIERZ':'🔒 ZABLOKOWANY'}</button></div>`).join('')+'</div>';
+  content.querySelectorAll('[data-title]').forEach(b=>b.onclick=()=>setTitle(b.dataset.title));
+ }else if(tab==='events'){
+  content.innerHTML=`<div class="megaCard"><b>🌠 WYDARZENIA LOSOWE</b><p>Podczas gry co jakiś czas pojawia się wydarzenie z ograniczoną czasowo nagrodą.</p><p>${event?'✨ AKTYWNE: '+(event.type==='meteor'?'Deszcz gwiazd':'Szczęśliwa godzina'):'🌙 Brak aktywnego wydarzenia — graj dalej!'}</p><button id="megaEventClaim" ${event?'':'disabled'}>🎁 ODBIERZ NAGRODĘ</button><p>Zaobserwowane wydarzenia: ${st.eventsSeen}</p></div>`;
+  content.querySelector('#megaEventClaim').onclick=claimEvent;
+ }
+}
+window.pwMegaOpen=()=>{panel.hidden=false;show('home')};
+const hub=document.querySelector('#pwHub .pwGrid');
+if(hub){const b=document.createElement('button');b.textContent='✨ MEGA UPDATE';b.onclick=window.pwMegaOpen;hub.append(b)}
+// Integrate with the organized desktop and mobile menus without moving their buttons.
+for(const selector of ['#pwDesktopMenu .pwDesktopGrid','#pwMobileSheet .pwMobileTiles']){
+ const el=document.querySelector(selector);if(el){const b=document.createElement('button');b.textContent='✨ MEGA UPDATE';b.onclick=window.pwMegaOpen;el.append(b)}
+}
+})();
+</script>
 </body>
 </html>
