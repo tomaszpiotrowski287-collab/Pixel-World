@@ -6878,5 +6878,59 @@ addEventListener('resize',layout);
 layout();
 })();
 </script>
+
+<style id="pwMobileRealFix">
+@media(max-width:700px){
+ #pwHubBtn,#pwExplorerButton,#pwTreasureGuide,#pwUltimateBar,#pwQuick,
+ #gameUI .topRight,#pwOnline,#pwPerf{display:none!important}
+ #pwPhoneToggle,#pwPhoneDrawer{display:none!important}
+ #pwMobileDock{display:flex!important;position:fixed!important;top:max(6px,env(safe-area-inset-top))!important;right:6px!important;z-index:150!important;gap:4px!important;pointer-events:auto!important}
+ #pwMobileDock button{min-height:34px!important;padding:5px 7px!important;font-size:12px!important;background:#15394b!important;border:2px solid #63cfee!important;box-shadow:2px 2px #000!important}
+ #pwMobileSheet{position:fixed!important;z-index:149!important;top:46px!important;right:6px!important;left:6px!important;bottom:calc(130px + env(safe-area-inset-bottom))!important;max-height:calc(100dvh - 180px)!important;overflow:auto!important;background:rgba(8,18,26,.98)!important;border:2px solid #64d4ee!important;padding:10px!important;box-shadow:4px 4px #000!important;pointer-events:auto!important}
+ #pwMobileSheet[hidden]{display:none!important}
+ #pwMobileSheet .pwMobileTiles{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+ #pwMobileSheet .pwMobileTiles button{min-width:0!important;min-height:46px!important;padding:6px 3px!important;font-size:10px!important;line-height:1.2!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ #pwMobileSheet h3{font-size:13px!important;margin:5px 0 10px!important;color:#8eefff!important}
+ #gameUI .hp{position:fixed!important;top:8px!important;left:7px!important;width:115px!important;height:20px!important;z-index:20!important}
+ #pwCoords{top:35px!important;left:7px!important;max-width:120px!important}
+ #pwDayBadge{top:58px!important;left:7px!important;max-width:120px!important}
+ #hotbar{bottom:calc(75px + env(safe-area-inset-bottom))!important;max-width:calc(100vw - 12px)!important}
+ .mobile{bottom:calc(6px + env(safe-area-inset-bottom))!important}
+}
+@media(min-width:701px){#pwMobileDock,#pwMobileSheet{display:none!important}}
+</style>
+<script id="pwMobileRealFixScript">
+(function(){
+const dock=document.createElement('div');dock.id='pwMobileDock';
+const menu=document.createElement('button');menu.textContent='☰ MENU';menu.setAttribute('aria-label','Otwórz menu');
+const bag=document.createElement('button');bag.textContent='🎒';bag.title='Ekwipunek';
+const craft=document.createElement('button');craft.textContent='🔨';craft.title='Crafting';
+dock.append(menu,bag,craft);
+const sheet=document.createElement('section');sheet.id='pwMobileSheet';sheet.hidden=true;
+sheet.innerHTML='<h3>🎮 MENU GRY</h3><div class="pwMobileTiles"></div>';
+document.body.append(dock,sheet);
+const tiles=sheet.querySelector('.pwMobileTiles');
+const actions=[
+ ['🌎 HUB','pwHubBtn'],['📖 MISJE','pwExplorerButton'],['🗝️ SKARBY','pwTreasureGuide'],
+ ['🎒 PLECAK','inventoryBtn'],['🔨 CRAFTING','craftBtn'],['💾 ZAPISZ','save'],
+ ['⚙️ OPCJE','gameSettingsBtn'],['⏸️ PAUZA','pauseBtn'],['💬 CZAT','chatBtn'],
+ ['🧑 PROFIL','pwPlayersBtn'],['📊 STATY','pwStatsBtn'],['📍 CHECKPOINT','pwCPBtn'],
+ ['🛠️ NAPRAW','pwFixBtn'],['🌙 DZIEŃ/NOC','pwTime2'],['📸 SCREENSHOT','pwShot2']
+];
+function run(id){
+ const target=document.getElementById(id);
+ if(!target){return}
+ // A hidden original button still receives programmatic click events.
+ target.click();sheet.hidden=true;menu.textContent='☰ MENU';
+}
+for(const [label,id] of actions){
+ const b=document.createElement('button');b.textContent=label;b.onclick=()=>run(id);tiles.appendChild(b);
+}
+menu.onclick=()=>{sheet.hidden=!sheet.hidden;menu.textContent=sheet.hidden?'☰ MENU':'✕ ZAMKNIJ'};
+bag.onclick=()=>run('inventoryBtn');
+craft.onclick=()=>run('craftBtn');
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){sheet.hidden=true;menu.textContent='☰ MENU'}});
+})();
+</script>
 </body>
 </html>
