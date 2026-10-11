@@ -9001,5 +9001,305 @@ scan();
 window.PW2Tools={open:show};
 })();
 </script>
-</body>
+
+<style id="pwCrystalFixStyle">
+#pwCrystalFix{position:fixed;right:12px;bottom:180px;z-index:88;background:#2b3566;color:white;border:2px solid #a6eaff;border-radius:7px;padding:10px 12px;font:700 12px monospace;cursor:pointer;box-shadow:0 3px 0 #101527}
+#pwCrystalFix[hidden]{display:none!important}
+@media(max-width:700px){#pwCrystalFix{bottom:205px;right:8px;font-size:10px;padding:8px}}
+</style>
+<script id="pwCrystalHarvestFix">
+(function(){
+ 'use strict';
+ const btn=document.createElement('button');btn.id='pwCrystalFix';btn.textContent='💎 ZBIERZ KRYSZTAŁ [R]';btn.hidden=true;document.body.appendChild(btn);
+ function nearbyCrystal(){
+  if(typeof gameStarted==='undefined'||!gameStarted||typeof PW==='undefined'||!PW.crops)return null;
+  const x=(me.x+me.w/2)/T,y=(me.y+me.h/2)/T;
+  let closest=null,best=Infinity;
+  for(const [key,c] of Object.entries(PW.crops)){
+   if(!c||c.seed!=='crystal')continue;
+   const coords=key.split(',').map(Number),dist=Math.hypot(coords[0]+.5-x,coords[1]+.5-y);
+   if(dist<=5&&dist<best){closest={x:coords[0],y:coords[1],c};best=dist}
+  }
+  return closest;
+ }
+ function harvest(){
+  if(typeof gameStarted==='undefined'||!gameStarted)return;
+  const crop=nearbyCrystal();
+  if(!crop){pwToast('💎 Podejdź bliżej kryształowej rośliny (maks. 5 bloków).');return}
+  if(crop.c.grow<crop.c.max){pwToast('🌱 Kryształ jeszcze rośnie — poczekaj, aż dojrzeje.');return}
+  pwHarvestAt(crop.x,crop.y);
+  pwToast('💎 Kryształ zebrany! Plony znajdziesz w ekwipunku.');
+  updateHotbar();
+ }
+ btn.addEventListener('click',harvest);
+ document.addEventListener('keydown',e=>{
+  if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+  if(e.key.toLowerCase()==='r')harvest();
+ });
+ setInterval(()=>{const crop=nearbyCrystal();btn.hidden=!crop||typeof paused!=='undefined'&&paused;btn.textContent=crop&&crop.c.grow>=crop.c.max?'💎 ZBIERZ KRYSZTAŁ [R]':'🌱 KRYSZTAŁ ROŚNIE [R]'},350);
+ window.pwHarvestCrystal=harvest;
+})();
+</script>
+
+<style id="pw21FarmGuideCSS">
+#pw21FarmGuide{position:fixed;z-index:230;left:50%;top:50%;transform:translate(-50%,-50%);width:min(570px,95vw);max-height:80dvh;overflow:auto;box-sizing:border-box;padding:14px;background:#0b2330;border:3px solid #83c4a2;box-shadow:5px 5px #030c11;color:#f2fff4;font:12px monospace}
+#pw21FarmGuide[hidden]{display:none!important}
+#pw21FarmGuide button{background:#285743;color:white;border:2px solid #85c49c;padding:8px;font:11px monospace;cursor:pointer}
+#pw21FarmGuide .pw21Head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#pw21FarmGuide .pw21Row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;background:#183b35;border:1px solid #4d8171;margin-top:8px}
+#pw21FarmGuide .pw21Bar{height:7px;background:#071d1c;margin-top:6px;min-width:130px}
+#pw21FarmGuide .pw21Fill{height:100%;background:#83e0a3}
+#pw21FarmGuide .pw21Muted{color:#b9d6cc;line-height:1.6}
+#pw21FarmGuide .pw21Actions{display:flex;gap:5px;flex-wrap:wrap}
+#pw21FarmGuide .pw21Actions button{white-space:nowrap}
+#pw21FarmGuide .pw21Summary{padding:8px;background:#14352d;margin-top:9px}
+@media(max-width:600px){#pw21FarmGuide .pw21Row{flex-direction:column;align-items:stretch}#pw21FarmGuide .pw21Actions button{flex:1}}
+</style>
+<script id="pw21FarmGuideScript">
+(function(){
+'use strict';
+const panel=document.createElement('section');panel.id='pw21FarmGuide';panel.hidden=true;document.body.append(panel);
+const names={dirt:'🌱 Ziemia',stone:'🪨 Kamień',sand:'🏖️ Piasek',crystal:'💎 Kryształ',gold:'🟡 Złoto',diamond:'💠 Diament',carrot:'🥕 Marchew',wheat:'🌾 Pszenica',tomato:'🍅 Pomidor'};
+const coords=()=>({x:(me.x+me.w/2)/T,y:(me.y+me.h/2)/T});
+function crops(){
+ if(typeof PW==='undefined'||!PW.crops)return [];
+ const p=coords();
+ return Object.entries(PW.crops).map(([key,c])=>{
+  const [x,y]=key.split(',').map(Number);
+  return {key,c,x,y,dist:Math.hypot(x+.5-p.x,y+.5-p.y),percent:Math.min(100,Math.floor(100*(c.grow||0)/Math.max(1,c.max||1))),ready:c.grow>=c.max};
+ }).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).sort((a,b)=>a.dist-b.dist);
+}
+function harvestNear(){
+ if(!gameStarted)return pwToast('Najpierw wejdź do świata.');
+ const list=crops().filter(p=>p.dist<=5&&p.ready);
+ if(!list.length){pwToast('Brak dojrzałych roślin w promieniu 5 bloków.');return}
+ let count=0;
+ for(const p of list.slice(0,12))if(pwHarvestAt(p.x,p.y))count++;
+ if(count){pwSaveExtra();updateHotbar();pwToast('🌾 Zebrano rośliny: '+count)}
+ if(!panel.hidden)show();
+}
+function show(){
+ if(!gameStarted){pwToast('Uruchom świat, aby sprawdzić uprawy.');return}
+ panel.hidden=false;
+ const all=crops(),ready=all.filter(p=>p.ready),near=ready.filter(p=>p.dist<=5);
+ panel.innerHTML='<div class="pw21Head"><b style="font-size:16px;color:#e0ffac">🌿 OPIEKUN UPRAW — ETAP 21</b><button id="pw21Close">✕</button></div><p class="pw21Muted">Sprawdzaj wzrost roślin i zbieraj gotowe plony bez przełączania trybu sadzenia.</p><div class="pw21Summary" id="pw21Stats"></div><div class="pw21Actions" style="margin-top:10px"><button id="pw21Harvest">🧺 ZBIERZ GOTOWE W POBLIŻU</button><button id="pw21Refresh">🔄 ODŚWIEŻ</button><button id="pw21OpenFarm">🌱 OTWÓRZ FARMĘ</button></div><div id="pw21Rows"></div><p class="pw21Muted">Skrót: Shift + G. Zbieranie działa tylko w odległości do 5 bloków. Dojrzałe kryształy można też zebrać klawiszem R.</p>';
+ panel.querySelector('#pw21Close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#pw21Stats').textContent=`Wszystkie uprawy: ${all.length} • Dojrzałe: ${ready.length} • Do zebrania w pobliżu: ${near.length}`;
+ panel.querySelector('#pw21Harvest').onclick=harvestNear;
+ panel.querySelector('#pw21Refresh').onclick=show;
+ panel.querySelector('#pw21OpenFarm').onclick=()=>{panel.hidden=true;pwFarmUI()};
+ const rows=panel.querySelector('#pw21Rows');
+ if(!all.length){const p=document.createElement('p');p.textContent='Nie masz jeszcze zasadzonych roślin. Otwórz farmę i wybierz nasiono.';rows.append(p)}
+ for(const p of all.slice(0,30)){
+  const row=document.createElement('div');row.className='pw21Row';
+  const details=document.createElement('div');details.style.flex='1';
+  const heading=document.createElement('b');heading.textContent=`${names[p.c.seed]||p.c.seed} • (${p.x}, ${p.y})`;
+  const sub=document.createElement('div');sub.className='pw21Muted';sub.textContent=`${p.ready?'✓ Gotowe do zbioru':p.percent+'% wzrostu'} • ${Math.round(p.dist)} bloków od Ciebie`;
+  const bar=document.createElement('div');bar.className='pw21Bar';
+  const fill=document.createElement('div');fill.className='pw21Fill';fill.style.width=p.percent+'%';bar.append(fill);
+  details.append(heading,sub,bar);row.append(details);
+  if(p.ready){
+   const btn=document.createElement('button');btn.textContent=p.dist<=5?'🧺 ZBIERZ':'📍 ZA DALEKO';
+   btn.disabled=p.dist>5;
+   btn.onclick=()=>{if(crops().some(c=>c.key===p.key&&c.ready&&c.dist<=5)){pwHarvestAt(p.x,p.y);show()}else{pwToast('Podejdź bliżej lub poczekaj na dojrzewanie.');show()}};
+   row.append(btn);
+  }
+  rows.append(row);
+ }
+ if(all.length>30){const more=document.createElement('p');more.className='pw21Muted';more.textContent='Wyświetlono 30 najbliższych upraw.';rows.append(more)}
+}
+document.addEventListener('keydown',e=>{
+ if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+ if(e.shiftKey&&e.key.toLowerCase()==='g'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}
+ if(e.key==='Escape')panel.hidden=true;
+});
+function addButton(root,label){
+ if(!root||root.querySelector('[data-pw21]'))return;
+ const b=document.createElement('button');b.dataset.pw21='1';b.textContent=label;b.onclick=show;root.append(b);
+}
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid'])addButton(document.querySelector(sel),'🌿 OPIEKUN UPRAW');
+addButton(document.querySelector('#pw2Dock'),'🌿');
+const oldOpen=window.PW2Tools&&window.PW2Tools.open;
+if(oldOpen){
+ window.PW2Tools.open=function(){oldOpen();setTimeout(()=>{const g=document.querySelector('#pw20Panel .pw20grid, .pw20grid');addButton(g,'🌿 OPIEKUN UPRAW')},0)}
+}
+window.PW21Farm={open:show,harvest:harvestNear};
+})();
+</script>
+
+<style id="pw22SeedBankStyle">
+#pw22SeedBank{position:fixed;z-index:240;top:50%;left:50%;transform:translate(-50%,-50%);width:min(580px,95vw);max-height:84dvh;overflow:auto;box-sizing:border-box;background:#10292e;border:3px solid #83cfa5;color:#effff5;box-shadow:5px 5px #071115;padding:15px;font:12px monospace}
+#pw22SeedBank[hidden]{display:none!important}
+#pw22SeedBank button{background:#295b4d;border:2px solid #81b99f;color:white;padding:9px;cursor:pointer;font:11px monospace}
+#pw22SeedBank button:disabled{opacity:.45;cursor:default}
+#pw22SeedBank .sb22Head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#pw22SeedBank .sb22Item{background:#1b403b;border:1px solid #537f6e;padding:10px;margin:8px 0}
+#pw22SeedBank .sb22Line{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+#pw22SeedBank .sb22Buttons{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+#pw22SeedBank .sb22Note{color:#c1ddce;line-height:1.6}
+#pw22SeedBank .sb22Active{color:#baf5a2}
+</style>
+<script id="pw22SeedBankScript">
+(function(){
+'use strict';
+const panel=document.createElement('section');panel.id='pw22SeedBank';panel.hidden=true;document.body.append(panel);
+const labels={dirt:'🌱 Zwykłe',crystal:'💎 Kryształ',gold:'🟡 Złoto',diamond:'💠 Diament',carrot:'🥕 Marchew',wheat:'🌾 Pszenica',tomato:'🍅 Pomidor'};
+const current=()=>PW.selectedSeed||'dirt';
+const count=k=>Math.max(0,Number(PW.seeds[k])||0);
+function notify(s){pwToast(s)}
+function refreshGame(){pwSaveExtra();pwRefresh();updateHotbar()}
+function select(k){
+ PW.selectedSeed=k;
+ PW.farmMode=true;
+ refreshGame();
+ panel.hidden=true;
+ notify('🌱 Wybrano '+(PW_SEEDS[k]||k)+'. Kliknij blok ziemi, aby posadzić.');
+}
+function makeSeed(k){
+ const have=Math.floor(Number(inv[k])||0);
+ if(have<3){notify('Potrzebujesz 3 plonów tego rodzaju.');return}
+ inv[k]-=3;
+ PW.seeds[k]=count(k)+1;
+ refreshGame();notify('🌱 Utworzono 1 nasiono z 3 plonów');show();
+}
+function buyCrystal(){
+ if(PW.gems<75){notify('Potrzebujesz 75 gemów.');return}
+ PW.gems-=75;PW.seeds.crystal=count('crystal')+5;
+ refreshGame();notify('💎 Kupiono 5 nasion kryształu!');show();
+}
+function show(){
+ if(!gameStarted){notify('Najpierw wejdź do świata.');return}
+ panel.hidden=false;
+ panel.innerHTML='<div class="sb22Head"><b style="font-size:16px;color:#ddffa9">🌰 BANK NASION — ETAP 22</b><button id="sb22Close">✕</button></div><p class="sb22Note">Wybierz nasiono, aby przejść do sadzenia. Z 3 zebranych plonów możesz odzyskać 1 nasiono tego samego rodzaju. Kupno kryształowych nasion: 5 sztuk za 75 💎.</p><div id="sb22Stock"></div><p class="sb22Note">Po wybraniu nasiona kliknij ziemię lub trawę w świecie. Aby zebrać dojrzałą roślinę, użyj opiekuna upraw (Shift + G) lub klawisza R przy kryształach.</p>';
+ panel.querySelector('#sb22Close').onclick=()=>panel.hidden=true;
+ const stock=panel.querySelector('#sb22Stock');
+ const kinds=Object.keys(PW_SEEDS);
+ for(const k of kinds){
+  const item=document.createElement('div');item.className='sb22Item';
+  const line=document.createElement('div');line.className='sb22Line';
+  const name=document.createElement('b');name.textContent=(labels[k]||'🌱 '+PW_SEEDS[k])+' • '+count(k)+' nasion';
+  if(current()===k){const active=document.createElement('span');active.className='sb22Active';active.textContent='✓ WYBRANE';line.append(active)}
+  line.prepend(name);
+  const note=document.createElement('div');note.className='sb22Note';note.textContent='Zebrane plony w plecaku: '+(inv[k]||0);
+  const buttons=document.createElement('div');buttons.className='sb22Buttons';
+  const button=(text,cb,disabled=false)=>{const b=document.createElement('button');b.textContent=text;b.disabled=disabled;b.onclick=cb;buttons.append(b)};
+  button('🌱 WYBIERZ I SADŹ',()=>select(k),count(k)<=0);
+  button('♻️ 3 PLONY → 1 NASIONO',()=>makeSeed(k),(inv[k]||0)<3);
+  if(k==='crystal')button('💎 KUP 5 — 75 GEMÓW',buyCrystal,PW.gems<75);
+  item.append(line,note,buttons);stock.append(item);
+ }
+}
+document.addEventListener('keydown',e=>{
+ if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+ if(e.key.toLowerCase()==='q'&&e.shiftKey){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}
+ if(e.key==='Escape')panel.hidden=true;
+});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(sel);
+ if(root){const b=document.createElement('button');b.textContent='🌰 BANK NASION';b.onclick=show;root.append(b)}
+}
+const dock=document.querySelector('#pw2Dock');
+if(dock){const b=document.createElement('button');b.textContent='🌰';b.title='Bank nasion';b.onclick=show;dock.append(b)}
+window.PW22SeedBank={open:show};
+})();
+</script>
+<style id="pw23FishingStyle">
+#pw23FishPanel{position:fixed;z-index:245;left:50%;top:50%;transform:translate(-50%,-50%);width:min(530px,94vw);max-height:80dvh;overflow:auto;box-sizing:border-box;padding:15px;background:#0b2635;border:3px solid #7bc9e8;color:#effaff;box-shadow:5px 5px #06111a;font:12px monospace}
+#pw23FishPanel[hidden]{display:none!important}
+#pw23FishPanel button,#pw23FishQuick{background:#1b5066;color:white;border:2px solid #81c3db;padding:9px;cursor:pointer;font:12px monospace}
+#pw23FishPanel button:disabled{opacity:.4;cursor:default}
+#pw23FishPanel .pw23Head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#pw23FishPanel .pw23Line{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:#163c4e;border:1px solid #477b91;padding:9px;margin:7px 0}
+#pw23FishPanel .pw23Note{line-height:1.7;color:#b8dce9}
+#pw23FishQuick{position:fixed;z-index:75;right:8px;bottom:155px;padding:7px}
+#pw23FishHint{position:fixed;z-index:25;top:68px;left:50%;transform:translateX(-50%);padding:7px 11px;background:rgba(8,32,45,.93);border:1px solid #7dc9df;color:#fff;font:12px monospace;pointer-events:none;display:none;max-width:90vw;text-align:center}
+@media(max-width:700px){#pw23FishQuick{right:5px;bottom:calc(145px + env(safe-area-inset-bottom))}#pw23FishHint{top:54px;font-size:10px}}
+</style>
+<script id="pw23FishingStage">
+(function(){
+'use strict';
+const KEY='PW2_FISHING_STAGE23';
+const kinds=[{id:'small',name:'🐟 Płotka',price:4,weight:50},{id:'perch',name:'🐠 Okoń',price:9,weight:29},{id:'pike',name:'🐡 Szczupak',price:20,weight:15},{id:'golden',name:'✨ Złota ryba',price:65,weight:6}];
+let state={rod:false,fish:{small:0,perch:0,pike:0,golden:0},total:0};
+try{const d=JSON.parse(localStorage.getItem(KEY)||'{}');if(d&&typeof d==='object'){state.rod=!!d.rod;state.total=Math.max(0,Number(d.total)||0);for(const k of kinds)state.fish[k.id]=Math.max(0,Math.floor(Number(d.fish&&d.fish[k.id])||0))}}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+const panel=document.createElement('section');panel.id='pw23FishPanel';panel.hidden=true;document.body.append(panel);
+const quick=document.createElement('button');quick.id='pw23FishQuick';quick.textContent='🎣';quick.title='Wędkowanie';document.body.append(quick);
+const hint=document.createElement('div');hint.id='pw23FishHint';document.body.append(hint);
+let cast=null;
+const now=()=>Date.now();
+const playerTile=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h/2)/T)});
+const toast=s=>{if(typeof pwToast==='function')pwToast(s)};
+function waterNear(){
+ const p=playerTile();let found=null,dist=1e9;
+ for(let y=p.y-4;y<=p.y+5;y++)for(let x=p.x-6;x<=p.x+6;x++){
+  if(x<0||y<0||x>=WORLD_W||y>=WORLD_H||getB(x,y)!==B.water)continue;
+  const d=Math.hypot(x-p.x,y-p.y);
+  if(d<dist){found={x,y};dist=d}
+ }
+ return found;
+}
+function craft(){
+ if(state.rod)return toast('Masz już wędkę.');
+ if((inv.wood||0)<4||(inv.stone||0)<2)return toast('Potrzebujesz 4 drewna i 2 kamieni.');
+ inv.wood-=4;inv.stone-=2;state.rod=true;persist();updateHotbar();if(typeof save==='function')save();toast('🎣 Wędka gotowa!');if(!panel.hidden)show();
+}
+function action(){
+ if(!gameStarted||paused)return toast('Wejdź do gry, aby łowić.');
+ if(!state.rod)return toast('Najpierw wykonaj wędkę w menu 🎣.');
+ if(cast){
+  if(now()<cast.biteAt){cast=null;toast('Za wcześnie! Ryba uciekła.');return}
+  if(now()>cast.endAt){cast=null;toast('Za późno! Ryba odpłynęła.');return}
+  if(Math.hypot(playerTile().x-cast.start.x,playerTile().y-cast.start.y)>6){cast=null;toast('Oddaliłeś się od łowiska.');return}
+  let r=Math.random()*100,chosen=kinds[0];for(const k of kinds){r-=k.weight;if(r<=0){chosen=k;break}}
+  state.fish[chosen.id]++;state.total++;persist();cast=null;toast('🎣 Złowiono: '+chosen.name+'!');if(!panel.hidden)show();return;
+ }
+ const water=waterNear();if(!water)return toast('Podejdź do wody (maks. 6 bloków).');
+ const start=playerTile(),biteAt=now()+3500+Math.random()*4500;
+ cast={water,start,biteAt,endAt:biteAt+3000};toast('🎣 Zarzucono wędkę! Czekaj na branie.');
+}
+function sell(id){
+ const k=kinds.find(k=>k.id===id);if(!k||!state.fish[id])return;
+ const amount=state.fish[id];state.fish[id]=0;PW.gems=(Number(PW.gems)||0)+amount*k.price;persist();if(typeof pwSaveExtra==='function')pwSaveExtra();if(typeof pwRefresh==='function')pwRefresh();toast('💎 Sprzedano '+amount+' szt. za '+amount*k.price+' gemów');show();
+}
+function show(){
+ panel.hidden=false;
+ panel.innerHTML='<div class="pw23Head"><b style="font-size:16px;color:#b5eeff">🎣 WĘDKOWANIE — ETAP 23</b><button id="pw23Close">✕</button></div><p class="pw23Note">Zbuduj wędkę, podejdź do jeziora i zarzuć ją klawiszem Q. Gdy zobaczysz napis „BRANIE!”, ponownie naciśnij Q w ciągu 3 sekund.</p><div class="pw23Line"><b>Wędka: '+(state.rod?'✓ gotowa':'brak')+'</b><button id="pw23Craft" '+(state.rod?'disabled':'')+'>🔨 WYKONAJ (4 DREWNO + 2 KAMIEŃ)</button></div><div class="pw23Line"><b>Łącznie złowiono: '+state.total+'</b><button id="pw23Action">🎣 '+(cast?'ZWIŃ WĘDKĘ':'ZARZUĆ WĘDKĘ')+'</button></div><div id="pw23FishList"></div><p class="pw23Note">Sterowanie: Q — zarzuć / wyciągnij, Shift + F — menu. Na telefonie kliknij 🎣. Ryby i wędka zapisują się automatycznie.</p>';
+ panel.querySelector('#pw23Close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#pw23Craft').onclick=craft;
+ panel.querySelector('#pw23Action').onclick=()=>{action();if(!panel.hidden)show()};
+ const list=panel.querySelector('#pw23FishList');
+ for(const k of kinds){
+  const row=document.createElement('div');row.className='pw23Line';
+  const name=document.createElement('span');name.textContent=k.name+' — '+state.fish[k.id]+' szt. • '+k.price+' 💎/szt.';
+  const b=document.createElement('button');b.textContent='💎 SPRZEDAJ';b.disabled=!state.fish[k.id];b.onclick=()=>sell(k.id);
+  row.append(name,b);list.append(row);
+ }
+}
+quick.onclick=()=>{if(cast)action();else if(!state.rod)show();else action()};
+document.addEventListener('keydown',e=>{
+ if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+ if(e.shiftKey&&e.key.toLowerCase()==='f'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}
+ else if(!e.shiftKey&&e.key.toLowerCase()==='q'){e.preventDefault();action()}
+ if(e.key==='Escape')panel.hidden=true;
+});
+const oldRender=render;render=function(){oldRender();if(!cast||!gameStarted)return;
+ const x=cast.water.x*T-cam.x+T/2,y=cast.water.y*T-cam.y+T/2;
+ const px=me.x+me.w/2-cam.x,py=me.y+me.h/2-cam.y;
+ ctx.save();ctx.strokeStyle='#c6dbe2';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(x,y);ctx.stroke();
+ ctx.fillStyle=now()>=cast.biteAt&&now()<=cast.endAt?'#ff6e57':'#e9edf1';ctx.fillRect(Math.round(x-2),Math.round(y-4),4,6);
+ ctx.fillStyle='#dd4e43';ctx.fillRect(Math.round(x-2),Math.round(y-4),4,2);ctx.restore();
+};
+setInterval(()=>{
+ if(!cast||!gameStarted){hint.style.display='none';return}
+ const t=now();if(t>cast.endAt){cast=null;hint.style.display='none';toast('Ryba odpłynęła. Spróbuj ponownie.');return}
+ hint.style.display='block';hint.textContent=t>=cast.biteAt?'🐟 BRANIE! NACIŚNIJ Q / 🎣':'🎣 Czekaj na branie…';
+},150);
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='🎣 WĘDKOWANIE';b.onclick=show;root.append(b)}
+}
+const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='🎣';b.title='Wędkowanie';b.onclick=show;dock.append(b)}
+window.PW23Fishing={open:show,action};
+})();
+</script></body>
 </html>
