@@ -8590,5 +8590,70 @@ window.addEventListener('pagehide',store);
 window.PW2Atlas={open:show,save:store};
 })();
 </script>
+
+<style id="pw15InteractionStyles">
+#pw15Hint{position:fixed;z-index:62;left:50%;bottom:82px;transform:translateX(-50%);background:rgba(7,24,34,.94);color:#fff4cf;border:2px solid #80b6c8;padding:7px 10px;font:11px monospace;white-space:nowrap;pointer-events:none;max-width:90vw;overflow:hidden;text-overflow:ellipsis;display:none}
+#pw15Interact{position:fixed;z-index:68;right:9px;bottom:155px;background:#27536b;color:#fff;border:2px solid #9bd0e5;padding:9px 11px;font:bold 11px monospace;cursor:pointer;display:none}
+#pw15Help{position:fixed;z-index:260;left:50%;top:50%;transform:translate(-50%,-50%);background:#102839;color:#eff9ff;border:3px solid #91bfd1;box-shadow:5px 5px #061018;padding:16px;max-width:min(490px,94vw);max-height:78dvh;overflow:auto;font:12px monospace;box-sizing:border-box}
+#pw15Help[hidden]{display:none!important}
+#pw15Help button{background:#28516a;color:white;border:2px solid #83b3c8;padding:8px;font:12px monospace;cursor:pointer}
+#pw15Help .pw15Row{display:flex;gap:9px;justify-content:space-between;padding:7px 0;border-bottom:1px solid #38576a}
+#pw15Help .pw15Row span:last-child{color:#ffe1a2}
+@media(max-width:700px){#pw15Hint{bottom:calc(143px + env(safe-area-inset-bottom));font-size:10px;max-width:67vw;left:38%}#pw15Interact{bottom:calc(185px + env(safe-area-inset-bottom));right:5px;padding:8px}}
+</style>
+<script id="pw15Interactions">
+(function(){
+'use strict';
+const hint=document.createElement('div');hint.id='pw15Hint';document.body.append(hint);
+const action=document.createElement('button');action.id='pw15Interact';action.textContent='✋ UŻYJ';document.body.append(action);
+const help=document.createElement('section');help.id='pw15Help';help.hidden=true;document.body.append(help);
+const currentWorld=()=>String((typeof PW!=='undefined'&&PW.currentWorld)||'main');
+const pos=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h)/T)});
+const distance=p=>Math.hypot(pos().x-p.x,pos().y-p.y);
+function read(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function closest(){
+ if(!gameStarted)return null;
+ const world=currentWorld();const candidates=[];
+ for(const c of read('PIXEL_WORLD_2_CHESTS_STAGE_12'))if(c.world===world&&distance(c)<=5)candidates.push({type:'chest',name:c.name||'Skrzynia',distance:distance(c)});
+ for(const c of read('PW2_TRAVEL_STAGE_10'))if(c.world===world&&distance(c)<=5)candidates.push({type:'station',name:c.name||'Stacja',distance:distance(c)});
+ for(const c of read('PW2_STAGE_13_SIGNS'))if(c.world===world&&distance(c)<=5)candidates.push({type:'sign',name:c.text||'Tabliczka',distance:distance(c)});
+ candidates.sort((a,b)=>a.distance-b.distance);
+ return candidates[0]||null;
+}
+function use(){
+ if(!gameStarted)return;
+ const c=closest();
+ if(!c){if(typeof pwToast==='function')pwToast('Nie ma obiektu w pobliżu. Podejdź do skrzyni, stacji lub tabliczki.');return}
+ if(c.type==='chest'&&window.PW2Chests){window.PW2Chests.open();return}
+ if(c.type==='station'&&window.pwTravel10Open){window.pwTravel10Open();return}
+ if(c.type==='sign'&&window.pw2SignsOpen){window.pw2SignsOpen();return}
+}
+action.onclick=use;
+function showHelp(){
+ help.hidden=false;
+ help.innerHTML='<div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><b style="font-size:16px;color:#ffe0a4">🎮 STEROWANIE — ETAP 15</b><button id="pw15Close">✕</button></div><p>Podejdź do skrzyni, stacji lub tabliczki i naciśnij <b>F</b>. Na telefonie użyj przycisku ✋ UŻYJ.</p><div class="pw15Row"><span>Interakcja z obiektem</span><span>F</span></div><div class="pw15Row"><span>Magazyn / skrzynie</span><span>Y</span></div><div class="pw15Row"><span>Podróże / stacje</span><span>T</span></div><div class="pw15Row"><span>Tabliczki</span><span>I</span></div><div class="pw15Row"><span>Atlas świata</span><span>M</span></div><div class="pw15Row"><span>Farma</span><span>G</span></div><div class="pw15Row"><span>Kopalnia</span><span>O</span></div><p style="color:#a8cad9;line-height:1.7">Skrzynia: najpierw zbierz 8 drewna, otwórz magazyn (Y), postaw skrzynię, a potem podejdź do niej i naciśnij F.</p>';
+ help.querySelector('#pw15Close').onclick=()=>help.hidden=true;
+}
+document.addEventListener('keydown',e=>{
+ if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+ if(e.key.toLowerCase()==='f'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){if(help.hidden)use();e.preventDefault()}
+ if(e.key==='Escape')help.hidden=true;
+});
+const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='❔';b.title='Pomoc i sterowanie';b.onclick=showHelp;dock.append(b)}
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='❔ STEROWANIE';b.onclick=showHelp;root.append(b)}
+}
+let oldText='';
+setInterval(()=>{
+ if(!gameStarted||paused){hint.style.display='none';action.style.display='none';return}
+ const c=closest();
+ if(!c){hint.style.display='none';action.style.display='none';return}
+ const text=c.type==='chest'?'📦 '+c.name+' — F: OTWÓRZ':c.type==='station'?'🚉 '+c.name+' — F: PODRÓŻE':'🪧 TABLICZKA — F: EDYTUJ';
+ if(text!==oldText){hint.textContent=text;oldText=text}
+ hint.style.display='block';action.style.display='block';
+},450);
+window.PW2Interact15={use,help:showHelp};
+})();
+</script>
 </body>
 </html>
