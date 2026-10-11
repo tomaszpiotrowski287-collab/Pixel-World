@@ -8655,5 +8655,117 @@ setInterval(()=>{
 window.PW2Interact15={use,help:showHelp};
 })();
 </script>
-</body>
+
+<style id="pw16NavStyles">
+#pw16Panel{position:fixed;z-index:270;left:50%;top:50%;transform:translate(-50%,-50%);width:min(490px,94vw);max-height:80dvh;overflow:auto;box-sizing:border-box;padding:14px;background:#0c2431;border:3px solid #7db7c9;box-shadow:5px 5px #000;color:#f2faff;font:12px monospace}
+#pw16Panel[hidden]{display:none!important}
+#pw16Panel button{background:#235268;color:#fff;border:2px solid #7aaec2;padding:8px;cursor:pointer;font:11px monospace}
+#pw16Panel input{box-sizing:border-box;background:#0a1b27;color:#fff;border:1px solid #7ba9bb;padding:8px;width:100%;min-width:0}
+#pw16Panel .pw16Head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#pw16Panel .pw16Entry{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#18394b;border:1px solid #4e7c90;margin:8px 0;padding:9px}
+#pw16Panel .pw16Entry .pw16Actions{display:flex;gap:5px;flex-shrink:0}
+#pw16Panel .pw16Entry small{display:block;color:#afcedb;margin-top:4px}
+#pw16Compass{position:fixed;z-index:63;top:54px;left:50%;transform:translateX(-50%);background:rgba(8,27,39,.92);border:1px solid #8bbcc9;border-radius:3px;color:#f9edbb;padding:6px 9px;font:11px monospace;white-space:nowrap;max-width:80vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none;display:none}
+@media(max-width:600px){#pw16Panel .pw16Entry{align-items:stretch;flex-direction:column}#pw16Compass{top:47px;font-size:10px}}
+</style>
+<script id="pw16NavigationStage">
+(function(){
+'use strict';
+const KEY='PW2_STAGE16_WAYPOINTS';
+const panel=document.createElement('section');panel.id='pw16Panel';panel.hidden=true;document.body.append(panel);
+const compass=document.createElement('div');compass.id='pw16Compass';document.body.append(compass);
+let data={points:[],active:null};
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'{}');if(saved&&Array.isArray(saved.points)){data.points=saved.points.filter(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&typeof p.world==='string').slice(0,40);data.active=typeof saved.active==='string'?saved.active:null}}catch(e){}
+const saveData=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
+const world=()=>String((typeof PW!=='undefined'&&PW.currentWorld)||'main');
+const pos=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h/2)/T)});
+const tell=msg=>{if(typeof pwToast==='function')pwToast(msg)};
+function active(){return data.points.find(p=>p.id===data.active&&p.world===world())||null}
+function add(){
+ if(!gameStarted)return tell('Najpierw wejdź do świata.');
+ if(data.points.filter(p=>p.world===world()).length>=8)return tell('Możesz zapisać maksymalnie 8 miejsc w jednym świecie.');
+ const input=panel.querySelector('#pw16Name');const name=(input?.value||'').trim().slice(0,24)||'Moje miejsce';
+ const p=pos();const id=String(Date.now())+'_'+Math.random().toString(36).slice(2,7);
+ data.points.push({id,name,x:p.x,y:p.y,world:world()});data.active=id;saveData();tell('📍 Zapisano: '+name);show();
+}
+function setActive(id){data.active=id;saveData();show()}
+function remove(id){data.points=data.points.filter(p=>p.id!==id);if(data.active===id)data.active=null;saveData();show()}
+function show(){
+ panel.hidden=false;
+ panel.innerHTML='<div class="pw16Head"><b style="font-size:16px;color:#ffe4a3">🧭 KOMPAS I ZAPISANE MIEJSCA</b><button id="pw16Close">✕</button></div><p style="line-height:1.6;color:#b7d8e6">Zapisz pozycję domu, kopalni lub ulubionego miejsca. Kompas pokaże kierunek i odległość. To nawigacja, nie teleportacja.</p><div style="display:flex;gap:6px"><input id="pw16Name" maxlength="24" placeholder="Nazwa miejsca, np. Dom" aria-label="Nazwa miejsca"><button id="pw16Add">📍 ZAPISZ</button></div><div id="pw16List"></div><p style="color:#a6c9d8">Klawisz N — otwórz kompas. Maksymalnie 8 miejsc na świat.</p>';
+ panel.querySelector('#pw16Close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#pw16Add').onclick=add;
+ const list=panel.querySelector('#pw16List');const points=data.points.filter(p=>p.world===world());
+ if(!points.length){const empty=document.createElement('p');empty.textContent='Nie masz jeszcze zapisanych miejsc.';list.append(empty)}
+ for(const p of points){
+  const row=document.createElement('div');row.className='pw16Entry';
+  const detail=document.createElement('div');const name=document.createElement('b');name.textContent=(p.id===data.active?'🟢 ':'📍 ')+p.name;
+  const meta=document.createElement('small');meta.textContent=`Współrzędne: ${p.x}, ${p.y} • ${Math.round(Math.hypot(pos().x-p.x,pos().y-p.y))} bloków`;
+  detail.append(name,meta);
+  const actions=document.createElement('div');actions.className='pw16Actions';
+  const button=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.onclick=fn;actions.append(b)};
+  button(p.id===data.active?'WYŁĄCZ':'PROWADŹ',()=>setActive(p.id===data.active?null:p.id));
+  button('USUŃ',()=>remove(p.id));row.append(detail,actions);list.append(row);
+ }
+}
+function update(){
+ if(!gameStarted||paused){compass.style.display='none';return}
+ const p=active();if(!p){compass.style.display='none';return}
+ const mep=pos(),dx=p.x-mep.x,dy=p.y-mep.y;
+ const arrow=Math.abs(dx)<=2&&Math.abs(dy)<=2?'●':Math.abs(dx)>Math.abs(dy)*1.7?(dx>0?'→':'←'):Math.abs(dy)>Math.abs(dx)*1.7?(dy>0?'↓':'↑'):(dy>0?(dx>0?'↘':'↙'):(dx>0?'↗':'↖'));
+ const distance=Math.round(Math.hypot(dx,dy));
+ compass.textContent=`🧭 ${arrow} ${p.name} • ${distance} bloków`;
+ compass.style.display='block';
+}
+const b=document.createElement('button');b.textContent='🧭';b.title='Kompas i zapisane miejsca';b.onclick=show;
+const dock=document.querySelector('#pw2Dock');if(dock)dock.append(b);
+for(const selector of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(selector);if(root){const button=document.createElement('button');button.textContent='🧭 KOMPAS';button.onclick=show;root.append(button)}
+}
+document.addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.key.toLowerCase()==='n'){if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape')panel.hidden=true});
+setInterval(update,400);
+window.PW2Compass={open:show};
+})();
+</script>
+<style id="pw17CSS">
+#pw17Panel{position:fixed;z-index:225;left:50%;top:50%;transform:translate(-50%,-50%);width:min(510px,94vw);max-height:82dvh;overflow:auto;box-sizing:border-box;background:#102633;color:#edfaff;border:3px solid #82c7da;box-shadow:5px 5px #050e16;padding:14px;font:12px monospace}#pw17Panel[hidden]{display:none!important}#pw17Panel button,#pw17Panel select{background:#23475a;color:#fff;border:2px solid #6da4b8;padding:9px;font:12px monospace;cursor:pointer}#pw17Panel .pw17row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:10px 0}#pw17Panel .pw17row>*{flex:1}#pw17Panel .pw17heading{display:flex;align-items:center;justify-content:space-between;gap:10px}#pw17Panel .pw17heading b{font-size:16px;color:#ffe4a5}#pw17Panel .pw17help{color:#b8d8e5;line-height:1.7}#pw17Panel .pw17action{width:100%;margin-top:6px}#pw17Panel .pw17action:disabled{opacity:.5}#pw17HUD{position:fixed;z-index:75;right:8px;top:86px;background:#112d3b;color:#e9f8ff;border:1px solid #78a8b8;padding:6px;font:10px monospace;pointer-events:none}#pw17HUD[hidden]{display:none!important}@media(max-width:650px){#pw17Panel{padding:10px}#pw17HUD{top:70px;right:4px;font-size:9px}}
+</style><script id="pw17Stage">
+(function(){'use strict';
+const blocks=[['dirt','Ziemia'],['stone','Kamień'],['wood','Drewno'],['sand','Piasek'],['glass','Szkło'],['brick','Cegła']];
+const shapes=[['platform','Platforma (6 bloków)'],['wall','Ściana (4×3)'],['stairs','Schody (6 stopni)'],['frame','Rama (6×4)']];
+const panel=document.createElement('section');panel.id='pw17Panel';panel.hidden=true;document.body.append(panel);
+const hud=document.createElement('div');hud.id='pw17HUD';hud.hidden=true;document.body.append(hud);
+let selected='wood',shape='platform',active=false,flip=false,lastBuilt=null;
+const say=t=>{if(typeof pwToast==='function')pwToast(t)};
+function origin(){const x=Math.floor((me.x+me.w/2)/T),y=Math.floor((me.y+me.h/2)/T);return {x:x+(me.dir>=0?3:-8),y:y-1}}
+function pattern(){let pts=[];
+ if(shape==='platform')for(let x=0;x<6;x++)pts.push([x,0]);
+ if(shape==='wall')for(let y=0;y<3;y++)for(let x=0;x<4;x++)pts.push([x,-y]);
+ if(shape==='stairs')for(let x=0;x<6;x++)pts.push([x,-x]);
+ if(shape==='frame')for(let x=0;x<6;x++)for(let y=0;y<4;y++)if(x===0||x===5||y===0||y===3)pts.push([x,-y]);
+ return pts;
+}
+function cells(){const o=origin();return pattern().map(([x,y])=>({x:o.x+(flip?-x:x),y:o.y+y}))}
+function assess(){const c=cells();const player={x:me.x,y:me.y,w:me.w,h:me.h};const needed=c.length;let blocked=0;
+ for(const p of c){if(p.x<1||p.x>=WORLD_W-1||p.y<1||p.y>=WORLD_H-1||getB(p.x,p.y)!==B.air||p.x*T<player.x+player.w&&p.x*T+T>player.x&&p.y*T<player.y+player.h&&p.y*T+T>player.y)blocked++}
+ return {c,needed,blocked,stock:inv[selected]||0,valid:blocked===0&&(inv[selected]||0)>=needed};
+}
+function build(){if(!gameStarted||paused)return say('Najpierw wróć do gry.');const a=assess();if(a.blocked)return say('Przesuń się: miejsce budowy jest zajęte.');if(a.stock<a.needed)return say('Brakuje materiału: '+selected+' ('+a.needed+' bloków).');
+ const id=typeof PW!=='undefined'?String(PW.currentWorld||'main'):'main';
+ a.c.forEach(p=>setB(p.x,p.y,B[selected]));inv[selected]-=a.needed;lastBuilt={id,block:selected,cells:a.c};
+ if(typeof updateHotbar==='function')updateHotbar();if(typeof save==='function')save();say('🏗️ Zbudowano! Możesz cofnąć ostatnią konstrukcję.');show();
+}
+function undo(){if(!lastBuilt)return say('Nie ma konstrukcji do cofnięcia.');const id=typeof PW!=='undefined'?String(PW.currentWorld||'main'):'main';if(lastBuilt.id!==id)return say('Konstrukcja jest w innym świecie.');if(lastBuilt.cells.some(p=>getB(p.x,p.y)!==B[lastBuilt.block]))return say('Nie można cofnąć: konstrukcja została zmieniona.');lastBuilt.cells.forEach(p=>setB(p.x,p.y,B.air));inv[lastBuilt.block]=(inv[lastBuilt.block]||0)+lastBuilt.cells.length;lastBuilt=null;if(typeof updateHotbar==='function')updateHotbar();if(typeof save==='function')save();say('↩️ Cofnięto budowę, materiały wróciły.');show()}
+function show(){panel.hidden=false;active=true;const a=assess();panel.innerHTML='<div class="pw17heading"><b>🏗️ WARSZTAT — ETAP 17</b><button id="pw17Close">✕</button></div><p class="pw17help">Wybierz kształt i materiał. Podgląd pojawi się w świecie obok postaci. Budowa wykorzystuje bloki z Twojego plecaka.</p><div class="pw17row"><select id="pw17Shape" aria-label="Kształt"></select><select id="pw17Block" aria-label="Materiał"></select></div><div class="pw17row"><button id="pw17Flip">↔️ ODBIJ KIERUNEK</button><button id="pw17Preview">👁️ PODGLĄD: '+(active?'WŁ.':'WYŁ.')+'</button></div><p class="pw17help" id="pw17Status"></p><button class="pw17action" id="pw17Build">🔨 POSTAW KONSTRUKCJĘ (B)</button><button class="pw17action" id="pw17Undo">↩️ COFNIJ OSTATNIĄ BUDOWĘ</button><p class="pw17help">Klawisz H — otwórz warsztat. B — buduj. Podgląd zielony oznacza wolne miejsce, czerwony — przeszkodę. Budowa nie zastępuje istniejących bloków.</p>';
+ const sh=panel.querySelector('#pw17Shape'),bl=panel.querySelector('#pw17Block');shapes.forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v;sh.append(o)});blocks.forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v;bl.append(o)});sh.value=shape;bl.value=selected;
+ sh.onchange=()=>{shape=sh.value;show()};bl.onchange=()=>{selected=bl.value;show()};panel.querySelector('#pw17Flip').onclick=()=>{flip=!flip;show()};panel.querySelector('#pw17Preview').onclick=()=>{active=!active;panel.querySelector('#pw17Preview').textContent='👁️ PODGLĄD: '+(active?'WŁ.':'WYŁ.');hud.hidden=!active};panel.querySelector('#pw17Build').onclick=build;panel.querySelector('#pw17Undo').onclick=undo;panel.querySelector('#pw17Close').onclick=()=>{panel.hidden=true;active=false;hud.hidden=true};
+ panel.querySelector('#pw17Status').textContent='Potrzeba: '+a.needed+' • Masz: '+a.stock+' • Zajętych pól: '+a.blocked+(a.valid?' • GOTOWE':' • NIE MOŻNA ZBUDOWAĆ');panel.querySelector('#pw17Build').disabled=!a.valid;
+}
+function draw(){if(!gameStarted||!active)return;const a=assess();ctx.save();for(const p of a.c){const x=Math.round(p.x*T-cam.x),y=Math.round(p.y*T-cam.y);if(x<-T||x>VW||y<-T||y>VH)continue;const free=p.x>=1&&p.x<WORLD_W-1&&p.y>=1&&p.y<WORLD_H-1&&getB(p.x,p.y)===B.air;ctx.fillStyle=free?'rgba(71,239,157,.29)':'rgba(255,81,91,.36)';ctx.fillRect(x,y,T,T);ctx.strokeStyle=free?'#6df8b0':'#ff6675';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,T-1,T-1)}ctx.restore();hud.hidden=false;hud.textContent='🏗️ '+(a.valid?'GOTOWE':'BLOKADA / BRAK BLOKÓW')+' • '+a.needed+' '+selected}
+const oldRender=render;render=function(){oldRender();draw()};
+document.addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;const k=e.key.toLowerCase();if(k==='h'){if(panel.hidden)show();else{panel.hidden=true;active=false;hud.hidden=true}}if(k==='b'&&active)build();if(k==='escape'&&!panel.hidden){panel.hidden=true;active=false;hud.hidden=true}});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='🏗️ WARSZTAT';b.onclick=show;root.append(b)}}const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='🏗️';b.title='Warsztat budowniczego';b.onclick=show;dock.append(b)}
+window.PW17Builder={open:show,build,undo};
+})();
+</script></body>
 </html>
