@@ -8286,5 +8286,309 @@ setInterval(()=>{if(gameStarted)hud.textContent='🌱 Rośliny: '+farm.plants.fi
 window.pw2Farm11Open=show;
 })();
 </script>
+
+<style id="pw12ChestCSS">
+#pw12ChestPanel{position:fixed;z-index:240;left:50%;top:50%;transform:translate(-50%,-50%);width:min(600px,94vw);max-height:80dvh;overflow:auto;box-sizing:border-box;background:#0c2130;color:#eefaff;border:3px solid #a3b8cb;box-shadow:5px 5px #02080e;padding:14px;font:12px monospace}
+#pw12ChestPanel[hidden]{display:none!important}
+#pw12ChestPanel button{background:#23475d;color:white;border:2px solid #80a6bb;padding:8px;cursor:pointer;font:11px monospace}
+#pw12ChestPanel .chHead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+#pw12ChestPanel .chHead b{font-size:17px;color:#ffe1a5}
+#pw12ChestPanel .chRows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#pw12ChestPanel .chRow{background:#183546;border:1px solid #416b82;padding:8px;display:flex;flex-direction:column;gap:6px}
+#pw12ChestPanel .chActions{display:flex;gap:5px;flex-wrap:wrap}
+#pw12ChestPanel .chActions button{flex:1}
+#pw12ChestPanel .chActions button:disabled{opacity:.4;cursor:not-allowed}
+#pw12ChestPanel .chHint{color:#bbd9e8;font-size:11px;line-height:1.6}
+#pw12ChestDock{position:fixed;right:8px;bottom:102px;z-index:65;background:#19394d;color:white;border:2px solid #8cb5c9;padding:8px;font:11px monospace}
+@media(max-width:600px){#pw12ChestPanel .chRows{grid-template-columns:1fr}#pw12ChestDock{bottom:calc(165px + env(safe-area-inset-bottom));padding:6px}}
+</style>
+<script id="pw12ChestSystem">
+(function(){
+'use strict';
+const KEY='PIXEL_WORLD_2_CHESTS_STAGE_12';
+let chests=[];
+try{const data=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(data))chests=data.filter(c=>Number.isFinite(c.x)&&Number.isFinite(c.y)&&c.stash&&typeof c.stash==='object').slice(0,60)}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(chests))}catch(e){}}
+const currentWorld=()=>String(PW.currentWorld||'main');
+const here=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h)/T)});
+const dist=c=>Math.hypot(here().x-c.x,here().y-c.y);
+const panel=document.createElement('section');panel.id='pw12ChestPanel';panel.hidden=true;document.body.append(panel);
+let active=null;
+function notify(s){if(typeof pwToast==='function')pwToast(s)}
+function nearby(){return chests.filter(c=>c.world===currentWorld()&&dist(c)<=5).sort((a,b)=>dist(a)-dist(b))[0]||null}
+function placeChest(){
+ if(!gameStarted)return notify('Najpierw uruchom świat.');
+ if((inv.wood||0)<8)return notify('Do budowy skrzyni potrzeba 8 drewna.');
+ const p=here();let loc=null;
+ for(let r=1;r<=4&&!loc;r++)for(let dx=-r;dx<=r&&!loc;dx++)for(let dy=-r;dy<=r&&!loc;dy++){
+  const x=p.x+dx,y=p.y+dy;
+  if(x<2||x>=WORLD_W-2||y<3||y>=WORLD_H-2)continue;
+  if(getB(x,y)!==B.air||getB(x,y-1)!==B.air)continue;
+  const below=getB(x,y+1);if(below===B.air||below===B.water)continue;
+  if(chests.some(c=>c.world===currentWorld()&&c.x===x&&c.y===y))continue;
+  loc={x,y};
+ }
+ if(!loc)return notify('Brak miejsca na skrzynię. Znajdź równy teren.');
+ inv.wood-=8;
+ const chest={...loc,world:currentWorld(),name:'Skrzynia '+(chests.filter(c=>c.world===currentWorld()).length+1),stash:{}};
+ chests.push(chest);persist();updateHotbar();save();active=chest;show();notify('📦 Skrzynia postawiona!');
+}
+function transfer(item,amount,toChest){
+ if(!active||dist(active)>6||active.world!==currentWorld())return notify('Podejdź bliżej do skrzyni.');
+ const src=toChest?inv:active.stash,dst=toChest?active.stash:inv;
+ const n=Math.min(amount,Math.max(0,Math.floor(src[item]||0)));
+ if(!n)return;
+ src[item]=(src[item]||0)-n;dst[item]=(dst[item]||0)+n;
+ if(src===active.stash&&src[item]===0)delete src[item];
+ persist();updateHotbar();save();show();
+}
+function dismantle(){
+ if(!active||dist(active)>6)return notify('Podejdź bliżej do skrzyni.');
+ if(Object.values(active.stash).some(n=>n>0))return notify('Najpierw opróżnij skrzynię.');
+ chests=chests.filter(c=>c!==active);inv.wood=(inv.wood||0)+4;active=null;persist();updateHotbar();save();panel.hidden=true;notify('📦 Skrzynia rozebrana. Odzyskano 4 drewna.');
+}
+function show(){
+ if(!gameStarted)return notify('Najpierw uruchom świat.');
+ if(!active||dist(active)>6||active.world!==currentWorld())active=nearby();
+ panel.hidden=false;panel.replaceChildren();
+ const head=document.createElement('div');head.className='chHead';
+ const title=document.createElement('b');title.textContent=active?'📦 '+active.name:'📦 MAGAZYN — ETAP 12';
+ const close=document.createElement('button');close.textContent='✕';close.onclick=()=>panel.hidden=true;
+ head.append(title,close);panel.append(head);
+ const hint=document.createElement('p');hint.className='chHint';
+ hint.textContent=active?'Przenoś materiały pomiędzy plecakiem a skrzynią. Możesz zabrać 1, 10 lub wszystkie sztuki.':'Postaw skrzynię za 8 drewna albo podejdź do już zbudowanej.';
+ panel.append(hint);
+ const build=document.createElement('button');build.textContent='➕ POSTAW NOWĄ SKRZYNIĘ (8 🪵)';build.onclick=placeChest;panel.append(build);
+ if(!active){const count=document.createElement('p');count.textContent='Skrzynie w tym świecie: '+chests.filter(c=>c.world===currentWorld()).length;panel.append(count);return}
+ const rows=document.createElement('div');rows.className='chRows';panel.append(rows);
+ const allItems=[...new Set([...items,...Object.keys(active.stash)])];
+ for(const item of allItems){
+  const have=Math.floor(inv[item]||0),stored=Math.floor(active.stash[item]||0);
+  if(!have&&!stored)continue;
+  const row=document.createElement('div');row.className='chRow';
+  const label=document.createElement('b');label.textContent=`${item.toUpperCase()} • 🎒 ${have} • 📦 ${stored}`;row.append(label);
+  const actions=document.createElement('div');actions.className='chActions';row.append(actions);
+  const button=(label,count,toChest,disabled)=>{const b=document.createElement('button');b.textContent=label;b.disabled=disabled;b.onclick=()=>transfer(item,count,toChest);actions.append(b)};
+  button('📥 1',1,true,have<1);button('📥 10',10,true,have<1);button('📥 WSZYSTKO',have,true,have<1);
+  button('📤 1',1,false,stored<1);button('📤 10',10,false,stored<1);button('📤 WSZYSTKO',stored,false,stored<1);
+  rows.append(row);
+ }
+ if(!rows.children.length){const empty=document.createElement('p');empty.textContent='Skrzynia i plecak są puste.';rows.append(empty)}
+ const dismantleButton=document.createElement('button');dismantleButton.textContent='🪓 ROZBIERZ PUSTĄ SKRZYNIĘ (+4 DREWNA)';dismantleButton.style.marginTop='10px';dismantleButton.onclick=dismantle;panel.append(dismantleButton);
+}
+function draw(){
+ if(!gameStarted)return;
+ ctx.save();for(const c of chests){
+  if(c.world!==currentWorld())continue;
+  const x=Math.round(c.x*T-cam.x),y=Math.round(c.y*T-cam.y);
+  if(x<-20||x>VW+20||y<-20||y>VH+20)continue;
+  ctx.fillStyle='#4a2b1e';ctx.fillRect(x,y+2,16,14);
+  ctx.fillStyle='#ad7744';ctx.fillRect(x+1,y+4,14,10);
+  ctx.fillStyle='#e0b86e';ctx.fillRect(x+1,y+2,14,3);
+  ctx.fillStyle='#4d3927';ctx.fillRect(x+1,y+7,14,2);
+  ctx.fillStyle='#f6d77b';ctx.fillRect(x+7,y+6,3,6);
+  if(dist(c)<5){ctx.fillStyle='#f2f6ff';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('📦',x+8,y-3)}
+ }ctx.restore();
+}
+const oldRender=render;render=function(){oldRender();draw()};
+const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='📦';b.title='Magazyn';b.onclick=show;dock.append(b)}
+for(const selector of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(selector);if(root){const b=document.createElement('button');b.textContent='📦 MAGAZYN';b.onclick=show;root.append(b)}}
+document.addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.key.toLowerCase()==='y'){if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape')panel.hidden=true});
+window.PW2Chests={open:show,place:placeChest};
+})();
+</script>
+
+<style id="pw13SignsStyle">
+#pw13Panel{position:fixed;z-index:210;top:50%;left:50%;transform:translate(-50%,-50%);width:min(510px,94vw);max-height:80dvh;overflow:auto;box-sizing:border-box;background:#0b2030;border:3px solid #84b9d1;color:#f2faff;box-shadow:5px 5px #03090d;padding:14px;font:12px monospace}
+#pw13Panel[hidden]{display:none!important}
+#pw13Panel button{background:#214559;border:2px solid #739eb3;color:#fff;padding:8px;cursor:pointer;font:11px monospace}
+#pw13Panel input,#pw13Panel select{background:#132e40;color:#fff;border:2px solid #688da1;padding:8px;max-width:100%;box-sizing:border-box;font:12px monospace}
+#pw13Panel .sign13row{padding:9px;background:#183648;border:1px solid #496d82;margin:7px 0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#pw13Panel .sign13row button{margin-left:4px}
+#pw13Panel .sign13Grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#pw13Panel .sign13Hint{color:#b8d5e1;font-size:11px;line-height:1.6}
+#pw13Open{position:fixed;right:8px;bottom:152px;z-index:65;background:#204458;color:#fff;border:2px solid #80aec3;padding:7px;font:11px monospace}
+@media(max-width:700px){#pw13Open{right:6px;bottom:calc(198px + env(safe-area-inset-bottom))}#pw13Panel .sign13row{display:block}#pw13Panel .sign13row button{margin-top:5px}}
+</style>
+<script id="pw13Signs">
+(function(){
+'use strict';
+const KEY='PW2_STAGE_13_SIGNS';
+let signs=[];
+try{const raw=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(raw))signs=raw.filter(x=>Number.isInteger(x.x)&&Number.isInteger(x.y)&&typeof x.text==='string'&&typeof x.world==='string').slice(0,100)}catch(e){}
+const store=()=>{try{localStorage.setItem(KEY,JSON.stringify(signs))}catch(e){}};
+const wid=()=>String(PW.currentWorld||'main');
+const player=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h)/T)});
+const distance=p=>Math.hypot(player().x-p.x,player().y-p.y);
+const alert=s=>pwToast(s);
+const panel=document.createElement('section');panel.id='pw13Panel';panel.hidden=true;document.body.append(panel);
+const button=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.onclick=fn;return b};
+function available(x,y){return x>1&&x<WORLD_W-2&&y>2&&y<WORLD_H-2&&getB(x,y)===B.air&&getB(x,y-1)===B.air&&getB(x,y+1)!==B.air&&getB(x,y+1)!==B.water&&!signs.some(s=>s.world===wid()&&s.x===x&&s.y===y)}
+function create(){
+ if(!gameStarted)return alert('Najpierw uruchom świat.');
+ if((inv.wood||0)<3)return alert('Potrzebujesz 3 drewna na tabliczkę.');
+ if(signs.filter(s=>s.world===wid()).length>=20)return alert('Limit: 20 tabliczek w jednym świecie.');
+ const p=player();let loc=null;
+ for(let r=1;r<=4&&!loc;r++)for(let dx=-r;dx<=r&&!loc;dx++)for(let dy=-r;dy<=r&&!loc;dy++)if(available(p.x+dx,p.y+dy))loc={x:p.x+dx,y:p.y+dy};
+ if(!loc)return alert('Znajdź wolne miejsce na ziemi.');
+ const input=panel.querySelector('#pw13Name');const value=(input?.value||'Moja baza').trim().slice(0,32);
+ if(!value)return alert('Wpisz tekst na tabliczce.');
+ signs.push({...loc,world:wid(),text:value});inv.wood-=3;updateHotbar();save();store();show();alert('🪧 Tabliczka postawiona!');
+}
+function edit(i){const s=signs[i];if(!s||s.world!==wid()||distance(s)>7)return alert('Podejdź bliżej tabliczki.');const el=panel.querySelector('[data-edit="'+i+'"]');const value=(el?.value||'').trim().slice(0,32);if(!value)return alert('Tekst nie może być pusty.');s.text=value;store();show();}
+function remove(i){const s=signs[i];if(!s||s.world!==wid()||distance(s)>7)return alert('Podejdź bliżej tabliczki.');signs.splice(i,1);inv.wood=(inv.wood||0)+2;updateHotbar();save();store();show();alert('Odzyskano 2 drewna.');}
+function show(){
+ panel.hidden=false;panel.replaceChildren();
+ const head=document.createElement('div');head.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:8px';
+ const title=document.createElement('b');title.textContent='🪧 PIXEL WORLD 2 — ETAP 13: TABLICZKI';title.style.color='#ffe2a3';
+ head.append(title,button('✕',()=>panel.hidden=true));panel.append(head);
+ const hint=document.createElement('p');hint.className='sign13Hint';hint.textContent='Oznacz dom, kopalnię, farmę i magazyn własnymi napisami. Tabliczki stoją w świecie i pozostają po ponownym uruchomieniu gry. Koszt: 3 drewna.';panel.append(hint);
+ const form=document.createElement('div');form.className='sign13Grid';
+ const input=document.createElement('input');input.id='pw13Name';input.maxLength=32;input.placeholder='Np. DOM TOMKA';input.value='Moja baza';
+ form.append(input,button('➕ POSTAW TABLICZKĘ',create));panel.append(form);
+ const subtitle=document.createElement('p');subtitle.textContent='Twoje tabliczki w tym świecie:';panel.append(subtitle);
+ const rows=signs.map((s,i)=>({...s,i})).filter(s=>s.world===wid());
+ if(!rows.length){const p=document.createElement('p');p.className='sign13Hint';p.textContent='Brak tabliczek. Postaw pierwszą obok postaci.';panel.append(p)}
+ for(const s of rows){const row=document.createElement('div');row.className='sign13row';
+  const left=document.createElement('div');const editInput=document.createElement('input');editInput.value=s.text;editInput.maxLength=32;editInput.dataset.edit=s.i;const coords=document.createElement('div');coords.className='sign13Hint';coords.textContent=`📍 ${s.x}, ${s.y} • odległość: ${Math.round(distance(s))} bloków`;left.append(editInput,coords);
+  const right=document.createElement('div');right.append(button('💾',()=>edit(s.i)),button('🪓',()=>remove(s.i)));row.append(left,right);panel.append(row);
+ }
+ const tip=document.createElement('p');tip.className='sign13Hint';tip.textContent='Klawisz I otwiera tabliczki. Edycja i rozbiórka wymagają podejścia do tabliczki (7 bloków).';panel.append(tip);
+}
+function draw(){if(!gameStarted)return;ctx.save();
+ for(const s of signs){if(s.world!==wid())continue;const x=Math.round(s.x*T-cam.x),y=Math.round(s.y*T-cam.y);if(x<-180||x>VW+180||y<-60||y>VH+20)continue;
+ ctx.fillStyle='#6d4930';ctx.fillRect(x+7,y+7,3,10);ctx.fillStyle='#9b683d';ctx.fillRect(x-3,y-7,23,15);ctx.fillStyle='#c69253';ctx.fillRect(x-1,y-5,19,11);ctx.fillStyle='#3a251c';ctx.fillRect(x-1,y-7,19,1);
+ ctx.font='bold 8px monospace';ctx.textAlign='center';const width=Math.min(195,Math.max(36,ctx.measureText(s.text).width+10));ctx.fillStyle='rgba(9,23,31,.9)';ctx.fillRect(x+8-width/2,y-23,width,13);ctx.fillStyle='#fff2c7';ctx.fillText(s.text,x+8,y-13,185);
+ }ctx.restore();}
+const prevRender=render;render=function(){prevRender();draw()};
+document.addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.key.toLowerCase()==='i'){if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape')panel.hidden=true});
+const dock=document.querySelector('#pw2Dock');if(dock){const b=button('🪧',show);b.title='Tabliczki';dock.append(b)}
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(sel);if(root)root.append(button('🪧 TABLICZKI',show))}
+window.pw2SignsOpen=show;
+})();
+</script>
+
+<style id="pw14MapStyle">
+#pw14MapPanel{position:fixed;z-index:220;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,96vw);max-height:86dvh;overflow:auto;box-sizing:border-box;background:#0b2130;border:3px solid #80bdd1;box-shadow:5px 5px #02080d;color:#f4faff;padding:14px;font:12px monospace}
+#pw14MapPanel[hidden]{display:none!important}
+#pw14MapPanel button{background:#214b60;color:white;border:2px solid #78a9bd;padding:8px;font:11px monospace;cursor:pointer}
+#pw14MapPanel .map14Header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#pw14MapPanel .map14Scroll{margin-top:10px;border:2px solid #597e90;background:#030e17;overflow:auto;max-height:56dvh}
+#pw14MapPanel canvas{display:block;width:100%;height:auto;image-rendering:pixelated;cursor:crosshair}
+#pw14MapPanel .map14Legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;color:#c7dfea;line-height:1.6}
+#pw14MapPanel .map14Legend span{white-space:nowrap}
+#pw14MapPanel .map14Foot{display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:space-between;margin-top:10px}
+@media(max-width:700px){#pw14MapPanel{padding:9px}#pw14MapPanel .map14Scroll{max-height:49dvh}}
+</style>
+<script id="pw14MapStage">
+(function(){
+'use strict';
+const PREFIX='PW2_STAGE14_MAP_';
+const panel=document.createElement('section');
+panel.id='pw14MapPanel';panel.hidden=true;document.body.append(panel);
+const map=document.createElement('canvas');map.width=WORLD_W;map.height=WORLD_H;
+const mctx=map.getContext('2d',{alpha:false});
+const seenByWorld=new Map();
+const world=()=>String((typeof PW!=='undefined'&&PW.currentWorld)||'main');
+let activeWorld='',lastPos='',dirty=false,lastSaved=0,lastDraw=0;
+function getSeen(){
+ const id=world();
+ if(seenByWorld.has(id))return seenByWorld.get(id);
+ let arr=new Uint8Array(WORLD_W*WORLD_H);
+ try{
+  const raw=localStorage.getItem(PREFIX+id);
+  if(raw&&raw.length===arr.length)for(let i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i)===49?1:0;
+ }catch(e){}
+ seenByWorld.set(id,arr);return arr;
+}
+function store(){
+ if(!dirty)return;
+ try{
+  const arr=getSeen();
+  let result='';
+  for(let i=0;i<arr.length;i+=4096)result+=Array.from(arr.subarray(i,i+4096),x=>x?'1':'0').join('');
+  localStorage.setItem(PREFIX+world(),result);
+  dirty=false;lastSaved=Date.now();
+ }catch(e){}
+}
+function reveal(){
+ if(!gameStarted)return;
+ const id=world();
+ if(id!==activeWorld){if(activeWorld&&dirty){const w=activeWorld;const arr=seenByWorld.get(w);try{localStorage.setItem(PREFIX+w,Array.from(arr,x=>x?'1':'0').join(''))}catch(e){}}dirty=false;activeWorld=id;lastPos=''}
+ const x=Math.floor((me.x+me.w/2)/T),y=Math.floor((me.y+me.h/2)/T);
+ const pos=x+','+y;
+ if(pos===lastPos)return;
+ lastPos=pos;const arr=getSeen();
+ for(let dy=-10;dy<=10;dy++)for(let dx=-15;dx<=15;dx++){
+  if((dx*dx)/225+(dy*dy)/100>1)continue;
+  const tx=x+dx,ty=y+dy;
+  if(tx<0||ty<0||tx>=WORLD_W||ty>=WORLD_H)continue;
+  const index=ty*WORLD_W+tx;
+  if(!arr[index]){arr[index]=1;dirty=true}
+ }
+}
+const palette={};
+palette[B.air]='#a3d6eb';palette[B.grass]='#62bb60';palette[B.dirt]='#94714d';palette[B.stone]='#707d8b';
+palette[B.wood]='#9a6b3f';palette[B.leaves]='#377d4e';palette[B.sand]='#e4c58c';palette[B.water]='#3d8bc4';
+palette[B.glass]='#c2e7f0';palette[B.brick]='#b65f54';palette[B.coal]='#3b4654';palette[B.gold]='#e7c45a';
+palette[B.lapis]='#4165c7';palette[B.emerald]='#2cc784';palette[B.diamond]='#8ce5ed';palette[B.obsidian]='#29233f';palette[B.crystal]='#ae77da';
+function redraw(){
+ if(panel.hidden)return;
+ const arr=getSeen(),p=mctx.createImageData(WORLD_W,WORLD_H);
+ const cache=new Map();
+ function rgb(color){
+  if(cache.has(color))return cache.get(color);
+  const v=[parseInt(color.slice(1,3),16),parseInt(color.slice(3,5),16),parseInt(color.slice(5,7),16)];
+  cache.set(color,v);return v;
+ }
+ let known=0;
+ for(let y=0;y<WORLD_H;y++)for(let x=0;x<WORLD_W;x++){
+  const i=y*WORLD_W+x,k=i*4;
+  if(!arr[i]){p.data[k]=7;p.data[k+1]=18;p.data[k+2]=27;p.data[k+3]=255;continue}
+  known++;
+  const b=getB(x,y);
+  const c=rgb(palette[b]||'#9d96a6');
+  p.data[k]=c[0];p.data[k+1]=c[1];p.data[k+2]=c[2];p.data[k+3]=255;
+ }
+ mctx.putImageData(p,0,0);
+ if(gameStarted){
+  const x=Math.floor((me.x+me.w/2)/T),y=Math.floor((me.y+me.h/2)/T);
+  mctx.fillStyle='#101a26';mctx.fillRect(x-2,y-2,5,5);
+  mctx.fillStyle='#ff5c68';mctx.fillRect(x-1,y-1,3,3);
+  mctx.fillStyle='#fff';mctx.fillRect(x,y,1,1);
+ }
+ const progress=panel.querySelector('#pw14Progress');
+ if(progress)progress.textContent=`Odkryto ${Math.round(known/arr.length*100)}% mapy • Pozycja: ${Math.floor((me.x+me.w/2)/T)}, ${Math.floor((me.y+me.h/2)/T)}`;
+}
+function show(){
+ if(!gameStarted){if(typeof pwToast==='function')pwToast('Uruchom świat, aby zobaczyć mapę.');return}
+ panel.hidden=false;
+ panel.innerHTML='<div class="map14Header"><b style="font-size:16px;color:#ffe2a3">🗺️ ATLAS ODKRYWCY — ETAP 14</b><button id="pw14Close">✕</button></div><p style="color:#bdd9e5;line-height:1.6">Mapa odkrywa się podczas wędrówki. Ciemne obszary to miejsca, których jeszcze nie odwiedzono.</p><div class="map14Scroll" id="pw14MapHost"></div><div class="map14Legend"><span>🟥 Twoja pozycja</span><span>🟩 Trawa i las</span><span>🟦 Woda</span><span>🟨 Piasek i złoto</span><span>⬛ Nieodkryte</span></div><div class="map14Foot"><span id="pw14Progress"></span><button id="pw14Refresh">🔄 ODŚWIEŻ</button></div><p style="color:#a9c8d7;font-size:11px">Klawisz M — otwórz/zamknij atlas. Mapa zapisuje odkryte obszary automatycznie.</p>';
+ panel.querySelector('#pw14MapHost').append(map);
+ panel.querySelector('#pw14Close').onclick=()=>{panel.hidden=true;store()};
+ panel.querySelector('#pw14Refresh').onclick=redraw;
+ reveal();redraw();
+}
+document.addEventListener('keydown',e=>{
+ if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+ if(e.key.toLowerCase()==='m'){if(panel.hidden)show();else{panel.hidden=true;store()}}
+ if(e.key==='Escape'&&!panel.hidden){panel.hidden=true;store()}
+});
+const makeButton=(text)=>{const b=document.createElement('button');b.textContent=text;b.onclick=show;return b};
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(sel);if(root)root.append(makeButton('🗺️ ATLAS'));
+}
+const dock=document.querySelector('#pw2Dock');
+if(dock){const b=makeButton('🗺️');b.title='Atlas odkrywcy';dock.append(b)}
+setInterval(()=>{
+ if(!gameStarted)return;
+ reveal();
+ if(dirty&&Date.now()-lastSaved>12000)store();
+ if(!panel.hidden&&Date.now()-lastDraw>1500){lastDraw=Date.now();redraw()}
+},1000);
+window.addEventListener('pagehide',store);
+window.PW2Atlas={open:show,save:store};
+})();
+</script>
 </body>
 </html>
