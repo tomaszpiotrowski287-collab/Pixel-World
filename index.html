@@ -7793,5 +7793,498 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)panel
 window.PW2Stage3={settings,open:()=>{panel.hidden=false;show()}};
 })();
 </script>
+
+<style id="pw2WeatherCSS">
+#pw2WeatherButton{position:fixed;right:8px;top:101px;z-index:85;padding:7px 9px;background:#153649;border:2px solid #78b7cf;color:#fff;font:11px monospace;cursor:pointer;box-shadow:2px 2px #091520}
+#pw2WeatherPanel{position:fixed;z-index:205;top:140px;right:8px;width:min(300px,calc(100vw - 16px));background:#0d2433;border:2px solid #8ac7da;color:#f2faff;box-shadow:4px 4px #07121a;padding:12px;box-sizing:border-box;font:12px monospace}
+#pw2WeatherPanel[hidden]{display:none!important}
+#pw2WeatherPanel button{background:#20475b;border:2px solid #79b1c9;color:#fff;padding:9px;cursor:pointer;font:11px monospace}
+#pw2WeatherPanel .weatherGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:10px 0}
+#pw2WeatherPanel .weatherGrid button.active{border-color:#f2d08c;color:#ffe4ad}
+#pw2WeatherPanel label{display:flex;gap:8px;align-items:center;padding:8px 0}
+@media(max-width:700px){#pw2WeatherButton{right:5px;top:82px;font-size:10px;padding:5px}#pw2WeatherPanel{right:5px;top:115px}}
+</style>
+<script id="pw2Stage8LivingWorld">
+(function(){
+'use strict';
+const KEY='PIXEL_WORLD_2_STAGE8_WEATHER';
+const kinds=['clear','cloudy','rain','snow'];
+const labels={clear:'☀️ Słońce',cloudy:'☁️ Chmury',rain:'🌧️ Deszcz',snow:'❄️ Śnieg'};
+let state={kind:'clear',auto:true,particles:true,clouds:true,wind:true,changeAt:Date.now()+120000};
+try{Object.assign(state,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+if(!kinds.includes(state.kind))state.kind='clear';
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+const button=document.createElement('button');button.id='pw2WeatherButton';button.textContent='☀️ POGODA';
+const panel=document.createElement('section');panel.id='pw2WeatherPanel';panel.hidden=true;
+document.body.append(button,panel);
+function select(kind){state.kind=kind;state.changeAt=Date.now()+150000;persist();updateButton();if(!panel.hidden)show()}
+function updateButton(){button.textContent=labels[state.kind]+' ▾'}
+function show(){
+ panel.replaceChildren();
+ const h=document.createElement('strong');h.textContent='🌍 PIXEL WORLD 2 — ŻYJĄCY ŚWIAT';panel.append(h);
+ const p=document.createElement('p');p.textContent='Pogoda zmienia wygląd świata. Możesz wybrać ją ręcznie lub włączyć automatyczne zmiany.';p.style.lineHeight='1.5';panel.append(p);
+ const grid=document.createElement('div');grid.className='weatherGrid';panel.append(grid);
+ for(const kind of kinds){const b=document.createElement('button');b.textContent=labels[kind];b.className=state.kind===kind?'active':'';b.onclick=()=>select(kind);grid.append(b)}
+ for(const [key,label] of [['auto','🔁 Automatyczna zmiana pogody'],['particles','✨ Opady i efekty'],['clouds','☁️ Ruchome chmury'],['wind','🍃 Wiatr i liście']]){
+  const row=document.createElement('label');const input=document.createElement('input');input.type='checkbox';input.checked=!!state[key];input.onchange=()=>{state[key]=input.checked;persist()};row.append(input,document.createTextNode(label));panel.append(row)
+ }
+ const close=document.createElement('button');close.textContent='✓ ZAMKNIJ';close.onclick=()=>panel.hidden=true;panel.append(close);
+}
+button.onclick=()=>{panel.hidden=!panel.hidden;if(!panel.hidden)show()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)panel.hidden=true});
+let last=0;
+const prevSky=sky;
+sky=function(){prevSky();if(!gameStarted)return;const now=performance.now()/1000;
+ ctx.save();
+ if(state.kind==='cloudy'||state.kind==='rain'||state.kind==='snow'){
+  ctx.fillStyle=state.kind==='rain'?'rgba(26,48,74,.22)':state.kind==='snow'?'rgba(189,217,236,.12)':'rgba(125,153,168,.11)';ctx.fillRect(0,0,VW,VH);
+ }
+ if(state.clouds){
+  for(let i=0;i<7;i++){
+   const speed=state.kind==='rain'?5:2.4;
+   const x=((i*107+now*speed-(cam.x*.055))%(VW+130)+(VW+130))%(VW+130)-65;
+   const y=15+(i*29)%60;
+   ctx.fillStyle=state.kind==='rain'?'rgba(59,83,105,.55)':state.kind==='snow'?'rgba(233,245,255,.69)':'rgba(244,252,255,.56)';
+   ctx.fillRect(Math.round(x),y+8,55,12);ctx.fillRect(Math.round(x+9),y+3,32,15);ctx.fillRect(Math.round(x+21),y,19,17);
+  }
+ }
+ ctx.restore();
+};
+const prevRender=render;
+render=function(){prevRender();if(!gameStarted||!state.particles)return;
+ const now=performance.now()/1000;
+ ctx.save();
+ if(state.kind==='rain'||state.kind==='snow'){
+  const rain=state.kind==='rain',count=rain?80:53;
+  ctx.fillStyle=rain?'rgba(152,212,250,.65)':'rgba(247,253,255,.85)';
+  for(let i=0;i<count;i++){
+   const speed=rain?140:29;
+   const dx=rain?now*37:now*9;
+   const x=((i*73+dx)% (VW+25))-10;
+   const y=((i*41+now*speed+(i%5)*18)% (VH+20))-10;
+   ctx.fillRect(Math.round(x),Math.round(y),rain?1:2,rain?7:2);
+  }
+ }
+ if(state.wind&&state.kind!=='snow'){
+  ctx.fillStyle=state.kind==='rain'?'rgba(156,203,219,.35)':'rgba(171,220,134,.6)';
+  for(let i=0;i<14;i++){
+   const x=((i*131+now*(state.kind==='rain'?46:21)-cam.x*.13)%(VW+20)+(VW+20))%(VW+20)-10;
+   const y=45+(i*53+Math.sin(now+i)*10)%(VH-45);
+   ctx.fillRect(Math.round(x),Math.round(y),3,2)
+  }
+ }
+ ctx.restore();
+};
+setInterval(()=>{
+ if(!gameStarted||!state.auto||Date.now()<state.changeAt)return;
+ const current=kinds.indexOf(state.kind);
+ // Transition through neighboring weather types instead of chaotic random jumps.
+ const next=(current+(Math.random()<.65?1:3))%kinds.length;
+ state.kind=kinds[next];state.changeAt=Date.now()+120000+Math.floor(Math.random()*100000);persist();updateButton();
+ if(typeof pwToast==='function')pwToast('🌦️ Pogoda: '+labels[state.kind]);
+},4000);
+for(const selector of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const el=document.querySelector(selector);if(el){const b=document.createElement('button');b.textContent='🌦️ POGODA';b.onclick=()=>{panel.hidden=false;show()};el.append(b)}
+}
+updateButton();
+window.PW2Weather={open:()=>{panel.hidden=false;show()},set:select};
+})();
+</script>
+
+<style id="pw2Mining9CSS">
+#pw2Mine9{position:fixed;z-index:190;left:50%;top:50%;transform:translate(-50%,-50%);width:min(530px,94vw);max-height:78dvh;overflow:auto;box-sizing:border-box;background:#0b1d2a;color:#f2faff;border:3px solid #82bed6;box-shadow:5px 5px #02080d;padding:14px;font:12px monospace}
+#pw2Mine9[hidden]{display:none!important}
+#pw2Mine9 button{background:#21445a;color:white;border:2px solid #6f9bb3;padding:9px;cursor:pointer;font:inherit}
+#pw2Mine9 .mineGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#pw2Mine9 .mineCard{padding:10px;background:#183447;border:1px solid #416d84;line-height:1.7}
+#pw2Mine9 .mineCard button{display:block;width:100%;margin-top:8px}
+#pw2Mine9 .mineHeader{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+#pw2Mine9 .mineHeader b{font-size:15px;color:#ffe0a0}
+#pw2Mine9Indicator{position:fixed;z-index:20;left:8px;bottom:92px;background:rgba(7,23,34,.88);border:1px solid #65899d;color:#e4f7ff;padding:6px;font:10px monospace;pointer-events:none}
+#pw2Mine9Quick{position:fixed;z-index:65;right:8px;bottom:108px;display:flex;gap:5px}
+#pw2Mine9Quick button{background:#17394a;border:2px solid #6f9bb3;color:white;padding:8px;font:11px monospace}
+@media(max-width:700px){#pw2Mine9 .mineGrid{grid-template-columns:1fr}#pw2Mine9Quick{right:5px;bottom:calc(103px + env(safe-area-inset-bottom))}#pw2Mine9Quick button{padding:6px}#pw2Mine9Indicator{bottom:calc(148px + env(safe-area-inset-bottom));font-size:9px;max-width:120px}}
+</style>
+<script id="pw2MiningStage9">
+(function(){
+'use strict';
+const KEY='PW2_MINING_STAGE_9';
+const oreList=[
+ {id:B.coal,label:'⚫ Węgiel',color:'#555e68'},
+ {id:B.gold,label:'🟡 Złoto',color:'#f2ce64'},
+ {id:B.lapis,label:'🔵 Lapis',color:'#477ddf'},
+ {id:B.emerald,label:'🟢 Szmaragd',color:'#49d594'},
+ {id:B.diamond,label:'💎 Diament',color:'#84e8f6'},
+ {id:B.crystal,label:'🔮 Kryształ',color:'#bb83ef'}
+];
+const state={torches:6,placed:[],scanner:false,oreFilter:0,found:0};
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'{}');Object.assign(state,saved);if(!Array.isArray(state.placed))state.placed=[]}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+const panel=document.createElement('section');panel.id='pw2Mine9';panel.hidden=true;document.body.append(panel);
+const info=document.createElement('div');info.id='pw2Mine9Indicator';document.body.append(info);
+const quick=document.createElement('div');quick.id='pw2Mine9Quick';document.body.append(quick);
+const worldId=()=>typeof PW==='object'?(PW.currentWorld||'main'):'main';
+const playerTile=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h/2)/T)});
+const note=s=>{if(typeof pwToast==='function')pwToast(s)};
+function craft(){
+ if((inv.coal||0)<1||(inv.wood||0)<1)return note('Potrzebujesz 1 węgla i 1 drewna');
+ inv.coal--;inv.wood--;state.torches+=4;persist();updateHotbar();if(typeof save==='function')save();note('🔥 Wytworzono 4 pochodnie');if(!panel.hidden)show();
+}
+function putTorch(){
+ if(!gameStarted||paused)return;
+ if(state.torches<=0)return note('Brak pochodni! Wytwórz nowe w menu kopalni.');
+ const q=target(),x=Math.floor(q.x/T),y=Math.floor(q.y/T);
+ if(x<1||x>=WORLD_W-1||y<1||y>=WORLD_H-1||!inRange(x,y))return note('To miejsce jest poza zasięgiem.');
+ if(getB(x,y)!==B.air)return note('Pochodnię stawiasz w pustym miejscu.');
+ if(![getB(x-1,y),getB(x+1,y),getB(x,y-1),getB(x,y+1)].some(b=>b!==B.air&&b!==B.water))return note('Pochodnia wymaga sąsiedniego bloku.');
+ if(state.placed.some(p=>p.x===x&&p.y===y&&p.world===worldId()))return;
+ state.placed.push({x,y,world:worldId()});state.torches--;persist();note('🔥 Pochodnia ustawiona!');
+}
+function removeTorch(){
+ if(!gameStarted||paused)return;
+ const q=target(),x=Math.floor(q.x/T),y=Math.floor(q.y/T);
+ const idx=state.placed.findIndex(p=>p.x===x&&p.y===y&&p.world===worldId());
+ if(idx<0)return note('Wyceluj w ustawioną pochodnię.');
+ state.placed.splice(idx,1);state.torches++;persist();note('Pochodnia zabrana');
+}
+function scan(){
+ if(!gameStarted)return note('Najpierw wejdź do świata.');
+ const p=playerTile(),ores=[];
+ for(let dy=-13;dy<=13;dy++)for(let dx=-19;dx<=19;dx++){
+  const x=p.x+dx,y=p.y+dy;
+  if(x<0||y<0||x>=WORLD_W||y>=WORLD_H)continue;
+  const b=getB(x,y),ore=oreList.find(o=>o.id===b);
+  if(ore)ores.push({x,y,ore,dist:Math.hypot(dx,dy)});
+ }
+ ores.sort((a,b)=>a.dist-b.dist);
+ const first=ores.find(o=>o.ore.id===oreList[state.oreFilter].id);
+ state.scanner=true;state.found=ores.length;
+ const msg=first?`${first.ore.label}: ${Math.round(first.dist)} bloków od Ciebie`:'Brak wybranej rudy w zasięgu skanera';
+ note('🔎 '+msg);persist();if(!panel.hidden)show();
+}
+function show(){
+ panel.hidden=false;
+ const ore=oreList[state.oreFilter];
+ panel.innerHTML=`<div class="mineHeader"><b>⛏️ KOPALNIA 2.0</b><button id="m9close">✕</button></div><div class="mineGrid">
+ <div class="mineCard"><b>🔥 OŚWIETLENIE JASKIŃ</b><br>Pochodnie: ${state.torches}<br>Wytwarzanie: 1 drewno + 1 węgiel → 4 pochodnie<br><button id="m9craft">🔨 WYTWÓRZ 4 POCHODNIE</button><button id="m9put">🔥 POSTAW POCHODNIĘ (L)</button><button id="m9remove">↩️ ZABIERZ POCHODNIĘ (U)</button></div>
+ <div class="mineCard"><b>🔎 SKANER ZŁÓŻ</b><br>Wybrana ruda: ${ore.label}<br>Wykryte złoża: ${state.found}<br>Wskaźniki pokazują tylko rudy w pobliżu.<br><button id="m9ore">🔁 ZMIEŃ RUDĘ</button><button id="m9scan">🔎 SKANUJ (P)</button></div>
+ <div class="mineCard"><b>🧭 GŁĘBOKOŚĆ</b><br>Pozycja: ${playerTile().x}, ${playerTile().y}<br>Im niżej kopiesz, tym ciemniejsze otoczenie.<br>Rozstawiaj pochodnie, aby oświetlić tunele.</div>
+ <div class="mineCard"><b>🎮 STEROWANIE</b><br>L — ustaw pochodnię<br>U — zabierz pochodnię<br>P — skanuj złoża<br>O — otwórz kopalnię<br>Na telefonie użyj przycisków 🔥 i ⛏️.</div>
+ </div>`;
+ panel.querySelector('#m9close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#m9craft').onclick=craft;
+ panel.querySelector('#m9put').onclick=putTorch;
+ panel.querySelector('#m9remove').onclick=removeTorch;
+ panel.querySelector('#m9ore').onclick=()=>{state.oreFilter=(state.oreFilter+1)%oreList.length;state.scanner=false;persist();show()};
+ panel.querySelector('#m9scan').onclick=scan;
+}
+function draw(){
+ if(!gameStarted)return;
+ const player=playerTile(),deep=player.y>35;
+ ctx.save();
+ if(deep){
+  const darkness=Math.min(.57,Math.max(0,(player.y-35)*.014));
+  ctx.fillStyle=`rgba(2,8,18,${darkness})`;ctx.fillRect(0,0,VW,VH);
+ }
+ for(const t of state.placed){
+  if(t.world!==worldId())continue;
+  const x=t.x*T-cam.x+8,y=t.y*T-cam.y+8;
+  if(x<-40||y<-40||x>VW+40||y>VH+40)continue;
+  const glow=ctx.createRadialGradient(x,y,2,x,y,65);
+  glow.addColorStop(0,'rgba(255,209,100,.34)');glow.addColorStop(1,'rgba(255,195,75,0)');
+  ctx.fillStyle=glow;ctx.fillRect(x-65,y-65,130,130);
+  ctx.fillStyle='#78502e';ctx.fillRect(Math.round(x-2),Math.round(y),4,8);
+  ctx.fillStyle='#ffb747';ctx.fillRect(Math.round(x-3),Math.round(y-6),6,7);
+  ctx.fillStyle='#fff2a3';ctx.fillRect(Math.round(x-1),Math.round(y-5),2,4);
+ }
+ if(state.scanner){
+  const focus=oreList[state.oreFilter],p=player;
+  for(let dy=-13;dy<=13;dy++)for(let dx=-19;dx<=19;dx++){
+   const tx=p.x+dx,ty=p.y+dy;
+   if(tx<0||ty<0||tx>=WORLD_W||ty>=WORLD_H||getB(tx,ty)!==focus.id)continue;
+   const x=tx*T-cam.x,y=ty*T-cam.y;
+   if(x<-T||x>VW||y<-T||y>VH)continue;
+   ctx.strokeStyle=focus.color;ctx.lineWidth=1.5;
+   ctx.strokeRect(Math.round(x)+1.5,Math.round(y)+1.5,T-3,T-3);
+   ctx.fillStyle=focus.color;ctx.fillRect(Math.round(x+T/2-2),Math.round(y-3),4,3);
+  }
+ }
+ ctx.restore();
+}
+const oldRender=render;render=function(){oldRender();draw()};
+const quickButton=(txt,fn)=>{const b=document.createElement('button');b.textContent=txt;b.onclick=fn;quick.append(b)};
+quickButton('🔥',putTorch);quickButton('⛏️',show);
+document.addEventListener('keydown',e=>{
+ if(e.repeat||/INPUT|TEXTAREA/.test(e.target.tagName))return;
+ const key=e.key.toLowerCase();
+ if(key==='l')putTorch();
+ if(key==='u')removeTorch();
+ if(key==='p')scan();
+ if(key==='o'){if(panel.hidden)show();else panel.hidden=true}
+ if(key==='escape')panel.hidden=true;
+});
+for(const selector of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const target=document.querySelector(selector);if(target){const b=document.createElement('button');b.textContent='⛏️ KOPALNIA 2.0';b.onclick=show;target.append(b)}
+}
+const pw2=document.querySelector('#pw2Dock');if(pw2){const b=document.createElement('button');b.textContent='⛏️';b.title='Kopalnia 2.0';b.onclick=show;pw2.append(b)}
+setInterval(()=>{if(!gameStarted)return;info.textContent=`🔥 ${state.torches} pochodni • ⛏️ głębokość ${playerTile().y}`},900);
+window.PW2Mining={open:show,torch:putTorch,scan};
+})();
+</script>
+
+<style id="pw2Travel10Styles">
+#pw2Travel10{position:fixed;z-index:195;left:50%;top:50%;transform:translate(-50%,-50%);width:min(510px,94vw);max-height:80dvh;overflow:auto;background:#0d2230;color:#f0faff;border:3px solid #82c6d9;box-shadow:5px 5px #000;padding:15px;box-sizing:border-box;font:12px monospace}
+#pw2Travel10[hidden]{display:none!important}
+#pw2Travel10 button{background:#21495c;color:#fff;border:2px solid #77a8bb;padding:9px;cursor:pointer;font:11px monospace}
+#pw2Travel10 .t10Head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#pw2Travel10 .t10Stop{padding:11px;background:#193746;border:1px solid #517c90;margin:9px 0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#pw2Travel10 .t10Stop small{display:block;color:#a8cddd;margin-top:4px}
+#pw2Travel10 .t10Actions{display:flex;gap:5px;flex-wrap:wrap}
+#pw2Travel10 input{max-width:130px;background:#09212d;border:1px solid #89b9cc;color:#fff;padding:7px}
+#pw2Travel10 .t10Hint{color:#bad7e3;line-height:1.7}
+@media(max-width:600px){#pw2Travel10{padding:10px}#pw2Travel10 .t10Stop{flex-direction:column;align-items:stretch}#pw2Travel10 .t10Actions button{flex:1}}
+</style>
+<script id="pw2TravelStage10">
+(function(){
+'use strict';
+const KEY='PW2_TRAVEL_STAGE_10';
+let stops=[];
+try{const stored=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(stored))stops=stored.filter(x=>Number.isFinite(x.x)&&Number.isFinite(x.y)&&typeof x.world==='string').slice(0,12)}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(stops))}catch(e){}};
+const world=()=>String(PW.currentWorld||'main');
+const panel=document.createElement('section');panel.id='pw2Travel10';panel.hidden=true;document.body.append(panel);
+const note=s=>pwToast(s);
+const tile=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h)/T)});
+const localStops=()=>stops.filter(p=>p.world===world());
+function freeAt(x,y){
+ if(x<1||x>=WORLD_W-1||y<3||y>=WORLD_H-3)return false;
+ const a=getB(x,y),b=getB(x,y-1),floor=getB(x,y+1);
+ return a===B.air&&b===B.air&&floor!==B.air&&floor!==B.water;
+}
+function addStop(){
+ if(!gameStarted)return note('Najpierw uruchom świat.');
+ if(localStops().length>=5)return note('Limit: 5 stacji w jednym świecie.');
+ if((inv.stone||0)<8||(inv.wood||0)<4)return note('Potrzeba 8 kamienia i 4 drewna.');
+ const p=tile();let location=null;
+ for(let r=0;r<=3&&!location;r++)for(let dx=-r;dx<=r&&!location;dx++)for(let dy=-r;dy<=r&&!location;dy++){
+  const x=p.x+dx,y=p.y+dy;
+  if(freeAt(x,y)&&Math.hypot(dx,dy)<4)location={x,y};
+ }
+ if(!location)return note('Znajdź płaski teren z wolnym miejscem.');
+ if(localStops().some(s=>Math.hypot(s.x-location.x,s.y-location.y)<7))return note('Stacje muszą być oddalone o minimum 7 bloków.');
+ const name='Stacja '+(localStops().length+1);
+ stops.push({...location,name,world:world()});
+ inv.stone-=8;inv.wood-=4;updateHotbar();save();persist();note('🚉 Stacja zbudowana!');show();
+}
+function travel(i){
+ if(!gameStarted)return note('Najpierw uruchom świat.');
+ const stop=stops[i];
+ if(!stop||stop.world!==world())return note('Ta stacja jest w innym świecie.');
+ if(!freeAt(stop.x,stop.y))return note('Miejsce docelowe jest zablokowane. Oczyść stację.');
+ me.x=stop.x*T+Math.max(0,(T-me.w)/2);
+ me.y=(stop.y+1)*T-me.h;
+ me.vx=0;me.vy=0;
+ if(typeof cam==='object'){cam.x=Math.max(0,me.x-VW/2);cam.y=Math.max(0,me.y-VH/2)}
+ panel.hidden=true;note('🚉 Podróż zakończona: '+stop.name);
+}
+function removeStop(i){
+ const stop=stops[i];if(!stop||stop.world!==world())return;
+ if(Math.hypot(tile().x-stop.x,tile().y-stop.y)>6)return note('Podejdź do stacji, aby ją rozebrać.');
+ stops.splice(i,1);inv.stone=(inv.stone||0)+4;inv.wood=(inv.wood||0)+2;updateHotbar();save();persist();show();note('Stacja rozebrana. Odzyskano część materiałów.');
+}
+function renameStop(i,value){
+ const stop=stops[i];if(!stop||stop.world!==world())return;
+ const name=value.trim().slice(0,24);
+ if(!name)return note('Podaj nazwę stacji.');
+ stop.name=name;persist();show();
+}
+function show(){
+ panel.hidden=false;
+ panel.innerHTML='<div class="t10Head"><b style="font-size:17px;color:#ffe0a0">🚉 SIEĆ PODRÓŻY — ETAP 10</b><button id="t10Close">✕</button></div><p class="t10Hint">Buduj stacje i przenoś się między nimi w tym samym świecie. Każda stacja kosztuje 8 kamienia i 4 drewna. Maksymalnie 5 stacji na świat.</p><button id="t10Build">➕ ZBUDUJ STACJĘ</button><div id="t10List"></div><p class="t10Hint">Sterowanie: T — otwórz menu. Na telefonie wybierz 🚉 w menu gry.</p>';
+ panel.querySelector('#t10Close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#t10Build').onclick=addStop;
+ const list=panel.querySelector('#t10List');
+ const rows=stops.map((p,i)=>({...p,i})).filter(p=>p.world===world());
+ if(!rows.length){const p=document.createElement('p');p.textContent='Nie masz jeszcze stacji w tym świecie.';list.append(p)}
+ for(const p of rows){
+  const item=document.createElement('div');item.className='t10Stop';
+  const details=document.createElement('div');
+  const name=document.createElement('input');name.value=p.name;name.maxLength=24;name.setAttribute('aria-label','Nazwa stacji');
+  const coords=document.createElement('small');coords.textContent=`📍 ${p.x}, ${p.y} • ${Math.round(Math.hypot(tile().x-p.x,tile().y-p.y))} bloków`;
+  details.append(name,coords);
+  const actions=document.createElement('div');actions.className='t10Actions';
+  const button=(label,cb)=>{const b=document.createElement('button');b.textContent=label;b.onclick=cb;actions.append(b)};
+  button('💾',()=>renameStop(p.i,name.value));
+  button('🚉 JEDŹ',()=>travel(p.i));
+  button('🗑️',()=>removeStop(p.i));
+  item.append(details,actions);list.append(item);
+ }
+}
+function draw(){
+ if(!gameStarted)return;
+ ctx.save();
+ for(const p of localStops()){
+  const x=Math.round(p.x*T-cam.x),y=Math.round(p.y*T-cam.y);
+  if(x<-25||x>VW+25||y<-45||y>VH+25)continue;
+  const t=performance.now()/450;
+  ctx.fillStyle='#253e57';ctx.fillRect(x,y-7,16,24);
+  ctx.fillStyle='#6bcee2';ctx.fillRect(x+2,y-5,12,19);
+  ctx.fillStyle='#102e4c';ctx.fillRect(x+4,y-3,8,15);
+  ctx.fillStyle='#a4f3ff';ctx.fillRect(x+6,y-1,4,10);
+  ctx.fillStyle='#ffe8a4';ctx.fillRect(x+6,y-8+Math.sin(t)*1.5,4,3);
+  ctx.fillStyle='#091923';ctx.fillRect(x+2,y+15,12,2);
+  ctx.font='bold 8px monospace';ctx.textAlign='center';
+  const name=p.name.length>15?p.name.slice(0,14)+'…':p.name;
+  const width=Math.min(120,Math.max(42,ctx.measureText(name).width+10));
+  ctx.fillStyle='rgba(7,23,35,.9)';ctx.fillRect(x+8-width/2,y-24,width,12);
+  ctx.fillStyle='#f3f8ff';ctx.fillText(name,x+8,y-15);
+ }
+ ctx.restore();
+}
+const prev=render;render=function(){prev();draw()};
+document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='t'&&!e.repeat&&!/INPUT|TEXTAREA/.test(e.target.tagName)){if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape')panel.hidden=true});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='🚉 PODRÓŻE';b.onclick=show;root.append(b)}
+}
+const dock=document.querySelector('#pw2Dock');
+if(dock){const b=document.createElement('button');b.textContent='🚉';b.title='Stacje podróży';b.onclick=show;dock.append(b)}
+window.pwTravel10Open=show;
+})();
+</script>
+
+<style id="pw2Farm11Style">
+#pw2Farm11{position:fixed;z-index:205;left:50%;top:50%;transform:translate(-50%,-50%);width:min(510px,94vw);max-height:78dvh;overflow:auto;box-sizing:border-box;padding:14px;background:#102a29;color:#f0fff2;border:3px solid #91d8a5;box-shadow:5px 5px #020b09;font:12px monospace}
+#pw2Farm11[hidden]{display:none!important}
+#pw2Farm11 button{background:#235347;color:white;border:2px solid #80b99b;padding:9px;font:11px monospace;cursor:pointer}
+#pw2Farm11 .farmHead{display:flex;justify-content:space-between;align-items:center;gap:9px}
+#pw2Farm11 .farmGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+#pw2Farm11 .farmCard{background:#183e39;border:1px solid #548b74;padding:11px;line-height:1.7}
+#pw2Farm11 .farmCard button{width:100%;margin-top:7px}
+#pw2Farm11 .farmMuted{font-size:10px;color:#b6d7c7;line-height:1.6}
+#pw2Farm11Hud{position:fixed;left:8px;bottom:125px;z-index:19;background:rgba(7,31,25,.86);border:1px solid #619b79;color:#e5ffec;padding:6px;font:10px monospace;pointer-events:none}
+@media(max-width:600px){#pw2Farm11 .farmGrid{grid-template-columns:1fr}#pw2Farm11Hud{left:5px;bottom:calc(175px + env(safe-area-inset-bottom));font-size:9px}}
+</style>
+<script id="pw2FarmStage11">
+(function(){
+'use strict';
+const KEY='PW2_FARM_STAGE_11';
+const crops=[
+ {name:'🥕 Marchew',color:'#ee983f',leaf:'#5aba63',duration:65000,reward:8},
+ {name:'🌾 Pszenica',color:'#ebd271',leaf:'#b7a74a',duration:85000,reward:12},
+ {name:'🍅 Pomidor',color:'#df5c52',leaf:'#62b46a',duration:110000,reward:17}
+];
+let farm={seeds:[8,5,3],harvest:[0,0,0],plants:[],selected:0,earned:0};
+try{const v=JSON.parse(localStorage.getItem(KEY)||'{}');Object.assign(farm,v);if(!Array.isArray(farm.plants))farm.plants=[];if(!Array.isArray(farm.seeds))farm.seeds=[8,5,3];if(!Array.isArray(farm.harvest))farm.harvest=[0,0,0]}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(farm))}catch(e){}};
+const world=()=>String(PW.currentWorld||'main');
+const panel=document.createElement('section');panel.id='pw2Farm11';panel.hidden=true;document.body.append(panel);
+const hud=document.createElement('div');hud.id='pw2Farm11Hud';document.body.append(hud);
+const message=s=>{if(typeof pwToast==='function')pwToast(s)};
+const playerTile=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h)/T)});
+function location(){
+ const p=playerTile(),dir=me.dir<0?-1:1;
+ for(let dist=1;dist<=4;dist++){
+  const x=p.x+dist*dir;
+  if(x<1||x>=WORLD_W-1)continue;
+  for(let y=p.y-2;y<=p.y+3;y++){
+   if(y<1||y>=WORLD_H-2)continue;
+   if(getB(x,y)===B.air&&[B.grass,B.dirt].includes(getB(x,y+1))&&getB(x,y-1)===B.air&&!farm.plants.some(q=>q.world===world()&&q.x===x&&q.y===y))return{x,y};
+  }
+ }
+ return null;
+}
+function plant(){
+ if(!gameStarted||paused)return message('Najpierw wejdź do gry.');
+ const kind=farm.selected;
+ if((farm.seeds[kind]||0)<1)return message('Brakuje nasion. Kup je za gemy.');
+ const spot=location();if(!spot)return message('Znajdź wolną ziemię lub trawę obok postaci.');
+ farm.seeds[kind]--;
+ farm.plants.push({...spot,world:world(),kind,planted:Date.now(),watered:false});
+ persist();message('🌱 Zasadzono: '+crops[kind].name);if(!panel.hidden)show();
+}
+function closest(){
+ const p=playerTile();return farm.plants.map((q,i)=>({...q,i})).filter(q=>q.world===world()&&Math.abs(q.x-p.x)<=5&&Math.abs(q.y-p.y)<=5).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x))[0];
+}
+function water(){
+ if(!gameStarted||paused)return;
+ const q=closest();if(!q)return message('Nie ma rośliny w pobliżu.');
+ if(q.watered)return message('Ta roślina została już podlana.');
+ farm.plants[q.i].watered=true;
+ persist();message('💧 Podlano roślinę — urośnie szybciej!');if(!panel.hidden)show();
+}
+function ready(q){return Date.now()-q.planted>=crops[q.kind].duration*(q.watered?.55:1)}
+function harvest(){
+ if(!gameStarted||paused)return;
+ const q=closest();if(!q)return message('Nie ma rośliny w pobliżu.');
+ if(!ready(q)){const sec=Math.ceil((crops[q.kind].duration*(q.watered?.55:1)-(Date.now()-q.planted))/1000);return message('🌱 Jeszcze '+sec+' sekund do zbioru.');}
+ farm.plants.splice(q.i,1);
+ farm.harvest[q.kind]=(farm.harvest[q.kind]||0)+1;
+ if(Math.random()<.65)farm.seeds[q.kind]=(farm.seeds[q.kind]||0)+1;
+ persist();message('🧺 Zebrano: '+crops[q.kind].name);if(!panel.hidden)show();
+}
+function sell(){
+ let total=0;for(let i=0;i<crops.length;i++){total+=(farm.harvest[i]||0)*crops[i].reward;farm.harvest[i]=0}
+ if(!total)return message('Nie masz plonów na sprzedaż.');
+ PW.gems=(PW.gems||0)+total;farm.earned+=total;persist();
+ if(typeof pwSaveExtra==='function')pwSaveExtra();if(typeof pwRefresh==='function')pwRefresh();
+ message('💎 Sprzedano plony za '+total+' gemów!');show();
+}
+function buy(){
+ if((PW.gems||0)<15)return message('Potrzebujesz 15 gemów.');
+ PW.gems-=15;farm.seeds[farm.selected]=(farm.seeds[farm.selected]||0)+5;
+ if(typeof pwSaveExtra==='function')pwSaveExtra();if(typeof pwRefresh==='function')pwRefresh();
+ persist();message('🌱 Kupiono 5 nasion!');show();
+}
+function show(){
+ panel.hidden=false;
+ const near=closest(),remaining=near?Math.max(0,Math.ceil((crops[near.kind].duration*(near.watered?.55:1)-(Date.now()-near.planted))/1000)):null;
+ panel.innerHTML=`<div class="farmHead"><b style="font-size:17px;color:#d5f4a2">🌱 FARMA 2.0 — ETAP 11</b><button id="farmClose">✕</button></div>
+ <p class="farmMuted">Sadź na trawie lub ziemi obok postaci. Podlewaj, aby przyspieszyć wzrost. Zebrane plony możesz sprzedać za gemy.</p>
+ <div class="farmGrid"><div class="farmCard"><b>🌱 NASIONA</b><br>Wybrano: ${crops[farm.selected].name}<br>${crops.map((c,i)=>c.name+': '+(farm.seeds[i]||0)).join('<br>')}<br><button id="farmChoose">🔁 ZMIEŃ ROŚLINĘ</button><button id="farmPlant">🌱 ZASADŹ (V)</button><button id="farmBuy">🛒 5 NASION — 15 💎</button></div>
+ <div class="farmCard"><b>🧺 PLONY</b><br>${crops.map((c,i)=>c.name+': '+(farm.harvest[i]||0)).join('<br>')}<br>Gemy: ${PW.gems||0}<br><button id="farmHarvest">🧺 ZBIERZ (C)</button><button id="farmSell">💎 SPRZEDAJ WSZYSTKIE</button></div>
+ <div class="farmCard"><b>💧 PIELĘGNACJA</b><br>${near?crops[near.kind].name+' — '+(remaining===0?'GOTOWA DO ZBIORU':remaining+' s do zbioru'):'Brak pobliskiej rośliny'}<br><button id="farmWater">💧 PODLEJ (X)</button></div>
+ <div class="farmCard"><b>🎮 STEROWANIE</b><br>G — menu farmy<br>V — sadzenie<br>X — podlewanie<br>C — zbieranie<br><span class="farmMuted">Rośliny rosną także po zamknięciu gry.</span></div></div>`;
+ panel.querySelector('#farmClose').onclick=()=>panel.hidden=true;
+ panel.querySelector('#farmChoose').onclick=()=>{farm.selected=(farm.selected+1)%crops.length;persist();show()};
+ panel.querySelector('#farmPlant').onclick=plant;
+ panel.querySelector('#farmBuy').onclick=buy;
+ panel.querySelector('#farmHarvest').onclick=harvest;
+ panel.querySelector('#farmSell').onclick=sell;
+ panel.querySelector('#farmWater').onclick=water;
+}
+function draw(){
+ if(!gameStarted)return;
+ ctx.save();
+ for(const q of farm.plants){
+  if(q.world!==world())continue;
+  const x=Math.round(q.x*T-cam.x),y=Math.round(q.y*T-cam.y);
+  if(x<-20||x>VW+20||y<-20||y>VH+20)continue;
+  const progress=Math.min(1,(Date.now()-q.planted)/(crops[q.kind].duration*(q.watered?.55:1)));
+  const height=Math.max(3,Math.floor(13*progress));
+  ctx.fillStyle='#5c9a4d';ctx.fillRect(x+7,y+16-height,2,height);
+  ctx.fillStyle=crops[q.kind].leaf;
+  ctx.fillRect(x+3,y+15-height,5,4);ctx.fillRect(x+9,y+13-height,5,4);
+  if(progress>.5){ctx.fillStyle=crops[q.kind].color;ctx.fillRect(x+5,y+9-height,6,6)}
+  if(progress>=1){ctx.fillStyle='#fff3b0';ctx.fillRect(x+7,y-4,2,2)}
+  if(q.watered){ctx.fillStyle='#7bd9fa';ctx.fillRect(x+13,y+12,2,2)}
+ }
+ ctx.restore();
+}
+const previousRender=render;render=function(){previousRender();draw()};
+document.addEventListener('keydown',e=>{
+ if(e.repeat||/INPUT|TEXTAREA/.test(e.target.tagName))return;
+ const k=e.key.toLowerCase();
+ if(k==='g'){if(panel.hidden)show();else panel.hidden=true}
+ if(k==='v')plant();if(k==='x')water();if(k==='c')harvest();
+ if(k==='escape')panel.hidden=true;
+});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const parent=document.querySelector(sel);if(parent){const b=document.createElement('button');b.textContent='🌱 FARMA 2.0';b.onclick=show;parent.append(b)}
+}
+const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='🌱';b.title='Farma 2.0';b.onclick=show;dock.append(b)}
+setInterval(()=>{if(gameStarted)hud.textContent='🌱 Rośliny: '+farm.plants.filter(q=>q.world===world()).length+' • 🧺 Plony: '+farm.harvest.reduce((a,b)=>a+b,0)},1000);
+window.pw2Farm11Open=show;
+})();
+</script>
 </body>
 </html>
