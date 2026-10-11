@@ -8767,5 +8767,239 @@ document.addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.tes
 for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='🏗️ WARSZTAT';b.onclick=show;root.append(b)}}const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='🏗️';b.title='Warsztat budowniczego';b.onclick=show;dock.append(b)}
 window.PW17Builder={open:show,build,undo};
 })();
-</script></body>
+</script><style id="pw18PhotoStyles">
+#pw18Photo{position:fixed;z-index:260;left:50%;bottom:16px;transform:translateX(-50%);width:min(540px,94vw);box-sizing:border-box;padding:12px;background:rgba(9,29,43,.96);border:2px solid #82bed6;box-shadow:4px 4px #030a11;color:#f4faff;font:12px monospace}
+#pw18Photo[hidden],#pw18PhotoLauncher[hidden]{display:none!important}
+#pw18Photo .pw18Top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+#pw18Photo .pw18Controls{display:flex;gap:7px;flex-wrap:wrap}
+#pw18Photo button,#pw18PhotoLauncher{background:#1b4258;border:2px solid #75a8bf;color:#fff;padding:9px 11px;font:11px monospace;cursor:pointer}
+#pw18Photo button[aria-pressed="true"]{background:#42755d;border-color:#9de7b3}
+#pw18Photo .pw18Note{color:#bad5e4;margin-top:9px;line-height:1.4}
+#pw18PhotoLauncher{position:fixed;right:9px;bottom:190px;z-index:185}
+body.pw18PhotoMode #pw2Dock,body.pw18PhotoMode #pw2Panel,body.pw18PhotoMode #pwHub,body.pw18PhotoMode #pwMobileSheet,body.pw18PhotoMode #pwDesktopMenu,body.pw18PhotoMode #pw2Mine9Quick,body.pw18PhotoMode #pw2Mine9Indicator{visibility:hidden!important}
+body.pw18PhotoMode #pw18Photo,body.pw18PhotoMode #pw18PhotoLauncher{visibility:visible!important}
+#pw18PhotoFrame{position:fixed;inset:0;pointer-events:none;z-index:175;display:none;background:linear-gradient(90deg,transparent 33.2%,rgba(255,255,255,.24) 33.33%,transparent 33.46%,transparent 66.55%,rgba(255,255,255,.24) 66.66%,transparent 66.8%),linear-gradient(transparent 33.2%,rgba(255,255,255,.24) 33.33%,transparent 33.46%,transparent 66.55%,rgba(255,255,255,.24) 66.66%,transparent 66.8%)}
+body.pw18Grid #pw18PhotoFrame{display:block}
+@media(max-width:700px){#pw18Photo{bottom:calc(8px + env(safe-area-inset-bottom));padding:9px}#pw18Photo button{padding:8px 7px}#pw18PhotoLauncher{bottom:calc(200px + env(safe-area-inset-bottom))}}
+</style>
+<script id="pw18PhotoStage">
+(function(){
+'use strict';
+const panel=document.createElement('section');panel.id='pw18Photo';panel.hidden=true;
+panel.innerHTML='<div class="pw18Top"><b style="color:#ffe1a0;font-size:15px">📸 STUDIO ZDJĘĆ — ETAP 18</b><button id="pw18Close">✕</button></div><div class="pw18Controls"><button id="pw18Shot">📷 ZAPISZ PNG</button><button id="pw18Grid">▦ SIATKA KADRU</button><button id="pw18Hide">👁️ UKRYJ PANEL</button></div><div class="pw18Note">K — studio zdjęć • Enter — zapisz zdjęcie • Esc — wyjdź. Zrzut obejmuje sam świat gry, bez przycisków. Zdjęcie zapisuje się w plikach urządzenia.</div>';
+document.body.append(panel);
+const frame=document.createElement('div');frame.id='pw18PhotoFrame';document.body.append(frame);
+const launcher=document.createElement('button');launcher.id='pw18PhotoLauncher';launcher.textContent='📸 ZRÓB ZDJĘCIE';launcher.hidden=true;document.body.append(launcher);
+let mode=false,grid=false,number=0;
+function toast(t){if(typeof pwToast==='function')pwToast(t)}
+function close(){mode=false;panel.hidden=true;launcher.hidden=true;document.body.classList.remove('pw18PhotoMode','pw18Grid')}
+function open(){if(!gameStarted){toast('Najpierw uruchom świat.');return}mode=true;panel.hidden=false;launcher.hidden=true;document.body.classList.add('pw18PhotoMode');document.body.classList.toggle('pw18Grid',grid);sync()}
+function toggle(){mode?close():open()}
+function sync(){panel.querySelector('#pw18Grid').setAttribute('aria-pressed',String(grid));panel.querySelector('#pw18Grid').textContent=grid?'▦ SIATKA: WŁ.':'▦ SIATKA: WYŁ.'}
+function shot(){
+ if(!gameStarted)return toast('Najpierw uruchom świat.');
+ try{
+  const image=canvas.toDataURL('image/png');
+  if(!image.startsWith('data:image/png'))throw new Error('Brak obrazu');
+  const link=document.createElement('a');
+  const date=new Date();const stamp=[date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');
+  link.download='PIXEL_WORLD_2_'+stamp+'_'+String(++number).padStart(2,'0')+'.png';link.href=image;
+  document.body.append(link);link.click();link.remove();toast('📸 Zdjęcie zapisane jako PNG!');
+ }catch(err){toast('Nie udało się zapisać zdjęcia w tej przeglądarce.')}
+}
+panel.querySelector('#pw18Close').onclick=close;
+panel.querySelector('#pw18Shot').onclick=shot;
+panel.querySelector('#pw18Grid').onclick=()=>{grid=!grid;document.body.classList.toggle('pw18Grid',grid);sync()};
+panel.querySelector('#pw18Hide').onclick=()=>{panel.hidden=true;launcher.hidden=false};
+launcher.onclick=()=>{panel.hidden=false;launcher.hidden=true};
+document.addEventListener('keydown',e=>{
+ if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.repeat)return;
+ if(e.key.toLowerCase()==='k'){e.preventDefault();toggle()}
+ else if(mode&&e.key==='Enter'){e.preventDefault();shot()}
+ else if(mode&&e.key==='Escape'){e.preventDefault();close()}
+});
+function makeButton(label){const b=document.createElement('button');b.textContent=label;b.onclick=open;return b}
+for(const selector of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(selector);if(root)root.append(makeButton('📸 ZDJĘCIA'));
+}
+const dock=document.querySelector('#pw2Dock');if(dock){const b=makeButton('📸');b.title='Studio zdjęć';dock.append(b)}
+window.PW2Photo={open,close,shot};
+})();
+</script><style id="pw19JournalStyles">
+#pw19Journal{position:fixed;z-index:240;left:50%;top:50%;transform:translate(-50%,-50%);width:min(580px,95vw);max-height:82dvh;overflow:auto;box-sizing:border-box;padding:14px;background:#102534;color:#f3f8ff;border:3px solid #7db6c8;box-shadow:5px 5px #020a10;font:12px monospace}
+#pw19Journal[hidden]{display:none!important}
+#pw19Journal button{background:#28536a;border:2px solid #8db4c4;color:#fff;padding:8px;cursor:pointer;font:11px monospace}
+#pw19Journal input,#pw19Journal textarea{box-sizing:border-box;width:100%;background:#081d2b;color:#f4fbff;border:1px solid #7698ac;padding:8px;font:12px monospace}
+#pw19Journal textarea{resize:vertical;min-height:65px}
+#pw19Journal .j19Top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#pw19Journal .j19Entry{margin:9px 0;padding:10px;background:#1b394a;border:1px solid #4e778c;line-height:1.5}
+#pw19Journal .j19EntryHead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#pw19Journal .j19Meta{color:#abcbd9;font-size:10px;margin:5px 0}
+#pw19Journal .j19Actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+#pw19Journal .j19Entry p{white-space:pre-wrap;overflow-wrap:anywhere}
+#pw19Journal .j19Form{display:grid;gap:7px;padding:10px;background:#152f40;margin:10px 0}
+@media(max-width:650px){#pw19Journal{padding:9px}#pw19Journal .j19EntryHead{align-items:flex-start}}
+</style>
+<script id="pw19JournalScript">
+(function(){
+'use strict';
+const KEY='PIXEL_WORLD_2_JOURNAL_STAGE19';
+const MAX=40;
+let notes=[];
+try{const data=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(data))notes=data.filter(n=>n&&typeof n.title==='string'&&typeof n.body==='string').slice(0,MAX)}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(notes))}catch(e){if(typeof pwToast==='function')pwToast('Brak miejsca na zapis notatek')}};
+const currentWorld=()=>String((typeof PW!=='undefined'&&PW.currentWorld)||'main');
+const position=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h/2)/T)});
+const panel=document.createElement('section');panel.id='pw19Journal';panel.hidden=true;document.body.append(panel);
+function add(title,body){
+ title=title.trim().slice(0,55);body=body.trim().slice(0,1000);
+ if(!title||!body)return pwToast('Wpisz tytuł i treść notatki.');
+ if(notes.length>=MAX)return pwToast('Limit 40 notatek. Usuń starszą notatkę.');
+ const p=position();notes.unshift({id:Date.now()+'-'+Math.floor(Math.random()*100000),title,body,x:p.x,y:p.y,world:currentWorld(),created:new Date().toLocaleString('pl-PL')});
+ persist();show();pwToast('📖 Notatka zapisana!');
+}
+function remove(id){notes=notes.filter(n=>n.id!==id);persist();show()}
+function exportNotes(){
+ const data=notes.filter(n=>n.world===currentWorld());
+ const text='PIXEL WORLD 2 — DZIENNIK ODKRYWCY\n\n'+data.map(n=>`${n.title}\n${n.created} | X: ${n.x}, Y: ${n.y}\n${n.body}`).join('\n\n---\n\n');
+ const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download='PIXEL_WORLD_2_DZIENNIK.txt';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+function show(){
+ if(!gameStarted){if(typeof pwToast==='function')pwToast('Najpierw uruchom świat.');return}
+ panel.hidden=false;panel.replaceChildren();
+ const top=document.createElement('div');top.className='j19Top';
+ const title=document.createElement('strong');title.textContent='📖 DZIENNIK ODKRYWCY — ETAP 19';title.style.fontSize='15px';
+ const close=document.createElement('button');close.textContent='✕';close.onclick=()=>panel.hidden=true;top.append(title,close);panel.append(top);
+ const intro=document.createElement('p');intro.textContent='Zapisuj odkrycia, plany budowy i ważne miejsca. Współrzędne dodają się automatycznie.';panel.append(intro);
+ const form=document.createElement('div');form.className='j19Form';
+ const input=document.createElement('input');input.placeholder='Tytuł, np. Jaskinia z diamentami';input.maxLength=55;
+ const textarea=document.createElement('textarea');textarea.placeholder='Co chcesz zapamiętać?';textarea.maxLength=1000;
+ const save=document.createElement('button');save.textContent='➕ ZAPISZ NOTATKĘ Z POZYCJĄ';save.onclick=()=>add(input.value,textarea.value);
+ form.append(input,textarea,save);panel.append(form);
+ const actions=document.createElement('div');actions.className='j19Actions';
+ const exportBtn=document.createElement('button');exportBtn.textContent='📥 EKSPORTUJ DO TXT';exportBtn.onclick=exportNotes;actions.append(exportBtn);
+ const count=document.createElement('span');count.textContent=`Notatki: ${notes.length}/${MAX}`;actions.append(count);panel.append(actions);
+ const worldNotes=notes.filter(n=>n.world===currentWorld());
+ if(!worldNotes.length){const p=document.createElement('p');p.textContent='Nie masz jeszcze notatek w tym świecie.';panel.append(p)}
+ for(const n of worldNotes){
+  const card=document.createElement('article');card.className='j19Entry';
+  const head=document.createElement('div');head.className='j19EntryHead';
+  const h=document.createElement('b');h.textContent=n.title;head.append(h);card.append(head);
+  const meta=document.createElement('div');meta.className='j19Meta';meta.textContent=`📍 X: ${n.x}, Y: ${n.y} • ${n.created}`;card.append(meta);
+  const body=document.createElement('p');body.textContent=n.body;card.append(body);
+  const buttons=document.createElement('div');buttons.className='j19Actions';
+  const coords=document.createElement('button');coords.textContent='📋 KOPIUJ POZYCJĘ';coords.onclick=()=>{const str=`X: ${n.x}, Y: ${n.y}`;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(str).then(()=>pwToast('Pozycja skopiowana')).catch(()=>pwToast(str));else pwToast(str)};
+  const del=document.createElement('button');del.textContent='🗑️ USUŃ';del.onclick=()=>remove(n.id);
+  buttons.append(coords,del);card.append(buttons);panel.append(card);
+ }
+}
+document.addEventListener('keydown',e=>{
+ if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+ if(e.key.toLowerCase()==='j'){if(panel.hidden)show();else panel.hidden=true}
+ if(e.key==='Escape'&&!panel.hidden)panel.hidden=true;
+});
+const button=label=>{const b=document.createElement('button');b.textContent=label;b.onclick=show;return b};
+for(const selector of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(selector);if(root)root.append(button('📖 DZIENNIK'))}
+const dock=document.querySelector('#pw2Dock');if(dock){const b=button('📖');b.title='Dziennik odkrywcy';dock.append(b)}
+window.PW2Journal={open:show};
+})();
+</script>
+<style id="pw20ToolsCss">
+#pw20Launcher{position:fixed;right:10px;top:55px;z-index:185;border:2px solid #7bd5da;background:#123344;color:#fff;font:bold 12px monospace;padding:9px 12px;box-shadow:3px 3px #07131a;cursor:pointer}
+#pw20Tools{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:250;width:min(570px,94vw);max-height:82dvh;overflow:auto;box-sizing:border-box;background:#0c2331;color:#effaff;border:3px solid #80c7d5;box-shadow:6px 6px #030b10;padding:14px;font:12px monospace}
+#pw20Tools[hidden]{display:none!important}
+#pw20Tools .pw20top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+#pw20Tools button{cursor:pointer;color:#f7fdff;background:#1d4559;border:2px solid #679eb6;padding:10px;font:12px monospace}
+#pw20Tools .pw20grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#pw20Tools .pw20grid button{min-height:55px;line-height:1.5}
+#pw20Tools .pw20grid button:disabled{opacity:.45;cursor:not-allowed}
+#pw20Tools .pw20bottom{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;color:#b5d8e5}
+#pw20Tools .pw20bottom label{display:flex;align-items:center;gap:6px}
+#pw20Tools .pw20bottom input{accent-color:#7bd5da}
+#pw20Tools .pw20help{color:#b6d5e1;line-height:1.7;margin:10px 0 0}
+@media(max-width:600px){#pw20Launcher{right:5px;top:49px;padding:7px;font-size:11px}#pw20Tools{padding:9px}#pw20Tools .pw20grid{grid-template-columns:repeat(2,minmax(0,1fr))}#pw20Tools .pw20grid button{padding:8px;font-size:11px}}
+</style>
+<script id="pw20ToolsScript">
+(function(){
+'use strict';
+const KEY='PW2_STAGE20_COMPACT';
+const features=[
+ {name:'🌦️ Pogoda',tags:['POGODA'],key:'pogoda'},
+ {name:'⛏️ Kopalnia',tags:['KOPALNIA'],key:'kopalnia'},
+ {name:'🚉 Podróże',tags:['PODRÓŻE'],key:'podroze'},
+ {name:'🌱 Farma',tags:['FARMA'],key:'farma'},
+ {name:'📦 Skrzynie',tags:['MAGAZYN'],key:'magazyn'},
+ {name:'🪧 Tabliczki',tags:['TABLICZKI'],key:'tabliczki'},
+ {name:'🗺️ Atlas',tags:['ATLAS'],key:'atlas'},
+ {name:'🧭 Kompas',tags:['KOMPAS'],key:'kompas'},
+ {name:'🏗️ Warsztat',tags:['WARSZTAT'],key:'warsztat'},
+ {name:'📸 Zdjęcia',tags:['STUDIO','ZDJĘCIA'],key:'zdjecia'},
+ {name:'📖 Dziennik',tags:['DZIENNIK'],key:'dziennik'},
+ {name:'🎨 Grafika',tags:['GRAFIKA'],key:'grafika'}
+];
+const featureSymbols={'⛏️':'kopalnia','🚉':'podroze','🌱':'farma','📦':'magazyn','🪧':'tabliczki','🗺️':'atlas','🧭':'kompas','🏗️':'warsztat','📸':'zdjecia','📖':'dziennik'};
+const rootSelectors=['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid','#pw2Dock'];
+const roots=rootSelectors.map(s=>document.querySelector(s)).filter(Boolean);
+const originals=new Map();
+function featureFor(button){
+ const txt=(button.textContent||'').trim().toUpperCase();
+ if(featureSymbols[txt])return featureSymbols[txt];
+ if(txt==='🌦️'||txt==='☀️')return 'pogoda';
+ const match=features.find(f=>f.tags.some(tag=>txt.includes(tag)));
+ return match&&match.key;
+}
+function scan(){
+ for(const root of roots)for(const button of root.querySelectorAll('button')){
+  if(button.id==='pw20Launcher'||button.dataset.pw20Managed==='yes')continue;
+  const key=featureFor(button);if(!key)continue;
+  if(!originals.has(key))originals.set(key,button);
+  button.dataset.pw20Managed='yes';
+ }
+ applyCompact();
+}
+let compact=true;
+try{compact=localStorage.getItem(KEY)!=='false'}catch(e){}
+function applyCompact(){
+ for(const root of roots)for(const b of root.querySelectorAll('button[data-pw20-managed="yes"]')){
+  b.style.display=compact?'none':'';
+ }
+ const label=document.querySelector('#pw20Compact');if(label)label.checked=compact;
+ try{localStorage.setItem(KEY,String(compact))}catch(e){}
+}
+const panel=document.createElement('section');panel.id='pw20Tools';panel.hidden=true;document.body.append(panel);
+const launcher=document.createElement('button');launcher.id='pw20Launcher';launcher.textContent='🧰 NARZĘDZIA';launcher.title='Centrum narzędzi (klawisz Z)';document.body.append(launcher);
+function openFeature(key){
+ scan();const b=originals.get(key);
+ if(b){panel.hidden=true;b.click();return}
+ const fallback={podroze:window.pwTravel10Open,farma:window.pw2Farm11Open,tabliczki:window.pw2SignsOpen,atlas:window.PW2Atlas&&window.PW2Atlas.open,kopalnia:window.PW2Mining&&window.PW2Mining.open};
+ if(typeof fallback[key]==='function'){panel.hidden=true;fallback[key]();return}
+ if(typeof pwToast==='function')pwToast('Otwórz tę funkcję w menu głównym.');
+}
+function show(){
+ scan();panel.hidden=false;panel.replaceChildren();
+ const head=document.createElement('div');head.className='pw20top';
+ const title=document.createElement('strong');title.style.fontSize='16px';title.style.color='#ffe2a2';title.textContent='🧰 CENTRUM NARZĘDZI — ETAP 20';
+ const close=document.createElement('button');close.textContent='✕';close.onclick=()=>panel.hidden=true;
+ head.append(title,close);panel.append(head);
+ const intro=document.createElement('p');intro.textContent='Wszystkie ważne funkcje w jednym miejscu. Wybierz narzędzie:';panel.append(intro);
+ const grid=document.createElement('div');grid.className='pw20grid';
+ for(const f of features){const b=document.createElement('button');b.textContent=f.name;b.onclick=()=>openFeature(f.key);grid.append(b)}
+ panel.append(grid);
+ const bottom=document.createElement('div');bottom.className='pw20bottom';
+ const label=document.createElement('label');const check=document.createElement('input');check.type='checkbox';check.id='pw20Compact';check.checked=compact;check.onchange=()=>{compact=check.checked;applyCompact()};
+ const t=document.createElement('span');t.textContent='Kompaktowy interfejs (ukryj powtórzone przyciski)';label.append(check,t);bottom.append(label);panel.append(bottom);
+ const hint=document.createElement('p');hint.className='pw20help';hint.textContent='Z — otwórz centrum narzędzi. Dotychczasowe skróty klawiaturowe nadal działają. Możesz wyłączyć tryb kompaktowy, aby przywrócić stare przyciski.';panel.append(hint);
+}
+launcher.onclick=()=>panel.hidden?show():panel.hidden=true;
+document.addEventListener('keydown',e=>{
+ if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+ if(e.key.toLowerCase()==='z'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}
+ if(e.key==='Escape'&&!panel.hidden)panel.hidden=true;
+});
+scan();
+window.PW2Tools={open:show};
+})();
+</script>
+</body>
 </html>
