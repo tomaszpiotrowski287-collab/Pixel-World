@@ -9301,5 +9301,498 @@ for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMe
 const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='🎣';b.title='Wędkowanie';b.onclick=show;dock.append(b)}
 window.PW23Fishing={open:show,action};
 })();
+</script>
+<style id="pw24WildStyle">
+#pw24WildPanel{position:fixed;z-index:250;left:50%;top:50%;transform:translate(-50%,-50%);width:min(540px,94vw);max-height:80dvh;overflow:auto;box-sizing:border-box;padding:14px;background:#102b30;color:#f1fff8;border:3px solid #80c9a2;box-shadow:5px 5px #061215;font:12px monospace}
+#pw24WildPanel[hidden]{display:none!important}
+#pw24WildPanel button{background:#27574a;color:#fff;border:2px solid #86bda0;padding:9px;cursor:pointer;font:12px monospace}
+#pw24WildPanel .wildHead,#pw24WildPanel .wildRow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#pw24WildPanel .wildRow{background:#1c403c;border:1px solid #548574;padding:10px;margin:8px 0}
+#pw24WildPanel .wildHint{color:#b8dccb;line-height:1.7}
+#pw24WildHint{position:fixed;z-index:29;left:50%;top:94px;transform:translateX(-50%);background:rgba(9,36,37,.9);border:1px solid #78bda2;color:#f0fff7;padding:5px 10px;font:11px monospace;pointer-events:none;display:none;text-align:center;max-width:90vw}
+@media(max-width:700px){#pw24WildHint{top:76px;font-size:10px}}
+</style>
+<script id="pw24WildlifeStage">
+(function(){
+'use strict';
+const KEY='PW2_WILDLIFE_24';
+const species=[
+ {id:'butterfly',name:'🦋 Motyl',description:'Lata nisko nad łąkami',color:'#f8b96c'},
+ {id:'bird',name:'🐦 Ptak',description:'Przelatuje nad koronami drzew',color:'#acd8f7'},
+ {id:'firefly',name:'✨ Świetlik',description:'Świeci wśród traw',color:'#e7f59b'},
+ {id:'beetle',name:'🐞 Biedronka',description:'Odpoczywa na trawie',color:'#ed6868'}
+];
+let found={};try{const raw=JSON.parse(localStorage.getItem(KEY)||'{}');if(raw&&typeof raw==='object')found=raw}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(found))}catch(e){}};
+const panel=document.createElement('section');panel.id='pw24WildPanel';panel.hidden=true;document.body.append(panel);
+const hint=document.createElement('div');hint.id='pw24WildHint';document.body.append(hint);
+const world=()=>String((typeof PW!=='undefined'&&PW.currentWorld)||'main');
+const meTile=()=>({x:(me.x+me.w/2)/T,y:(me.y+me.h/2)/T});
+let creatures=[],cachedWorld='',cachedTime=0;
+function hash(n){let x=Math.sin(n*127.1+34.7)*43758.5453;return x-Math.floor(x)}
+function regenerate(){
+ const id=world(),now=Date.now();
+ if(cachedWorld===id&&now-cachedTime<20000)return;
+ cachedWorld=id;cachedTime=now;creatures=[];
+ const shift=id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+ for(let x=8;x<WORLD_W-8;x+=10){
+  const choice=hash(x+shift),kind=choice<.30?'butterfly':choice<.53?'bird':choice<.77?'firefly':'beetle';
+  let surface=-1;
+  for(let y=4;y<Math.min(WORLD_H-4,65);y++){
+   if(getB(x,y)===B.grass&&getB(x,y-1)===B.air&&getB(x,y-2)===B.air){surface=y;break}
+  }
+  if(surface<0)continue;
+  creatures.push({id:kind,x:x+.5,y:surface-(kind==='bird'?5:kind==='butterfly'?2.7:1.1),phase:hash(x*2+shift)*6.283});
+ }
+}
+function position(c,t){
+ const wave=Math.sin(t*(c.id==='bird'?.9:1.6)+c.phase);
+ return {x:c.x+(c.id==='bird'?Math.sin(t*.3+c.phase)*2.2:Math.sin(t*.5+c.phase)*.6),y:c.y+(c.id==='beetle'?0:wave*(c.id==='bird'?.7:.25))};
+}
+function nearby(){
+ if(!gameStarted)return [];
+ regenerate();const p=meTile(),t=performance.now()/1000;
+ return creatures.map(c=>({...c,pos:position(c,t)})).filter(c=>Math.hypot(c.pos.x-p.x,c.pos.y-p.y)<=7).sort((a,b)=>Math.hypot(a.pos.x-p.x,a.pos.y-p.y)-Math.hypot(b.pos.x-p.x,b.pos.y-p.y));
+}
+function observe(){
+ if(!gameStarted||paused){pwToast('Najpierw wejdź do świata.');return}
+ const list=nearby();if(!list.length){pwToast('Nie ma zwierząt blisko Ciebie. Poszukaj na łące!');return}
+ const c=list[0],key=world()+'|'+c.id;
+ if(!found[key]){found[key]={date:Date.now(),x:Math.round(c.x),y:Math.round(c.y)};persist();pwToast('📖 Nowe odkrycie: '+species.find(s=>s.id===c.id).name+'!')}
+ else pwToast('🔭 Obserwujesz: '+species.find(s=>s.id===c.id).name);
+ if(!panel.hidden)show();
+}
+function show(){
+ panel.hidden=false;
+ const total=species.filter(s=>found[world()+'|'+s.id]).length;
+ panel.innerHTML='<div class="wildHead"><b style="font-size:16px;color:#c8ffb4">🦋 ALBUM PRZYRODY — ETAP 24</b><button id="pw24Close">✕</button></div><p class="wildHint">Odkrywaj zwierzęta w otwartym świecie. Podejdź do nich na 7 bloków i użyj przycisku OBSERWUJ. Zwierzęta są spokojne — nie trzeba ich łapać.</p><p id="pw24Count"></p><button id="pw24Observe">🔭 OBSERWUJ NAJBLIŻSZE ZWIERZĘ</button><div id="pw24List"></div><p class="wildHint">Skrót: Shift + W — otwórz album, E — obserwuj (gdy nie piszesz na czacie). Odkrycia zapisują się automatycznie.</p>';
+ panel.querySelector('#pw24Close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#pw24Observe').onclick=observe;
+ panel.querySelector('#pw24Count').textContent='Odkryte gatunki w tym świecie: '+total+' / '+species.length;
+ const list=panel.querySelector('#pw24List');
+ for(const sp of species){
+  const data=found[world()+'|'+sp.id];
+  const row=document.createElement('div');row.className='wildRow';
+  const text=document.createElement('div');
+  const title=document.createElement('b');title.textContent=data?sp.name:'❔ Nieodkryty gatunek';
+  const desc=document.createElement('div');desc.className='wildHint';desc.textContent=data?sp.description+' • odkryto przy '+data.x+', '+data.y:'Wyrusz na poszukiwania!';
+  text.append(title,desc);row.append(text);list.append(row);
+ }
+}
+function draw(){
+ if(!gameStarted)return;
+ regenerate();const t=performance.now()/1000;
+ ctx.save();
+ for(const c of creatures){
+  const p=position(c,t),x=Math.round(p.x*T-cam.x),y=Math.round(p.y*T-cam.y);
+  if(x<-16||x>VW+16||y<-16||y>VH+16)continue;
+  if(c.id==='butterfly'){
+   const wing=Math.sin(t*12+c.phase)>0?3:2;
+   ctx.fillStyle='#f6b969';ctx.fillRect(x-wing-1,y-3,wing,4);ctx.fillRect(x+1,y-3,wing,4);
+   ctx.fillStyle='#fbe3a1';ctx.fillRect(x-wing,y+1,wing-1,2);ctx.fillRect(x+1,y+1,wing-1,2);
+   ctx.fillStyle='#34293d';ctx.fillRect(x,y-3,1,7);
+  }else if(c.id==='bird'){
+   ctx.fillStyle='#b8d5ec';ctx.fillRect(x-3,y-1,7,4);ctx.fillRect(x+2,y-3,3,2);
+   ctx.fillStyle='#edf6ff';ctx.fillRect(x-2,y-2,3,Math.sin(t*10+c.phase)>0?2:4);
+   ctx.fillStyle='#f7b55c';ctx.fillRect(x+5,y,2,1);
+  }else if(c.id==='firefly'){
+   const glow=.45+.4*Math.sin(t*4+c.phase);
+   ctx.fillStyle='rgba(230,255,125,'+glow+')';ctx.fillRect(x-2,y-2,5,5);
+   ctx.fillStyle='#fff9b8';ctx.fillRect(x,y,2,2);
+  }else{
+   ctx.fillStyle='#ea5e60';ctx.fillRect(x-3,y-2,7,5);
+   ctx.fillStyle='#242b32';ctx.fillRect(x,y-2,1,5);ctx.fillRect(x-2,y-1,1,1);ctx.fillRect(x+2,y+1,1,1);
+  }
+ }
+ ctx.restore();
+}
+const previous=render;render=function(){previous();draw()};
+document.addEventListener('keydown',e=>{
+ if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+ if(e.shiftKey&&e.key.toLowerCase()==='w'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}
+ else if(!e.shiftKey&&e.key.toLowerCase()==='e'){if(!panel.hidden)return;observe()}
+ if(e.key==='Escape')panel.hidden=true;
+});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='🦋 ALBUM PRZYRODY';b.onclick=show;root.append(b)}
+}
+window.PW24Wildlife={open:show,observe};
+})();
+</script>
+
+<style id="pw25BedCSS">
+#pw25BedPanel{position:fixed;z-index:260;top:50%;left:50%;transform:translate(-50%,-50%);width:min(500px,94vw);max-height:78dvh;overflow:auto;box-sizing:border-box;background:#17283a;border:3px solid #a4b8df;color:#f7f7ff;box-shadow:5px 5px #07101a;padding:14px;font:12px monospace}
+#pw25BedPanel[hidden]{display:none!important}
+#pw25BedPanel button{background:#354d70;color:white;border:2px solid #96acd0;padding:9px;cursor:pointer;font:11px monospace}
+#pw25BedPanel .bedHead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#pw25BedPanel .bedRow{display:flex;justify-content:space-between;align-items:center;gap:9px;background:#243c55;border:1px solid #6686a7;padding:9px;margin:8px 0;flex-wrap:wrap}
+#pw25BedPanel .bedInfo{color:#c5d7ed;line-height:1.7}
+#pw25BedPanel .bedBtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+#pw25BedPanel .bedBtns button{flex:1}
+</style>
+<script id="pw25BedStage">
+(function(){
+'use strict';
+const KEY='PW2_STAGE25_BEDS';
+let beds=[];
+try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(value))beds=value.filter(b=>Number.isFinite(b.x)&&Number.isFinite(b.y)&&typeof b.world==='string').slice(0,40)}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(beds))}catch(e){}};
+const world=()=>String(PW.currentWorld||'main');
+const tile=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h)/T)});
+const own=()=>beds.filter(b=>b.world===world());
+const dist=b=>Math.hypot(b.x-tile().x,b.y-tile().y);
+const toast=s=>pwToast(s);
+const panel=document.createElement('section');panel.id='pw25BedPanel';panel.hidden=true;document.body.append(panel);
+function valid(x,y){return x>1&&x<WORLD_W-2&&y>2&&y<WORLD_H-3&&getB(x,y)===B.air&&getB(x+1,y)===B.air&&getB(x,y+1)!==B.air&&getB(x+1,y+1)!==B.air&&getB(x,y+1)!==B.water&&getB(x+1,y+1)!==B.water}
+function place(){
+ if(!gameStarted)return toast('Najpierw wejdź do świata.');
+ if(own().length>=6)return toast('Możesz mieć maksymalnie 6 łóżek w świecie.');
+ if((inv.wood||0)<6||(inv.leaves||0)<4)return toast('Potrzeba 6 drewna i 4 liści.');
+ const p=tile();let found=null;
+ for(let d=0;d<=4&&!found;d++)for(let dx=-d;dx<=d&&!found;dx++)for(let dy=-d;dy<=d&&!found;dy++){
+  const x=p.x+dx,y=p.y+dy;
+  if(valid(x,y)&&!own().some(b=>Math.hypot(b.x-x,b.y-y)<3))found={x,y};
+ }
+ if(!found)return toast('Znajdź płaski teren z dwoma wolnymi blokami nad podłożem.');
+ inv.wood-=6;inv.leaves-=4;updateHotbar();if(typeof save==='function')save();
+ beds.push({...found,world:world(),home:!own().length});persist();toast('🛏️ Łóżko ustawione!');show();
+}
+function rest(i){
+ const bed=beds[i];if(!bed||bed.world!==world())return;
+ if(dist(bed)>5)return toast('Podejdź do łóżka na maksymalnie 5 bloków.');
+ if(!valid(bed.x,bed.y))return toast('Łóżko jest zasłonięte blokami. Oczyść miejsce.');
+ const phase=((dayTime%DAY_LENGTH)+DAY_LENGTH)%DAY_LENGTH/DAY_LENGTH;
+ const isNight=phase<.23||phase>.77;
+ if(!isNight)return toast('Możesz przespać noc, gdy zrobi się ciemno.');
+ dayTime=(Math.floor(dayTime/DAY_LENGTH)+1)*DAY_LENGTH+DAY_LENGTH*.26;
+ me.vx=0;me.vy=0;
+ if(typeof save==='function')save();persist();panel.hidden=true;toast('☀️ Dzień dobry! Noc minęła.');
+}
+function home(i){const b=beds[i];if(!b||b.world!==world())return;for(const other of own())other.home=false;b.home=true;persist();toast('🏠 Ustawiono łóżko jako dom.');show()}
+function returnHome(){
+ const b=own().find(b=>b.home);if(!b)return toast('Najpierw wybierz łóżko jako dom.');
+ if(!valid(b.x,b.y))return toast('Miejsce przy łóżku jest zablokowane.');
+ me.x=b.x*T+T/2;me.y=(b.y+1)*T-me.h;me.vx=0;me.vy=0;
+ if(typeof cam==='object'){cam.x=Math.max(0,me.x-VW/2);cam.y=Math.max(0,me.y-VH/2)}
+ panel.hidden=true;toast('🏠 Wrócono do domu!');
+}
+function remove(i){const b=beds[i];if(!b||b.world!==world())return;if(dist(b)>5)return toast('Podejdź bliżej, aby rozebrać łóżko.');beds.splice(i,1);inv.wood=(inv.wood||0)+3;inv.leaves=(inv.leaves||0)+2;updateHotbar();if(typeof save==='function')save();persist();toast('Łóżko rozebrane. Odzyskano część materiałów.');show()}
+function show(){
+ if(!gameStarted)return toast('Najpierw uruchom świat.');
+ panel.hidden=false;
+ panel.innerHTML='<div class="bedHead"><b style="font-size:16px;color:#ffdea5">🛏️ DOM I ODPOCZYNEK — ETAP 25</b><button id="bedClose">✕</button></div><p class="bedInfo">Zbuduj łóżko z 6 drewna i 4 liści. Śpij w nocy, ustaw dom lub wróć do niego. Odpoczynek wymaga bliskości łóżka; powrót do domu jest dostępny z dowolnego miejsca w tym samym świecie.</p><div class="bedBtns"><button id="bedBuild">➕ POSTAW ŁÓŻKO</button><button id="bedHome">🏠 WRÓĆ DO DOMU</button></div><div id="bedList"></div><p class="bedInfo">Skrót: Shift + B. Na telefonie wybierz 🛏️ w menu.</p>';
+ panel.querySelector('#bedClose').onclick=()=>panel.hidden=true;
+ panel.querySelector('#bedBuild').onclick=place;
+ panel.querySelector('#bedHome').onclick=returnHome;
+ const list=panel.querySelector('#bedList');
+ const rows=beds.map((b,i)=>({...b,i})).filter(b=>b.world===world());
+ if(!rows.length){const p=document.createElement('p');p.className='bedInfo';p.textContent='Nie masz jeszcze łóżka w tym świecie.';list.append(p)}
+ for(const b of rows){
+  const row=document.createElement('div');row.className='bedRow';
+  const info=document.createElement('div');info.textContent=(b.home?'🏠 DOM • ':'🛏️ ŁÓŻKO • ')+`(${b.x}, ${b.y}) • ${Math.round(dist(b))} bloków`;
+  const buttons=document.createElement('div');buttons.className='bedBtns';
+  const button=(label,cb)=>{const el=document.createElement('button');el.textContent=label;el.onclick=cb;buttons.append(el)};
+  button('🌙 ŚPIJ',()=>rest(b.i));button('🏠 USTAW DOM',()=>home(b.i));button('🪓 ROZBIERZ',()=>remove(b.i));
+  row.append(info,buttons);list.append(row);
+ }
+}
+function draw(){
+ if(!gameStarted)return;
+ ctx.save();
+ for(const b of own()){
+  const x=Math.round(b.x*T-cam.x),y=Math.round(b.y*T-cam.y);
+  if(x<-40||y<-35||x>VW+35||y>VH+35)continue;
+  ctx.fillStyle='#533b2e';ctx.fillRect(x,y+10,32,5);ctx.fillRect(x+2,y+15,3,3);ctx.fillRect(x+27,y+15,3,3);
+  ctx.fillStyle='#c34e64';ctx.fillRect(x+2,y+4,28,7);
+  ctx.fillStyle='#f4e9d5';ctx.fillRect(x+2,y+4,9,7);
+  ctx.fillStyle='#e88991';ctx.fillRect(x+12,y+5,16,2);
+  if(b.home){ctx.font='10px monospace';ctx.textAlign='center';ctx.fillStyle='#fff2a2';ctx.fillText('⌂',x+16,y-3)}
+ }
+ ctx.restore();
+}
+const oldRender=render;render=function(){oldRender();draw()};
+document.addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;if(e.shiftKey&&e.key.toLowerCase()==='b'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape')panel.hidden=true});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(sel);if(root){const btn=document.createElement('button');btn.textContent='🛏️ DOM I SEN';btn.onclick=show;root.append(btn)}}
+const dock=document.querySelector('#pw2Dock');if(dock){const btn=document.createElement('button');btn.textContent='🛏️';btn.title='Dom i sen';btn.onclick=show;dock.append(btn)}
+window.PW25Beds={open:show,returnHome};
+})();
+</script>
+<style id="pw26ElevatorCSS">
+#pw26Elevator{position:fixed;z-index:245;left:50%;top:50%;transform:translate(-50%,-50%);width:min(570px,95vw);max-height:82dvh;overflow:auto;box-sizing:border-box;background:#10212f;border:3px solid #7eb5ca;box-shadow:5px 5px #020a10;color:#f3faff;padding:14px;font:12px monospace}
+#pw26Elevator[hidden]{display:none!important}
+#pw26Elevator button{background:#24485e;border:2px solid #82a9bf;color:#fff;padding:9px;cursor:pointer;font:11px monospace}
+#pw26Elevator .e26Top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#pw26Elevator .e26Stop{background:#1b3748;border:1px solid #547e94;padding:10px;margin-top:9px}
+#pw26Elevator .e26Actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+#pw26Elevator .e26Text{color:#c1d8e5;line-height:1.7}
+#pw26Elevator .e26Stop button:disabled{opacity:.45;cursor:default}
+</style>
+<script id="pw26ElevatorJS">
+(function(){
+'use strict';
+const KEY='PW2_STAGE26_ELEVATORS';
+let stops=[];
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(saved))stops=saved.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)&&typeof p.world==='string').slice(0,60)}catch(e){}
+const saveStops=()=>{try{localStorage.setItem(KEY,JSON.stringify(stops))}catch(e){}};
+const world=()=>String(PW.currentWorld||'main');
+const local=()=>stops.filter(s=>s.world===world());
+const tile=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h)/T)});
+const dist=p=>Math.hypot(p.x-tile().x,p.y-tile().y);
+const toast=s=>pwToast(s);
+const panel=document.createElement('section');panel.id='pw26Elevator';panel.hidden=true;document.body.append(panel);
+function valid(x,y){return x>1&&x<WORLD_W-2&&y>2&&y<WORLD_H-3&&getB(x,y)===B.air&&getB(x,y-1)===B.air&&getB(x,y+1)!==B.air&&getB(x,y+1)!==B.water}
+function build(){
+ if(!gameStarted)return toast('Najpierw uruchom świat.');
+ if(local().length>=8)return toast('Maksymalnie 8 przystanków windy na świat.');
+ if((inv.stone||0)<12||(inv.wood||0)<6)return toast('Potrzeba 12 kamienia i 6 drewna.');
+ const p=tile();let target=null;
+ for(let r=0;r<=4&&!target;r++)for(let dx=-r;dx<=r&&!target;dx++)for(let dy=-r;dy<=r&&!target;dy++){
+  const x=p.x+dx,y=p.y+dy;
+  if(valid(x,y)&&!local().some(s=>Math.hypot(s.x-x,s.y-y)<4))target={x,y};
+ }
+ if(!target)return toast('Stań blisko pustego miejsca z solidną podłogą.');
+ inv.stone-=12;inv.wood-=6;updateHotbar();if(typeof save==='function')save();
+ stops.push({...target,world:world(),name:'Poziom '+target.y});saveStops();toast('🛗 Przystanek windy gotowy!');show();
+}
+function travel(i){
+ const dest=stops[i];if(!dest||dest.world!==world())return;
+ if(!gameStarted)return toast('Najpierw uruchom świat.');
+ if(!local().some(s=>dist(s)<=5))return toast('Podejdź do dowolnego przystanku windy na 5 bloków.');
+ if(!valid(dest.x,dest.y))return toast('Przystanek docelowy jest zasłonięty blokami.');
+ me.x=(dest.x+.5)*T-me.w/2;me.y=(dest.y+1)*T-me.h;me.vx=0;me.vy=0;
+ if(typeof cam==='object'){cam.x=Math.max(0,Math.min(WORLD_W*T-VW,me.x-VW/2));cam.y=Math.max(0,Math.min(WORLD_H*T-VH,me.y-VH/2))}
+ panel.hidden=true;toast('🛗 Dotarłeś: '+dest.name);
+}
+function dismantle(i){
+ const dest=stops[i];if(!dest||dest.world!==world())return;
+ if(dist(dest)>5)return toast('Podejdź bliżej, żeby rozebrać przystanek.');
+ stops.splice(i,1);inv.stone=(inv.stone||0)+6;inv.wood=(inv.wood||0)+3;
+ updateHotbar();if(typeof save==='function')save();saveStops();toast('Odzyskano 6 kamienia i 3 drewna.');show();
+}
+function show(){
+ if(!gameStarted)return toast('Najpierw uruchom świat.');
+ panel.hidden=false;
+ panel.innerHTML='<div class="e26Top"><b style="font-size:16px;color:#ffe4ac">🛗 WINDA GÓRNICZA — ETAP 26</b><button id="e26Close">✕</button></div><p class="e26Text">Zbuduj przystanki na różnych wysokościach. Podróż działa, gdy stoisz blisko jednego z przystanków. Każdy kosztuje 12 kamienia i 6 drewna.</p><button id="e26Build">➕ ZBUDUJ PRZYSTANEK</button><div id="e26List"></div><p class="e26Text">Skrót: Shift + E. Na telefonie otwórz windę z menu gry. Maksymalnie 8 przystanków na świat.</p>';
+ panel.querySelector('#e26Close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#e26Build').onclick=build;
+ const list=panel.querySelector('#e26List');
+ const entries=stops.map((p,i)=>({...p,i})).filter(p=>p.world===world()).sort((a,b)=>a.y-b.y);
+ if(!entries.length){const p=document.createElement('p');p.className='e26Text';p.textContent='Nie masz jeszcze przystanków windy.';list.append(p)}
+ for(const p of entries){
+  const row=document.createElement('div');row.className='e26Stop';
+  const label=document.createElement('b');label.textContent='🛗 '+p.name+' • ('+p.x+', '+p.y+')';
+  const detail=document.createElement('div');detail.className='e26Text';detail.textContent=Math.round(dist(p))+' bloków od Ciebie';
+  const actions=document.createElement('div');actions.className='e26Actions';
+  const button=(name,fn)=>{const b=document.createElement('button');b.textContent=name;b.onclick=fn;actions.append(b)};
+  button('⬆️⬇️ JEDŹ',()=>travel(p.i));button('🪓 ROZBIERZ',()=>dismantle(p.i));
+  row.append(label,detail,actions);list.append(row);
+ }
+}
+function draw(){
+ if(!gameStarted)return;
+ ctx.save();
+ for(const p of local()){
+  const x=Math.round(p.x*T-cam.x),y=Math.round(p.y*T-cam.y);
+  if(x<-25||x>VW+25||y<-40||y>VH+25)continue;
+  ctx.fillStyle='#26394a';ctx.fillRect(x+2,y-16,12,32);
+  ctx.fillStyle='#75c8d8';ctx.fillRect(x+4,y-14,8,25);
+  ctx.fillStyle='#143348';ctx.fillRect(x+6,y-11,4,18);
+  ctx.fillStyle='#ffe2a4';ctx.fillRect(x+5,y-15,6,3);
+  ctx.fillStyle='#3e5362';ctx.fillRect(x-1,y+13,18,3);
+  ctx.fillStyle='#e5faff';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('↕',x+8,y+2);
+ }
+ ctx.restore();
+}
+const previousRender=render;render=function(){previousRender();draw()};
+document.addEventListener('keydown',e=>{
+ if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+ if(e.shiftKey&&e.key.toLowerCase()==='e'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}
+ if(e.key==='Escape')panel.hidden=true;
+});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){
+ const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='🛗 WINDA GÓRNICZA';b.onclick=show;root.append(b)}
+}
+const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='🛗';b.title='Winda górnicza';b.onclick=show;dock.append(b)}
+window.PW26Elevator={open:show};
+})();
+</script>
+
+<style id="pw27PaintStyles">
+#pw27PaintPanel{position:fixed;z-index:240;left:50%;top:50%;transform:translate(-50%,-50%);width:min(470px,94vw);max-height:80dvh;overflow:auto;box-sizing:border-box;background:#112535;color:#f5fbff;border:3px solid #9ec7e1;box-shadow:5px 5px #06121c;padding:14px;font:12px monospace}
+#pw27PaintPanel[hidden]{display:none!important}
+#pw27PaintPanel button{border:2px solid #81aabd;background:#214659;color:#fff;padding:9px;cursor:pointer;font:12px monospace}
+#pw27PaintPanel .p27Head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#pw27PaintPanel .p27Palette{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+#pw27PaintPanel .p27Color{display:flex;flex-direction:column;align-items:center;gap:5px;min-height:66px}
+#pw27PaintPanel .p27Swatch{height:20px;width:40px;border:2px solid #fff}
+#pw27PaintPanel .p27Selected{outline:3px solid #ffe68b}
+#pw27PaintPanel p{line-height:1.6;color:#c8dfed}
+#pw27PaintIndicator{position:fixed;z-index:100;top:58px;left:50%;transform:translateX(-50%);background:#152a36;border:2px solid #e4c779;color:#fff;padding:8px 12px;font:12px monospace;pointer-events:none}
+#pw27PaintIndicator[hidden]{display:none!important}
+@media(max-width:600px){#pw27PaintPanel .p27Palette{grid-template-columns:repeat(2,minmax(0,1fr))}#pw27PaintIndicator{top:75px;font-size:10px}}
+</style>
+<script id="pw27Painting">
+(function(){
+'use strict';
+const KEY='PW2_PAINT_STAGE27';
+const palette=[['Czerwony','#f05e65'],['Pomarańczowy','#f49a4c'],['Żółty','#f6da67'],['Zielony','#6fdc83'],['Turkusowy','#56d9d1'],['Niebieski','#6f9df4'],['Fioletowy','#b68bed'],['Biały','#f0f3f8'],['Czarny','#384354'],['Różowy','#ed91bc'],['Brązowy','#a9794e'],['Szary','#a4adb8']];
+const paints=new Map();let selected=0,mode=false,eraser=false,dirty=false,saveTimer=0;
+const currentWorld=()=>String((typeof PW!=='undefined'&&PW.currentWorld)||'main');
+function getPaint(){const id=currentWorld();if(paints.has(id))return paints.get(id);let entries={};try{const obj=JSON.parse(localStorage.getItem(KEY+':'+id)||'{}');if(obj&&typeof obj==='object'&&!Array.isArray(obj))entries=obj}catch(e){}paints.set(id,entries);return entries}
+function persist(){if(!dirty)return;try{for(const [id,entries] of paints)localStorage.setItem(KEY+':'+id,JSON.stringify(entries));dirty=false}catch(e){}}
+const panel=document.createElement('section');panel.id='pw27PaintPanel';panel.hidden=true;document.body.append(panel);
+const indicator=document.createElement('div');indicator.id='pw27PaintIndicator';indicator.hidden=true;document.body.append(indicator);
+function toast(s){if(typeof pwToast==='function')pwToast(s)}
+function setMode(value){mode=value;indicator.hidden=!mode;indicator.textContent=eraser?'🧽 GUMKA — dotknij bloku':'🎨 MALOWANIE: '+palette[selected][0]+' — kliknij blok';if(!panel.hidden)show()}
+function show(){panel.hidden=false;panel.innerHTML='<div class="p27Head"><b style="font-size:16px;color:#ffe3a4">🎨 PRACOWNIA KOLORÓW — ETAP 27</b><button id="p27Close">✕</button></div><p>Wybierz kolor i włącz malowanie. Kliknij lub dotknij dowolnego pełnego bloku na ekranie. Kolor jest dekoracją i nie zmienia wytrzymałości bloku.</p><div class="p27Palette" id="p27Colors"></div><div style="display:flex;flex-wrap:wrap;gap:7px"><button id="p27Enable"></button><button id="p27Erase">🧽 GUMKA</button><button id="p27Save">💾 ZAPISZ KOLORY</button></div><p>Malowanie nie zużywa materiałów. Po zakończeniu wyłącz tryb malowania, aby normalnie kopać i budować. Skrót: <b>Shift + K</b>.</p>';
+ const colors=panel.querySelector('#p27Colors');
+ palette.forEach(([name,color],i)=>{const b=document.createElement('button');b.className='p27Color'+(selected===i&&!eraser?' p27Selected':'');const sw=document.createElement('span');sw.className='p27Swatch';sw.style.background=color;const txt=document.createElement('span');txt.textContent=name;b.append(sw,txt);b.onclick=()=>{selected=i;eraser=false;setMode(true);panel.hidden=true;toast('🎨 Wybrano: '+name+'. Kliknij blok.');};colors.append(b)});
+ panel.querySelector('#p27Close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#p27Enable').textContent=mode?'⏹️ WYŁĄCZ MALOWANIE':'🖌️ WŁĄCZ MALOWANIE';
+ panel.querySelector('#p27Enable').onclick=()=>{setMode(!mode);panel.hidden=true};
+ panel.querySelector('#p27Erase').onclick=()=>{eraser=true;setMode(true);panel.hidden=true;toast('🧽 Gumka aktywna. Kliknij pomalowany blok.');};
+ panel.querySelector('#p27Save').onclick=()=>{persist();toast('💾 Kolory zapisane.');};
+}
+function draw(){if(!gameStarted)return;const entries=getPaint();ctx.save();for(const [key,v] of Object.entries(entries)){
+ const [tx,ty]=key.split(',').map(Number);if(!Number.isFinite(tx)||!Number.isFinite(ty)||tx<0||ty<0||tx>=WORLD_W||ty>=WORLD_H||getB(tx,ty)!==v.block)continue;
+ const x=tx*T-cam.x,y=ty*T-cam.y;if(x<-T||y<-T||x>VW||y>VH)continue;
+ ctx.fillStyle=v.color;ctx.globalAlpha=.62;ctx.fillRect(Math.floor(x)+1,Math.floor(y)+1,T-2,T-2);
+ ctx.globalAlpha=.85;ctx.fillStyle='rgba(255,255,255,.17)';ctx.fillRect(Math.floor(x)+2,Math.floor(y)+2,T-4,2);
+}ctx.restore()}
+const prevRender=render;render=function(){prevRender();draw()};
+canvas.addEventListener('pointerdown',e=>{
+ if(!mode||!gameStarted||paused||!panel.hidden)return;
+ const rect=canvas.getBoundingClientRect();const x=Math.floor(((e.clientX-rect.left)/rect.width*VW+cam.x)/T),y=Math.floor(((e.clientY-rect.top)/rect.height*VH+cam.y)/T);
+ if(x<0||y<0||x>=WORLD_W||y>=WORLD_H)return;
+ e.preventDefault();e.stopImmediatePropagation();
+ const block=getB(x,y),key=x+','+y,paint=getPaint();
+ if(eraser){if(paint[key]){delete paint[key];dirty=true;toast('🧽 Usunięto kolor.')}return}
+ if(block===B.air||block===B.water){toast('Wybierz pełny blok, nie powietrze ani wodę.');return}
+ paint[key]={color:palette[selected][1],block};dirty=true;
+ const count=Object.keys(paint).length;
+ if(count>1600){const oldest=Object.keys(paint)[0];delete paint[oldest]}
+},{capture:true});
+document.addEventListener('keydown',e=>{if(e.repeat||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;if(e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape'&&!panel.hidden)panel.hidden=true});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='🎨 MALOWANIE';b.onclick=show;root.append(b)}}
+const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='🎨';b.title='Pracownia kolorów';b.onclick=show;dock.append(b)}
+setInterval(()=>{if(dirty)persist()},12000);window.addEventListener('pagehide',persist);
+window.PW27Paint={open:show,stop:()=>setMode(false)};
+})();
+</script>
+<style id="pw28style">
+#pw28Panel{position:fixed;z-index:245;top:50%;left:50%;transform:translate(-50%,-50%);width:min(600px,95vw);max-height:82dvh;overflow:auto;box-sizing:border-box;background:#102633;border:3px solid #80c6e3;color:#f3faff;padding:15px;box-shadow:5px 5px #050b11;font:12px monospace}
+#pw28Panel[hidden]{display:none!important}#pw28Panel button{padding:9px;background:#23546b;color:white;border:2px solid #80aec5;font:11px monospace;cursor:pointer}#pw28Panel button:disabled{opacity:.4}#pw28Panel .pw28top{display:flex;align-items:center;justify-content:space-between;gap:8px}#pw28Panel .pw28actions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}#pw28Panel .pw28desc{line-height:1.7;color:#b9d7e4}#pw28Panel .pw28card{padding:10px;margin-top:8px;background:#1a3a4b;border:1px solid #527c91}#pw28Panel input{background:#0c1c2b;border:1px solid #80aec5;color:white;padding:8px;max-width:180px}#pw28Panel .pw28good{color:#b9f5bc}#pw28Panel .pw28bad{color:#ffaaa4}
+</style>
+<script id="pw28Blueprint">
+(function(){
+'use strict';
+const KEY='PW2_STAGE28_BLUEPRINTS';
+const ID_TO_ITEM={1:'dirt',2:'dirt',3:'stone',4:'wood',5:'wood',6:'sand',7:'water',8:'glass',9:'brick',10:'coal',11:'gold',12:'lapis',13:'emerald',14:'diamond',15:'obsidian',16:'crystal'};
+const allowed=new Set([B.grass,B.dirt,B.stone,B.wood,B.leaves,B.sand,B.glass,B.brick,B.coal,B.gold,B.lapis,B.emerald,B.diamond,B.obsidian,B.crystal]);
+let plans=[],a=null,b=null,chosen=0,preview=false,lastBuild=null;
+try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))plans=v.filter(p=>p&&Array.isArray(p.cells)&&p.w>0&&p.h>0&&p.w<=12&&p.h<=10).slice(0,8)}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(plans))}catch(e){}};
+const panel=document.createElement('section');panel.id='pw28Panel';panel.hidden=true;document.body.append(panel);
+const toast=s=>{if(typeof pwToast==='function')pwToast(s)};
+const pos=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h/2)/T)});
+const bounds=()=>{if(!a||!b)return null;const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(a.x-b.x)+1,h=Math.abs(a.y-b.y)+1;return {x,y,w,h}};
+const target=()=>{const p=pos();return {x:p.x+3,y:p.y-1}};
+function mark(which){if(!gameStarted)return toast('Najpierw uruchom świat.');if(which==='a')a=pos();else b=pos();preview=false;show();toast('Zapisano narożnik '+which.toUpperCase())}
+function capture(){
+ const q=bounds();if(!q)return toast('Ustaw oba narożniki.');
+ if(q.w>12||q.h>10)return toast('Maksymalny rozmiar: 12 × 10 bloków.');
+ if(plans.length>=8)return toast('Masz już 8 projektów. Usuń jeden.');
+ const cells=[];for(let y=0;y<q.h;y++)for(let x=0;x<q.w;x++){const block=getB(q.x+x,q.y+y);if(allowed.has(block))cells.push({x,y,block})}
+ if(!cells.length)return toast('Nie ma tu bloków do skopiowania.');
+ plans.push({name:'Projekt '+(plans.length+1),w:q.w,h:q.h,cells});chosen=plans.length-1;persist();show();toast('📐 Zapisano projekt!')
+}
+function plan(){return plans[chosen]}
+function check(){
+ const p=plan();if(!p)return {ok:false,msg:'Najpierw zapisz projekt.'};
+ if(!gameStarted)return {ok:false,msg:'Uruchom świat.'};
+ const t=target(),needed={};
+ for(const c of p.cells){const x=t.x+c.x,y=t.y+c.y;
+  if(x<1||y<1||x>=WORLD_W-1||y>=WORLD_H-1)return {ok:false,msg:'Projekt wychodzi poza świat.'};
+  if(getB(x,y)!==B.air)return {ok:false,msg:'W tym miejscu są już bloki.'};
+  const key=ID_TO_ITEM[c.block];if(!key||key==='water')return {ok:false,msg:'Nieobsługiwany blok.'};needed[key]=(needed[key]||0)+1;
+ }
+ for(const [key,n] of Object.entries(needed))if((inv[key]||0)<n)return {ok:false,msg:`Brakuje ${key}: ${n-(inv[key]||0)} szt.`};
+ return {ok:true,needed,t};
+}
+function build(){
+ const result=check();if(!result.ok)return toast(result.msg);
+ const p=plan(),placed=[];
+ for(const c of p.cells){const x=result.t.x+c.x,y=result.t.y+c.y;setB(x,y,c.block);placed.push({x,y,block:c.block})}
+ for(const [key,n] of Object.entries(result.needed))inv[key]-=n;
+ lastBuild={placed,world:typeof PW==='object'?String(PW.currentWorld||'main'):'main'};
+ updateHotbar();save();preview=false;show();toast('🏗️ Zbudowano: '+p.name)
+}
+function undo(){
+ if(!lastBuild)return toast('Brak ostatniej budowy.');
+ if(lastBuild.world!==String(PW.currentWorld||'main'))return toast('Wróć do świata, w którym budowano.');
+ if(lastBuild.placed.some(c=>getB(c.x,c.y)!==c.block))return toast('Nie można cofnąć: konstrukcja została zmieniona.');
+ const refund={};for(const c of lastBuild.placed){setB(c.x,c.y,B.air);const key=ID_TO_ITEM[c.block];refund[key]=(refund[key]||0)+1}
+ for(const [key,n] of Object.entries(refund))inv[key]=(inv[key]||0)+n;
+ lastBuild=null;updateHotbar();save();show();toast('↩️ Cofnięto budowę i zwrócono materiały.')
+}
+function show(){
+ panel.hidden=false;
+ panel.innerHTML='<div class="pw28top"><b style="font-size:16px;color:#ffe2a0">📐 PROJEKTY BUDOWLI — ETAP 28</b><button id="pw28close">✕</button></div><p class="pw28desc">Stań w pierwszym narożniku konstrukcji i zapisz punkt A. Następnie przejdź do przeciwległego narożnika i zapisz punkt B. Skopiuj zaznaczenie. Kopia zużywa rzeczywiste materiały z plecaka.</p><div class="pw28actions"><button id="pw28a">📍 NAROŻNIK A</button><button id="pw28b">📍 NAROŻNIK B</button><button id="pw28copy">📐 ZAPISZ PROJEKT</button></div><div id="pw28range" class="pw28desc"></div><div id="pw28list"></div><div class="pw28actions"><button id="pw28preview">👁️ PODGLĄD</button><button id="pw28build">🏗️ BUDUJ OBOK</button><button id="pw28undo">↩️ COFNIJ OSTATNIĄ BUDOWĘ</button></div><p class="pw28desc">Skrót: Shift + P. Projekt stawiany jest trzy bloki na prawo od postaci. Możesz zapisać do 8 projektów, maksymalnie 12 × 10 bloków każdy.</p>';
+ panel.querySelector('#pw28close').onclick=()=>panel.hidden=true;
+ panel.querySelector('#pw28a').onclick=()=>mark('a');panel.querySelector('#pw28b').onclick=()=>mark('b');panel.querySelector('#pw28copy').onclick=capture;
+ const q=bounds();panel.querySelector('#pw28range').textContent=`Punkt A: ${a?`${a.x}, ${a.y}`:'—'} • Punkt B: ${b?`${b.x}, ${b.y}`:'—'} • Obszar: ${q?q.w+' × '+q.h:'nieustawiony'}`;
+ const list=panel.querySelector('#pw28list');if(!plans.length){const e=document.createElement('p');e.textContent='Nie masz jeszcze zapisanych projektów.';list.append(e)}
+ plans.forEach((p,i)=>{const row=document.createElement('div');row.className='pw28card';const line=document.createElement('div');line.className='pw28actions';
+ const select=document.createElement('button');select.textContent=(chosen===i?'✓ ':'')+p.name+` (${p.w}×${p.h}, ${p.cells.length} bloków)`;select.onclick=()=>{chosen=i;show()};line.append(select);
+ const rename=document.createElement('button');rename.textContent='✏️ ZMIEŃ NAZWĘ';rename.onclick=()=>{const input=row.querySelector('input');input.hidden=!input.hidden;input.focus()};line.append(rename);
+ const remove=document.createElement('button');remove.textContent='🗑️ USUŃ';remove.onclick=()=>{plans.splice(i,1);chosen=Math.max(0,Math.min(chosen,plans.length-1));preview=false;persist();show()};line.append(remove);
+ const input=document.createElement('input');input.hidden=true;input.maxLength=24;input.value=p.name;input.setAttribute('aria-label','Nazwa projektu');input.onchange=()=>{p.name=input.value.trim().slice(0,24)||p.name;persist();show()};
+ row.append(line,input);list.append(row)});
+ panel.querySelector('#pw28preview').onclick=()=>{preview=!preview;panel.hidden=true;toast(preview?'👁️ Podgląd aktywny. Otwórz menu, aby zbudować.':'Podgląd wyłączony.')};
+ panel.querySelector('#pw28build').onclick=build;panel.querySelector('#pw28undo').onclick=undo;
+ const result=check(),info=document.createElement('p');info.className=result.ok?'pw28good':'pw28bad';info.textContent=result.ok?'✓ Możesz zbudować projekt w aktualnym miejscu.':'ⓘ '+result.msg;panel.querySelector('#pw28list').after(info)
+}
+const oldRender=render;render=function(){oldRender();if(!preview||!gameStarted||!plan())return;const p=plan(),t=target();ctx.save();for(const c of p.cells){const x=t.x+c.x,y=t.y+c.y,sx=x*T-cam.x,sy=y*T-cam.y;if(sx<-T||sy<-T||sx>VW||sy>VH)continue;ctx.fillStyle=getB(x,y)===B.air?'rgba(97,239,157,.35)':'rgba(255,92,91,.48)';ctx.fillRect(sx,sy,T,T);ctx.strokeStyle='#fff';ctx.lineWidth=.5;ctx.strokeRect(sx+.5,sy+.5,T-1,T-1)}ctx.restore()};
+ document.addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.shiftKey&&e.key.toLowerCase()==='p'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape')panel.hidden=true});
+ for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(sel);if(root){const button=document.createElement('button');button.textContent='📐 PROJEKTY';button.onclick=show;root.append(button)}}
+ const dock=document.querySelector('#pw2Dock');if(dock){const button=document.createElement('button');button.textContent='📐';button.title='Projekty budowli';button.onclick=show;dock.append(button)}
+ window.PW28Blueprints={open:show};
+})();
+</script><style id="pw29LampCSS">
+#pw29LampPanel{position:fixed;z-index:250;left:50%;top:50%;transform:translate(-50%,-50%);width:min(540px,94vw);max-height:82dvh;overflow:auto;box-sizing:border-box;background:#10232f;color:#f5faff;border:3px solid #f5cb74;box-shadow:5px 5px #030c12;padding:14px;font:12px monospace}
+#pw29LampPanel[hidden]{display:none!important}
+#pw29LampPanel button{background:#36536b;color:#fff;border:2px solid #9fb9c7;padding:9px;cursor:pointer;font:11px monospace}
+#pw29LampPanel button:disabled{opacity:.45;cursor:default}
+#pw29LampPanel .pw29Header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#pw29LampPanel .pw29Box{background:#1a3947;border:1px solid #54788b;padding:11px;margin:9px 0;line-height:1.7}
+#pw29LampPanel .pw29Buttons{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+#pw29LampPanel .pw29Muted{color:#bdd2df;line-height:1.6}
+</style>
+<script id="pw29LampStage">
+(function(){
+'use strict';
+const KEY='PIXEL_WORLD_2_STAGE29_LAMPS';
+let data={stock:0,auto:true,lamps:[]};
+try{const old=JSON.parse(localStorage.getItem(KEY)||'{}');if(old&&typeof old==='object'){data.stock=Math.max(0,Number(old.stock)||0);data.auto=old.auto!==false;data.lamps=Array.isArray(old.lamps)?old.lamps.filter(p=>Number.isInteger(p.x)&&Number.isInteger(p.y)&&typeof p.world==='string').slice(0,180):[]}}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
+const worldId=()=>String(PW.currentWorld||'main');
+const pos=()=>({x:Math.floor((me.x+me.w/2)/T),y:Math.floor((me.y+me.h/2)/T)});
+const dist=p=>Math.hypot(pos().x-p.x,pos().y-p.y);
+const active=()=>data.lamps.filter(p=>p.world===worldId());
+const note=t=>pwToast(t);
+const panel=document.createElement('section');panel.id='pw29LampPanel';panel.hidden=true;document.body.append(panel);
+function isClear(x,y){return x>=1&&y>=2&&x<WORLD_W-1&&y<WORLD_H-2&&getB(x,y)===B.air&&getB(x,y+1)!==B.air&&getB(x,y+1)!==B.water}
+function craft(){if(!gameStarted)return note('Najpierw uruchom świat.');if((inv.glass||0)<2||(inv.coal||0)<2||(inv.stone||0)<3)return note('Potrzebujesz 2 szkła, 2 węgla i 3 kamienia.');inv.glass-=2;inv.coal-=2;inv.stone-=3;data.stock++;updateHotbar();save();persist();note('💡 Zbudowano lampę!');show()}
+function place(){if(!gameStarted)return note('Najpierw uruchom świat.');if(!data.stock)return note('Najpierw wytwórz lampę.');if(active().length>=30)return note('Maksymalnie 30 lamp w jednym świecie.');const p=pos();let target=null;for(let r=1;r<=3&&!target;r++)for(let dx=-r;dx<=r&&!target;dx++)for(let dy=-r;dy<=r&&!target;dy++){const x=p.x+dx,y=p.y+dy;if(isClear(x,y)&&!active().some(a=>a.x===x&&a.y===y))target={x,y}}if(!target)return note('Stań przy wolnym miejscu z podłożem pod lampą.');data.lamps.push({...target,world:worldId(),on:true});data.stock--;persist();note('💡 Lampa postawiona!');show()}
+function closest(){return active().filter(p=>dist(p)<=5).sort((a,b)=>dist(a)-dist(b))[0]}
+function toggle(){const p=closest();if(!p)return note('Podejdź do lampy na maksymalnie 5 bloków.');p.on=!p.on;persist();note(p.on?'💡 Lampa włączona':'🌑 Lampa wyłączona');show()}
+function remove(){const p=closest();if(!p)return note('Podejdź do lampy na maksymalnie 5 bloków.');data.lamps.splice(data.lamps.indexOf(p),1);data.stock++;persist();note('📦 Lampa wróciła do zapasów');show()}
+function show(){panel.hidden=false;const lamps=active(),near=closest();panel.innerHTML='<div class="pw29Header"><b style="font-size:16px;color:#ffdd91">💡 OŚWIETLENIE — ETAP 29</b><button id="pw29Close">✕</button></div><p class="pw29Muted">Buduj lampy, ustawiaj je w domach i jaskiniach oraz włączaj automatyczne światło po zmroku.</p><div class="pw29Box"><b id="pw29Stats"></b><div>Koszt jednej lampy: 2 szkła + 2 węgla + 3 kamienia.</div><div class="pw29Buttons"><button id="pw29Craft">🔨 WYTWÓRZ LAMPĘ</button><button id="pw29Place">💡 POSTAW OBOK</button></div></div><div class="pw29Box"><b>STEROWANIE LAMPAMI</b><div id="pw29Nearby"></div><div class="pw29Buttons"><button id="pw29Toggle">🔘 PRZEŁĄCZ NAJBLIŻSZĄ</button><button id="pw29Remove">📦 ZABIERZ NAJBLIŻSZĄ</button><button id="pw29Auto"></button></div></div><p class="pw29Muted">Shift + L — menu oświetlenia. Przy automatycznym oświetleniu lampy zapalają się nocą, a gasną w dzień. Możesz również włączyć je ręcznie.</p>';
+panel.querySelector('#pw29Stats').textContent='Lampy w zapasie: '+data.stock+' • Postawione: '+lamps.length+'/30';panel.querySelector('#pw29Nearby').textContent=near?'Najbliższa lampa: '+Math.round(dist(near))+' bloków • '+(near.on?'włączona':'wyłączona'):'Brak lampy w promieniu 5 bloków';panel.querySelector('#pw29Close').onclick=()=>panel.hidden=true;panel.querySelector('#pw29Craft').onclick=craft;panel.querySelector('#pw29Place').onclick=place;panel.querySelector('#pw29Toggle').onclick=toggle;panel.querySelector('#pw29Remove').onclick=remove;panel.querySelector('#pw29Toggle').disabled=!near;panel.querySelector('#pw29Remove').disabled=!near;const auto=panel.querySelector('#pw29Auto');auto.textContent=data.auto?'🌙 AUTO: WŁĄCZONE':'🌙 AUTO: WYŁĄCZONE';auto.onclick=()=>{data.auto=!data.auto;persist();show()};}
+function draw(){if(!gameStarted)return;ctx.save();const darkness=typeof nightAmount==='function'?nightAmount():0;for(const p of active()){const x=p.x*T-cam.x+T/2,y=p.y*T-cam.y+T/2;if(x<-80||y<-80||x>VW+80||y>VH+80)continue;const on=p.on&&(!data.auto||darkness>.32);if(on){const radius=72;const glow=ctx.createRadialGradient(x,y,3,x,y,radius);glow.addColorStop(0,'rgba(255,230,150,.48)');glow.addColorStop(.35,'rgba(255,211,115,.19)');glow.addColorStop(1,'rgba(255,205,100,0)');ctx.fillStyle=glow;ctx.fillRect(x-radius,y-radius,radius*2,radius*2)}ctx.fillStyle='#36424b';ctx.fillRect(Math.round(x-3),Math.round(y-2),6,9);ctx.fillStyle=on?'#ffe6a3':'#87939b';ctx.fillRect(Math.round(x-5),Math.round(y-6),10,7);ctx.fillStyle=on?'#fff5d1':'#58636d';ctx.fillRect(Math.round(x-2),Math.round(y-4),4,3);ctx.fillStyle='#182a35';ctx.fillRect(Math.round(x-5),Math.round(y+7),10,2)}ctx.restore()}
+const previousRender=render;render=function(){previousRender();draw()};
+document.addEventListener('keydown',e=>{if(e.repeat||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;if(e.shiftKey&&e.key.toLowerCase()==='l'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape')panel.hidden=true});
+for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='💡 OŚWIETLENIE';b.onclick=show;root.append(b)}}const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='💡';b.title='Oświetlenie budowli';b.onclick=show;dock.append(b)}window.PW29Lamps={open:show,place,toggle};
+})();
 </script></body>
 </html>
