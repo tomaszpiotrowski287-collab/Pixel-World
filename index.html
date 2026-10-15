@@ -4842,7 +4842,7 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
   place=function(){oldPlace();if(typeof pwQuest==='function')pwQuest('build')};
 
   /* Pixel-perfect global settings */
-  if(typeof settings!=='undefined'){settings.pixelPerfect=true;saveSettings&&saveSettings()}
+  if(typeof settings!=='undefined'){settings.pixelPerfect=true;if(typeof saveSettings==='function')saveSettings()}
 })();
 </script>
 <script>
@@ -5637,7 +5637,7 @@ document.querySelectorAll('#settingsPanel [data-close="settingsPanel"]').forEach
     document.body.classList.toggle('pwCompact',!!ext.compact);
   }
   [['setShadows','shadows'],['setWorldAnim','worldAnim'],['setHitFx','hitFx'],['setShake','shake'],['setHoldMine','holdMine'],['setHoldPlace','holdPlace'],['setVibrate','vibrate'],['setMap','map'],['setCoords','coords'],['setFps','fps'],['setCompact','compact']].forEach(([id,k])=>$(id)?.addEventListener('change',e=>{ext[k]=e.target.checked;saveExt()}));
-  $('pwResetSettings')?.addEventListener('click',()=>{ext={...defaults};saveExt();safe(()=>saveSettings&&saveSettings());window.toast?.('⚙ Ustawienia zresetowane');});
+  $('pwResetSettings')?.addEventListener('click',()=>{ext={...defaults};saveExt();safe(()=>{if(typeof saveSettings==='function')saveSettings()});window.toast?.('⚙ Ustawienia zresetowane');});
   $('pwFullscreen')?.addEventListener('click',async()=>{safe(()=>document.documentElement.requestFullscreen?.());});
   applyUI();
 
@@ -9472,7 +9472,7 @@ function home(i){const b=beds[i];if(!b||b.world!==world())return;for(const other
 function returnHome(){
  const b=own().find(b=>b.home);if(!b)return toast('Najpierw wybierz łóżko jako dom.');
  if(!valid(b.x,b.y))return toast('Miejsce przy łóżku jest zablokowane.');
- me.x=b.x*T+T/2;me.y=(b.y+1)*T-me.h;me.vx=0;me.vy=0;
+ me.x=(b.x+.5)*T-me.w/2;me.y=(b.y+1)*T-me.h;me.vx=0;me.vy=0;
  if(typeof cam==='object'){cam.x=Math.max(0,me.x-VW/2);cam.y=Math.max(0,me.y-VH/2)}
  panel.hidden=true;toast('🏠 Wrócono do domu!');
 }
@@ -9816,10 +9816,77 @@ function show(){panel.hidden=false;const d=gameStarted?near():null;panel.innerHT
  panel.querySelector('#pw30info').textContent=`Drzwi w świecie: ${here().length}/25. ${d?'Najbliższe: '+(d.open?'otwarte':'zamknięte')+'.':'Brak drzwi w pobliżu.'}`}
 const oldRender=render;render=function(){oldRender();if(!gameStarted)return;ctx.save();for(const d of here()){const sx=d.x*T-cam.x,sy=d.y*T-cam.y;if(sx<-T||sx>VW||sy<-2*T||sy>VH)continue;ctx.fillStyle=d.open?'#926038':'#754324';ctx.fillRect(sx+(d.open?2:1),sy+1,d.open?3:14,30);ctx.fillStyle='#c48a4c';if(!d.open){ctx.fillRect(sx+3,sy+4,10,2);ctx.fillRect(sx+3,sy+22,10,2);ctx.fillStyle='#f8d18a';ctx.fillRect(sx+11,sy+15,2,3)}else{ctx.fillRect(sx+1,sy+4,4,3);ctx.fillRect(sx+1,sy+24,4,3)}}ctx.restore()};
 // Synchronize only after a world changes; don't continuously overwrite player edits.
-let lastWorld=wid();const oldRender2=render;render=function(){if(gameStarted&&wid()!==lastWorld){lastWorld=wid();for(const d of here())apply(d)}oldRender2()};
+let lastWorld=null;
+const oldRender2=render;
+render=function(){
+ if(gameStarted&&wid()!==lastWorld){
+  lastWorld=wid();
+  for(const d of here()){
+   const a=getB(d.x,d.y),b=getB(d.x,d.y+1);
+   // Never overwrite a solid construction added after the door was saved.
+   if((a===B.air||a===B.wood)&&(b===B.air||b===B.wood))apply(d);
+  }
+ }
+ if(!gameStarted)lastWorld=null;
+ oldRender2();
+};
+// A door is an object, not a mineable source of unlimited wood.
+const pw30PreviousMine=mine,pw30PreviousPlace=place;
+function pw30TargetDoor(){
+ if(!gameStarted)return null;
+ const p=target(),x=Math.floor(p.x/T),y=Math.floor(p.y/T);
+ return here().find(d=>d.x===x&&(d.y===y||d.y+1===y))||null;
+}
+mine=function(){if(pw30TargetDoor()){toast('🚪 Użyj menu drzwi, aby je zdemontować.');return}return pw30PreviousMine()};
+place=function(){if(pw30TargetDoor()){toast('🚪 Nie możesz budować w miejscu drzwi.');return}return pw30PreviousPlace()};
 document.addEventListener('keydown',e=>{if(e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||''))return;if(e.shiftKey&&e.code==='KeyD'){e.preventDefault();if(panel.hidden)show();else panel.hidden=true}if(e.key==='Escape')panel.hidden=true});
 for(const sel of ['#pwHub .pwGrid','#pwMobileSheet .pwMobileTiles','#pwDesktopMenu .pwDesktopGrid']){const root=document.querySelector(sel);if(root){const b=document.createElement('button');b.textContent='🚪 DRZWI';b.onclick=show;root.append(b)}}
 const dock=document.querySelector('#pw2Dock');if(dock){const b=document.createElement('button');b.textContent='🚪';b.title='Drzwi';b.onclick=show;dock.append(b)}
 window.PW30Doors={open:show,build,toggle,remove};
-})();</script></body>
+})();</script><style id="pw31CleanHUD">
+/* Jeden czytelny pasek zamiast kilkunastu ikon na górze */
+#pw2Dock{top:10px!important;right:12px!important;left:auto!important;display:flex!important;flex-wrap:nowrap!important;gap:6px!important;max-width:calc(100vw - 15px)!important;z-index:280!important}
+#pw2Dock>button{min-height:39px!important;min-width:40px!important;padding:8px 11px!important;font-size:13px!important}
+#pw2Dock #pw31More{min-width:106px!important;background:#1d4557!important;border-color:#f1ca7d!important;color:#fff2c9!important}
+#pw31Drawer{position:fixed;right:12px;top:60px;z-index:279;width:min(405px,calc(100vw - 24px));max-height:calc(100dvh - 75px);overflow:auto;box-sizing:border-box;background:rgba(8,23,34,.98);color:#eff9ff;border:2px solid #73c6e6;box-shadow:5px 5px #02080c;padding:13px;font:12px monospace}
+#pw31Drawer[hidden]{display:none!important}
+#pw31Drawer .pw31Header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+#pw31Drawer .pw31Header strong{font-size:15px;color:#ffe0a2}
+#pw31Drawer .pw31Header button{background:#203f51;color:white;border:1px solid #80a8bc;padding:7px 10px;cursor:pointer}
+#pw31Drawer h3{margin:12px 0 7px;color:#8cddf4;font-size:11px;letter-spacing:1px}
+#pw31Drawer .pw31Grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+#pw31Drawer .pw31Grid button{position:static!important;width:100%!important;min-width:0!important;min-height:49px!important;padding:7px 5px!important;background:#173549!important;color:#f1faff!important;border:1px solid #5d879d!important;box-shadow:none!important;cursor:pointer!important;white-space:normal!important;overflow-wrap:anywhere!important;font:11px monospace!important}
+#pw31Drawer .pw31Grid button:hover{background:#2b5668!important;border-color:#f2d187!important}
+#pw2Status{top:10px!important;left:10px!important;right:auto!important;max-width:175px!important;box-sizing:border-box!important}
+#pw20Launcher{right:12px!important;top:60px!important;display:none!important}
+#pw2Mine9Quick,#pw2Mine9Indicator{opacity:.88}
+#pw2Panel{top:60px!important;right:12px!important;z-index:281!important}
+#pw31Drawer button:focus-visible,#pw2Dock button:focus-visible{outline:2px solid #ffe5a0;outline-offset:2px}
+@media(max-width:700px){#pw2Dock{right:5px!important;top:5px!important;gap:3px!important}#pw2Dock>button{padding:6px 7px!important;min-width:34px!important;min-height:34px!important;font-size:11px!important}#pw2Dock #pw31More{min-width:76px!important}#pw31Drawer{right:5px;top:47px;width:calc(100vw - 10px);max-height:calc(100dvh - 60px);padding:9px}#pw31Drawer .pw31Grid{grid-template-columns:repeat(2,minmax(0,1fr))}#pw2Status{top:47px!important;left:5px!important;max-width:125px!important;font-size:9px!important}}
+</style><script id="pw31CleanHUDScript">
+(function(){'use strict';
+const dock=document.getElementById('pw2Dock');if(!dock)return;
+const more=document.createElement('button');more.id='pw31More';more.textContent='▦ FUNKCJE';more.title='Wszystkie funkcje gry';more.setAttribute('aria-expanded','false');
+const drawer=document.createElement('section');drawer.id='pw31Drawer';drawer.hidden=true;drawer.setAttribute('aria-label','Funkcje gry');
+drawer.innerHTML='<div class="pw31Header"><strong>▦ FUNKCJE GRY</strong><button id="pw31Close" type="button">✕ ZAMKNIJ</button></div><div id="pw31Groups"></div>';
+const groups=document.getElementById('pw31Groups');
+const groupSpecs=[['🏗️ BUDOWANIE',/budow|warsztat|projekt|malowan|drzwi|oświet|lamp|dom i sen|łóżk|tablicz|magazyn/i],['🌎 ODKRYWANIE',/map|atlas|kompas|podróż|winda|kopalni|zwierz|przyrod|wędk|dziennik|fot|studio|odkry/i],['🎒 POZOSTAŁE',/.*/]];
+const grids=groupSpecs.map(([name])=>{const title=document.createElement('h3');title.textContent=name;const grid=document.createElement('div');grid.className='pw31Grid';groups.append(title,grid);return grid});
+function classify(b){const label=[b.title,b.textContent,b.getAttribute('aria-label')].filter(Boolean).join(' ');const idx=groupSpecs.findIndex(g=>g[1].test(label));return grids[Math.max(idx,0)]}
+const reserved=new Set(['pw2MenuButton','pw31More']);
+const original=[...dock.querySelectorAll(':scope > button')];
+const keep=original.slice(0,4);for(const b of original){if(!keep.includes(b))classify(b).append(b)}
+dock.append(more);document.body.append(drawer);
+function close(){drawer.hidden=true;more.setAttribute('aria-expanded','false')}
+more.addEventListener('click',()=>{drawer.hidden=!drawer.hidden;more.setAttribute('aria-expanded',String(!drawer.hidden));const p=document.getElementById('pw2Panel');if(p&&!p.hidden)p.hidden=true});
+document.getElementById('pw31Close').onclick=close;
+drawer.addEventListener('click',e=>{if(e.target.closest('.pw31Grid button'))close()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+document.addEventListener('pointerdown',e=>{if(!drawer.hidden&&!drawer.contains(e.target)&&!more.contains(e.target))close()});
+const observer=new MutationObserver(()=>{for(const b of [...dock.querySelectorAll(':scope > button')]){if(b===more||keep.includes(b)||reserved.has(b.id))continue;classify(b).append(b)}});
+observer.observe(dock,{childList:true});
+// Uporządkuj także dodatkowy przycisk narzędzi, zachowując jego działanie.
+const tool=document.getElementById('pw20Launcher');if(tool){const b=document.createElement('button');b.textContent='🧰 NARZĘDZIA';b.onclick=()=>tool.click();grids[2].prepend(b)}
+})();
+</script></body>
 </html>
